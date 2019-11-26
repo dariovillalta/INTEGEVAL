@@ -63,7 +63,35 @@ function (_React$Component) {
           index: i,
           isFirstRow: _this.props.isFirstRow
         });
-      }));
+      }), this.props.formula.length == 0 ? _react["default"].createElement("div", {
+        style: {
+          height: "100%",
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center"
+        },
+        onClick: function onClick(e) {
+          e.persist();
+
+          _this.props.clickEnFormula(e, "empty", {}, 0);
+        }
+      }, _react["default"].createElement("div", {
+        style: {
+          height: "100%",
+          width: "5%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center"
+        }
+      }, _react["default"].createElement("div", {
+        id: "indicadorFormulaVacia",
+        className: "highlightFormulaBackground",
+        style: {
+          height: "80%",
+          width: "100%"
+        }
+      }))) : null);
     }
   }]);
 

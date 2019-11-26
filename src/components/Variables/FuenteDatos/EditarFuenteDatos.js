@@ -1,5 +1,7 @@
 import React from 'react';
 
+const tipoCampos = [ {nombre: "texto"}, {nombre: "booleano"}, {nombre: "fecha"}, {nombre: "número"}];
+
 export default class EditarFuenteDatos extends React.Component {
     constructor(props) {
         super(props);
@@ -39,7 +41,7 @@ export default class EditarFuenteDatos extends React.Component {
                                             <label htmlFor="nombreFuenteDato" className="col-form-label">Nombre Fuente de Dato</label>
                                         </div>
                                         <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"}>
-                                            <input id="nombreFuenteDato" type="text" className="form-control form-control-sm" defaultValue={this.props.nombreRiesgo}/>
+                                            <input id="nombreFuenteDato" type="text" className="form-control form-control-sm" defaultValue={this.props.nombreFuenteDatos}/>
                                         </div>
                                     </div>
                                     <div className={"row"} style={{width: "100%"}}>
@@ -47,9 +49,9 @@ export default class EditarFuenteDatos extends React.Component {
                                             <label htmlFor="tipoFuenteDato" className="col-form-label">Tipo de Variable</label>
                                         </div>
                                         <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"}>
-                                            <select id="tipoFuenteDato" className="form-control">
-                                                {tipoCampos.map((riesgo, i) =>
-                                                    <option value={riesgo.ID}>{riesgo.nombre}</option>
+                                            <select id="tipoFuenteDato" className="form-control" defaultValue={this.props.tipoFuenteDatos}>
+                                                {tipoCampos.map((tipo, i) =>
+                                                    <option value={tipo.nombre} key={tipo.nombre}>{tipo.nombre}</option>
                                                 )}
                                             </select>
                                         </div>
@@ -60,7 +62,7 @@ export default class EditarFuenteDatos extends React.Component {
                                         </div>
                                         <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"}>
                                             <div className={"switch-button switch-button-yesno"} style={{margin:"0 auto", display:"block"}}>
-                                                <input type="checkbox" defaultChecked name={"guardarFuenteDato"} id={"guardarFuenteDato"}/><span>
+                                                <input type="checkbox" defaultChecked={this.props.guardarFuenteDatos} name={"guardarFuenteDato"} id={"guardarFuenteDato"}/><span>
                                                 <label htmlFor={"guardarFuenteDato"}></label></span>
                                             </div>
                                         </div>

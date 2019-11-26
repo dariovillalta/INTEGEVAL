@@ -15,11 +15,9 @@ export default class FuenteDatosHome extends React.Component {
             componenteActual: "selFuenteDatos",
             idFuenteDatos: -1,
             nombreFuenteDatos: "",
-            descripcionFuenteDatos: "",
-            formulaFuenteDatos: "",
-            esObjetoFuenteDatos: "",
-            objetoPadreIDFuenteDatos: -1,
-            nivelFuenteDatos: -1
+            tipoFuenteDatos: "",
+            guardarFuenteDatos: "",
+            formulaFuenteDatos: ""
         }
         this.crearFuenteDatos = this.crearFuenteDatos.bind(this);
         this.retornoSeleccionFuenteDatosSameComponent = this.retornoSeleccionFuenteDatosSameComponent.bind(this);
@@ -47,11 +45,9 @@ export default class FuenteDatosHome extends React.Component {
             componenteActual: "selFuenteDatos",
             idFuenteDatos: -1,
             nombreFuenteDatos: "",
-            descripcionFuenteDatos: "",
-            formulaFuenteDatos: "",
-            esObjetoFuenteDatos: "",
-            objetoPadreIDFuenteDatos: -1,
-            nivelFuenteDatos: -1
+            tipoFuenteDatos: "",
+            guardarFuenteDatos: "",
+            formulaFuenteDatos: ""
         });
     }
 
@@ -60,21 +56,20 @@ export default class FuenteDatosHome extends React.Component {
         var self = this;
         setTimeout(function(){
             self.setState({
-                idRiesgoSeleccionado: -1,
+                idFuenteDatos: -1,
                 componenteActual: "selFuenteDatos"
             });
         }, 500);
     }
 
-    editarFuenteDatos (idFuenteDatos, nombreFuenteDatos, descripcionFuenteDatos, formulaFuenteDatos, esObjetoFuenteDatos, objetoPadreIDFuenteDatos, nivelFuenteDatos) {
+    editarFuenteDatos (idFuenteDatos, nombreFuenteDatos, tipoFuenteDatos, guardarFuenteDatos, formulaFuenteDatos) {
         this.setState({
-            idRiesgoSeleccionado: id,
+            idFuenteDatos: idFuenteDatos,
             componenteActual: "editarFuenteDatos",
-            nombreRiesgo: nombreRiesgo,
-            pesoRiesgo: pesoRiesgo,
-            toleranciaRiesgo: toleranciaRiesgo,
-            valorIdealRiesgo: valorIdealRiesgo,
-            padreRiesgo: padreRiesgo
+            nombreFuenteDatos: nombreFuenteDatos,
+            tipoFuenteDatos: tipoFuenteDatos,
+            guardarFuenteDatos: guardarFuenteDatos,
+            formulaFuenteDatos: formulaFuenteDatos
         });
     }
 
@@ -107,7 +102,7 @@ export default class FuenteDatosHome extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("select * from Variables where nombre = '"+nombreFuenteDatos+"'", (err, result) => {
+            request.query("select * from Campos where nombre = '"+nombreFuenteDatos+"'", (err, result) => {
                 if (err) {
                     if (!rolledBack) {
                         console.log(err);
@@ -131,7 +126,7 @@ export default class FuenteDatosHome extends React.Component {
         if(this.state.componenteActual.localeCompare("selFuenteDatos") == 0) {
             return (
                 <div>
-                    <SeleccionarFuenteDatos configuracionHome={this.props.configuracionHome} crearFuenteDatos={this.crearFuenteDatos} editarFuenteDatos={this.editarFuenteDatos}> </SeleccionarFuenteDatos>
+                    <SeleccionarFuenteDatos pool={this.props.pool} configuracionHome={this.props.configuracionHome} crearFuenteDatos={this.crearFuenteDatos} editarFuenteDatos={this.editarFuenteDatos}> </SeleccionarFuenteDatos>
                 </div>
             );
         } else if(this.state.componenteActual.localeCompare("crearFuenteDatos") == 0) {
@@ -143,7 +138,7 @@ export default class FuenteDatosHome extends React.Component {
         } else if(this.state.componenteActual.localeCompare("editarFuenteDatos") == 0) {
             return (
                 <div>
-                    <EditarFuenteDatos pool={this.props.pool} showFormula={this.props.showFormula} showCondicionVar={this.props.showCondicionVar} showRiesgos={this.props.showRiesgos} retornoSeleccionRiesgo={this.retornoSeleccionRiesgoSameComponent} retornoSeleccionRiesgoUmbral={this.retornoSeleccionRiesgoDiffComponent} configuracionHome={this.props.configuracionHome} updateNavBar={this.props.updateNavBar} showUmbralHome={this.props.showUmbralHome} riesgos={[]} nombreRiesgo={this.state.nombreRiesgo} pesoRiesgo={this.state.pesoRiesgo} toleranciaRiesgo={this.state.toleranciaRiesgo} valorIdealRiesgo={this.state.valorIdealRiesgo} padreRiesgo={this.state.padreRiesgo} updateFormula={this.props.updateFormula}> </EditarFuenteDatos>
+                    <EditarFuenteDatos pool={this.props.pool} showFormula={this.props.showFormula} showCondicionVar={this.props.showCondicionVar} showRiesgos={this.props.showRiesgos} retornoSeleccionRiesgo={this.retornoSeleccionRiesgoSameComponent} retornoSeleccionRiesgoUmbral={this.retornoSeleccionRiesgoDiffComponent} configuracionHome={this.props.configuracionHome} updateNavBar={this.props.updateNavBar} showUmbralHome={this.props.showUmbralHome} idFuenteDatos={this.state.idFuenteDatos} nombreFuenteDatos={this.state.nombreFuenteDatos} tipoFuenteDatos={this.state.tipoFuenteDatos} guardarFuenteDatos={this.state.guardarFuenteDatos} formulaFuenteDatos={this.state.formulaFuenteDatos} updateFormula={this.props.updateFormula}> </EditarFuenteDatos>
                 </div>
             );
         }

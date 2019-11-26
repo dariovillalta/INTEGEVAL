@@ -13,8 +13,7 @@ const objetos = [];
 const camposDeObjetos = [];
 const anchuraSeccionFormula = ["100%", "50", "33%", "25%", "25%", "17%", "15%", "13%", "11%", "10%", "9%"];
 
-var variableSeleccionada = [], operacionSeleccionada = [];
-var ladoIndice = "centro";
+var variableSeleccionada = [], operacionSeleccionada = [], posicionDeIndicadorSeleccionadoEnFormula = '';
 
 //var arrregloPrueba = [{valor: "\\", width: "5%", height: "100%", tipo: "indicador", posicion: "izquierda"}, {valor: [{valor: "a", width: "100%", height: "49%", tipo: "variable"}, {valor: "division\\", width: "100%", height: "2%", tipo: "division\\"}, {valor: "b", width: "100%", height: "49%", tipo: "variable"}], width: "90%", height: "100%", tipo: "contenedorDivision"}, {valor: "\\", width: "5%", height: "100%", tipo: "indicador", posicion: "derecha"}];
 //var arrregloPrueba = [{valor: "\\", width: "5%", height: "100%", tipo: "indicador", posicion: "izquierda"}, {valor: [{valor: "a", width: "49%", height: "49%", tipo: "variable"}, {valor: "-", width: "2%", height: "49%", tipo: "signo"}, {valor: "m", width: "49%", height: "49%", tipo: "variable"}, {valor: "division\\", width: "100%", height: "2%", tipo: "division\\"}, {valor: "b", width: "100%", height: "49%", tipo: "variable"}], width: "90%", height: "100%", tipo: "contenedorDivision"}, {valor: "\\", width: "5%", height: "100%", tipo: "indicador", posicion: "derecha"}];
@@ -50,10 +49,28 @@ export default class Formula extends React.Component {
         this.esOperacionCompleja = this.esOperacionCompleja.bind(this);
         this.getPalabraFormula = this.getPalabraFormula.bind(this);
         this.agregarFormulaAnchuraCoordinadas = this.agregarFormulaAnchuraCoordinadas.bind(this);
+        this.findVariableInFormula = this.findVariableInFormula.bind(this);
+    }
+
+    componentDidMount() {
+        console.log('arrregloPrueba');
+        console.log(arrregloPrueba);
+        /*this.findVariableInFormula(arrregloPrueba, "b", '');
+        console.log( posicionDeIndicadorSeleccionadoEnFormula );*/
+    }
+
+    findVariableInFormula (arreglo, variable, posicionEnArreglo) {
+        for (var i = 0; i < arreglo.length; i++) {
+            if( !Array.isArray(arreglo[i].valor) && arreglo[i].valor.localeCompare(variable) == 0) {
+                posicionDeIndicadorSeleccionadoEnFormula = posicionEnArreglo+'['+i+']';
+            } else if( Array.isArray(arreglo[i].valor) ) {
+                this.findVariableInFormula (arreglo[i].valor, variable, posicionEnArreglo+'['+i+'].valor');
+            }
+        };
     }
 
     clickEnFormula (e, posicion, nombre, index) {
-        e.stopPropagation()
+        /*e.stopPropagation()
         console.log(e)
         console.log(e.target.className);
         var test = (e.clientX-this.offsetLeft) / this.offsetWidth * 100;
@@ -69,7 +86,7 @@ export default class Formula extends React.Component {
         console.log(node.getBoundingClientRect());
         var nueva = e.nativeEvent.offsetY;
         console.log('nueva');
-        console.log(nueva);
+        console.log(nueva);*/
         for (var i = 0; i < this.state.formula.length; i++) {
             $("#indicadorIzquierda"+this.state.formula[i].nombre).removeClass("colorPunteroFormula");
             $("#indicadorIzquierda"+this.state.formula[i].nombre).removeClass("blink");
@@ -79,9 +96,17 @@ export default class Formula extends React.Component {
             $("#indicadorDerecha"+this.state.formula[i].nombre).addClass("highlightFormulaBackground");
         };
         if(posicion == null) {
+            console.log('1');
             console.log(this.state.formula);
-            var temp = [...this.state.formula];
-            var tempVar = temp[index];
+            this.findVariableInFormula(arrregloPrueba, nombre, '');
+            console.log('posicionDeIndicadorSeleccionadoEnFormula');
+            console.log(posicionDeIndicadorSeleccionadoEnFormula);
+            var temp = [...arrregloPrueba];
+            console.log('temp');
+            console.log(temp);
+            console.log(temp+posicionDeIndicadorSeleccionadoEnFormula);
+            var tempVar;
+            eval("tempVar = temp"+posicionDeIndicadorSeleccionadoEnFormula);
             console.log('index = '+index);
             console.log('tempVar');
             console.log(tempVar);
@@ -90,26 +115,30 @@ export default class Formula extends React.Component {
             this.setState({
                 formula: temp
             }, console.log(this.state.formula));
-            /*var centro = e.target.clientWidth/ 2;
-            console.log('centro');
-            console.log(centro);
-            console.log('e.clientX');
-            console.log(e.clientX);
-            if(e.clientX-node.getBoundingClientRect().x <= centro) {
-                $("#indicadorIzquierda"+nombre).addClass("colorPunteroFormula");
-                $("#indicadorIzquierda"+nombre).addClass("blink");
-            } else {
-                $("#indicadorDerecha"+nombre).addClass("colorPunteroFormula");
-                $("#indicadorDerecha"+nombre).addClass("blink");
-            }*/
         } else if (posicion.localeCompare("izquierda") == 0) {
+            console.log('2');
             $("#indicadorIzquierda"+nombre).addClass("colorPunteroFormula");
             $("#indicadorIzquierda"+nombre).addClass("blink");
             $("#indicadorIzquierda"+nombre).removeClass("highlightFormulaBackground");
+            this.findVariableInFormula(arrregloPrueba, nombre, '');
+            console.log('posicionDeIndicadorSeleccionadoEnFormula');
+            console.log(posicionDeIndicadorSeleccionadoEnFormula);
         } else if (posicion.localeCompare("derecha") == 0) {
+            console.log('3');
             $("#indicadorDerecha"+nombre).addClass("colorPunteroFormula");
             $("#indicadorDerecha"+nombre).addClass("blink");
             $("#indicadorDerecha"+nombre).removeClass("highlightFormulaBackground");
+            this.findVariableInFormula(arrregloPrueba, nombre, '');
+            console.log('posicionDeIndicadorSeleccionadoEnFormula');
+            console.log(posicionDeIndicadorSeleccionadoEnFormula);
+        } else if (posicion.localeCompare("empty") == 0) {
+            if($("#indicadorFormulaVacia").hasClass("colorPunteroFormula")) {
+                $("#indicadorFormulaVacia").removeClass("blink");
+                $("#indicadorFormulaVacia").removeClass("colorPunteroFormula");
+            } else {
+                $("#indicadorFormulaVacia").addClass("blink");
+                $("#indicadorFormulaVacia").addClass("colorPunteroFormula");
+            }
         }
     }
 
@@ -274,12 +303,22 @@ export default class Formula extends React.Component {
         return (
             <div>
                 <div className={"row"}>
+                    <div className={"col-xl-6 col-lg-6 col-md-6 col-sm-6 col-6"}>
+                    </div>
+                    <div className={"col-xl-6 col-lg-6 col-md-6 col-sm-6 col-6"}>
+                        <div className={"text-center"} style={{width: "100%"}}>
+                            <a href="#" className="btn btn-brand font-bold font-20" onClick={this.props.showVariables}>Crear Variables</a>
+                        </div>
+                    </div>
+                </div>
+                <br/>
+                <div className={"row"}>
                     <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
                         <div className={"card"}>
                             <div className={"border-top border-bottom"} style={{width: "100%"}}>
                                 <div style={{width: "100%"}}>
                                     <div className={"font-20"} style={{height: "45vh", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "#e6e6f2", color: "black", overflowWrap: "break-word", wordWrap: "break-word", whiteSpace: "-moz-pre-wrap", whiteSpace: "pre-wrap"}}>
-                                        <Equacion formula={arrregloPrueba} clickEnFormula={this.clickEnFormula} height={"100%"} width={"100%"}   isFirstRow={true}></Equacion>
+                                        <Equacion formula={arrregloPrueba} clickEnFormula={this.clickEnFormula} height={"100%"} width={"100%"} isFirstRow={true} posicionEnArreglo={"0"}></Equacion>
                                     </div>
                                 </div>
                                 <div style={{width: "100%", height: "250px"}}>
@@ -289,9 +328,6 @@ export default class Formula extends React.Component {
                                         </div>
                                         <div className={"row"} style={{height: "100%"}}>
                                             <ListasSeleVariableContenedorVariable esOperacion={false} mostrarRosa={true} campos={campos} variables={variables} objetos={objetos} camposDeObjetos={camposDeObjetos} seleccionarMultiple={false} retornoSeleccionVariable={this.retornoClickLista}></ListasSeleVariableContenedorVariable>
-                                        </div>
-                                        <div className={"row"}>
-                                            <a className={"btn btn-brand btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.props.showVariables}>Crear Variables</a>
                                         </div>
                                     </div>
                                     <div style={{width: "50%", height: "100%", float: "right", borderTop: "1px solid black", borderBottom: "1px solid black", padding: "0% 1%", scroll: "auto"}}>

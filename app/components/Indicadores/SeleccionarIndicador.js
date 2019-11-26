@@ -100,8 +100,9 @@ function (_React$Component) {
       }, _react["default"].createElement("div", {
         className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
       }, riesgos.map(function (riesgo, i) {
-        return _react["default"].createElement(_Accordion["default"], {
-          key: riesgo.ID,
+        return _react["default"].createElement("div", {
+          key: riesgo.ID
+        }, _react["default"].createElement(_Accordion["default"], {
           showTrash: false,
           showEdit: false,
           allowMultipleOpen: true,
@@ -115,7 +116,7 @@ function (_React$Component) {
           }, indicador.nombre);
         }), indicadores[i].length == 0 ? _react["default"].createElement("a", {
           className: "btn btn-outline-dark btn-block btnWhiteColorHover fontSize1EM"
-        }, "No existen indicadores creados, presiona para crear") : _react["default"].createElement("span", null)) : _react["default"].createElement("span", null)));
+        }, "No existen indicadores creados, presiona para crear") : _react["default"].createElement("span", null)) : _react["default"].createElement("span", null))), _react["default"].createElement("br", null));
       }))));
     }
   }]);

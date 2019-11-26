@@ -27,6 +27,16 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
+var tipoCampos = [{
+  nombre: "texto"
+}, {
+  nombre: "booleano"
+}, {
+  nombre: "fecha"
+}, {
+  nombre: "número"
+}];
+
 var EditarFuenteDatos =
 /*#__PURE__*/
 function (_React$Component) {
@@ -110,7 +120,7 @@ function (_React$Component) {
         id: "nombreFuenteDato",
         type: "text",
         className: "form-control form-control-sm",
-        defaultValue: this.props.nombreRiesgo
+        defaultValue: this.props.nombreFuenteDatos
       }))), _react["default"].createElement("div", {
         className: "row",
         style: {
@@ -125,11 +135,13 @@ function (_React$Component) {
         className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
       }, _react["default"].createElement("select", {
         id: "tipoFuenteDato",
-        className: "form-control"
-      }, tipoCampos.map(function (riesgo, i) {
+        className: "form-control",
+        defaultValue: this.props.tipoFuenteDatos
+      }, tipoCampos.map(function (tipo, i) {
         return _react["default"].createElement("option", {
-          value: riesgo.ID
-        }, riesgo.nombre);
+          value: tipo.nombre,
+          key: tipo.nombre
+        }, tipo.nombre);
       })))), _react["default"].createElement("div", {
         className: "row",
         style: {
@@ -150,7 +162,7 @@ function (_React$Component) {
         }
       }, _react["default"].createElement("input", {
         type: "checkbox",
-        defaultChecked: true,
+        defaultChecked: this.props.guardarFuenteDatos,
         name: "guardarFuenteDato",
         id: "guardarFuenteDato"
       }), _react["default"].createElement("span", null, _react["default"].createElement("label", {

@@ -7,6 +7,8 @@ exports["default"] = void 0;
 
 var _react = _interopRequireDefault(require("react"));
 
+var _mssql = _interopRequireDefault(require("mssql"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -27,16 +29,6 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
-var riesgos = [{
-  ID: 1,
-  nombre: "LAFT"
-}, {
-  ID: 2,
-  nombre: "Operativo"
-}, {
-  ID: 3,
-  nombre: "Tecnologico"
-}];
 var colores = ["secondary", "success", "primary", "brand"];
 
 var SeleccionarFuenteDatos =
@@ -44,16 +36,50 @@ var SeleccionarFuenteDatos =
 function (_React$Component) {
   _inherits(SeleccionarFuenteDatos, _React$Component);
 
-  function SeleccionarFuenteDatos() {
+  function SeleccionarFuenteDatos(props) {
+    var _this;
+
     _classCallCheck(this, SeleccionarFuenteDatos);
 
-    return _possibleConstructorReturn(this, _getPrototypeOf(SeleccionarFuenteDatos).apply(this, arguments));
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(SeleccionarFuenteDatos).call(this, props));
+    _this.state = {
+      fuenteDeDatos: []
+    };
+    return _this;
   }
 
   _createClass(SeleccionarFuenteDatos, [{
+    key: "componentDidMount",
+    value: function componentDidMount() {
+      var _this2 = this;
+
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("select * from Campos", function (err, result) {
+          if (err) {
+            if (!rolledBack) {
+              console.log(err);
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              _this2.setState({
+                fuenteDeDatos: result.recordset
+              });
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
     key: "render",
     value: function render() {
-      var _this = this;
+      var _this3 = this;
 
       return _react["default"].createElement("div", null, _react["default"].createElement("div", {
         className: "row"
@@ -87,7 +113,7 @@ function (_React$Component) {
           color: "#fafafa"
         },
         onClick: this.props.crearFuenteDatos
-      }, "Crear Riesgo")), _react["default"].createElement("br", null), _react["default"].createElement("div", {
+      }, "Crear Fuente de Dato")), _react["default"].createElement("br", null), _react["default"].createElement("div", {
         className: "row"
       }, _react["default"].createElement("div", {
         className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
@@ -97,18 +123,23 @@ function (_React$Component) {
         className: "card-body"
       }, _react["default"].createElement("div", {
         className: "row border-top border-bottom addPaddingToConfig"
-      }, riesgos.map(function (riesgo, i) {
+      }, this.state.fuenteDeDatos.map(function (fuenteDeDato, i) {
         return _react["default"].createElement("a", {
           onClick: function onClick() {
-            return _this.props.editarFuenteDatos(riesgo.ID, riesgo.nombre);
+            return _this3.props.editarFuenteDatos(fuenteDeDato.ID, fuenteDeDato.nombre, fuenteDeDato.tipo, fuenteDeDato.guardar, fuenteDeDato.formula);
           },
           style: {
             color: "#fafafa"
           },
           className: "btn btn-" + (i <= colores.length - 1 ? colores[i] : colores[i % colores.length]) + ' btn-block btnWhiteColorHover font-bold font-20',
-          key: i
-        }, riesgo.nombre);
-      })))))));
+          key: fuenteDeDato.ID
+        }, fuenteDeDato.nombre);
+      }), this.state.fuenteDeDatos.length == 0 ? _react["default"].createElement("a", {
+        style: {
+          color: "#fafafa"
+        },
+        className: "btn btn-info btn-block btnWhiteColorHover font-bold font-20"
+      }, "No existen tipo de datos creados") : null))))));
     }
   }]);
 

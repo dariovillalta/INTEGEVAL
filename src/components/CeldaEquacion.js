@@ -8,9 +8,6 @@ import IndicadorCeldaEquacion from './IndicadorCeldaEquacion.js';
 
 export default class CeldaEquacion extends React.Component {
     render() {
-        console.log('this.props.formula.length')
-        console.log(this.props.formula.length)
-        console.log(this.props.formula)
         return (
             <div style={{width: this.props.width, height: this.props.height, float: (this.props.index != this.props.formula.length-1) ? "left": "right"}}>
                 { Array.isArray(this.props.variable.valor) ? (

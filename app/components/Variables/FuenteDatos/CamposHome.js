@@ -52,11 +52,9 @@ function (_React$Component) {
       componenteActual: "selFuenteDatos",
       idFuenteDatos: -1,
       nombreFuenteDatos: "",
-      descripcionFuenteDatos: "",
-      formulaFuenteDatos: "",
-      esObjetoFuenteDatos: "",
-      objetoPadreIDFuenteDatos: -1,
-      nivelFuenteDatos: -1
+      tipoFuenteDatos: "",
+      guardarFuenteDatos: "",
+      formulaFuenteDatos: ""
     };
     _this.crearFuenteDatos = _this.crearFuenteDatos.bind(_assertThisInitialized(_this));
     _this.retornoSeleccionFuenteDatosSameComponent = _this.retornoSeleccionFuenteDatosSameComponent.bind(_assertThisInitialized(_this));
@@ -91,11 +89,9 @@ function (_React$Component) {
         componenteActual: "selFuenteDatos",
         idFuenteDatos: -1,
         nombreFuenteDatos: "",
-        descripcionFuenteDatos: "",
-        formulaFuenteDatos: "",
-        esObjetoFuenteDatos: "",
-        objetoPadreIDFuenteDatos: -1,
-        nivelFuenteDatos: -1
+        tipoFuenteDatos: "",
+        guardarFuenteDatos: "",
+        formulaFuenteDatos: ""
       });
     }
   }, {
@@ -105,22 +101,21 @@ function (_React$Component) {
       var self = this;
       setTimeout(function () {
         self.setState({
-          idRiesgoSeleccionado: -1,
+          idFuenteDatos: -1,
           componenteActual: "selFuenteDatos"
         });
       }, 500);
     }
   }, {
     key: "editarFuenteDatos",
-    value: function editarFuenteDatos(idFuenteDatos, nombreFuenteDatos, descripcionFuenteDatos, formulaFuenteDatos, esObjetoFuenteDatos, objetoPadreIDFuenteDatos, nivelFuenteDatos) {
+    value: function editarFuenteDatos(idFuenteDatos, nombreFuenteDatos, tipoFuenteDatos, guardarFuenteDatos, formulaFuenteDatos) {
       this.setState({
-        idRiesgoSeleccionado: id,
+        idFuenteDatos: idFuenteDatos,
         componenteActual: "editarFuenteDatos",
-        nombreRiesgo: nombreRiesgo,
-        pesoRiesgo: pesoRiesgo,
-        toleranciaRiesgo: toleranciaRiesgo,
-        valorIdealRiesgo: valorIdealRiesgo,
-        padreRiesgo: padreRiesgo
+        nombreFuenteDatos: nombreFuenteDatos,
+        tipoFuenteDatos: tipoFuenteDatos,
+        guardarFuenteDatos: guardarFuenteDatos,
+        formulaFuenteDatos: formulaFuenteDatos
       });
     }
   }, {
@@ -160,7 +155,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("select * from Variables where nombre = '" + nombreFuenteDatos + "'", function (err, result) {
+        request.query("select * from Campos where nombre = '" + nombreFuenteDatos + "'", function (err, result) {
           if (err) {
             if (!rolledBack) {
               console.log(err);
@@ -183,6 +178,7 @@ function (_React$Component) {
     value: function render() {
       if (this.state.componenteActual.localeCompare("selFuenteDatos") == 0) {
         return _react["default"].createElement("div", null, _react["default"].createElement(_SeleccionarFuenteDatos["default"], {
+          pool: this.props.pool,
           configuracionHome: this.props.configuracionHome,
           crearFuenteDatos: this.crearFuenteDatos,
           editarFuenteDatos: this.editarFuenteDatos
@@ -191,8 +187,10 @@ function (_React$Component) {
         return _react["default"].createElement("div", null, _react["default"].createElement(_CrearFuenteDatos["default"], {
           pool: this.props.pool,
           showCondicionVar: this.props.showCondicionVar,
-          terminoCrearRiesgo: this.terminoCrearFuenteDatosPasarAEdit,
-          nombreTablaSeleccionada: this.props.nombreTablaSeleccionada
+          terminoCrearCampo: this.terminoCrearFuenteDatosPasarAEdit,
+          idTablaSeleccionada: this.props.idTablaSeleccionada,
+          nombreTablaSeleccionada: this.props.nombreTablaSeleccionada,
+          configuracionHome: this.props.configuracionHome
         }, " "));
       } else if (this.state.componenteActual.localeCompare("editarFuenteDatos") == 0) {
         return _react["default"].createElement("div", null, _react["default"].createElement(_EditarFuenteDatos["default"], {
@@ -205,12 +203,11 @@ function (_React$Component) {
           configuracionHome: this.props.configuracionHome,
           updateNavBar: this.props.updateNavBar,
           showUmbralHome: this.props.showUmbralHome,
-          riesgos: [],
-          nombreRiesgo: this.state.nombreRiesgo,
-          pesoRiesgo: this.state.pesoRiesgo,
-          toleranciaRiesgo: this.state.toleranciaRiesgo,
-          valorIdealRiesgo: this.state.valorIdealRiesgo,
-          padreRiesgo: this.state.padreRiesgo,
+          idFuenteDatos: this.state.idFuenteDatos,
+          nombreFuenteDatos: this.state.nombreFuenteDatos,
+          tipoFuenteDatos: this.state.tipoFuenteDatos,
+          guardarFuenteDatos: this.state.guardarFuenteDatos,
+          formulaFuenteDatos: this.state.formulaFuenteDatos,
           updateFormula: this.props.updateFormula
         }, " "));
       }

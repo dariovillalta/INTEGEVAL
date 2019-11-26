@@ -30,24 +30,27 @@ export default class SeleccionarIndicador extends React.Component {
                 <div className={"row"}>
                     <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
                         {riesgos.map((riesgo, i) => (
-                            <Accordion key={riesgo.ID} showTrash={false} showEdit={false} allowMultipleOpen color={"#ffffff"}>
-                                <div label={riesgo.nombre}>
-                                    { indicadores[i] != undefined ? (
-                                        <div>
-                                            {indicadores[i].map((indicador, j) =>
-                                                <a className={"btn btn-outline-info btn-block btnWhiteColorHover fontSize1EM"} key={indicador.ID}>{indicador.nombre}</a>
-                                            )}
-                                            { indicadores[i].length == 0 ? (
-                                                <a className={"btn btn-outline-dark btn-block btnWhiteColorHover fontSize1EM"}>No existen indicadores creados, presiona para crear</a>
-                                            ) : (
-                                                <span></span>
-                                            )}
-                                        </div>
-                                    ) : (
-                                        <span></span>
-                                    )}
-                                </div>
-                            </Accordion>
+                            <div key={riesgo.ID}>
+                                <Accordion showTrash={false} showEdit={false} allowMultipleOpen color={"#ffffff"}>
+                                    <div label={riesgo.nombre}>
+                                        { indicadores[i] != undefined ? (
+                                            <div>
+                                                {indicadores[i].map((indicador, j) =>
+                                                    <a className={"btn btn-outline-info btn-block btnWhiteColorHover fontSize1EM"} key={indicador.ID}>{indicador.nombre}</a>
+                                                )}
+                                                { indicadores[i].length == 0 ? (
+                                                    <a className={"btn btn-outline-dark btn-block btnWhiteColorHover fontSize1EM"}>No existen indicadores creados, presiona para crear</a>
+                                                ) : (
+                                                    <span></span>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <span></span>
+                                        )}
+                                    </div>
+                                </Accordion>
+                                <br/>
+                            </div>
                         ))}
                     </div>
                 </div>

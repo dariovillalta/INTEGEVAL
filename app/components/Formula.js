@@ -76,8 +76,8 @@ var objetos = [];
 var camposDeObjetos = [];
 var anchuraSeccionFormula = ["100%", "50", "33%", "25%", "25%", "17%", "15%", "13%", "11%", "10%", "9%"];
 var variableSeleccionada = [],
-    operacionSeleccionada = [];
-var ladoIndice = "centro"; //var arrregloPrueba = [{valor: "\\", width: "5%", height: "100%", tipo: "indicador", posicion: "izquierda"}, {valor: [{valor: "a", width: "100%", height: "49%", tipo: "variable"}, {valor: "division\\", width: "100%", height: "2%", tipo: "division\\"}, {valor: "b", width: "100%", height: "49%", tipo: "variable"}], width: "90%", height: "100%", tipo: "contenedorDivision"}, {valor: "\\", width: "5%", height: "100%", tipo: "indicador", posicion: "derecha"}];
+    operacionSeleccionada = [],
+    posicionDeIndicadorSeleccionadoEnFormula = ''; //var arrregloPrueba = [{valor: "\\", width: "5%", height: "100%", tipo: "indicador", posicion: "izquierda"}, {valor: [{valor: "a", width: "100%", height: "49%", tipo: "variable"}, {valor: "division\\", width: "100%", height: "2%", tipo: "division\\"}, {valor: "b", width: "100%", height: "49%", tipo: "variable"}], width: "90%", height: "100%", tipo: "contenedorDivision"}, {valor: "\\", width: "5%", height: "100%", tipo: "indicador", posicion: "derecha"}];
 //var arrregloPrueba = [{valor: "\\", width: "5%", height: "100%", tipo: "indicador", posicion: "izquierda"}, {valor: [{valor: "a", width: "49%", height: "49%", tipo: "variable"}, {valor: "-", width: "2%", height: "49%", tipo: "signo"}, {valor: "m", width: "49%", height: "49%", tipo: "variable"}, {valor: "division\\", width: "100%", height: "2%", tipo: "division\\"}, {valor: "b", width: "100%", height: "49%", tipo: "variable"}], width: "90%", height: "100%", tipo: "contenedorDivision"}, {valor: "\\", width: "5%", height: "100%", tipo: "indicador", posicion: "derecha"}];
 //var arrregloPrueba = [{valor: "\\", width: "5%", height: "100%", tipo: "indicador", posicion: "izquierda"}, {valor: [{valor: "a", width: "49%", height: "49%", tipo: "variable"}, {valor: "-", width: "2%", height: "49%", tipo: "signo"}, {valor: "m", width: "49%", height: "49%", tipo: "variable"}, {valor: "division\\", width: "100%", height: "2%", tipo: "division\\"}, {valor: "b", width: "32%", height: "49%", tipo: "variable"}, {valor: "+", width: "2%", height: "49%", tipo: "signo"}, {valor: "zsasasas", width: "32%", height: "49%", tipo: "variable"}, {valor: "*", width: "2%", height: "49%", tipo: "signo"}, {valor: "d", width: "32%", height: "49%", tipo: "variable"}], width: "90%", height: "100%", tipo: "contenedorDivision"}, {valor: "\\", width: "5%", height: "100%", tipo: "indicador", posicion: "derecha"}];
 //var arrregloPrueba = [{valor: "\\", width: "5%", height: "100%", tipo: "indicador", posicion: "izquierda"}, {valor: "a", width: "90%", height: "100%", tipo: "variable"}, {valor: "\\", width: "5%", height: "100%", tipo: "indicador", posicion: "derecha"}];
@@ -178,16 +178,38 @@ function (_React$Component) {
     _this.esOperacionCompleja = _this.esOperacionCompleja.bind(_assertThisInitialized(_this));
     _this.getPalabraFormula = _this.getPalabraFormula.bind(_assertThisInitialized(_this));
     _this.agregarFormulaAnchuraCoordinadas = _this.agregarFormulaAnchuraCoordinadas.bind(_assertThisInitialized(_this));
+    _this.findVariableInFormula = _this.findVariableInFormula.bind(_assertThisInitialized(_this));
     return _this;
   }
 
   _createClass(Formula, [{
+    key: "componentDidMount",
+    value: function componentDidMount() {
+      console.log('arrregloPrueba');
+      console.log(arrregloPrueba);
+      /*this.findVariableInFormula(arrregloPrueba, "b", '');
+      console.log( posicionDeIndicadorSeleccionadoEnFormula );*/
+    }
+  }, {
+    key: "findVariableInFormula",
+    value: function findVariableInFormula(arreglo, variable, posicionEnArreglo) {
+      for (var i = 0; i < arreglo.length; i++) {
+        if (!Array.isArray(arreglo[i].valor) && arreglo[i].valor.localeCompare(variable) == 0) {
+          posicionDeIndicadorSeleccionadoEnFormula = posicionEnArreglo + '[' + i + ']';
+        } else if (Array.isArray(arreglo[i].valor)) {
+          this.findVariableInFormula(arreglo[i].valor, variable, posicionEnArreglo + '[' + i + '].valor');
+        }
+      }
+
+      ;
+    }
+  }, {
     key: "clickEnFormula",
     value: function clickEnFormula(e, posicion, nombre, index) {
-      e.stopPropagation();
-      console.log(e);
+      /*e.stopPropagation()
+      console.log(e)
       console.log(e.target.className);
-      var test = (e.clientX - this.offsetLeft) / this.offsetWidth * 100;
+      var test = (e.clientX-this.offsetLeft) / this.offsetWidth * 100;
       var test1 = e.clientX;
       var test2 = e.offsetX;
       var elm = $(this);
@@ -195,15 +217,12 @@ function (_React$Component) {
       console.log(test1);
       console.log(test2);
       console.log(elm);
-
-      var node = _reactDom["default"].findDOMNode(this);
-
+      var node = ReactDOM.findDOMNode(this);
       console.log(window.getComputedStyle(node).offset);
       console.log(node.getBoundingClientRect());
       var nueva = e.nativeEvent.offsetY;
       console.log('nueva');
-      console.log(nueva);
-
+      console.log(nueva);*/
       for (var i = 0; i < this.state.formula.length; i++) {
         $("#indicadorIzquierda" + this.state.formula[i].nombre).removeClass("colorPunteroFormula");
         $("#indicadorIzquierda" + this.state.formula[i].nombre).removeClass("blink");
@@ -216,11 +235,17 @@ function (_React$Component) {
       ;
 
       if (posicion == null) {
+        console.log('1');
         console.log(this.state.formula);
-
-        var temp = _toConsumableArray(this.state.formula);
-
-        var tempVar = temp[index];
+        this.findVariableInFormula(arrregloPrueba, nombre, '');
+        console.log('posicionDeIndicadorSeleccionadoEnFormula');
+        console.log(posicionDeIndicadorSeleccionadoEnFormula);
+        var temp = [].concat(arrregloPrueba);
+        console.log('temp');
+        console.log(temp);
+        console.log(temp + posicionDeIndicadorSeleccionadoEnFormula);
+        var tempVar;
+        eval("tempVar = temp" + posicionDeIndicadorSeleccionadoEnFormula);
         console.log('index = ' + index);
         console.log('tempVar');
         console.log(tempVar);
@@ -229,26 +254,30 @@ function (_React$Component) {
         this.setState({
           formula: temp
         }, console.log(this.state.formula));
-        /*var centro = e.target.clientWidth/ 2;
-        console.log('centro');
-        console.log(centro);
-        console.log('e.clientX');
-        console.log(e.clientX);
-        if(e.clientX-node.getBoundingClientRect().x <= centro) {
-            $("#indicadorIzquierda"+nombre).addClass("colorPunteroFormula");
-            $("#indicadorIzquierda"+nombre).addClass("blink");
-        } else {
-            $("#indicadorDerecha"+nombre).addClass("colorPunteroFormula");
-            $("#indicadorDerecha"+nombre).addClass("blink");
-        }*/
       } else if (posicion.localeCompare("izquierda") == 0) {
+        console.log('2');
         $("#indicadorIzquierda" + nombre).addClass("colorPunteroFormula");
         $("#indicadorIzquierda" + nombre).addClass("blink");
         $("#indicadorIzquierda" + nombre).removeClass("highlightFormulaBackground");
+        this.findVariableInFormula(arrregloPrueba, nombre, '');
+        console.log('posicionDeIndicadorSeleccionadoEnFormula');
+        console.log(posicionDeIndicadorSeleccionadoEnFormula);
       } else if (posicion.localeCompare("derecha") == 0) {
+        console.log('3');
         $("#indicadorDerecha" + nombre).addClass("colorPunteroFormula");
         $("#indicadorDerecha" + nombre).addClass("blink");
         $("#indicadorDerecha" + nombre).removeClass("highlightFormulaBackground");
+        this.findVariableInFormula(arrregloPrueba, nombre, '');
+        console.log('posicionDeIndicadorSeleccionadoEnFormula');
+        console.log(posicionDeIndicadorSeleccionadoEnFormula);
+      } else if (posicion.localeCompare("empty") == 0) {
+        if ($("#indicadorFormulaVacia").hasClass("colorPunteroFormula")) {
+          $("#indicadorFormulaVacia").removeClass("blink");
+          $("#indicadorFormulaVacia").removeClass("colorPunteroFormula");
+        } else {
+          $("#indicadorFormulaVacia").addClass("blink");
+          $("#indicadorFormulaVacia").addClass("colorPunteroFormula");
+        }
       }
     }
   }, {
@@ -461,6 +490,21 @@ function (_React$Component) {
       return _react["default"].createElement("div", null, _react["default"].createElement("div", {
         className: "row"
       }, _react["default"].createElement("div", {
+        className: "col-xl-6 col-lg-6 col-md-6 col-sm-6 col-6"
+      }), _react["default"].createElement("div", {
+        className: "col-xl-6 col-lg-6 col-md-6 col-sm-6 col-6"
+      }, _react["default"].createElement("div", {
+        className: "text-center",
+        style: {
+          width: "100%"
+        }
+      }, _react["default"].createElement("a", {
+        href: "#",
+        className: "btn btn-brand font-bold font-20",
+        onClick: this.props.showVariables
+      }, "Crear Variables")))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
+        className: "row"
+      }, _react["default"].createElement("div", {
         className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
       }, _react["default"].createElement("div", {
         className: "card"
@@ -491,7 +535,8 @@ function (_React$Component) {
         clickEnFormula: this.clickEnFormula,
         height: "100%",
         width: "100%",
-        isFirstRow: true
+        isFirstRow: true,
+        posicionEnArreglo: "0"
       }))), _react["default"].createElement("div", {
         style: {
           width: "100%",
@@ -531,15 +576,7 @@ function (_React$Component) {
         camposDeObjetos: camposDeObjetos,
         seleccionarMultiple: false,
         retornoSeleccionVariable: this.retornoClickLista
-      })), _react["default"].createElement("div", {
-        className: "row"
-      }, _react["default"].createElement("a", {
-        className: "btn btn-brand btn-block btnWhiteColorHover font-bold font-20",
-        style: {
-          color: "#fafafa"
-        },
-        onClick: this.props.showVariables
-      }, "Crear Variables"))), _react["default"].createElement("div", {
+      }))), _react["default"].createElement("div", {
         style: {
           width: "50%",
           height: "100%",

@@ -51,11 +51,6 @@ function (_React$Component) {
   _createClass(CeldaEquacion, [{
     key: "render",
     value: function render() {
-      var _this = this;
-
-      console.log('this.props.formula.length');
-      console.log(this.props.formula.length);
-      console.log(this.props.formula);
       return _react["default"].createElement("div", {
         style: {
           width: this.props.width,
@@ -73,11 +68,6 @@ function (_React$Component) {
         style: {
           height: "100%",
           width: "100%"
-        },
-        onClick: function onClick(e) {
-          e.persist();
-
-          _this.props.clickEnFormula(e, null, _this.props.variable.valor, _this.props.index);
         }
       }, this.props.variable.tipo.localeCompare("variable") == 0 ? _react["default"].createElement(_VariableCeldaEquacion["default"], {
         variable: this.props.variable,
