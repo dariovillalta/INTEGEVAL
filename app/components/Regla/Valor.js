@@ -51,8 +51,7 @@ function (_React$Component) {
 
   _createClass(Valor, [{
     key: "componentDidMount",
-    value: function componentDidMount() {
-      this.getLists();
+    value: function componentDidMount() {//this.getLists();
     }
   }, {
     key: "getLists",
@@ -153,221 +152,124 @@ function (_React$Component) {
   }, {
     key: "render",
     value: function render() {
-      if (this.props.esNumero) {
-        return _react["default"].createElement("div", {
-          className: "row"
-        }, _react["default"].createElement("div", {
-          className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
-        }, _react["default"].createElement("div", {
-          className: "card"
-        }, _react["default"].createElement("h3", {
-          className: "card-header"
-        }, "Seleccionar Campo"), _react["default"].createElement("div", {
-          className: "card-body"
-        }, _react["default"].createElement("div", {
-          className: "form-group"
-        }, _react["default"].createElement("select", {
-          id: "selectLista",
-          className: "form-control form-control-lg",
-          onChange: this.updateVariableList
-        }, _react["default"].createElement("option", {
-          value: ""
-        }, "Seleccione una lista..."), _react["default"].createElement("option", {
-          value: "table"
-        }, "Campos de tabla"), this.state.listas.map(function (lista, i) {
-          return _react["default"].createElement("option", {
-            value: lista.ID,
-            key: lista.ID
-          }, lista.nombre);
-        })))), _react["default"].createElement("h5", {
-          className: "card-header",
-          style: {
-            margin: "0px"
-          }
-        }), _react["default"].createElement("h4", {
-          className: "card-header"
-        }, "Seleccionar Elementos"), _react["default"].createElement("div", {
-          className: "card-body"
-        }, _react["default"].createElement("div", {
-          className: "form-group"
-        }, _react["default"].createElement("select", {
-          id: "camposDeLista",
-          className: "form-control form-control-lg",
-          multiple: true
-        }, this.state.variablesDeLista.map(function (variable, i) {
-          if (variable.tipo.indexOf("int") == 0) {
-            return _react["default"].createElement("option", {
-              value: variable.ID,
-              key: variable.ID
-            }, variable.nombre);
-          } else {
-            return null;
-          }
-        })))))));
-      } else if (this.props.esBoolean || this.props.esPequenoDeudor) {
-        return _react["default"].createElement("div", {
-          className: "row"
-        }, _react["default"].createElement("div", {
-          className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
-        }, _react["default"].createElement("div", {
-          className: "card"
-        }, _react["default"].createElement("h3", {
-          className: "card-header"
-        }, "Seleccionar Operacion"), _react["default"].createElement("div", {
-          className: "card-body"
-        }, _react["default"].createElement("div", {
-          className: "text-center"
-        }, _react["default"].createElement("label", {
-          className: "custom-control custom-radio custom-control-inline"
-        }, _react["default"].createElement("input", {
-          type: "radio",
-          name: "radio-inline",
-          className: "custom-control-input"
-        }), _react["default"].createElement("span", {
-          className: "custom-control-label"
-        }, _react["default"].createElement("img", {
-          src: "./assets/varCreation/Verdadero.png",
-          alt: "",
-          style: {
-            height: "30px",
-            width: "auto"
-          }
-        }))), _react["default"].createElement("label", {
-          className: "custom-control custom-radio custom-control-inline"
-        }, _react["default"].createElement("input", {
-          type: "radio",
-          name: "radio-inline",
-          className: "custom-control-input"
-        }), _react["default"].createElement("span", {
-          className: "custom-control-label"
-        }, _react["default"].createElement("img", {
-          src: "./assets/varCreation/Falso.png",
-          alt: "",
-          style: {
-            height: "30px",
-            width: "auto"
-          }
-        }))))))));
-      } else if (this.props.esFecha) {
-        return _react["default"].createElement("div", null);
-      } else if (this.props.esTexto) {
-        return _react["default"].createElement("div", {
-          className: "row"
-        }, _react["default"].createElement("div", {
-          className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
-        }, _react["default"].createElement("div", {
-          className: "card"
-        }, _react["default"].createElement("h3", {
-          className: "card-header"
-        }, "Seleccionar Campo"), _react["default"].createElement("div", {
-          className: "card-body"
-        }, _react["default"].createElement("div", {
-          className: "form-group"
-        }, _react["default"].createElement("select", {
-          id: "selectLista",
-          className: "form-control form-control-lg",
-          onChange: this.updateVariableList
-        }, _react["default"].createElement("option", {
-          value: ""
-        }, "Seleccione una lista..."), _react["default"].createElement("option", {
-          value: "table"
-        }, "Campos de tabla"), this.state.listas.map(function (lista, i) {
-          return _react["default"].createElement("option", {
-            value: lista.ID,
-            key: lista.ID
-          }, lista.nombre);
-        })))), _react["default"].createElement("h5", {
-          className: "card-header",
-          style: {
-            margin: "0px"
-          }
-        }), _react["default"].createElement("h4", {
-          className: "card-header"
-        }, "Seleccionar Elementos"), _react["default"].createElement("div", {
-          className: "card-body"
-        }, _react["default"].createElement("div", {
-          className: "form-group"
-        }, _react["default"].createElement("select", {
-          id: "camposDeLista",
-          className: "form-control form-control-lg",
-          multiple: true
-        }, this.state.variablesDeLista.map(function (variable, i) {
-          if (variable.tipo.indexOf("varchar") == 0) {
-            return _react["default"].createElement("option", {
-              value: variable.ID,
-              key: variable.ID
-            }, variable.nombre);
-          } else {
-            return null;
-          }
-        })))))));
-      } else if (this.props.esGranDeudor) {
-        return _react["default"].createElement("div", {
-          className: "row"
-        }, _react["default"].createElement("div", {
-          className: "col-sm-4 col-4"
-        }, _react["default"].createElement("div", {
-          className: "card"
-        }, _react["default"].createElement("div", {
-          className: "card-body"
-        }, _react["default"].createElement("div", {
-          className: "d-inline-block text-center",
-          style: {
-            width: "100%"
-          }
-        }, _react["default"].createElement("h2", {
-          className: "text-muted"
-        }, "Capital M\xEDnimo"), _react["default"].createElement("input", {
-          id: "capitalMinimo",
-          type: "text",
-          className: "form-control",
-          style: {
-            width: "100%"
-          }
-        }))))), _react["default"].createElement("div", {
-          className: "col-sm-4 col-4"
-        }, _react["default"].createElement("div", {
-          className: "card"
-        }, _react["default"].createElement("div", {
-          className: "card-body"
-        }, _react["default"].createElement("div", {
-          className: "d-inline-block text-center",
-          style: {
-            width: "100%"
-          }
-        }, _react["default"].createElement("h2", {
-          className: "text-muted"
-        }, "Tiempo M\xEDnimo"), _react["default"].createElement("input", {
-          id: "tiempoMinimo",
-          type: "text",
-          className: "form-control",
-          style: {
-            width: "100%"
-          }
-        }))))), _react["default"].createElement("div", {
-          className: "col-sm-4 col-4"
-        }, _react["default"].createElement("div", {
-          className: "card"
-        }, _react["default"].createElement("div", {
-          className: "card-body"
-        }, _react["default"].createElement("div", {
-          className: "d-inline-block text-center",
-          style: {
-            width: "100%"
-          }
-        }, _react["default"].createElement("h2", {
-          className: "text-muted"
-        }, "Porcentaje M\xEDnimo"), _react["default"].createElement("input", {
-          id: "porcentajeMinimo",
-          type: "text",
-          className: "form-control",
-          style: {
-            width: "100%"
-          }
-        }))))));
+      /*if(this.props.esNumero) {
+          return (
+              <div className={"row"}>
+           	<div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"} style={{width: "100%", height: "100%", border: "1px solid black", borderRadius: "5px"}}>
+                      <div className={"font-18"} style={{width: "100%", display: "flex", alignItems: "center", justifyContent: "center"}}>
+                          Seleccionar Valor a Aplicar
+                      </div>
+                      <div className={"form-group"}>
+                          <select id="selectLista" className={"form-control form-control-lg"} onChange={this.updateVariableList}>
+                              <option value="">Seleccione una lista...</option>
+                              {this.props.camposDropdown.map((lista, i) =>
+                                  <option value={lista.ID} key={lista.ID}>{lista.valor}</option>
+                              )}
+                          </select>
+                      </div>
+                       <div className={"form-group"}>
+                          <select id="camposDeLista" className={"form-control form-control-lg"} multiple>
+                              {this.props.valoresDropdown.map((variable, i) => {
+                                      if (variable.tipo.indexOf("int") == 0 || variable.tipo.indexOf("decimal") == 0) {
+                                          return <option value={variable.ID} key={variable.ID}>{variable.valor}</option>
+                                      } else {
+                                          return null;
+                                      }
+                                  }
+                              )}
+                          </select>
+                      </div>
+               </div>
+           </div>
+          );
+      } else if(this.props.esBoolean) {
+          return (
+              <div className={"row"}>
+                  <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
+                      <div className={"text-center"} style={{width: "100%", height: "100%", border: "1px solid black", borderRadius: "15px", borderRadius: "5px"}}>
+                          <div className={"font-18"} style={{width: "100%", display: "flex", alignItems: "center", justifyContent: "center"}}>
+                              Seleccionar Valor a Aplicar
+                          </div>
+                          <label className={"custom-control custom-radio custom-control-inline"}>
+                              <input type="radio" name="radio-inline" className={"custom-control-input"}/>
+                              <span className={"custom-control-label"}>
+                                  <img src="./assets/varCreation/Verdadero.png" alt="" style={{height: "30px", width: "auto"}}/>
+                              </span>
+                          </label>
+                          <label className={"custom-control custom-radio custom-control-inline"}>
+                              <input type="radio" name="radio-inline" className={"custom-control-input"}/>
+                              <span className={"custom-control-label"}>
+                                  <img src="./assets/varCreation/Falso.png" alt="" style={{height: "30px", width: "auto"}}/>
+                              </span>
+                          </label>
+                      </div>
+                  </div>
+              </div>
+          );
+      } else if(this.props.esFecha) {
+          return (
+              <div>
+              </div>
+          );
+      } else if(this.props.esTexto) {
+          return (
+              <div className={"row"}>
+                  <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"} style={{width: "100%", height: "100%", border: "1px solid black", borderRadius: "5px"}}>
+                      <div className={"font-18"} style={{width: "100%", display: "flex", alignItems: "center", justifyContent: "center"}}>
+                          Seleccionar Valor a Aplicar
+                      </div>
+                      <div className={"form-group"}>
+                          <select id="selectLista" className={"form-control form-control-lg"} onChange={this.updateVariableList}>
+                              <option value="">Seleccione una lista...</option>
+                              {this.props.camposDropdown.map((lista, i) =>
+                                  <option value={lista.ID} key={lista.ID}>{lista.valor}</option>
+                              )}
+                          </select>
+                      </div>
+                       <div className={"form-group"}>
+                          <select id="camposDeLista" className={"form-control form-control-lg"} multiple>
+                              {this.props.valoresDropdown.map((variable, i) => {
+                                      if (variable.tipo.indexOf("varchar") == 0) {
+                                          return <option value={variable.ID} key={variable.ID}>{variable.valor}</option>
+                                      } else {
+                                          return null;
+                                      }
+                                  }
+                              )}
+                          </select>
+                      </div>
+                  </div>
+              </div>
+          );
       } else {
-        return _react["default"].createElement("div", null);
-      }
+          return (
+              <div>
+              </div>
+          );
+      }*/
+      return _react["default"].createElement("div", {
+        className: "row border-bottom",
+        style: {
+          width: "100%"
+        }
+      }, _react["default"].createElement("div", {
+        className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
+      }, _react["default"].createElement("label", {
+        htmlFor: "valor",
+        className: "col-form-label"
+      }, "Valor:")), _react["default"].createElement("div", {
+        className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group",
+        style: {
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center"
+        }
+      }, _react["default"].createElement("input", {
+        onKeyUp: this.props.actualizarValor,
+        id: "valor",
+        type: "text",
+        className: "form-control form-control-sm"
+      })));
     }
   }]);
 

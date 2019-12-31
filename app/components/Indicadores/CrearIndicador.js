@@ -29,6 +29,18 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
+var tipoCampos = [{
+  nombre: "texto"
+}, {
+  nombre: "booleano"
+}, {
+  nombre: "fecha"
+}, {
+  nombre: "número"
+}, {
+  nombre: "arreglo"
+}];
+
 var CrearIndicador =
 /*#__PURE__*/
 function (_React$Component) {
@@ -55,15 +67,11 @@ function (_React$Component) {
       var peso = $("#peso").val();
       var tolerancia = $("#tolerancia").val();
       var valorIdeal = $("#valorIdeal").val();
+      var tipoValorIdeal = $("#tipoValorIdeal").val();
       var periodicidad = $("#periodicidad").val();
       var tipoIndicador = $("#tipoIndicador").val();
       var analista = $("#analista").val();
       var riesgoPadre = this.props.riesgoPadre;
-
-      if (this.props.riesgoPadre == -1) {
-        if ($("#riesgoPadre").val().length > 0) riesgoPadre = $("#riesgoPadre").val();else riesgoPadre = -1;
-      }
-
       var transaction = new _mssql["default"].Transaction(this.props.pool);
       transaction.begin(function (err) {
         var rolledBack = false;
@@ -71,7 +79,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("insert into Indicadores (nombre, codigo, formula, peso, tolerancia, valorIdeal, periodicidad, tipoIndicador, analista, idRiesgoPadre) values ('" + nombre + "', '" + codigo + "', '" + formula + "', " + peso + ", " + tolerancia + ", " + valorIdeal + ", '" + periodicidad + "', '" + tipoIndicador + "', '" + analista + "', " + riesgoPadre + ")", function (err, result) {
+        request.query("insert into Indicadores (nombre, codigo, formula, peso, tolerancia, valorIdeal, tipoValorIdeal, periodicidad, tipoIndicador, analista, idRiesgoPadre) values ('" + nombre + "', '" + codigo + "', '" + formula + "', " + peso + ", " + tolerancia + ", " + valorIdeal + ", '" + tipoValorIdeal + "', '" + periodicidad + "', '" + tipoIndicador + "', '" + analista + "', " + riesgoPadre + ")", function (err, result) {
           if (err) {
             if (!rolledBack) {
               console.log(err);
@@ -98,7 +106,7 @@ function (_React$Component) {
         className: "page-header"
       }, _react["default"].createElement("h2", {
         className: "pageheader-title"
-      }, "Configuraci\xF3n"), _react["default"].createElement("div", {
+      }, "Crear Indicador"), _react["default"].createElement("div", {
         className: "page-breadcrumb"
       }, _react["default"].createElement("nav", {
         "aria-label": "breadcrumb"
@@ -112,6 +120,13 @@ function (_React$Component) {
         href: "#",
         className: "breadcrumb-link"
       }, "Configuraci\xF3n")), _react["default"].createElement("li", {
+        className: "breadcrumb-item font-16",
+        "aria-current": "page",
+        onClick: this.props.retornoSeleccionIndicador
+      }, _react["default"].createElement("a", {
+        href: "#",
+        className: "breadcrumb-link"
+      }, "Seleccionar Riesgo")), _react["default"].createElement("li", {
         className: "breadcrumb-item active font-16",
         "aria-current": "page"
       }, "Crear Indicador"))))))), _react["default"].createElement("div", {
@@ -215,6 +230,26 @@ function (_React$Component) {
       }, _react["default"].createElement("div", {
         className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
       }, _react["default"].createElement("label", {
+        htmlFor: "tipoValorIdeal",
+        className: "col-form-label"
+      }, "Tipo de Valor Ideal")), _react["default"].createElement("div", {
+        className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
+      }, _react["default"].createElement("select", {
+        id: "tipoValorIdeal",
+        className: "form-control"
+      }, tipoCampos.map(function (tipo, i) {
+        return _react["default"].createElement("option", {
+          value: tipo.nombre,
+          key: tipo.nombre
+        }, tipo.nombre);
+      })))), _react["default"].createElement("div", {
+        className: "row",
+        style: {
+          width: "100%"
+        }
+      }, _react["default"].createElement("div", {
+        className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
+      }, _react["default"].createElement("label", {
         htmlFor: "periodicidad",
         className: "col-form-label"
       }, "Periodicidad")), _react["default"].createElement("div", {
@@ -255,44 +290,20 @@ function (_React$Component) {
         id: "analista",
         type: "text",
         className: "form-control form-control-sm"
-      }))), this.props.riesgoPadre == -1 ? _react["default"].createElement("div", {
+      }))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
         className: "row",
         style: {
-          width: "100%"
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center"
         }
-      }, _react["default"].createElement("div", {
-        className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
-      }, _react["default"].createElement("label", {
-        htmlFor: "analista",
-        className: "col-form-label"
-      }, "Riesgo Padre")), _react["default"].createElement("div", {
-        className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
-      }, _react["default"].createElement("select", {
-        id: "riesgoPadre",
-        className: "form-control"
-      }, this.props.riesgos.map(function (riesgo, i) {
-        return _react["default"].createElement("option", {
-          value: riesgo.ID
-        }, riesgo.nombre);
-      })))) : _react["default"].createElement("span", null), _react["default"].createElement("a", {
-        className: "btn btn-secondary btn-block btnWhiteColorHover font-bold font-20",
+      }, _react["default"].createElement("a", {
+        className: "btn btn-primary btnWhiteColorHover font-bold font-20",
         style: {
           color: "#fafafa"
         },
-        onClick: this.props.showFormula
-      }, "F\xF3rmula"), _react["default"].createElement("a", {
-        className: "btn btn-success btn-block btnWhiteColorHover font-bold font-20",
-        style: {
-          color: "#fafafa"
-        },
-        onClick: this.props.showCondicionVar
-      }, "Condiciones para el C\xE1lculo"), _react["default"].createElement("a", {
-        className: "btn btn-brand btn-block btnWhiteColorHover font-bold font-20",
-        style: {
-          color: "#fafafa"
-        },
-        onClick: this.goCrearUmbral
-      }, "Umbrales")))))));
+        onClick: this.crearIndicador
+      }, "Guardar")), _react["default"].createElement("br", null)))))));
     }
   }]);
 

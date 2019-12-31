@@ -56,11 +56,6 @@ function (_React$Component) {
           alignItems: "center",
           justifyContent: "center",
           "float": "left"
-        },
-        onClick: function onClick(e) {
-          e.persist();
-
-          _this.props.clickEnFormula(e, "izquierda", _this.props.variable.valor, _this.props.index);
         }
       }, _react["default"].createElement("div", {
         id: "indicadorIzquierda" + this.props.variable.valor,
@@ -85,11 +80,6 @@ function (_React$Component) {
           "float": "left",
           color: "white",
           padding: "5%"
-        },
-        onClick: function onClick(e) {
-          e.persist();
-
-          _this.props.clickEnFormula(e, null, _this.props.variable.valor, _this.props.index);
         }
       }, _react["default"].createElement("div", {
         className: "highlightFormulaBackground" + (this.props.variable.activa ? ' formulaActive' : ''),
@@ -117,17 +107,12 @@ function (_React$Component) {
           alignItems: "center",
           justifyContent: "center",
           "float": "left"
-        },
-        onClick: function onClick(e) {
-          e.persist();
-
-          _this.props.clickEnFormula(e, "derecha", _this.props.variable.valor, _this.props.index);
         }
       }, _react["default"].createElement("div", {
         id: "indicadorDerecha" + this.props.variable.valor,
         className: "highlightFormulaBackground",
         style: {
-          height: "90%",
+          height: "80%",
           width: "100%"
         },
         onClick: function onClick(e) {

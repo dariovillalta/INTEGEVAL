@@ -11,6 +11,8 @@ var _mssql = _interopRequireDefault(require("mssql"));
 
 var _ListasSeleVariable = _interopRequireDefault(require("../../ListasSeleVariable.js"));
 
+var _CrearFuenteDatosAtributos = _interopRequireDefault(require("./CrearFuenteDatosAtributos.js"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -31,6 +33,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
+var nombreCampoSeleccionado = '';
 var tipoCampos = [{
   nombre: "texto"
 }, {
@@ -39,8 +42,9 @@ var tipoCampos = [{
   nombre: "fecha"
 }, {
   nombre: "número"
+}, {
+  nombre: "arreglo"
 }];
-var nombreCampoSeleccionado = '';
 
 var CrearFuenteDatos =
 /*#__PURE__*/
@@ -54,55 +58,21 @@ function (_React$Component) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(CrearFuenteDatos).call(this, props));
     _this.state = {
-      nombreColumnas: []
+      atributos: [],
+      mostrarEsObjeto: true,
+      titulo: "Valores Multiples"
     };
     _this.crearFuenteDato = _this.crearFuenteDato.bind(_assertThisInitialized(_this));
     _this.retornoSeleccionVariable = _this.retornoSeleccionVariable.bind(_assertThisInitialized(_this));
+    _this.cambioAObjeto = _this.cambioAObjeto.bind(_assertThisInitialized(_this));
+    _this.cambiarTitulo = _this.cambiarTitulo.bind(_assertThisInitialized(_this));
     return _this;
   }
 
   _createClass(CrearFuenteDatos, [{
-    key: "componentDidMount",
-    value: function componentDidMount() {
-      var _this2 = this;
-
-      var transaction = new _mssql["default"].Transaction(this.props.pool);
-      transaction.begin(function (err) {
-        var rolledBack = false;
-        transaction.on('rollback', function (aborted) {
-          rolledBack = true;
-        });
-        var request = new _mssql["default"].Request(transaction);
-        request.query("select * from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME = '" + _this2.props.nombreTablaSeleccionada + "'", function (err, result) {
-          if (err) {
-            if (!rolledBack) {
-              console.log(err);
-              transaction.rollback(function (err) {});
-            }
-          } else {
-            transaction.commit(function (err) {
-              var nombreColumnas = [];
-
-              for (var i = 0; i < result.recordset.length; i++) {
-                nombreColumnas.push({
-                  nombre: result.recordset[i].COLUMN_NAME
-                });
-              }
-
-              ;
-
-              _this2.setState({
-                nombreColumnas: nombreColumnas
-              });
-            });
-          }
-        });
-      }); // fin transaction
-    }
-  }, {
     key: "crearFuenteDato",
     value: function crearFuenteDato() {
-      var _this3 = this;
+      var _this2 = this;
 
       var nombre = $("#nombreFuenteDato").val();
       var tipo = $("#tipoFuenteDato").val();
@@ -127,7 +97,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("insert into Campos (tablaID, nombre, tipo, guardar, formula, nivel) values (" + _this3.props.idTablaSeleccionada + ", '" + nombre + "', '" + tipo + "', '" + guardar + "', '" + formula + "', " + nivel + ")", function (err, result) {
+        request.query("insert into Campos (tablaID, nombre, tipo, guardar, formula, nivel) values (" + _this2.props.idTablaSeleccionada + ", '" + nombre + "', '" + tipo + "', '" + guardar + "', '" + formula + "', " + nivel + ")", function (err, result) {
           if (err) {
             if (!rolledBack) {
               console.log(err);
@@ -135,7 +105,7 @@ function (_React$Component) {
             }
           } else {
             transaction.commit(function (err) {
-              _this3.props.terminoCrearCampo(nombre);
+              _this2.props.terminoCrearCampo(nombre);
             });
           }
         });
@@ -148,6 +118,26 @@ function (_React$Component) {
 
       if (variable[0].nombre.length > 0) {
         nombreCampoSeleccionado = variable[0].nombre;
+      }
+    }
+  }, {
+    key: "cambioAObjeto",
+    value: function cambioAObjeto() {
+      this.setState({
+        mostrarEsObjeto: !this.state.mostrarEsObjeto
+      }, this.cambiarTitulo);
+    }
+  }, {
+    key: "cambiarTitulo",
+    value: function cambiarTitulo() {
+      if (this.state.mostrarEsObjeto) {
+        this.setState({
+          titulo: "Valores Multiples"
+        });
+      } else {
+        this.setState({
+          titulo: "Valor Único"
+        });
       }
     }
   }, {
@@ -200,13 +190,64 @@ function (_React$Component) {
       }, _react["default"].createElement("label", {
         htmlFor: "nombreFuenteDato",
         className: "col-form-label"
-      }, "Nombre Fuente de Dato")), _react["default"].createElement("div", {
+      }, "Nombre Fuente de Dato (Variable Origen)")), _react["default"].createElement("div", {
         className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
       }, _react["default"].createElement("input", {
         id: "nombreFuenteDato",
         type: "text",
         className: "form-control form-control-sm"
       }))), _react["default"].createElement("div", {
+        className: "row",
+        style: {
+          width: "100%"
+        }
+      }, _react["default"].createElement("div", {
+        className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
+      }, _react["default"].createElement("label", {
+        htmlFor: "esObjetoFuenteDato",
+        className: "col-form-label"
+      }, "Tiene m\xE1s de un atributo / propiedad:")), _react["default"].createElement("div", {
+        className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
+      }, _react["default"].createElement("div", {
+        className: "switch-button-variable switch-button-yesno",
+        style: {
+          margin: "0 auto",
+          display: "block"
+        }
+      }, _react["default"].createElement("input", {
+        type: "checkbox",
+        defaultChecked: true,
+        name: "esObjetoFuenteDato",
+        id: "esObjetoFuenteDato",
+        onClick: this.cambioAObjeto
+      }), _react["default"].createElement("span", null, _react["default"].createElement("label", {
+        htmlFor: "esObjetoFuenteDato"
+      }))))), _react["default"].createElement("div", {
+        className: "row",
+        style: {
+          width: "100%"
+        }
+      }, _react["default"].createElement("div", {
+        className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
+      }, _react["default"].createElement("label", {
+        htmlFor: "guardarFuenteDato",
+        className: "col-form-label"
+      }, "Guardar Valores Obtenidos en Base de Datos")), _react["default"].createElement("div", {
+        className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
+      }, _react["default"].createElement("br", null), _react["default"].createElement("div", {
+        className: "switch-button switch-button-yesno",
+        style: {
+          margin: "0 auto",
+          display: "block"
+        }
+      }, _react["default"].createElement("input", {
+        type: "checkbox",
+        defaultChecked: true,
+        name: "guardarFuenteDato",
+        id: "guardarFuenteDato"
+      }), _react["default"].createElement("span", null, _react["default"].createElement("label", {
+        htmlFor: "guardarFuenteDato"
+      }))))), _react["default"].createElement("div", {
         className: "row",
         style: {
           width: "100%"
@@ -226,51 +267,19 @@ function (_React$Component) {
           value: tipo.nombre,
           key: tipo.nombre
         }, tipo.nombre);
-      })))), _react["default"].createElement("div", {
-        className: "row",
-        style: {
-          width: "100%"
-        }
-      }, _react["default"].createElement("div", {
-        className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
-      }, _react["default"].createElement("label", {
-        htmlFor: "guardarFuenteDato",
-        className: "col-form-label"
-      }, "Guardar Fuente de Dato en Base de Datos")), _react["default"].createElement("div", {
-        className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
-      }, _react["default"].createElement("div", {
-        className: "switch-button switch-button-yesno",
-        style: {
-          margin: "0 auto",
-          display: "block"
-        }
-      }, _react["default"].createElement("input", {
-        type: "checkbox",
-        defaultChecked: true,
-        name: "guardarFuenteDato",
-        id: "guardarFuenteDato"
-      }), _react["default"].createElement("span", null, _react["default"].createElement("label", {
-        htmlFor: "guardarFuenteDato"
-      }))))), _react["default"].createElement("div", {
+      })))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
         className: "row",
         style: {
           width: "100%",
-          height: "150px"
+          border: "1px solid #e6e6f2"
         }
-      }, _react["default"].createElement("div", {
-        className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
-      }, _react["default"].createElement("label", {
-        htmlFor: "listas",
-        className: "col-form-label"
-      }, "Columna de tabla")), _react["default"].createElement("div", {
-        className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
-      }, _react["default"].createElement(_ListasSeleVariable["default"], {
-        mostrarRosa: true,
-        variables: this.state.nombreColumnas,
-        seleccionarMultiple: false,
-        retornoSeleccion: this.retornoSeleccionVariable,
-        titulo: "Columnas"
-      }))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
+      }, _react["default"].createElement(_CrearFuenteDatosAtributos["default"], {
+        atributos: this.state.atributos,
+        campos: this.props.columnas,
+        titulo: this.state.titulo,
+        mostrarEsObjeto: this.state.mostrarEsObjeto,
+        terminarCrearAtributo: this.crearAtributoDeObjeto
+      }, " ")), _react["default"].createElement("br", null), !this.state.mostrarEsObjeto ? _react["default"].createElement("div", null, _react["default"].createElement("div", {
         className: "row",
         style: {
           display: "flex",
@@ -283,7 +292,7 @@ function (_React$Component) {
           color: "#fafafa"
         },
         onClick: this.crearFuenteDato
-      }, "Crear")), _react["default"].createElement("br", null)))))));
+      }, "Crear")), _react["default"].createElement("br", null)) : null))))));
     }
   }]);
 

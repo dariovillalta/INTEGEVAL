@@ -80,21 +80,7 @@ function (_React$Component) {
     _this.state = {
       isLoggedIn: false,
       userName: null,
-      permision: "" // or using a configuration object
-
-      /*const connectionString = {
-          connectionString: 'DSN=ClasificacionCartera',
-          connectionTimeout: 360,
-          loginTimeout: 360
-      }
-      odbc.connect(connectionString, (error, connection) => {
-          console.log(connection);
-          connection.columns(null, null, null, null, (error, result) => {
-              if (error) { return; } // handle
-              console.log(result);
-          });
-      });*/
-      // connection2 is now an open Connection
+      permision: "" // connection2 is now an open Connection
 
     };
     _this.login = _this.login.bind(_assertThisInitialized(_this));
@@ -116,35 +102,6 @@ function (_React$Component) {
     value: function logOff() {
       this.setState({
         isLoggedIn: false
-      });
-    }
-  }, {
-    key: "select",
-    value: function select() {
-      var config = {
-        user: 'SA',
-        password: 'password111!',
-        server: 'localhost',
-        database: 'RCL_Dev',
-        stream: true,
-        pool: {
-          max: 40,
-          min: 0,
-          idleTimeoutMillis: 60000
-        }
-      };
-      var pool = new _mssql["default"].ConnectionPool(config, function (err) {
-        console.log("11");
-
-        if (err) {
-          console.log(err);
-        } else {
-          console.log("222");
-          return pool.query('select * from Activos_Bancos', function (err, result) {
-            console.log("333");
-            console.log(result);
-          });
-        }
       });
     }
   }, {

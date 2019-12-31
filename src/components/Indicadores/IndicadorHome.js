@@ -3,6 +3,7 @@ import sql from 'mssql';
 
 import SeleccionarIndicador from './SeleccionarIndicador.js';
 import CrearIndicador from './CrearIndicador.js';
+import EditarIndicador from './EditarIndicador.js';
 
 export default class IndicadorHome extends React.Component {
     constructor(props) {
@@ -10,7 +11,8 @@ export default class IndicadorHome extends React.Component {
         this.state = {
             componenteAMostrar: "selIndicador",
             idIndicadorSeleccionado: -1,
-            nombreIndicadorSeleccionada: ""
+            nombreIndicadorSeleccionada: "",
+            idRiesgoPadreSeleccionado: -1
         }
         this.terminoSeleccionIndicador = this.terminoSeleccionIndicador.bind(this);
         this.retornoSeleccionIndicador = this.retornoSeleccionIndicador.bind(this);
@@ -30,13 +32,15 @@ export default class IndicadorHome extends React.Component {
         this.setState({
             componenteAMostrar: "selIndicador",
             idIndicadorSeleccionado: -1,
-            nombreTablaSeleccionada: ""
+            nombreTablaSeleccionada: "",
+            idRiesgoPadreSeleccionado: -1
         });
     }
 
-    goCrearIndicador () {
+    goCrearIndicador (idRiesgo) {
         this.setState({
-            componenteAMostrar: "crearIndicador"
+            componenteAMostrar: "crearIndicador",
+            idRiesgoPadreSeleccionado: idRiesgo
         });
     }
 
@@ -70,19 +74,19 @@ export default class IndicadorHome extends React.Component {
         if(this.state.componenteAMostrar.localeCompare("selIndicador") == 0) {
             return (
                 <div>
-                    <SeleccionarIndicador pool={this.props.pool} configuracionHome={this.props.configuracionHome} terminoSeleccionIndicador={this.terminoSeleccionIndicador} goCrearIndicador={this.goCrearIndicador}> </SeleccionarIndicador>
+                    <SeleccionarIndicador pool={this.props.pool} configuracionHome={this.props.configuracionHome} terminoSeleccionIndicador={this.terminoSeleccionIndicador} goCrearIndicador={this.goCrearIndicador} showRiesgos={this.props.showRiesgos}> </SeleccionarIndicador>
                 </div>
             );
         } else if(this.state.componenteAMostrar.localeCompare("crearIndicador") == 0) {
             return (
                 <div>
-                    <CrearIndicador pool={this.props.pool} showFormula={this.props.showFormula} showCondicionVar={this.props.showCondicionVar} retornoSeleccionIndicador={this.retornoSeleccionIndicador} configuracionHome={this.props.configuracionHome} terminoCrearIndicadorPasarAEdit={this.terminoCrearIndicadorPasarAEdit} riesgoPadre={-1}> </CrearIndicador>
+                    <CrearIndicador pool={this.props.pool} showCondicionVar={this.props.showCondicionVar} retornoSeleccionIndicador={this.retornoSeleccionIndicador} configuracionHome={this.props.configuracionHome} terminoCrearIndicadorPasarAEdit={this.terminoCrearIndicadorPasarAEdit} riesgoPadre={this.state.idRiesgoPadreSeleccionado}> </CrearIndicador>
                 </div>
             );
         } else if(this.state.componenteAMostrar.localeCompare("editIndicador") == 0) {
             return (
                 <div>
-                    <CrearIndicador pool={this.props.pool} showFormula={this.props.showFormula} showCondicionVar={this.props.showCondicionVar} retornoSeleccionIndicador={this.retornoSeleccionIndicador} configuracionHome={this.props.configuracionHome} idIndicadorSeleccionado={this.state.idIndicadorSeleccionado} nombreIndicadorSeleccionada={this.state.nombreIndicadorSeleccionada}> </CrearIndicador>
+                    <EditarIndicador pool={this.props.pool} showFormula={this.props.showFormula} showCondicionVar={this.props.showCondicionVar} retornoSeleccionIndicador={this.retornoSeleccionIndicador} configuracionHome={this.props.configuracionHome} idIndicadorSeleccionado={this.state.idIndicadorSeleccionado} nombreIndicadorSeleccionada={this.state.nombreIndicadorSeleccionada} riesgoPadre={this.state.idRiesgoPadreSeleccionado}> </EditarIndicador>
                 </div>
             );
         }

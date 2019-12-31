@@ -29,6 +29,18 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
+var tipoCampos = [{
+  nombre: "texto"
+}, {
+  nombre: "booleano"
+}, {
+  nombre: "fecha"
+}, {
+  nombre: "número"
+}, {
+  nombre: "arreglo"
+}];
+
 var CrearRiesgo =
 /*#__PURE__*/
 function (_React$Component) {
@@ -101,6 +113,7 @@ function (_React$Component) {
       var peso = parseInt($("#peso").val());
       var tolerancia = parseInt($("#tolerancia").val());
       var valorIdeal = parseInt($("#valorIdeal").val());
+      var tipoValorIdeal = $("#tipoValorIdeal").val();
       var riesgoPadre = parseInt(this.props.riesgoPadre);
       var nivel = 0;
 
@@ -129,7 +142,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("insert into Riesgos (nombre, formula, peso, tolerancia, valorIdeal, idRiesgoPadre, nivelRiesgoHijo) values ('" + nombre + "', '" + formula + "', " + peso + ", " + tolerancia + ", " + valorIdeal + ", " + riesgoPadre + ", " + nivel + ")", function (err, result) {
+        request.query("insert into Riesgos (nombre, formula, peso, tolerancia, valorIdeal, tipoValorIdeal, idRiesgoPadre, nivelRiesgoHijo) values ('" + nombre + "', '" + formula + "', " + peso + ", " + tolerancia + ", " + valorIdeal + ", '" + tipoValorIdeal + "', " + riesgoPadre + ", " + nivel + ")", function (err, result) {
           if (err) {
             if (!rolledBack) {
               console.log(err);
@@ -214,6 +227,27 @@ function (_React$Component) {
       }, _react["default"].createElement("div", {
         className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
       }, _react["default"].createElement("label", {
+        htmlFor: "nombreRiesgo",
+        className: "col-form-label"
+      }, "F\xF3rmula")), _react["default"].createElement("div", {
+        className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
+      }, _react["default"].createElement("select", {
+        id: "formula",
+        className: "form-control"
+      }, _react["default"].createElement("option", {
+        value: "ambos"
+      }, "Calidad de Gesti\xF3n + Riesgo Inherente"), _react["default"].createElement("option", {
+        value: "riesgoInherente"
+      }, "Riesgo Inherente"), _react["default"].createElement("option", {
+        value: "calidadGesti\xF3n"
+      }, "Calidad de Gesti\xF3n")))), _react["default"].createElement("div", {
+        className: "row",
+        style: {
+          width: "100%"
+        }
+      }, _react["default"].createElement("div", {
+        className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
+      }, _react["default"].createElement("label", {
         htmlFor: "peso",
         className: "col-form-label"
       }, "Peso")), _react["default"].createElement("div", {
@@ -255,6 +289,26 @@ function (_React$Component) {
         type: "text",
         className: "form-control form-control-sm"
       }))), _react["default"].createElement("div", {
+        className: "row",
+        style: {
+          width: "100%"
+        }
+      }, _react["default"].createElement("div", {
+        className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
+      }, _react["default"].createElement("label", {
+        htmlFor: "tipoValorIdeal",
+        className: "col-form-label"
+      }, "Tipo de Valor Ideal")), _react["default"].createElement("div", {
+        className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
+      }, _react["default"].createElement("select", {
+        id: "tipoValorIdeal",
+        className: "form-control"
+      }, tipoCampos.map(function (tipo, i) {
+        return _react["default"].createElement("option", {
+          value: tipo.nombre,
+          key: tipo.nombre
+        }, tipo.nombre);
+      })))), _react["default"].createElement("div", {
         className: "row",
         style: {
           width: "100%"

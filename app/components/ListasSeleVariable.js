@@ -82,15 +82,10 @@ function (_React$Component) {
   }, {
     key: "seleccionarIndice",
     value: function seleccionarIndice(variable, indice) {
-      console.log("antes seleccionarIndice");
-      console.log('arregloCeldasSeleccionadas');
-      console.log(arregloCeldasSeleccionadas);
-      console.log('this.state.indicesVarSeleccionados');
-      console.log(this.state.indicesVarSeleccionados);
       var entro = false;
 
       for (var i = 0; i < arregloCeldasSeleccionadas.length; i++) {
-        if (arregloCeldasSeleccionadas[i].nombre.localeCompare(variable.nombre) == 0) {
+        if (arregloCeldasSeleccionadas[i].valor.localeCompare(variable.valor) == 0) {
           entro = true;
           break;
         }
@@ -109,26 +104,13 @@ function (_React$Component) {
       this.setState({
         indicesVarSeleccionados: nuevoArr
       });
-      console.log("despues seleccionarIndice");
-      console.log('arregloCeldasSeleccionadas');
-      console.log(arregloCeldasSeleccionadas);
-      console.log('this.state.indicesVarSeleccionados');
-      console.log(this.state.indicesVarSeleccionados);
-      console.log('nuevoArr');
-      console.log(nuevoArr);
       this.props.retornoSeleccion(arregloCeldasSeleccionadas);
     }
   }, {
     key: "deseleccionarIndice",
     value: function deseleccionarIndice(variable, indice) {
-      console.log("antes deseleccionarIndice");
-      console.log('arregloCeldasSeleccionadas');
-      console.log(arregloCeldasSeleccionadas);
-      console.log('this.state.indicesVarSeleccionados');
-      console.log(this.state.indicesVarSeleccionados);
-
       for (var i = 0; i < arregloCeldasSeleccionadas.length; i++) {
-        if (arregloCeldasSeleccionadas[i].nombre.localeCompare(variable.nombre) == 0) {
+        if (arregloCeldasSeleccionadas[i].valor.localeCompare(variable.valor) == 0) {
           arregloCeldasSeleccionadas.splice(i, 1);
         }
       }
@@ -141,11 +123,6 @@ function (_React$Component) {
       this.setState({
         indicesVarSeleccionados: nuevoArr
       });
-      console.log("despues deseleccionarIndice");
-      console.log('arregloCeldasSeleccionadas');
-      console.log(arregloCeldasSeleccionadas);
-      console.log('this.state.indicesVarSeleccionados');
-      console.log(this.state.indicesVarSeleccionados);
       this.props.retornoSeleccion(arregloCeldasSeleccionadas);
     }
   }, {
@@ -208,7 +185,7 @@ function (_React$Component) {
           }, "whiteSpace", "pre-wrap"),
           className: clase + (_this2.state.indicesVarSeleccionados[i] ? _this2.props.mostrarRosa ? ' outline-secondary-selected' : ' outline-primary-selected' : ''),
           key: i
-        }, variable.nombre);
+        }, variable.valor);
       }))));
     }
   }]);

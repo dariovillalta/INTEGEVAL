@@ -69,7 +69,7 @@ export default class SeleccionarRiesgo extends React.Component {
                                     )}
                                     {
                                         this.state.riesgos.length == 0
-                                        ? <a style={{color: "#fafafa"}} className={"btn btn-info btn-block btnWhiteColorHover font-bold font-20"}>No existen riesgos creados</a>
+                                        ? <a style={{color: "#fafafa"}} className={"btn btn-dark btn-block btnWhiteColorHover font-bold font-20"}>No existen riesgos creados</a>
                                         : null
                                     }
                                 </div>

@@ -1,6 +1,8 @@
 import React from 'react';
 import sql from 'mssql';
 
+const tipoCampos = [ {nombre: "texto"}, {nombre: "booleano"}, {nombre: "fecha"}, {nombre: "número"}, {nombre: "arreglo"}];
+
 export default class CrearIndicador extends React.Component {
     constructor(props) {
         super(props);
@@ -14,16 +16,11 @@ export default class CrearIndicador extends React.Component {
         var peso = $("#peso").val();
         var tolerancia = $("#tolerancia").val();
         var valorIdeal = $("#valorIdeal").val();
+        var tipoValorIdeal = $("#tipoValorIdeal").val();
         var periodicidad = $("#periodicidad").val();
         var tipoIndicador = $("#tipoIndicador").val();
         var analista = $("#analista").val();
         var riesgoPadre = this.props.riesgoPadre;
-        if(this.props.riesgoPadre == -1) {
-            if($("#riesgoPadre").val().length > 0)
-                riesgoPadre = $("#riesgoPadre").val();
-            else
-                riesgoPadre = -1;
-        }
         const transaction = new sql.Transaction( this.props.pool );
         transaction.begin(err => {
             var rolledBack = false;
@@ -31,7 +28,7 @@ export default class CrearIndicador extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("insert into Indicadores (nombre, codigo, formula, peso, tolerancia, valorIdeal, periodicidad, tipoIndicador, analista, idRiesgoPadre) values ('"+nombre+"', '"+codigo+"', '"+formula+"', "+peso+", "+tolerancia+", "+valorIdeal+", '"+periodicidad+"', '"+tipoIndicador+"', '"+analista+"', "+riesgoPadre+")", (err, result) => {
+            request.query("insert into Indicadores (nombre, codigo, formula, peso, tolerancia, valorIdeal, tipoValorIdeal, periodicidad, tipoIndicador, analista, idRiesgoPadre) values ('"+nombre+"', '"+codigo+"', '"+formula+"', "+peso+", "+tolerancia+", "+valorIdeal+", '"+tipoValorIdeal+"', '"+periodicidad+"', '"+tipoIndicador+"', '"+analista+"', "+riesgoPadre+")", (err, result) => {
                 if (err) {
                     if (!rolledBack) {
                         console.log(err);
@@ -55,11 +52,12 @@ export default class CrearIndicador extends React.Component {
                 <div className={"row"}>
                     <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
                         <div className={"page-header"}>
-                            <h2 className={"pageheader-title"}>Configuraci&oacute;n</h2>
+                            <h2 className={"pageheader-title"}>Crear Indicador</h2>
                             <div className={"page-breadcrumb"}>
                                 <nav aria-label="breadcrumb">
                                     <ol className={"breadcrumb"}>
                                         <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.props.configuracionHome}><a href="#" className={"breadcrumb-link"}>Configuraci&oacute;n</a></li>
+                                        <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.props.retornoSeleccionIndicador}><a href="#" className={"breadcrumb-link"}>Seleccionar Riesgo</a></li>
                                         <li className={"breadcrumb-item active font-16"} aria-current="page">Crear Indicador</li>
                                     </ol>
                                 </nav>
@@ -114,6 +112,18 @@ export default class CrearIndicador extends React.Component {
                                     </div>
                                     <div className={"row"} style={{width: "100%"}}>
                                         <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
+                                            <label htmlFor="tipoValorIdeal" className="col-form-label">Tipo de Valor Ideal</label>
+                                        </div>
+                                        <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"}>
+                                            <select id="tipoValorIdeal" className="form-control">
+                                                {tipoCampos.map((tipo, i) =>
+                                                    <option value={tipo.nombre} key={tipo.nombre}>{tipo.nombre}</option>
+                                                )}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div className={"row"} style={{width: "100%"}}>
+                                        <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
                                             <label htmlFor="periodicidad" className="col-form-label">Periodicidad</label>
                                         </div>
                                         <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"}>
@@ -136,25 +146,11 @@ export default class CrearIndicador extends React.Component {
                                             <input id="analista" type="text" className="form-control form-control-sm"/>
                                         </div>
                                     </div>
-                                    { this.props.riesgoPadre == -1 ? (
-                                        <div className={"row"} style={{width: "100%"}}>
-                                            <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
-                                                <label htmlFor="analista" className="col-form-label">Riesgo Padre</label>
-                                            </div>
-                                            <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"}>
-                                                <select id="riesgoPadre" className="form-control">
-                                                    {this.props.riesgos.map((riesgo, i) =>
-                                                        <option value={riesgo.ID}>{riesgo.nombre}</option>
-                                                    )}
-                                                </select>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <span></span>
-                                    )}
-                                    <a className={"btn btn-secondary btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.props.showFormula}>Fórmula</a>
-                                    <a className={"btn btn-success btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.props.showCondicionVar}>Condiciones para el Cálculo</a>
-                                    <a className={"btn btn-brand btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.goCrearUmbral}>Umbrales</a>
+                                    <br/>
+                                    <div className={"row"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
+                                        <a className={"btn btn-primary btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.crearIndicador}>Guardar</a>
+                                    </div>
+                                    <br/>
                                 </div>
                             </div>
                         </div>

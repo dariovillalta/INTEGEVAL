@@ -39,6 +39,8 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
+var campo;
+
 var VariableCreation =
 /*#__PURE__*/
 function (_React$Component) {
@@ -55,9 +57,7 @@ function (_React$Component) {
         esNumero: true,
         esBoolean: false,
         esFecha: false,
-        esTexto: false,
-        esGranDeudor: false,
-        esPequenoDeudor: false
+        esTexto: false
       },
       errorCreacionRegla: {
         campo: "",
@@ -72,8 +72,13 @@ function (_React$Component) {
         titulo: "",
         mensaje: ""
       },
-      campos: []
+      campos: [],
+      campoSeleccionadoNombre: '{campo}',
+      textoOperacion: '{operación}',
+      textoValor: '{valor}'
     };
+    _this.retornoSeleccionVariable = _this.retornoSeleccionVariable.bind(_assertThisInitialized(_this));
+    _this.retornoSeleccionOperacion = _this.retornoSeleccionOperacion.bind(_assertThisInitialized(_this));
     _this.esNumero = _this.esNumero.bind(_assertThisInitialized(_this));
     _this.esBoolean = _this.esBoolean.bind(_assertThisInitialized(_this));
     _this.esFecha = _this.esFecha.bind(_assertThisInitialized(_this));
@@ -83,15 +88,35 @@ function (_React$Component) {
     _this.dismissReglaNewError = _this.dismissReglaNewError.bind(_assertThisInitialized(_this));
     _this.showSuccesMessage = _this.showSuccesMessage.bind(_assertThisInitialized(_this));
     _this.dismissMessageModal = _this.dismissMessageModal.bind(_assertThisInitialized(_this));
-    _this.esGranDeudor = _this.esGranDeudor.bind(_assertThisInitialized(_this));
-    _this.esPequenoDeudor = _this.esPequenoDeudor.bind(_assertThisInitialized(_this));
+    _this.actualizarValor = _this.actualizarValor.bind(_assertThisInitialized(_this));
     return _this;
   }
 
   _createClass(VariableCreation, [{
     key: "componentDidMount",
     value: function componentDidMount() {
-      this.loadFields();
+      if (this.props.calculoFuenteDatos) {//
+      }
+
+      if (this.props.calculoVariables) {} //
+      //this.loadFields();
+
+    }
+  }, {
+    key: "retornoSeleccionVariable",
+    value: function retornoSeleccionVariable(campoSeleccionadoInput) {
+      campo = campoSeleccionadoInput[0];
+      this.setState({
+        campoSeleccionadoNombre: campo.valor
+      });
+      this.props.retornarCampo(campo);
+    }
+  }, {
+    key: "retornoSeleccionOperacion",
+    value: function retornoSeleccionOperacion(textoOperacionNuevo) {
+      this.setState({
+        textoOperacion: textoOperacionNuevo
+      });
     }
   }, {
     key: "esNumero",
@@ -101,9 +126,7 @@ function (_React$Component) {
           esNumero: true,
           esBoolean: false,
           esFecha: false,
-          esTexto: false,
-          esGranDeudor: false,
-          esPequenoDeudor: false
+          esTexto: false
         }
       });
     }
@@ -115,9 +138,7 @@ function (_React$Component) {
           esNumero: false,
           esBoolean: true,
           esFecha: false,
-          esTexto: false,
-          esGranDeudor: false,
-          esPequenoDeudor: false
+          esTexto: false
         }
       });
     }
@@ -129,9 +150,7 @@ function (_React$Component) {
           esNumero: false,
           esBoolean: false,
           esFecha: true,
-          esTexto: false,
-          esGranDeudor: false,
-          esPequenoDeudor: false
+          esTexto: false
         }
       });
     }
@@ -143,37 +162,7 @@ function (_React$Component) {
           esNumero: false,
           esBoolean: false,
           esFecha: false,
-          esTexto: true,
-          esGranDeudor: false,
-          esPequenoDeudor: false
-        }
-      });
-    }
-  }, {
-    key: "esGranDeudor",
-    value: function esGranDeudor() {
-      this.setState({
-        tipoCampo: {
-          esNumero: false,
-          esBoolean: false,
-          esFecha: false,
-          esTexto: false,
-          esGranDeudor: true,
-          esPequenoDeudor: false
-        }
-      });
-    }
-  }, {
-    key: "esPequenoDeudor",
-    value: function esPequenoDeudor() {
-      this.setState({
-        tipoCampo: {
-          esNumero: false,
-          esBoolean: false,
-          esFecha: false,
-          esTexto: false,
-          esGranDeudor: false,
-          esPequenoDeudor: true
+          esTexto: true
         }
       });
     }
@@ -232,10 +221,6 @@ function (_React$Component) {
     value: function saveRule() {
       var _this3 = this;
 
-      /*console.log("retorno")
-      console.log( $("input[name='operacionRadio']:checked").val() )
-      let listaID = $("#selectLista").val();
-      console.log("listaID = "+listaID)*/
       var seleccionCampoIDSelect = $("#campo").val();
 
       if (seleccionCampoIDSelect.length > 0) {
@@ -288,66 +273,6 @@ function (_React$Component) {
           }
 
           texto = this.state.campos[seleccionCampoIDSelect].nombre + " " + operacionTexto + " ";
-        } else if (seleccionCampoIDSelect.localeCompare("M0ra") == 0) {
-          campoTablaID = -1;
-          campoID = -1;
-          campoTipo = "int";
-          operacion = $("input[name='operacionRadio']:checked").val();
-          operacionTipo;
-          if (operacion != undefined && (operacion.localeCompare("<") == 0 || operacion.localeCompare("<=") == 0 || operacion.localeCompare(">") == 0 || operacion.localeCompare(">=") == 0 || operacion.localeCompare("==") == 0 || operacion.localeCompare("!=") == 0)) operacionTipo = "relacional";else if (operacion != undefined && (operacion.localeCompare("+") == 0 || operacion.localeCompare("-") == 0 || operacion.localeCompare("*") == 0 || operacion.localeCompare("/") == 0)) operacionTipo = "algebraica";else if (operacion != undefined && (operacion.localeCompare("sumIf") == 0 || operacion.localeCompare("sumIfNot") == 0)) operacionTipo = "excel";
-          valorLista = $("#selectLista").val(); //ID Tabla
-
-          valorCampos = $("#camposDeLista").val();
-          esListaValor, esCampoValor;
-
-          if (valorLista != undefined && valorLista.localeCompare("table") == 0) {
-            esListaValor = false;
-            esCampoValor = true;
-            valorLista = this.props.tablaID;
-          } else if (valorLista != undefined && valorLista.length > 0) {
-            esListaValor = true;
-            esCampoValor = false;
-          }
-
-          var _operacionTexto;
-
-          if (operacion.localeCompare("==") == 0) {
-            _operacionTexto = "es igual";
-          } else if (operacion.localeCompare("<") == 0) {
-            _operacionTexto = "es menor";
-          } else if (operacion.localeCompare("<=") == 0) {
-            _operacionTexto = "es menor o igual";
-          } else if (operacion.localeCompare(">=") == 0) {
-            _operacionTexto = "es mayor o igual";
-          } else if (operacion.localeCompare(">") == 0) {
-            _operacionTexto = "es mayor";
-          } else if (operacion.localeCompare("!=") == 0) {
-            _operacionTexto = "no es igual";
-          }
-
-          texto = "Mora " + _operacionTexto + " ";
-        } else if (seleccionCampoIDSelect.localeCompare("Gr4nDeud0r") == 0) {
-          campoTablaID = -2;
-          campoID = -2;
-          campoTipo = "varchar";
-          operacion = $("input[name='operacionRadio']:checked").val();
-          operacionTipo;
-          if (operacion != undefined && (operacion.localeCompare("<") == 0 || operacion.localeCompare("<=") == 0 || operacion.localeCompare(">") == 0 || operacion.localeCompare(">=") == 0 || operacion.localeCompare("==") == 0 || operacion.localeCompare("!=") == 0)) operacionTipo = "relacional";else if (operacion != undefined && (operacion.localeCompare("+") == 0 || operacion.localeCompare("-") == 0 || operacion.localeCompare("*") == 0 || operacion.localeCompare("/") == 0)) operacionTipo = "algebraica";else if (operacion != undefined && (operacion.localeCompare("sumIf") == 0 || operacion.localeCompare("sumIfNot") == 0)) operacionTipo = "excel";
-          valorLista = "CAPITALMINIMO=" + $("#capitalMinimo").val() + ",TIEMPOMINIMO=" + $("#tiempoMinimo").val() + ",PORCENTAJEMINIMO=" + $("#porcentajeMinimo").val(); //ID Tabla
-
-          valorCampos = $("#camposDeLista").val();
-          esListaValor, esCampoValor;
-
-          if (valorLista != undefined && valorLista.localeCompare("table") == 0) {
-            esListaValor = false;
-            esCampoValor = true;
-            valorLista = this.props.tablaID;
-          } else if (valorLista != undefined && valorLista.length > 0) {
-            esListaValor = true;
-            esCampoValor = false;
-          }
-
-          texto = "Es Gran Deudor Comercial";
         }
 
         console.log("//////////////////////");
@@ -444,137 +369,145 @@ function (_React$Component) {
                             });
                           }); // fin transaction
                         } else {
-                          var campo = "Es Campo en Valor";
+                          var _campo = "Es Campo en Valor";
                           var descripcionN;
                           if (esCampoValor != undefined) descripcionN = "El valor debe existir.";
                           this.setState({
                             errorCreacionRegla: {
-                              campo: campo,
+                              campo: _campo,
                               descripcion: descripcionN,
                               mostrar: true
                             }
                           });
                         }
                       } else {
-                        var _campo = "Es Lista en Valor";
+                        var _campo2 = "Es Lista en Valor";
 
                         var _descripcionN;
 
                         if (esListaValor != undefined) _descripcionN = "El valor debe existir.";
                         this.setState({
                           errorCreacionRegla: {
-                            campo: _campo,
+                            campo: _campo2,
                             descripcion: _descripcionN,
                             mostrar: true
                           }
                         });
                       }
                     } else {
-                      var _campo2 = "Valor";
+                      var _campo3 = "Valor";
 
                       var _descripcionN2;
 
                       if (valorCampos.length == 0) _descripcionN2 = "El valor debe tener una longitud mayor a 0.";else if (valorCampos.length < 1001) _descripcionN2 = "El valor debe tener una longitud menor a 1001.";
                       this.setState({
                         errorCreacionRegla: {
-                          campo: _campo2,
+                          campo: _campo3,
                           descripcion: _descripcionN2,
                           mostrar: true
                         }
                       });
                     }
                   } else {
-                    var _campo3 = "ID de Tabla de Valor";
+                    var _campo4 = "ID de Tabla de Valor";
 
                     var _descripcionN3;
 
                     if (valorLista == undefined) _descripcionN3 = "Seleccione un valor para el ID de la tabla del campo de valor.";else if (valorLista.toString().length == 0) _descripcionN3 = "El valor debe tener una longitud mayor a 0.";
                     this.setState({
                       errorCreacionRegla: {
-                        campo: _campo3,
+                        campo: _campo4,
                         descripcion: _descripcionN3,
                         mostrar: true
                       }
                     });
                   }
                 } else {
-                  var _campo4 = "Tipo de Operación";
+                  var _campo5 = "Tipo de Operación";
 
                   var _descripcionN4;
 
                   if (isNaN(operacionTipo)) _descripcionN4 = "El tipo de operación no puede ser un número.";else _descripcionN4 = "El tipo de operación debe tener una longitud mayor a 0.";
                   this.setState({
                     errorCreacionRegla: {
-                      campo: _campo4,
+                      campo: _campo5,
                       descripcion: _descripcionN4,
                       mostrar: true
                     }
                   });
                 }
               } else {
-                var _campo5 = "Operación";
+                var _campo6 = "Operación";
 
                 var _descripcionN5;
 
                 if (operacion == undefined) _descripcionN5 = "Seleccione un valor de operación.";else if (isNaN(operacion)) _descripcionN5 = "La operación no puede ser un número.";else _descripcionN5 = "La operación debe tener una longitud mayor a 0.";
                 this.setState({
                   errorCreacionRegla: {
-                    campo: _campo5,
+                    campo: _campo6,
                     descripcion: _descripcionN5,
                     mostrar: true
                   }
                 });
               }
             } else {
-              var _campo6 = "Tipo de Campo";
+              var _campo7 = "Tipo de Campo";
               var _descripcionN6 = "El ID del campo debe ser un valor numérico.";
               this.setState({
                 errorCreacionRegla: {
-                  campo: _campo6,
+                  campo: _campo7,
                   descripcion: _descripcionN6,
                   mostrar: true
                 }
               });
             }
           } else {
-            var _campo7 = "ID de Campo de Campo";
+            var _campo8 = "ID de Campo de Campo";
 
             var _descripcionN7;
 
             if (campoID.toString().length == 0) _descripcionN7 = "El ID de campo debe tener una longitud mayor a 0.";else if (isNaN(campoID)) _descripcionN7 = "El ID de campo debe ser un valor numérico.";
             this.setState({
               errorCreacionRegla: {
-                campo: _campo7,
+                campo: _campo8,
                 descripcion: _descripcionN7,
                 mostrar: true
               }
             });
           }
         } else {
-          var _campo8 = "ID de Tabla de Campo";
+          var _campo9 = "ID de Tabla de Campo";
 
           var _descripcionN8;
 
           if (campoTablaID.toString().length == 0) _descripcionN8 = "El ID de tabla de campo debe tener una longitud mayor a 0.";else if (isNaN(campoTablaID)) _descripcionN8 = "El ID de tabla de campo debe ser un valor numérico.";
           this.setState({
             errorCreacionRegla: {
-              campo: _campo8,
+              campo: _campo9,
               descripcion: _descripcionN8,
               mostrar: true
             }
           });
         }
       } else {
-        var _campo9 = "ID de Tabla de Campo";
+        var _campo10 = "ID de Tabla de Campo";
         var _descripcionN9 = "Seleccione un valor para el ID de la tabla del campo.";
         this.setState({
           errorCreacionRegla: {
-            campo: _campo9,
+            campo: _campo10,
             descripcion: _descripcionN9,
             mostrar: true
           }
         });
       }
+    }
+  }, {
+    key: "actualizarValor",
+    value: function actualizarValor(e) {
+      var valor = $("#valor").val();
+      this.setState({
+        textoValor: valor
+      });
     }
   }, {
     key: "dismissReglaNewError",
@@ -631,31 +564,44 @@ function (_React$Component) {
   }, {
     key: "render",
     value: function render() {
-      return _react["default"].createElement("div", null, _react["default"].createElement(_Campo["default"], {
+      return _react["default"].createElement("div", {
+        style: {
+          width: "100%"
+        }
+      }, _react["default"].createElement("h3", {
+        className: "card-header"
+      }, "Crear Condici\xF3n / Instrucci\xF3n"), _react["default"].createElement("div", {
+        style: {
+          height: "50px",
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          borderBottom: "1px solid #d2d2e4"
+        }
+      }, "SI ", this.state.campoSeleccionadoNombre, " ", this.state.textoOperacion, " ", this.state.textoValor), _react["default"].createElement(_Campo["default"], {
         esNumero: this.esNumero,
         esBoolean: this.esBoolean,
         esFecha: this.esFecha,
         esTexto: this.esTexto,
-        campos: this.state.campos,
-        esGranDeudor: this.esGranDeudor,
-        esPequenoDeudor: this.esPequenoDeudor
-      }, " "), _react["default"].createElement(_Operacion["default"], {
+        campos: this.props.campos,
+        retornoSeleccionVariable: this.retornoSeleccionVariable
+      }, " "), _react["default"].createElement("br", null), _react["default"].createElement(_Operacion["default"], {
         esNumero: this.state.tipoCampo.esNumero,
         esBoolean: this.state.tipoCampo.esBoolean,
         esFecha: this.state.tipoCampo.esFecha,
         esTexto: this.state.tipoCampo.esTexto,
-        esGranDeudor: this.state.tipoCampo.esGranDeudor,
-        esPequenoDeudor: this.state.tipoCampo.esPequenoDeudor
-      }, " "), _react["default"].createElement(_Valor["default"], {
+        retornoSeleccionOperacion: this.retornoSeleccionOperacion
+      }, " "), _react["default"].createElement("br", null), _react["default"].createElement("br", null), _react["default"].createElement(_Valor["default"], {
         esNumero: this.state.tipoCampo.esNumero,
         esBoolean: this.state.tipoCampo.esBoolean,
         esFecha: this.state.tipoCampo.esFecha,
         esTexto: this.state.tipoCampo.esTexto,
-        campos: this.state.campos,
-        esGranDeudor: this.state.tipoCampo.esGranDeudor,
-        esPequenoDeudor: this.state.tipoCampo.esPequenoDeudor,
+        camposDropdown: this.props.camposDropdown,
+        valoresDropdown: this.props.valoresDropdown,
+        actualizarValor: this.actualizarValor,
         pool: this.props.pool
-      }, " "), this.state.errorCreacionRegla.mostrar ? _react["default"].createElement(_ErrorMessage["default"], {
+      }, " "), _react["default"].createElement("br", null), this.state.errorCreacionRegla.mostrar ? _react["default"].createElement(_ErrorMessage["default"], {
         campo: this.state.errorCreacionRegla.campo,
         descripcion: this.state.errorCreacionRegla.descripcion,
         dismissTableError: this.dismissReglaNewError
@@ -669,14 +615,14 @@ function (_React$Component) {
       }, " ") : _react["default"].createElement("span", null), _react["default"].createElement("div", {
         className: "text-center"
       }, _react["default"].createElement("a", {
-        onClick: this.saveRule,
+        onClick: this.props.callbackCrearRegla,
         className: "btn btn-primary col-xs-6 col-6",
         style: {
           color: "white",
           fontSize: "1.2em",
           fontWeight: "bold"
         }
-      }, "Guardar")), _react["default"].createElement("br", null));
+      }, "Crear Condici\xF3n / Instrucci\xF3n")), _react["default"].createElement("br", null));
     }
   }]);
 

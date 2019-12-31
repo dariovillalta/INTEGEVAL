@@ -41,6 +41,8 @@ function (_React$Component) {
   _createClass(Operacion, [{
     key: "render",
     value: function render() {
+      var _this = this;
+
       /*if(this.props.esNumero) {
           return (
               <div className={"row"}>
@@ -147,24 +149,39 @@ function (_React$Component) {
       } else*/
       if (this.props.esBoolean) {
         return _react["default"].createElement("div", {
-          className: "row"
+          className: "row",
+          style: {
+            width: "100%"
+          }
         }, _react["default"].createElement("div", {
-          className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
+          className: "border-bottom",
+          style: {
+            width: "100%"
+          }
         }, _react["default"].createElement("div", {
-          className: "card"
-        }, _react["default"].createElement("h3", {
-          className: "card-header"
-        }, "Seleccionar Operacion"), _react["default"].createElement("div", {
-          className: "card-body"
+          className: "text-center",
+          style: {
+            width: "100%",
+            height: "100%"
+          }
         }, _react["default"].createElement("div", {
-          className: "text-center"
-        }, _react["default"].createElement("label", {
+          className: "font-18",
+          style: {
+            width: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center"
+          }
+        }, "Seleccionar Operaci\xF3n"), _react["default"].createElement("label", {
           className: "custom-control custom-radio custom-control-inline"
         }, _react["default"].createElement("input", {
           type: "radio",
           value: "==",
           name: "operacionRadio",
-          className: "custom-control-input"
+          className: "custom-control-input",
+          onClick: function onClick() {
+            return _this.props.retornoSeleccionOperacion("ES IGUAL A");
+          }
         }), _react["default"].createElement("span", {
           className: "custom-control-label"
         }, _react["default"].createElement("img", {
@@ -174,19 +191,28 @@ function (_React$Component) {
             height: "30px",
             width: "30px"
           }
-        }))))))));
+        }))))), _react["default"].createElement("br", null));
       } else if (this.props.esNumero || this.props.esFecha || this.props.esTexto) {
         return _react["default"].createElement("div", {
-          className: "row"
+          className: "row",
+          style: {
+            width: "100%"
+          }
         }, _react["default"].createElement("div", {
-          className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
+          className: "border-bottom",
+          style: {
+            width: "100%",
+            height: "100%"
+          }
         }, _react["default"].createElement("div", {
-          className: "card"
-        }, _react["default"].createElement("h3", {
-          className: "card-header"
-        }, "Seleccionar Operacion"), _react["default"].createElement("div", {
-          className: "card-body"
-        }, _react["default"].createElement("div", {
+          className: "font-18",
+          style: {
+            width: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center"
+          }
+        }, "Seleccionar Operaci\xF3n"), _react["default"].createElement("div", {
           className: "row"
         }, _react["default"].createElement("div", {
           className: "col-xl-3 offset-xl-1 col-3 offset-1"
@@ -196,7 +222,10 @@ function (_React$Component) {
           type: "radio",
           value: "<",
           name: "operacionRadio",
-          className: "custom-control-input"
+          className: "custom-control-input",
+          onClick: function onClick() {
+            return _this.props.retornoSeleccionOperacion("ES MENOR A");
+          }
         }), _react["default"].createElement("span", {
           className: "custom-control-label"
         }, _react["default"].createElement("img", {
@@ -214,7 +243,10 @@ function (_React$Component) {
           type: "radio",
           value: "<=",
           name: "operacionRadio",
-          className: "custom-control-input"
+          className: "custom-control-input",
+          onClick: function onClick() {
+            return _this.props.retornoSeleccionOperacion("ES MENOR O IGUAL A");
+          }
         }), _react["default"].createElement("span", {
           className: "custom-control-label"
         }, _react["default"].createElement("img", {
@@ -232,7 +264,10 @@ function (_React$Component) {
           type: "radio",
           value: ">",
           name: "operacionRadio",
-          className: "custom-control-input"
+          className: "custom-control-input",
+          onClick: function onClick() {
+            return _this.props.retornoSeleccionOperacion("ES MAYOR O IGUAL A");
+          }
         }), _react["default"].createElement("span", {
           className: "custom-control-label"
         }, _react["default"].createElement("img", {
@@ -250,7 +285,10 @@ function (_React$Component) {
           type: "radio",
           value: ">=",
           name: "operacionRadio",
-          className: "custom-control-input"
+          className: "custom-control-input",
+          onClick: function onClick() {
+            return _this.props.retornoSeleccionOperacion("ES MAYOR A");
+          }
         }), _react["default"].createElement("span", {
           className: "custom-control-label"
         }, _react["default"].createElement("img", {
@@ -270,7 +308,10 @@ function (_React$Component) {
           type: "radio",
           value: "==",
           name: "operacionRadio",
-          className: "custom-control-input"
+          className: "custom-control-input",
+          onClick: function onClick() {
+            return _this.props.retornoSeleccionOperacion("ES IGUAL A");
+          }
         }), _react["default"].createElement("span", {
           className: "custom-control-label"
         }, _react["default"].createElement("img", {
@@ -288,7 +329,10 @@ function (_React$Component) {
           type: "radio",
           value: "!=",
           name: "operacionRadio",
-          className: "custom-control-input"
+          className: "custom-control-input",
+          onClick: function onClick() {
+            return _this.props.retornoSeleccionOperacion("NO ES IGUAL A");
+          }
         }), _react["default"].createElement("span", {
           className: "custom-control-label"
         }, _react["default"].createElement("img", {
@@ -298,7 +342,7 @@ function (_React$Component) {
             height: "30px",
             width: "30px"
           }
-        })))))))));
+        })))))), _react["default"].createElement("br", null));
       }
       /*else if(this.props.esTexto) {
         return (

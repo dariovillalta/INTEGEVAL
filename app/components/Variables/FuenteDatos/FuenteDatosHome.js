@@ -74,8 +74,9 @@ function (_React$Component) {
         return _react["default"].createElement("div", null, _react["default"].createElement(_ConfiguracionTablas["default"], {
           pool: this.props.pool,
           configuracionHome: this.props.configuracionHome,
+          goOptions: this.props.goOptions,
           terminoSeleccionTabla: this.terminoSeleccionTabla
-        }, " "));
+        }));
       } else {
         return _react["default"].createElement("div", null, _react["default"].createElement(_CamposHome["default"], {
           pool: this.props.pool,
@@ -83,8 +84,9 @@ function (_React$Component) {
           configuracionHome: this.props.configuracionHome,
           idTablaSeleccionada: this.state.idTablaSeleccionada,
           nombreTablaSeleccionada: this.state.nombreTablaSeleccionada,
+          goOptions: this.props.goOptions,
           terminoSeleccionTabla: this.terminoSeleccionTabla
-        }, " "));
+        }));
       }
     }
   }]);

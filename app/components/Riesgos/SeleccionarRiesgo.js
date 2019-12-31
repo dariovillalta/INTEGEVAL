@@ -138,7 +138,7 @@ function (_React$Component) {
         style: {
           color: "#fafafa"
         },
-        className: "btn btn-info btn-block btnWhiteColorHover font-bold font-20"
+        className: "btn btn-dark btn-block btnWhiteColorHover font-bold font-20"
       }, "No existen riesgos creados") : null))))));
     }
   }]);

@@ -27,6 +27,18 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
+var tipoCampos = [{
+  nombre: "texto"
+}, {
+  nombre: "booleano"
+}, {
+  nombre: "fecha"
+}, {
+  nombre: "número"
+}, {
+  nombre: "arreglo"
+}];
+
 var EditarRiesgo =
 /*#__PURE__*/
 function (_React$Component) {
@@ -40,6 +52,7 @@ function (_React$Component) {
     _this = _possibleConstructorReturn(this, _getPrototypeOf(EditarRiesgo).call(this, props));
     _this.goCrearUmbral = _this.goCrearUmbral.bind(_assertThisInitialized(_this));
     _this.goEditFormula = _this.goEditFormula.bind(_assertThisInitialized(_this));
+    _this.guardarRiesgo = _this.guardarRiesgo.bind(_assertThisInitialized(_this));
     return _this;
   }
 
@@ -93,6 +106,59 @@ function (_React$Component) {
     key: "goEditFormula",
     value: function goEditFormula() {
       this.props.updateFormula(idVarEditar, tablaVarEditar);
+    }
+  }, {
+    key: "guardarRiesgo",
+    value: function guardarRiesgo() {
+      var _this2 = this;
+
+      var nombre = $("#nombreRiesgo").val();
+      var formula = '';
+      var peso = parseInt($("#peso").val());
+      var tolerancia = parseInt($("#tolerancia").val());
+      var valorIdeal = parseInt($("#valorIdeal").val());
+      var tipoValorIdeal = $("#tipoValorIdeal").val();
+      var riesgoPadre = parseInt(this.props.riesgoPadre);
+      var nivel = 0;
+
+      if (this.props.riesgoPadre == -1) {
+        riesgoPadre = parseInt($("#riesgoPadre").val());
+      }
+
+      console.log('nombre');
+      console.log(nombre);
+      console.log('formula');
+      console.log(formula);
+      console.log('peso');
+      console.log(peso);
+      console.log('tolerancia');
+      console.log(tolerancia);
+      console.log('valorIdeal');
+      console.log(valorIdeal);
+      console.log('riesgoPadre');
+      console.log(riesgoPadre);
+      console.log('nivel');
+      console.log(nivel);
+      var transaction = new sql.Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new sql.Request(transaction);
+        request.query("update Riesgos set nombre = '" + nombre + "', peso = " + peso + ", tolerancia = " + tolerancia + ", valorIdeal = " + valorIdeal + ", tipoValorIdeal = '" + tipoValorIdeal + "', riesgoPadre = " + riesgoPadre + " where ID = " + _this2.props.idRiesgoSeleccionado, function (err, result) {
+          if (err) {
+            if (!rolledBack) {
+              console.log(err);
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              _this2.props.terminoCrearRiesgo(nombre);
+            });
+          }
+        });
+      }); // fin transaction
     }
   }, {
     key: "render",
@@ -210,6 +276,26 @@ function (_React$Component) {
         className: "form-control form-control-sm",
         defaultValue: this.props.valorIdealRiesgo
       }))), _react["default"].createElement("div", {
+        className: "row",
+        style: {
+          width: "100%"
+        }
+      }, _react["default"].createElement("div", {
+        className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
+      }, _react["default"].createElement("label", {
+        htmlFor: "tipoValorIdeal",
+        className: "col-form-label"
+      }, "Tipo de Valor Ideal")), _react["default"].createElement("div", {
+        className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
+      }, _react["default"].createElement("select", {
+        id: "tipoValorIdeal",
+        className: "form-control"
+      }, tipoCampos.map(function (tipo, i) {
+        return _react["default"].createElement("option", {
+          value: tipo.nombre,
+          key: tipo.nombre
+        }, tipo.nombre);
+      })))), _react["default"].createElement("div", {
         className: "row",
         style: {
           width: "100%"

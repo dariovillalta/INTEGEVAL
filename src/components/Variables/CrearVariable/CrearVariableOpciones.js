@@ -9,7 +9,8 @@ export default class CrearVariableOpciones extends React.Component {
         this.state = {
             mostrarCrearEscalar: true,
             variableEscalar: false,
-            variableObjeto: false
+            variableObjeto: false,
+            campos: []
         }
         this.handleMouseHoverCrear = this.handleMouseHoverCrear.bind(this);
         this.handleMouseHoverEditar = this.handleMouseHoverEditar.bind(this);
@@ -17,6 +18,22 @@ export default class CrearVariableOpciones extends React.Component {
         this.goCrearVariableEscalar = this.goCrearVariableEscalar.bind(this);
         this.goCrearVariableObjeto = this.goCrearVariableObjeto.bind(this);
         this.verificarBotonSel = this.verificarBotonSel.bind(this);
+    }
+
+    componentDidMount () {
+        if (this.props.esObjetoVariable) {
+            this.setState({
+                mostrarCrearEscalar: false,
+                variableEscalar: false,
+                variableObjeto: true
+            });
+        } else {
+            this.setState({
+                mostrarCrearEscalar: true,
+                variableEscalar: true,
+                variableObjeto: false
+            });
+        }
     }
 
     handleMouseHoverCrear() {
@@ -76,7 +93,7 @@ export default class CrearVariableOpciones extends React.Component {
                 { this.state.mostrarCrearEscalar ? (
                     <div className={"row"}>
                         <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
-                            <a className={"btn btn-secondary btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.props.showFormula}>Fuente de Dato</a>
+                            <a className={"btn btn-secondary btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.props.showFormula}>Fórmula</a>
                             <a className={"btn btn-success btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.props.showCondicionVar}>Condiciones para el Cálculo</a>
                         </div>
                     </div>
@@ -86,15 +103,38 @@ export default class CrearVariableOpciones extends React.Component {
                             <div style={{width: "100%"}}>
                                 <div className={"row"} style={{width: "100%"}}>
                                     <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3"}>
-                                        <label htmlFor="inputSmall" className="col-form-label">Nombre de Atributo:</label>
+                                        <label htmlFor="nombreAtributo" className="col-form-label">Nombre de Atributo:</label>
                                     </div>
                                     <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9"}>
-                                        <input id="inputSmall" type="text" className="form-control form-control-sm"/>
+                                        <input id="nombreAtributo" type="text" className="form-control form-control-sm"/>
                                     </div>
                                 </div>
-                                <a className={"btn btn-secondary btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.props.showFormula}>Fuente de Dato</a>
-                                <a className={"btn btn-success btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.props.showCondicionVar}>Condiciones para el Cálculo</a>
                             </div>
+                            <br/>
+                            <div className={"row"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
+                                <a className={"btn btn-primary btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.crearAtributoDeObjeto}>Crear</a>
+                            </div>
+                            <hr/>
+
+                            {this.props.campos.map((campo, i) => (
+                                <div style={{width: "100%"}} key={campo.ID}>
+                                    <div className={"row"} style={{width: "100%"}}>
+                                        <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3"}>
+                                            <label htmlFor="inputSmall" className="col-form-label" defaultValue={campo.nombre}>Nombre de Atributo:</label>
+                                        </div>
+                                        <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9"}>
+                                            <input id="inputSmall" type="text" className="form-control form-control-sm"/>
+                                        </div>
+                                    </div>
+                                    <br/>
+                                    <div className={"row"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
+                                        <a className={"btn btn-primary btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.crearAtributoDeObjeto}>Guardar</a>
+                                    </div>
+                                    <a className={"btn btn-secondary btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.props.showFormula}>(Fórmula|Valores) de Asignación</a>
+                                    <a className={"btn btn-success btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.props.showCondicionVar}>(Condiciones|Instrucciones) para el Cálculo</a>
+                                    <hr/>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 )}

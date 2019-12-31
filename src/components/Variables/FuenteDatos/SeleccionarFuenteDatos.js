@@ -43,12 +43,14 @@ export default class SeleccionarFuenteDatos extends React.Component {
                 <div className={"row"}>
                     <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
                         <div className={"page-header"}>
-                            <h2 className={"pageheader-title"}>Seleccionar Riesgo</h2>
+                            <h2 className={"pageheader-title"}>Fuentes de Datos</h2>
                             <div className={"page-breadcrumb"}>
                                 <nav aria-label="breadcrumb">
                                     <ol className={"breadcrumb"}>
                                         <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.props.configuracionHome}><a href="#" className={"breadcrumb-link"}>Configuraci&oacute;n</a></li>
-                                        <li className={"breadcrumb-item active font-16"} aria-current="page">Riesgos</li>
+                                        <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.props.goOptions}><a href="#" className={"breadcrumb-link"}>Tipo de Variable</a></li>
+                                        <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.props.retornoSeleccionTabla}><a href="#" className={"breadcrumb-link"}>Tablas</a></li>
+                                        <li className={"breadcrumb-item active font-16"} aria-current="page">Fuentes de Datos</li>
                                     </ol>
                                 </nav>
                             </div>

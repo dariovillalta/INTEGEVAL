@@ -35,7 +35,8 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
-var isMounted = false;
+var isMounted = false,
+    riesgos = [];
 
 var RiesgoHome =
 /*#__PURE__*/
@@ -65,6 +66,26 @@ function (_React$Component) {
     key: "componentDidMount",
     value: function componentDidMount() {
       isMounted = true;
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("select * from Riesgos", function (err, result) {
+          if (err) {
+            if (!rolledBack) {
+              console.log(err);
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              riesgos = result.recordset;
+            });
+          }
+        });
+      }); // fin transaction
     }
   }, {
     key: "componentWillUnmount",
@@ -141,7 +162,6 @@ function (_React$Component) {
     value: function terminoCrearRiesgoPasarAEdit(nombreRiesgo) {
       var _this2 = this;
 
-      console.log("despues retorno");
       var transaction = new _mssql["default"].Transaction(this.props.pool);
       transaction.begin(function (err) {
         var rolledBack = false;
@@ -157,9 +177,6 @@ function (_React$Component) {
             }
           } else {
             transaction.commit(function (err) {
-              console.log("retorno last");
-              console.log(result);
-
               if (result.recordset != undefined) {
                 if (result.recordset.length) {
                   _this2.editarRiesgo(result.recordset[0].ID, result.recordset[0].nombre, result.recordset[0].peso, result.recordset[0].tolerancia, result.recordset[0].valorIdeal, result.recordset[0].idRiesgoPadre);
@@ -191,8 +208,7 @@ function (_React$Component) {
           configuracionHome: this.props.configuracionHome,
           updateNavBar: this.props.updateNavBar,
           showUmbralHome: this.props.showUmbralHome,
-          riesgos: [],
-          riesgoPadre: -1,
+          riesgos: riesgos,
           terminoCrearRiesgo: this.terminoCrearRiesgoPasarAEdit
         }, " "));
       } else if (this.state.componenteActual.localeCompare("editarRiesgo") == 0) {
@@ -206,13 +222,14 @@ function (_React$Component) {
           configuracionHome: this.props.configuracionHome,
           updateNavBar: this.props.updateNavBar,
           showUmbralHome: this.props.showUmbralHome,
-          riesgos: [],
+          riesgos: riesgos,
           nombreRiesgo: this.state.nombreRiesgo,
           pesoRiesgo: this.state.pesoRiesgo,
           toleranciaRiesgo: this.state.toleranciaRiesgo,
           valorIdealRiesgo: this.state.valorIdealRiesgo,
           padreRiesgo: this.state.padreRiesgo,
-          updateFormula: this.props.updateFormula
+          updateFormula: this.props.updateFormula,
+          idRiesgoSeleccionado: this.state.idRiesgoSeleccionado
         }, " "));
       }
     }

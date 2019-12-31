@@ -26,10 +26,10 @@ export default class ConfiguracionRiesgos extends React.Component {
                         <div className={"card influencer-profile-data"}>
                             <div className={"card-body"}>
                                 <div className={"row border-top border-bottom addPaddingToConfig"}>
-                                    <a className={"btn btn-secondary btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.props.showUmbralHome}>Umbrales</a>
                                     <a className={"btn btn-success btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.props.showVariables}>Variables</a>
                                     <a className={"btn btn-primary btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.props.showIndicador}>Indicadores</a>
                                     <a className={"btn btn-brand btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.props.showRiesgos}>Tipos de Riesgos</a>
+                                    <a className={"btn btn-info btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.props.showRiesgos}>Umbral del Riesgo Integral</a>
                                 </div>
                             </div>
                         </div>

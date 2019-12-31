@@ -300,12 +300,13 @@ export default class ConfiguracionTablas extends React.Component {
                 <div className={"row"}>
                     <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
                         <div className={"page-header"}>
-                            <h2 className={"pageheader-title"}>Configuraci&oacute;n de Conecciones a las Tablas</h2>
+                            <h2 className={"pageheader-title"}>Configuraci&oacute;n de Conexiones a las Tablas</h2>
                             <div className={"page-breadcrumb"}>
                                 <nav aria-label="breadcrumb">
                                     <ol className={"breadcrumb"}>
-                                        <li className={"breadcrumb-item"} aria-current="page" onClick={this.props.configuracionHome}><a href="#" className={"breadcrumb-link"}>Configuraci&oacute;n</a></li>
-                                        <li className={"breadcrumb-item active"} aria-current="page">Tablas</li>
+                                        <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.props.configuracionHome}><a href="#" className={"breadcrumb-link"}>Configuraci&oacute;n</a></li>
+                                        <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.props.goOptions}><a href="#" className={"breadcrumb-link"}>Tipo de Variable</a></li>
+                                        <li className={"breadcrumb-item active font-16"} aria-current="page">Tablas</li>
                                     </ol>
                                 </nav>
                             </div>

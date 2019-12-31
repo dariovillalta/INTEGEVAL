@@ -7,7 +7,9 @@ exports["default"] = void 0;
 
 var _react = _interopRequireDefault(require("react"));
 
-var _ListasSeleVariableContenedorVariable = _interopRequireDefault(require("./ListasSeleVariableContenedorVariable.js"));
+var _OpcionesCrearRegla = _interopRequireDefault(require("./OpcionesCrearRegla.js"));
+
+var _ContenedorReglas = _interopRequireDefault(require("./ContenedorReglas.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
@@ -29,24 +31,13 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
-var campos = [{
-  nombre: "idCLiente"
-}, {
-  nombre: "saldoTotal"
-}, {
-  nombre: "tipoPersona"
-}, {
-  nombre: "impuestosTotal"
-}, {
-  nombre: "nombreCliente"
-}, {
-  nombre: "diasMora"
-}, {
-  nombre: "mesMora"
-}];
+//const campos = [{valor: "idCLiente"}, {valor: "saldoTotal"}, {valor: "tipoPersona"}, {valor: "impuestosTotal"}, {valor: "nombreCliente"}, {valor: "diasMora"}, {valor: "mesMora"}];
 var variables = [];
 var objetos = [];
 var camposDeObjetos = [];
+var reglas = [{
+  texto: "YO SOY MAYOR"
+}];
 
 var CondicionVariable =
 /*#__PURE__*/
@@ -54,134 +45,47 @@ function (_React$Component) {
   _inherits(CondicionVariable, _React$Component);
 
   function CondicionVariable(props) {
+    var _this;
+
     _classCallCheck(this, CondicionVariable);
 
-    return _possibleConstructorReturn(this, _getPrototypeOf(CondicionVariable).call(this, props));
-    /*this.state = {
-        showLoadingScreen: false,
-        mensajeLoadingScreen: ''
-    }
-    this.showLoadingScreen = this.showLoadingScreen.bind(this);
-    this.hideLoadingScreen = this.hideLoadingScreen.bind(this);*/
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(CondicionVariable).call(this, props));
+    _this.state = {
+      reglas: _this.props.reglas
+      /*this.showLoadingScreen = this.showLoadingScreen.bind(this);
+      this.hideLoadingScreen = this.hideLoadingScreen.bind(this);*/
+
+    };
+    return _this;
   }
 
   _createClass(CondicionVariable, [{
     key: "render",
     value: function render() {
-      return _react["default"].createElement("div", null, _react["default"].createElement("div", {
+      return _react["default"].createElement("div", null, this.props.navbar, _react["default"].createElement("div", {
+        className: "row",
+        style: {
+          width: "100%"
+        }
+      }, _react["default"].createElement("div", {
+        className: "card",
+        style: {
+          width: "100%"
+        }
+      }, _react["default"].createElement(_OpcionesCrearRegla["default"], {
+        pool: this.props.pool,
+        campos: this.props.campos,
+        retornarCampo: this.props.retornarCampo,
+        camposDropdown: this.props.camposDropdown,
+        valoresDropdown: this.props.valoresDropdown,
+        callbackCrearRegla: this.props.callbackCrearRegla
+      }))), _react["default"].createElement("hr", null), _react["default"].createElement("div", {
         className: "row"
       }, _react["default"].createElement("div", {
         className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
-      }, _react["default"].createElement("div", {
-        className: "page-header"
-      }, _react["default"].createElement("h2", {
-        className: "pageheader-title"
-      }, "Condiciones"), _react["default"].createElement("div", {
-        className: "page-breadcrumb"
-      }, _react["default"].createElement("nav", {
-        "aria-label": "breadcrumb"
-      }, _react["default"].createElement("ol", {
-        className: "breadcrumb"
-      }, _react["default"].createElement("li", {
-        className: "breadcrumb-item font-16",
-        "aria-current": "page",
-        onClick: this.props.configuracionHome
-      }, _react["default"].createElement("a", {
-        href: "#",
-        className: "breadcrumb-link"
-      }, "Configuraci\xF3n")), _react["default"].createElement("li", {
-        className: "breadcrumb-item active font-16",
-        "aria-current": "page"
-      }, "Condiciones"))))))), _react["default"].createElement("div", {
-        className: "row"
-      }, _react["default"].createElement("div", {
-        className: "font-18",
-        style: {
-          width: "100%",
-          height: "20%",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center"
-        }
-      }, "Seleccionar Variable"), _react["default"].createElement("div", {
-        className: "row",
-        style: {
-          height: "100%"
-        }
-      }, _react["default"].createElement(_ListasSeleVariableContenedorVariable["default"], {
-        esOperacion: false,
-        mostrarRosa: true,
-        campos: campos,
-        variables: variables,
-        objetos: objetos,
-        camposDeObjetos: camposDeObjetos,
-        seleccionarMultiple: false,
-        retornoSeleccionVariable: this.retornoClickLista
-      }))), _react["default"].createElement("div", {
-        className: "row"
-      }, _react["default"].createElement("div", {
-        className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
-      }, _react["default"].createElement("div", {
-        className: "row",
-        style: {
-          width: "100%",
-          margin: "1% 0% 0% 0%"
-        }
-      }, _react["default"].createElement("div", {
-        style: {
-          backgroundColor: "white",
-          borderRadius: "15px",
-          padding: "0% 2%",
-          width: "100%",
-          marginLeft: "auto",
-          marginRight: "0"
-        }
-      }, " SI ES PERSONA NATURAL !")), _react["default"].createElement("div", {
-        className: "row",
-        style: {
-          width: "100%",
-          margin: "1% 0% 0% 0%"
-        }
-      }, _react["default"].createElement("div", {
-        style: {
-          backgroundColor: "white",
-          borderRadius: "15px",
-          padding: "0% 2%",
-          width: "90%",
-          marginLeft: "auto",
-          marginRight: "0"
-        }
-      }, " SI TOTAL DEPOSITOS ES MENOR A 400,000 !")), _react["default"].createElement("div", {
-        className: "row",
-        style: {
-          width: "100%",
-          margin: "1% 0% 0% 0%"
-        }
-      }, _react["default"].createElement("div", {
-        style: {
-          backgroundColor: "white",
-          borderRadius: "15px",
-          padding: "0% 2%",
-          width: "80%",
-          marginLeft: "auto",
-          marginRight: "0"
-        }
-      }, " SI MONTO ES MENOR A FOSEDE")), _react["default"].createElement("div", {
-        className: "row",
-        style: {
-          width: "100%",
-          margin: "1% 0% 0% 0%"
-        }
-      }, _react["default"].createElement("div", {
-        style: {
-          backgroundColor: "white",
-          borderRadius: "15px",
-          padding: "0% 2%",
-          width: "90%",
-          marginLeft: "auto",
-          marginRight: "0"
-        }
-      }, " SI TOTAL DEPOSITOS ES MAYOR A 400,000 !")))));
+      }, _react["default"].createElement(_ContenedorReglas["default"], {
+        reglas: reglas
+      }, " "))));
     }
   }]);
 

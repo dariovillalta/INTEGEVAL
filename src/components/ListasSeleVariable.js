@@ -29,14 +29,9 @@ export default class ListasSeleVariable extends React.Component {
     }
 
     seleccionarIndice (variable, indice) {
-        console.log("antes seleccionarIndice");
-        console.log('arregloCeldasSeleccionadas');
-        console.log(arregloCeldasSeleccionadas);
-        console.log('this.state.indicesVarSeleccionados');
-        console.log(this.state.indicesVarSeleccionados);
         var entro = false;
         for (var i = 0; i < arregloCeldasSeleccionadas.length; i++) {
-            if(arregloCeldasSeleccionadas[i].nombre.localeCompare(variable.nombre) == 0) {
+            if(arregloCeldasSeleccionadas[i].valor.localeCompare(variable.valor) == 0) {
                 entro = true;
                 break;
             }
@@ -50,24 +45,12 @@ export default class ListasSeleVariable extends React.Component {
         this.setState({
             indicesVarSeleccionados: nuevoArr
         });
-        console.log("despues seleccionarIndice");
-        console.log('arregloCeldasSeleccionadas');
-        console.log(arregloCeldasSeleccionadas);
-        console.log('this.state.indicesVarSeleccionados');
-        console.log(this.state.indicesVarSeleccionados);
-        console.log('nuevoArr');
-        console.log(nuevoArr);
         this.props.retornoSeleccion(arregloCeldasSeleccionadas);
     }
 
     deseleccionarIndice (variable, indice) {
-        console.log("antes deseleccionarIndice");
-        console.log('arregloCeldasSeleccionadas');
-        console.log(arregloCeldasSeleccionadas);
-        console.log('this.state.indicesVarSeleccionados');
-        console.log(this.state.indicesVarSeleccionados);
         for (var i = 0; i < arregloCeldasSeleccionadas.length; i++) {
-            if(arregloCeldasSeleccionadas[i].nombre.localeCompare(variable.nombre) == 0) {
+            if(arregloCeldasSeleccionadas[i].valor.localeCompare(variable.valor) == 0) {
                 arregloCeldasSeleccionadas.splice(i, 1);
             }
         };
@@ -77,11 +60,6 @@ export default class ListasSeleVariable extends React.Component {
         this.setState({
             indicesVarSeleccionados: nuevoArr
         });
-        console.log("despues deseleccionarIndice");
-        console.log('arregloCeldasSeleccionadas');
-        console.log(arregloCeldasSeleccionadas);
-        console.log('this.state.indicesVarSeleccionados');
-        console.log(this.state.indicesVarSeleccionados);
         this.props.retornoSeleccion(arregloCeldasSeleccionadas);
     }
     
@@ -98,7 +76,7 @@ export default class ListasSeleVariable extends React.Component {
                     </div>
                     <div className={"row"} style={{width: "100%", height: "80%", overflowX: "auto", display: "flex", flexWrap: "nowrap"}}>
                         {this.props.variables.map((variable, i) =>
-                            <div onClick={() => this.clickEnListaCelda(variable, i)} style={{flex: "0 0 auto", width: "33%",height: "100%", display: "flex", alignItems: "center", justifyContent: "center", overflowWrap: "break-word", wordWrap: "break-word", whiteSpace: "-moz-pre-wrap", whiteSpace: "pre-wrap"}} className={clase + (this.state.indicesVarSeleccionados[i] ? (this.props.mostrarRosa ? ' outline-secondary-selected' : ' outline-primary-selected') : '')} key={i}>{variable.nombre}</div>
+                            <div onClick={() => this.clickEnListaCelda(variable, i)} style={{flex: "0 0 auto", width: "33%",height: "100%", display: "flex", alignItems: "center", justifyContent: "center", overflowWrap: "break-word", wordWrap: "break-word", whiteSpace: "-moz-pre-wrap", whiteSpace: "pre-wrap"}} className={clase + (this.state.indicesVarSeleccionados[i] ? (this.props.mostrarRosa ? ' outline-secondary-selected' : ' outline-primary-selected') : '')} key={i}>{variable.valor}</div>
                         )}
                     </div>
                 </div>

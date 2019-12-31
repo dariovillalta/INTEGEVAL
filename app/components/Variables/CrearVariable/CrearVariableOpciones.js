@@ -66,7 +66,8 @@ function (_React$Component) {
     _this.state = {
       mostrarCrearEscalar: true,
       variableEscalar: false,
-      variableObjeto: false
+      variableObjeto: false,
+      campos: []
     };
     _this.handleMouseHoverCrear = _this.handleMouseHoverCrear.bind(_assertThisInitialized(_this));
     _this.handleMouseHoverEditar = _this.handleMouseHoverEditar.bind(_assertThisInitialized(_this));
@@ -78,6 +79,23 @@ function (_React$Component) {
   }
 
   _createClass(CrearVariableOpciones, [{
+    key: "componentDidMount",
+    value: function componentDidMount() {
+      if (this.props.esObjetoVariable) {
+        this.setState({
+          mostrarCrearEscalar: false,
+          variableEscalar: false,
+          variableObjeto: true
+        });
+      } else {
+        this.setState({
+          mostrarCrearEscalar: true,
+          variableEscalar: true,
+          variableObjeto: false
+        });
+      }
+    }
+  }, {
     key: "handleMouseHoverCrear",
     value: function handleMouseHoverCrear() {
       $("#crearButton").addClass("onHoverOpcionUmbral");
@@ -128,6 +146,8 @@ function (_React$Component) {
   }, {
     key: "render",
     value: function render() {
+      var _this2 = this;
+
       return _react["default"].createElement("div", {
         style: {
           width: "100%",
@@ -178,7 +198,7 @@ function (_React$Component) {
           color: "#fafafa"
         },
         onClick: this.props.showFormula
-      }, "Fuente de Dato"), _react["default"].createElement("a", {
+      }, "F\xF3rmula"), _react["default"].createElement("a", {
         className: "btn btn-success btn-block btnWhiteColorHover font-bold font-20",
         style: {
           color: "#fafafa"
@@ -200,27 +220,77 @@ function (_React$Component) {
       }, _react["default"].createElement("div", {
         className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3"
       }, _react["default"].createElement("label", {
-        htmlFor: "inputSmall",
+        htmlFor: "nombreAtributo",
         className: "col-form-label"
       }, "Nombre de Atributo:")), _react["default"].createElement("div", {
         className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9"
       }, _react["default"].createElement("input", {
-        id: "inputSmall",
+        id: "nombreAtributo",
         type: "text",
         className: "form-control form-control-sm"
-      }))), _react["default"].createElement("a", {
-        className: "btn btn-secondary btn-block btnWhiteColorHover font-bold font-20",
+      })))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
+        className: "row",
+        style: {
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center"
+        }
+      }, _react["default"].createElement("a", {
+        className: "btn btn-primary btnWhiteColorHover font-bold font-20",
         style: {
           color: "#fafafa"
         },
-        onClick: this.props.showFormula
-      }, "Fuente de Dato"), _react["default"].createElement("a", {
-        className: "btn btn-success btn-block btnWhiteColorHover font-bold font-20",
-        style: {
-          color: "#fafafa"
-        },
-        onClick: this.props.showCondicionVar
-      }, "Condiciones para el C\xE1lculo")))));
+        onClick: this.crearAtributoDeObjeto
+      }, "Crear")), _react["default"].createElement("hr", null), this.props.campos.map(function (campo, i) {
+        return _react["default"].createElement("div", {
+          style: {
+            width: "100%"
+          },
+          key: campo.ID
+        }, _react["default"].createElement("div", {
+          className: "row",
+          style: {
+            width: "100%"
+          }
+        }, _react["default"].createElement("div", {
+          className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3"
+        }, _react["default"].createElement("label", {
+          htmlFor: "inputSmall",
+          className: "col-form-label",
+          defaultValue: campo.nombre
+        }, "Nombre de Atributo:")), _react["default"].createElement("div", {
+          className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9"
+        }, _react["default"].createElement("input", {
+          id: "inputSmall",
+          type: "text",
+          className: "form-control form-control-sm"
+        }))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
+          className: "row",
+          style: {
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center"
+          }
+        }, _react["default"].createElement("a", {
+          className: "btn btn-primary btnWhiteColorHover font-bold font-20",
+          style: {
+            color: "#fafafa"
+          },
+          onClick: _this2.crearAtributoDeObjeto
+        }, "Guardar")), _react["default"].createElement("a", {
+          className: "btn btn-secondary btn-block btnWhiteColorHover font-bold font-20",
+          style: {
+            color: "#fafafa"
+          },
+          onClick: _this2.props.showFormula
+        }, "(F\xF3rmula|Valores) de Asignaci\xF3n"), _react["default"].createElement("a", {
+          className: "btn btn-success btn-block btnWhiteColorHover font-bold font-20",
+          style: {
+            color: "#fafafa"
+          },
+          onClick: _this2.props.showCondicionVar
+        }, "(Condiciones|Instrucciones) para el C\xE1lculo"), _react["default"].createElement("hr", null));
+      }))));
     }
   }]);
 

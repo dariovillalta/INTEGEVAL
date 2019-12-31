@@ -89,7 +89,7 @@ function (_React$Component) {
         className: "page-header"
       }, _react["default"].createElement("h2", {
         className: "pageheader-title"
-      }, "Seleccionar Riesgo"), _react["default"].createElement("div", {
+      }, "Fuentes de Datos"), _react["default"].createElement("div", {
         className: "page-breadcrumb"
       }, _react["default"].createElement("nav", {
         "aria-label": "breadcrumb"
@@ -103,9 +103,23 @@ function (_React$Component) {
         href: "#",
         className: "breadcrumb-link"
       }, "Configuraci\xF3n")), _react["default"].createElement("li", {
+        className: "breadcrumb-item font-16",
+        "aria-current": "page",
+        onClick: this.props.goOptions
+      }, _react["default"].createElement("a", {
+        href: "#",
+        className: "breadcrumb-link"
+      }, "Tipo de Variable")), _react["default"].createElement("li", {
+        className: "breadcrumb-item font-16",
+        "aria-current": "page",
+        onClick: this.props.retornoSeleccionTabla
+      }, _react["default"].createElement("a", {
+        href: "#",
+        className: "breadcrumb-link"
+      }, "Tablas")), _react["default"].createElement("li", {
         className: "breadcrumb-item active font-16",
         "aria-current": "page"
-      }, "Riesgos"))))))), _react["default"].createElement("div", {
+      }, "Fuentes de Datos"))))))), _react["default"].createElement("div", {
         className: "row"
       }, _react["default"].createElement("a", {
         className: "btn btn-success btn-block btnWhiteColorHover font-bold font-20",

@@ -11,7 +11,7 @@ var _OpcionesVariableHome = _interopRequireDefault(require("./OpcionesVariableHo
 
 var _FuenteDatosHome = _interopRequireDefault(require("./FuenteDatos/FuenteDatosHome.js"));
 
-var _CrearVariable = _interopRequireDefault(require("./CrearVariable/CrearVariable.js"));
+var _VariableHome = _interopRequireDefault(require("./CrearVariable/VariableHome.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
@@ -88,18 +88,21 @@ function (_React$Component) {
       if (this.state.showFuentes) {
         return _react["default"].createElement("div", null, _react["default"].createElement(_FuenteDatosHome["default"], {
           pool: this.props.pool,
+          goOptions: this.goOptions,
           configuracionHome: this.props.configuracionHome
-        }, " "));
+        }));
       } else if (this.state.showVariables) {
-        return _react["default"].createElement("div", null, _react["default"].createElement(_CrearVariable["default"], {
+        return _react["default"].createElement("div", null, _react["default"].createElement(_VariableHome["default"], {
           pool: this.props.pool,
           updateNavBar: this.props.updateNavBar,
           showUmbralHome: this.props.showUmbralHome,
           showVariables: this.props.showVariables,
+          goOptions: this.goOptions,
           configuracionHome: this.props.configuracionHome,
           showFormula: this.props.showFormula,
-          showCondicionVar: this.props.showCondicionVar
-        }, " "));
+          showCondicionVar: this.props.showCondicionVar,
+          updateFormula: this.props.updateFormula
+        }));
       } else {
         return _react["default"].createElement("div", null, _react["default"].createElement(_OpcionesVariableHome["default"], {
           configuracionHome: this.props.configuracionHome,

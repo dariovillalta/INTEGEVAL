@@ -7,6 +7,8 @@ exports["default"] = void 0;
 
 var _react = _interopRequireDefault(require("react"));
 
+var _ListasSeleVariable = _interopRequireDefault(require("../ListasSeleVariable.js"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -44,62 +46,84 @@ function (_React$Component) {
 
   _createClass(Campo, [{
     key: "checkFieldType",
-    value: function checkFieldType() {
-      var valor = $('#campo').val();
-
-      if (valor.length > 0 && valor.localeCompare("M0ra") != 0 && valor.localeCompare("Gr4nDeud0r") != 0 && valor.localeCompare("P3quDeud0r") != 0) {
-        var campoSeleccionado = this.props.campos[valor];
-
-        if (campoSeleccionado.tipo.indexOf("int") == 0) {
-          this.props.esNumero();
-        } else if (campoSeleccionado.tipo.indexOf("bit") == 0) {
-          this.props.esBoolean();
-        } else if (campoSeleccionado.tipo.indexOf("date") == 0) {
-          this.props.esFecha();
-        } else if (campoSeleccionado.tipo.indexOf("varchar") == 0) {
-          this.props.esTexto();
-        }
-      } else if (valor.length > 0 && valor.localeCompare("M0ra") == 0) {
+    value: function checkFieldType(campo) {
+      if (campo[0].tipo.indexOf("int") == 0 || campo[0].tipo.indexOf("decimal") == 0) {
         this.props.esNumero();
-      } else if (valor.length > 0 && valor.localeCompare("Gr4nDeud0r") == 0) {
-        this.props.esGranDeudor();
-      } else if (valor.length > 0 && valor.localeCompare("P3quDeud0r") == 0) {
-        this.props.esPequenoDeudor();
+      } else if (campo[0].tipo.indexOf("bit") == 0) {
+        this.props.esBoolean();
+      } else if (campo[0].tipo.indexOf("date") == 0) {
+        this.props.esFecha();
+      } else if (campo[0].tipo.indexOf("varchar") == 0) {
+        this.props.esTexto();
       }
+
+      this.props.retornoSeleccionVariable(campo);
     }
   }, {
     key: "render",
     value: function render() {
-      return _react["default"].createElement("div", null, _react["default"].createElement("div", {
-        className: "row"
+      var _this2 = this;
+
+      return _react["default"].createElement("div", {
+        className: "row",
+        style: {
+          height: "150px",
+          width: "100%"
+        }
       }, _react["default"].createElement("div", {
-        className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
+        className: "border-bottom",
+        style: {
+          height: "100%",
+          width: "100%",
+          padding: "0% 1%"
+        }
       }, _react["default"].createElement("div", {
-        className: "card"
-      }, _react["default"].createElement("h3", {
-        className: "card-header"
+        className: "font-18",
+        style: {
+          width: "100%",
+          height: "20%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center"
+        }
       }, "Seleccionar Campo"), _react["default"].createElement("div", {
-        className: "card-body"
-      }, _react["default"].createElement("div", {
-        className: "form-group"
-      }, _react["default"].createElement("select", {
-        id: "campo",
-        className: "form-control form-control-lg",
-        onChange: this.checkFieldType
-      }, _react["default"].createElement("option", {
-        value: ""
-      }, "Seleccione un campo..."), _react["default"].createElement("option", {
-        value: "M0ra"
-      }, "D\xEDas de Mora"), _react["default"].createElement("option", {
-        value: "Gr4nDeud0r"
-      }, "Gran Deudor Comercial"), _react["default"].createElement("option", {
-        value: "P3quDeud0r"
-      }, "Peque\xF1o Deudor Comercial"), this.props.campos.map(function (campo, i) {
-        return _react["default"].createElement("option", {
-          value: i,
-          key: i
-        }, campo.nombre);
-      }))))))));
+        className: "row",
+        style: {
+          height: "80%",
+          width: "100%"
+        }
+      }, _react["default"].createElement(_ListasSeleVariable["default"], {
+        mostrarRosa: true,
+        variables: this.props.campos,
+        seleccionarMultiple: false,
+        retornoSeleccion: this.checkFieldType,
+        titulo: "Campos De Tabla"
+      })), this.props.calculoVariables ? _react["default"].createElement("div", {
+        style: {
+          width: "100%",
+          height: "100%"
+        }
+      }, this.props.variables.map(function (variable, i) {
+        return _react["default"].createElement("div", {
+          style: {
+            width: "100%",
+            height: "100%"
+          },
+          key: variable.ID
+        }, _this2.props.camposVariables[i] != undefined ? _react["default"].createElement("div", {
+          className: "row",
+          style: {
+            height: "100%",
+            width: "100%"
+          }
+        }, _react["default"].createElement(_ListasSeleVariable["default"], {
+          mostrarRosa: true,
+          variables: _this2.props.camposVariables[i],
+          seleccionarMultiple: false,
+          retornoSeleccion: _this2.retornoSeleccionVariable,
+          titulo: variable.nombre
+        })) : null);
+      })) : null, _react["default"].createElement("br", null)));
     }
   }]);
 

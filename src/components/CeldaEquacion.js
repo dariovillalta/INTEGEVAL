@@ -13,7 +13,7 @@ export default class CeldaEquacion extends React.Component {
                 { Array.isArray(this.props.variable.valor) ? (
                     <Equacion formula={this.props.variable.valor} clickEnFormula={this.props.clickEnFormula} isFirstRow={false} height={"100%"} width={"100%"}></Equacion>
                 ) : (
-                    <div id={"fondo"+this.props.variable.valor} style={{height: "100%", width: "100%"}} onClick={(e) => {e.persist(); this.props.clickEnFormula(e, null, this.props.variable.valor, this.props.index)}}>
+                    <div id={"fondo"+this.props.variable.valor} style={{height: "100%", width: "100%"}}>
                         {
                             this.props.variable.tipo.localeCompare("variable") == 0
                             ? <VariableCeldaEquacion variable={this.props.variable} clickEnFormula={this.props.clickEnFormula} index={this.props.index}></VariableCeldaEquacion>

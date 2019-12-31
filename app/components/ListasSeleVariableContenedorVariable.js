@@ -48,7 +48,8 @@ function (_React$Component) {
     key: "retornoSeleccionVariable",
     value: function retornoSeleccionVariable(variable) {
       this.props.retornoSeleccionVariable(this.props.esOperacion, variable);
-    }
+    } //EN VEZ DE TABLAS, FUENTE DE DATOS
+
   }, {
     key: "render",
     value: function render() {
@@ -63,29 +64,49 @@ function (_React$Component) {
         className: "row",
         style: {
           border: "1px solid #e6e6f2",
-          height: "75%"
+          width: "100%",
+          height: "100%"
+        }
+      }, this.props.tablas.map(function (tabla, i) {
+        return _react["default"].createElement("div", {
+          style: {
+            width: "100%",
+            height: "80%"
+          },
+          key: tabla.ID
+        }, _this2.props.camposTablas[i] != undefined ? _react["default"].createElement(_ListasSeleVariable["default"], {
+          mostrarRosa: _this2.props.mostrarRosa,
+          variables: _this2.props.camposTablas[i],
+          seleccionarMultiple: _this2.props.seleccionarMultiple,
+          retornoSeleccion: _this2.retornoSeleccionVariable,
+          titulo: tabla.nombre
+        }) : null);
+      }), this.props.variables.length > 0 ? _react["default"].createElement("div", {
+        style: {
+          width: "100%",
+          height: "80%"
         }
       }, _react["default"].createElement(_ListasSeleVariable["default"], {
-        mostrarRosa: this.props.mostrarRosa,
-        variables: this.props.campos,
-        seleccionarMultiple: this.props.seleccionarMultiple,
-        retornoSeleccion: this.retornoSeleccionVariable,
-        titulo: "Fuentes de Datos"
-      }), _react["default"].createElement(_ListasSeleVariable["default"], {
         mostrarRosa: this.props.mostrarRosa,
         variables: this.props.variables,
         seleccionarMultiple: this.props.seleccionarMultiple,
         retornoSeleccion: this.retornoSeleccionVariable,
         titulo: "Variable Escalares"
-      }), this.props.objetos.map(function (objeto, i) {
-        return _react["default"].createElement(_ListasSeleVariable["default"], {
+      })) : null, this.props.objetos.map(function (objeto, i) {
+        return _react["default"].createElement("div", {
+          style: {
+            width: "100%",
+            height: "80%"
+          },
+          key: objeto.ID
+        }, _this2.props.camposDeObjetos[i] != undefined ? _react["default"].createElement(_ListasSeleVariable["default"], {
           mostrarRosa: _this2.props.mostrarRosa,
           variables: _this2.props.camposDeObjetos[i],
           seleccionarMultiple: _this2.props.seleccionarMultiple,
           retornoSeleccion: _this2.retornoClickLista,
           titulo: objeto.nombre,
           key: i
-        });
+        }) : null);
       })));
     }
   }]);

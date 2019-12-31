@@ -13,6 +13,8 @@ var _SeleccionarIndicador = _interopRequireDefault(require("./SeleccionarIndicad
 
 var _CrearIndicador = _interopRequireDefault(require("./CrearIndicador.js"));
 
+var _EditarIndicador = _interopRequireDefault(require("./EditarIndicador.js"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -47,7 +49,8 @@ function (_React$Component) {
     _this.state = {
       componenteAMostrar: "selIndicador",
       idIndicadorSeleccionado: -1,
-      nombreIndicadorSeleccionada: ""
+      nombreIndicadorSeleccionada: "",
+      idRiesgoPadreSeleccionado: -1
     };
     _this.terminoSeleccionIndicador = _this.terminoSeleccionIndicador.bind(_assertThisInitialized(_this));
     _this.retornoSeleccionIndicador = _this.retornoSeleccionIndicador.bind(_assertThisInitialized(_this));
@@ -71,14 +74,16 @@ function (_React$Component) {
       this.setState({
         componenteAMostrar: "selIndicador",
         idIndicadorSeleccionado: -1,
-        nombreTablaSeleccionada: ""
+        nombreTablaSeleccionada: "",
+        idRiesgoPadreSeleccionado: -1
       });
     }
   }, {
     key: "goCrearIndicador",
-    value: function goCrearIndicador() {
+    value: function goCrearIndicador(idRiesgo) {
       this.setState({
-        componenteAMostrar: "crearIndicador"
+        componenteAMostrar: "crearIndicador",
+        idRiesgoPadreSeleccionado: idRiesgo
       });
     }
   }, {
@@ -117,27 +122,28 @@ function (_React$Component) {
           pool: this.props.pool,
           configuracionHome: this.props.configuracionHome,
           terminoSeleccionIndicador: this.terminoSeleccionIndicador,
-          goCrearIndicador: this.goCrearIndicador
+          goCrearIndicador: this.goCrearIndicador,
+          showRiesgos: this.props.showRiesgos
         }, " "));
       } else if (this.state.componenteAMostrar.localeCompare("crearIndicador") == 0) {
         return _react["default"].createElement("div", null, _react["default"].createElement(_CrearIndicador["default"], {
           pool: this.props.pool,
-          showFormula: this.props.showFormula,
           showCondicionVar: this.props.showCondicionVar,
           retornoSeleccionIndicador: this.retornoSeleccionIndicador,
           configuracionHome: this.props.configuracionHome,
           terminoCrearIndicadorPasarAEdit: this.terminoCrearIndicadorPasarAEdit,
-          riesgoPadre: -1
+          riesgoPadre: this.state.idRiesgoPadreSeleccionado
         }, " "));
       } else if (this.state.componenteAMostrar.localeCompare("editIndicador") == 0) {
-        return _react["default"].createElement("div", null, _react["default"].createElement(_CrearIndicador["default"], {
+        return _react["default"].createElement("div", null, _react["default"].createElement(_EditarIndicador["default"], {
           pool: this.props.pool,
           showFormula: this.props.showFormula,
           showCondicionVar: this.props.showCondicionVar,
           retornoSeleccionIndicador: this.retornoSeleccionIndicador,
           configuracionHome: this.props.configuracionHome,
           idIndicadorSeleccionado: this.state.idIndicadorSeleccionado,
-          nombreIndicadorSeleccionada: this.state.nombreIndicadorSeleccionada
+          nombreIndicadorSeleccionada: this.state.nombreIndicadorSeleccionada,
+          riesgoPadre: this.state.idRiesgoPadreSeleccionado
         }, " "));
       }
     }

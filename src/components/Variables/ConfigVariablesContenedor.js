@@ -2,7 +2,7 @@ import React from 'react';
 
 import OpcionesVariableHome from './OpcionesVariableHome.js';
 import FuenteDatosHome from './FuenteDatos/FuenteDatosHome.js';
-import CrearVariable from './CrearVariable/CrearVariable.js';
+import VariableHome from './CrearVariable/VariableHome.js';
 
 export default class ConfigVariablesContenedor extends React.Component {
     constructor() {
@@ -45,13 +45,25 @@ export default class ConfigVariablesContenedor extends React.Component {
         if(this.state.showFuentes) {
             return (
                 <div>
-                    <FuenteDatosHome pool={this.props.pool} configuracionHome={this.props.configuracionHome}> </FuenteDatosHome>
+                    <FuenteDatosHome pool={this.props.pool}
+                                goOptions={this.goOptions}
+                                configuracionHome={this.props.configuracionHome}>
+                    </FuenteDatosHome>
                 </div>
             );
         } else if(this.state.showVariables) {
             return (
                 <div>
-                    <CrearVariable pool={this.props.pool} updateNavBar={this.props.updateNavBar} showUmbralHome={this.props.showUmbralHome} showVariables={this.props.showVariables} configuracionHome={this.props.configuracionHome} showFormula={this.props.showFormula} showCondicionVar={this.props.showCondicionVar}> </CrearVariable>
+                    <VariableHome pool={this.props.pool}
+                                updateNavBar={this.props.updateNavBar}
+                                showUmbralHome={this.props.showUmbralHome}
+                                showVariables={this.props.showVariables}
+                                goOptions={this.goOptions}
+                                configuracionHome={this.props.configuracionHome}
+                                showFormula={this.props.showFormula}
+                                showCondicionVar={this.props.showCondicionVar}
+                                updateFormula={this.props.updateFormula}>
+                    </VariableHome>
                 </div>
             );
         } else {

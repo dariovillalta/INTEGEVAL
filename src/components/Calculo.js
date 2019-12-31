@@ -2,15 +2,23 @@ import React from 'react';
 import sql from 'mssql';
 
 var nivelMaximoVariables = 0;
-var arregloDeFuentesDeDatos = [];                           //Arreglo con el nombre de los campos o fuentes de datos
-var arregloDeVariables = [];                                //Arreglo con el nombre de las variables
+var arregloDeFuentesDeDatos = [];                           //Arreglo con las fuentes de datos
+        //objeto: {tablaID, nombre, descripcion, esObjeto, objetoPadreID, guardar, nivel, [arreglo de atributos]}
+            //objeto arreglo de atributos: {nombre, tipo, formula}
+var arregloDeVariables = [];                                //Arreglo con las variables
+        //objeto: {nombre, descripcion, esObjeto, objetoPadreID, guardar, nivel, [arreglo de atributos]}
+            //objeto arreglo de atributos: {nombre, tipo, formula}
 var arregloDeResultadosDeFuenteDeDatos = [];                //Arreglo con los valores de las tablas de fuentes de datos
 var arregloConecionesATablas = [];                          //Arreglo con los valores para poder conetarse a las tablas
 
+var banderaImportacionCamposFuenteDatosINICIO = 0;           //Bandera para saber si termino de importar los campos de las fuentes de datos
+var banderaImportacionCamposFuenteDatosFIN = 0;              //Bandera para saber si termino de importar los campos de las fuentes de datos
+var banderaImportacionCamposVariablesINICIO = 0;           //Bandera para saber si termino de importar los campos de las variables
+var banderaImportacionCamposVariablesFIN = 0;              //Bandera para saber si termino de importar los campos de las variables
 var banderaImportacionConecionesATablasINICIO = 0;           //Bandera para saber si termino de importar los valores para poder conetarse a las tablas
 var banderaImportacionConecionesATablasFIN = 0;              //Bandera para saber si termino de importar los valores para poder conetarse a las tablas
-var banderaImportacionResultadosDeFuenteDeDatosINICIO = 0;   //Bandera para saber si termino de importar los valores de las tablas de fuentes de datos
-var banderaImportacionResultadosDeFuenteDeDatosFIN = 0;      //Bandera para saber si termino de importar los valores de las tablas de fuentes de datos
+var banderaImportacionValoresDeTablasDeFuenteDeDatosINICIO = 0;   //Bandera para saber si termino de importar los valores de las tablas de fuentes de datos
+var banderaImportacionValoresDeTablasDeFuenteDeDatosFIN = 0;      //Bandera para saber si termino de importar los valores de las tablas de fuentes de datos
 
 const myWorker = new Worker("./components/CalculoVariablesWorker.js");
 
@@ -24,8 +32,12 @@ export default class Calculo extends React.Component {
         this.iniciarCalculo = this.iniciarCalculo.bind(this);
         this.getNivelMaximoCampos = this.getNivelMaximoCampos.bind(this);
         this.getNivelMaximoVariables = this.getNivelMaximoVariables.bind(this);
-        this.traerCampos = this.traerCampos.bind(this);
+        this.traerFuenteDatos = this.traerFuenteDatos.bind(this);
+        this.traerAtributosFuenteDatos = this.traerAtributosFuenteDatos.bind(this);
+        this.revisarFinImportacionCamposFuenteDatos = this.revisarFinImportacionCamposFuenteDatos.bind(this);
         this.traerVariables = this.traerVariables.bind(this);
+        this.traerAtributosVariables = this.traerAtributosVariables.bind(this);
+        this.revisarFinImportacionCamposVariables = this.revisarFinImportacionCamposVariables.bind(this);
         this.inicioTraerConeccionesATablas = this.inicioTraerConeccionesATablas.bind(this);
         this.noHaSidoImportadaConeccion = this.noHaSidoImportadaConeccion.bind(this);
         this.traerConeccionesATablas = this.traerConeccionesATablas.bind(this);
@@ -88,14 +100,15 @@ export default class Calculo extends React.Component {
                         if(result.recordset.length > 0 && nivelMaximoVariables < result.recordset[0].nivel) {
                             nivelMaximoVariables = result.recordset[0].nivel;
                         }
-                        this.traerCampos();
+                        arregloDeFuentesDeDatos = [];
+                        this.traerFuenteDatos();
                     });
                 }
             });
         }); // fin transaction
     }
 
-    traerCampos() {
+    traerFuenteDatos() {
         const transaction = new sql.Transaction( this.props.pool );
         transaction.begin(err => {
             var rolledBack = false;
@@ -103,7 +116,7 @@ export default class Calculo extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("select * from Campos", (err, result) => {
+            request.query("select * from FuenteDatos", (err, result) => {
                 if (err) {
                     if (!rolledBack) {
                         console.log(err);
@@ -113,11 +126,49 @@ export default class Calculo extends React.Component {
                 } else {
                     transaction.commit(err => {
                         arregloDeFuentesDeDatos = result.recordset;
-                        this.traerVariables();
+                        banderaImportacionCamposFuenteDatosINICIO = 0;
+                        banderaImportacionCamposFuenteDatosFIN = arregloDeFuentesDeDatos.length;
+                        for (var i = 0; i < arregloDeFuentesDeDatos.length; i++) {
+                            this.traerAtributosFuenteDatos(arregloDeFuentesDeDatos[i].ID, i);
+                        };
                     });
                 }
             });
         }); // fin transaction
+    }
+
+    traerAtributosFuenteDatos (fuenteDatoID, index) {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("select * from FuenteDatosCampos where fuenteDatoID = "+fuenteDatoID, (err, result) => {
+                if (err) {
+                    if (!rolledBack) {
+                        console.log(err);
+                        banderaImportacionCamposFuenteDatosINICIO++;
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        banderaImportacionCamposFuenteDatosINICIO++;
+                        arregloDeFuentesDeDatos[index].atributos = result.recordset;
+                        this.revisarFinImportacionCamposFuenteDatos();
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    revisarFinImportacionCamposFuenteDatos () {
+        if(banderaImportacionCamposFuenteDatosINICIO == banderaImportacionCamposFuenteDatosFIN) {
+            arregloDeVariables = [];
+            this.traerVariables();
+        }
     }
 
     traerVariables() {
@@ -138,11 +189,48 @@ export default class Calculo extends React.Component {
                 } else {
                     transaction.commit(err => {
                         arregloDeVariables = result.recordset;
-                        this.inicioTraerConeccionesATablas();
+                        banderaImportacionCamposVariablesINICIO = 0;
+                        banderaImportacionCamposVariablesFIN = arregloDeVariables.length;
+                        for (var i = 0; i < arregloDeVariables.length; i++) {
+                            this.traerAtributosVariables(arregloDeVariables[i].ID, i);
+                        };
                     });
                 }
             });
         }); // fin transaction
+    }
+
+    traerAtributosVariables (variableID, index) {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("select * from FuenteDatosCampos where variableID = "+variableID, (err, result) => {
+                if (err) {
+                    if (!rolledBack) {
+                        console.log(err);
+                        banderaImportacionCamposVariablesINICIO++;
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        banderaImportacionCamposVariablesINICIO++;
+                        arregloDeVariables[index].atributos = result.recordset;
+                        this.revisarFinImportacionCamposVariables();
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    revisarFinImportacionCamposVariables () {
+        if(banderaImportacionCamposVariablesINICIO == banderaImportacionCamposVariablesFIN) {
+            this.inicioTraerConeccionesATablas();
+        }
     }
 
     inicioTraerConeccionesATablas () {
@@ -152,7 +240,9 @@ export default class Calculo extends React.Component {
         for (var i = 0; i < arregloDeFuentesDeDatos.length; i++) {
             if(this.noHaSidoImportadaConeccion(arregloDeFuentesDeDatos[i])) {
                 banderaImportacionConecionesATablasFIN++;
-                this.traerConeccionesATablas(arregloDeFuentesDeDatos[i].tablaID);
+                //para asegurar que ID no sea asyncrono
+                arregloConecionesATablas[i].push({ID: arregloDeFuentesDeDatos[i].tablaID});
+                this.traerConeccionesATablas(arregloDeFuentesDeDatos[i].tablaID, i);
             }
         };
     }
@@ -166,7 +256,7 @@ export default class Calculo extends React.Component {
         return true;
     }
 
-    traerConeccionesATablas (tablaID) {
+    traerConeccionesATablas (tablaID, indexARemplazar) {
         const transaction = new sql.Transaction( this.props.pool );
         transaction.begin(err => {
             var rolledBack = false;
@@ -178,6 +268,7 @@ export default class Calculo extends React.Component {
                 if (err) {
                     if (!rolledBack) {
                         console.log(err);
+                        banderaImportacionConecionesATablasINICIO++;
                         transaction.rollback(err => {
                         });
                     }
@@ -185,7 +276,7 @@ export default class Calculo extends React.Component {
                     transaction.commit(err => {
                         banderaImportacionConecionesATablasINICIO++;
                         if(result.recordset.length > 0)
-                            arregloConecionesATablas = arregloConecionesATablas.concat(result.recordset);
+                            arregloConecionesATablas[indexARemplazar] = arregloConecionesATablas.concat(result.recordset);
                         this.finTraerConeccionesATablas();
                     });
                 }
@@ -200,11 +291,11 @@ export default class Calculo extends React.Component {
     }
 
     inicioTraerResultadosDeFuenteDeDatos () {
-        banderaImportacionResultadosDeFuenteDeDatosINICIO = 0;
-        banderaImportacionResultadosDeFuenteDeDatosFIN = 0;
+        banderaImportacionValoresDeTablasDeFuenteDeDatosINICIO = 0;
+        banderaImportacionValoresDeTablasDeFuenteDeDatosFIN = 0;
         arregloDeResultadosDeFuenteDeDatos = [];
         for (var i = 0; i < arregloConecionesATablas.length; i++) {
-            banderaImportacionResultadosDeFuenteDeDatosFIN++;
+            banderaImportacionValoresDeTablasDeFuenteDeDatosFIN++;
             this.traerResultadosDeFuenteDeDatos(arregloConecionesATablas[i]);
         };
     }
@@ -229,7 +320,7 @@ export default class Calculo extends React.Component {
         });
         pool.connect(err => {
             pool.request().query("select * from "+tabla.tabla, (err, result) => {
-                banderaImportacionResultadosDeFuenteDeDatosINICIO++;
+                banderaImportacionValoresDeTablasDeFuenteDeDatosINICIO++;
                 if(result.recordset != undefined && result.recordset.length > 0)
                     arregloDeResultadosDeFuenteDeDatos.splice(index, 0, result.recordset);
                 this.finTraerResultadosDeFuenteDeDatos();
@@ -238,7 +329,7 @@ export default class Calculo extends React.Component {
     }
 
     finTraerResultadosDeFuenteDeDatos () {
-        if(banderaImportacionResultadosDeFuenteDeDatosINICIO == banderaImportacionResultadosDeFuenteDeDatosFIN) {
+        if(banderaImportacionValoresDeTablasDeFuenteDeDatosINICIO == banderaImportacionValoresDeTablasDeFuenteDeDatosFIN) {
             this.iniciarHilo();
         }
     }

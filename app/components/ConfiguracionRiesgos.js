@@ -71,12 +71,6 @@ function (_React$Component) {
       }, _react["default"].createElement("div", {
         className: "row border-top border-bottom addPaddingToConfig"
       }, _react["default"].createElement("a", {
-        className: "btn btn-secondary btn-block btnWhiteColorHover font-bold font-20",
-        style: {
-          color: "#fafafa"
-        },
-        onClick: this.props.showUmbralHome
-      }, "Umbrales"), _react["default"].createElement("a", {
         className: "btn btn-success btn-block btnWhiteColorHover font-bold font-20",
         style: {
           color: "#fafafa"
@@ -94,7 +88,13 @@ function (_React$Component) {
           color: "#fafafa"
         },
         onClick: this.props.showRiesgos
-      }, "Tipos de Riesgos")))))));
+      }, "Tipos de Riesgos"), _react["default"].createElement("a", {
+        className: "btn btn-info btn-block btnWhiteColorHover font-bold font-20",
+        style: {
+          color: "#fafafa"
+        },
+        onClick: this.props.showRiesgos
+      }, "Umbral del Riesgo Integral")))))));
     }
   }]);
 

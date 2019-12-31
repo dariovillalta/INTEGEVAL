@@ -17,13 +17,12 @@ export default class Body extends React.Component {
             mensajeLoadingScreen: '',
             navbar: '',
             idVarEditarFormula: -1,
-            tablaVarEditarFormula: "",
+            tablaVarEditarFormula: ""
         }
         this.showLoadingScreen = this.showLoadingScreen.bind(this);
         this.hideLoadingScreen = this.hideLoadingScreen.bind(this);
         this.updateNavBar = this.updateNavBar.bind(this);
         this.updateFormula = this.updateFormula.bind(this);
-        this.crearArregloFormula = this.crearArregloFormula.bind(this);
     }
 
     componentDidMount() {
@@ -49,37 +48,10 @@ export default class Body extends React.Component {
     }
 
     updateFormula (idVarEditar, tablaVarEditar) {
-        const transaction = new sql.Transaction( this.props.pool );
-        transaction.begin(err => {
-            var rolledBack = false;
-            transaction.on('rollback', aborted => {
-                rolledBack = true;
-            });
-            const request = new sql.Request(transaction);
-            request.query("select formula from "+tablaVarEditar+" where ID = "+idVarEditar, (err, result) => {
-                if (err) {
-                    if (!rolledBack) {
-                        console.log(err);
-                        transaction.rollback(err => {
-                        });
-                    }
-                } else {
-                    transaction.commit(err => {
-                        if(result.recordset.length > 0) {
-                            this.crearArregloFormula(result.recordset[0].formula);
-                        }
-                    });
-                }
-            });
-        }); // fin transaction
         this.setState({
             idVarEditarFormula: idVarEditar,
             tablaVarEditarFormula: tablaVarEditar
         });
-    }
-
-    crearArregloFormula(formula) {
-        //
     }
 
     render() {
@@ -104,7 +76,7 @@ export default class Body extends React.Component {
         } else if(this.props.router.showVariables) {
             return (
                 <div>
-                    <ConfigVariablesContenedor updateNavBar={this.updateNavBar} showUmbralHome={this.props.showUmbralHome} showVariables={this.props.showVariables} configuracionHome={this.props.showRiskControlHome} pool={this.props.pool} showFormula={this.props.showFormula} showCondicionVar={this.props.showCondicionVar}> </ConfigVariablesContenedor>
+                    <ConfigVariablesContenedor updateNavBar={this.updateNavBar} showUmbralHome={this.props.showUmbralHome} showVariables={this.props.showVariables} configuracionHome={this.props.showRiskControlHome} pool={this.props.pool} showFormula={this.props.showFormula} showCondicionVar={this.props.showCondicionVar} updateFormula={this.updateFormula}> </ConfigVariablesContenedor>
                 </div>
             );
         } else if(this.props.router.showFormula) {
@@ -122,13 +94,13 @@ export default class Body extends React.Component {
         } else if(this.props.router.showIndicador) {
             return (
                 <div>
-                    <IndicadorHome showIndicador={this.props.showIndicador} configuracionHome={this.props.showRiskControlHome} pool={this.props.pool} showFormula={this.props.showFormula} showCondicionVar={this.props.showCondicionVar}> </IndicadorHome>
+                    <IndicadorHome showIndicador={this.props.showIndicador} configuracionHome={this.props.showRiskControlHome} pool={this.props.pool} showFormula={this.props.showFormula} showCondicionVar={this.props.showCondicionVar} showRiesgos={this.props.showRiesgos}> </IndicadorHome>
                 </div>
             );
         } else if(this.props.router.showRiesgos) {
             return (
                 <div>
-                    <RiesgoHome updateNavBar={this.updateNavBar} showUmbralHome={this.props.showUmbralHome} showRiesgos={this.props.showRiesgos} configuracionHome={this.props.showRiskControlHome} pool={this.props.pool} showFormula={this.props.showFormula} showCondicionVar={this.props.showCondicionVar} updateFormula={this.props.updateFormula}> </RiesgoHome>
+                    <RiesgoHome updateNavBar={this.updateNavBar} showUmbralHome={this.props.showUmbralHome} showRiesgos={this.props.showRiesgos} configuracionHome={this.props.showRiskControlHome} pool={this.props.pool} showFormula={this.props.showFormula} showCondicionVar={this.props.showCondicionVar} updateFormula={this.updateFormula}> </RiesgoHome>
                 </div>
             );
         } else if(this.props.router.showCalulo) {

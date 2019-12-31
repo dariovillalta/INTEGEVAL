@@ -495,21 +495,28 @@ function (_React$Component) {
         className: "page-header"
       }, _react["default"].createElement("h2", {
         className: "pageheader-title"
-      }, "Configuraci\xF3n de Conecciones a las Tablas"), _react["default"].createElement("div", {
+      }, "Configuraci\xF3n de Conexiones a las Tablas"), _react["default"].createElement("div", {
         className: "page-breadcrumb"
       }, _react["default"].createElement("nav", {
         "aria-label": "breadcrumb"
       }, _react["default"].createElement("ol", {
         className: "breadcrumb"
       }, _react["default"].createElement("li", {
-        className: "breadcrumb-item",
+        className: "breadcrumb-item font-16",
         "aria-current": "page",
         onClick: this.props.configuracionHome
       }, _react["default"].createElement("a", {
         href: "#",
         className: "breadcrumb-link"
       }, "Configuraci\xF3n")), _react["default"].createElement("li", {
-        className: "breadcrumb-item active",
+        className: "breadcrumb-item font-16",
+        "aria-current": "page",
+        onClick: this.props.goOptions
+      }, _react["default"].createElement("a", {
+        href: "#",
+        className: "breadcrumb-link"
+      }, "Tipo de Variable")), _react["default"].createElement("li", {
+        className: "breadcrumb-item active font-16",
         "aria-current": "page"
       }, "Tablas"))))))), _react["default"].createElement("div", {
         className: "row"

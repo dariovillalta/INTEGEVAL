@@ -11,7 +11,7 @@ var _mssql = _interopRequireDefault(require("mssql"));
 
 var _SeleccionarFuenteDatos = _interopRequireDefault(require("./SeleccionarFuenteDatos.js"));
 
-var _CrearFuenteDatos = _interopRequireDefault(require("./CrearFuenteDatos.js"));
+var _CrearFuenteDatosHome = _interopRequireDefault(require("./CrearFuenteDatos/CrearFuenteDatosHome.js"));
 
 var _EditarFuenteDatos = _interopRequireDefault(require("./EditarFuenteDatos.js"));
 
@@ -52,13 +52,14 @@ function (_React$Component) {
       componenteActual: "selFuenteDatos",
       idFuenteDatos: -1,
       nombreFuenteDatos: "",
-      tipoFuenteDatos: "",
+      descripcionFuenteDatos: "",
+      esObjetoFuenteDatos: "",
+      objetoPadreIDFuenteDatos: -1,
       guardarFuenteDatos: "",
-      formulaFuenteDatos: ""
+      columnas: []
     };
     _this.crearFuenteDatos = _this.crearFuenteDatos.bind(_assertThisInitialized(_this));
-    _this.retornoSeleccionFuenteDatosSameComponent = _this.retornoSeleccionFuenteDatosSameComponent.bind(_assertThisInitialized(_this));
-    _this.retornoSeleccionFuenteDatosDiffComponent = _this.retornoSeleccionFuenteDatosDiffComponent.bind(_assertThisInitialized(_this));
+    _this.retornoSeleccionFuenteDatos = _this.retornoSeleccionFuenteDatos.bind(_assertThisInitialized(_this));
     _this.editarFuenteDatos = _this.editarFuenteDatos.bind(_assertThisInitialized(_this));
     _this.retornoEditarFuenteDatos = _this.retornoEditarFuenteDatos.bind(_assertThisInitialized(_this));
     _this.terminoCrearFuenteDatosPasarAEdit = _this.terminoCrearFuenteDatosPasarAEdit.bind(_assertThisInitialized(_this));
@@ -68,12 +69,41 @@ function (_React$Component) {
   _createClass(FuenteDatosHome, [{
     key: "componentDidMount",
     value: function componentDidMount() {
-      isMounted = true;
-    }
-  }, {
-    key: "componentWillUnmount",
-    value: function componentWillUnmount() {
-      isMounted = false;
+      var _this2 = this;
+
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("select * from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME = '" + _this2.props.nombreTablaSeleccionada + "'", function (err, result) {
+          if (err) {
+            if (!rolledBack) {
+              console.log(err);
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              var nombreColumnas = [];
+
+              for (var i = 0; i < result.recordset.length; i++) {
+                nombreColumnas.push({
+                  valor: result.recordset[i].COLUMN_NAME,
+                  tipo: result.recordset[i].DATA_TYPE
+                });
+              }
+
+              ;
+
+              _this2.setState({
+                columnas: nombreColumnas
+              });
+            });
+          }
+        });
+      }); // fin transaction
     }
   }, {
     key: "crearFuenteDatos",
@@ -83,39 +113,29 @@ function (_React$Component) {
       });
     }
   }, {
-    key: "retornoSeleccionFuenteDatosSameComponent",
-    value: function retornoSeleccionFuenteDatosSameComponent() {
+    key: "retornoSeleccionFuenteDatos",
+    value: function retornoSeleccionFuenteDatos() {
       this.setState({
         componenteActual: "selFuenteDatos",
         idFuenteDatos: -1,
         nombreFuenteDatos: "",
-        tipoFuenteDatos: "",
-        guardarFuenteDatos: "",
-        formulaFuenteDatos: ""
+        descripcionFuenteDatos: "",
+        esObjetoFuenteDatos: "",
+        objetoPadreIDFuenteDatos: -1,
+        guardarFuenteDatos: ""
       });
     }
   }, {
-    key: "retornoSeleccionFuenteDatosDiffComponent",
-    value: function retornoSeleccionFuenteDatosDiffComponent() {
-      this.props.showRiesgos();
-      var self = this;
-      setTimeout(function () {
-        self.setState({
-          idFuenteDatos: -1,
-          componenteActual: "selFuenteDatos"
-        });
-      }, 500);
-    }
-  }, {
     key: "editarFuenteDatos",
-    value: function editarFuenteDatos(idFuenteDatos, nombreFuenteDatos, tipoFuenteDatos, guardarFuenteDatos, formulaFuenteDatos) {
+    value: function editarFuenteDatos(idFuenteDatos, nombreFuenteDatos, descripcionFuenteDatos, esObjetoFuenteDatos, objetoPadreIDFuenteDatos, guardarFuenteDatos) {
       this.setState({
         idFuenteDatos: idFuenteDatos,
         componenteActual: "editarFuenteDatos",
         nombreFuenteDatos: nombreFuenteDatos,
-        tipoFuenteDatos: tipoFuenteDatos,
-        guardarFuenteDatos: guardarFuenteDatos,
-        formulaFuenteDatos: formulaFuenteDatos
+        descripcionFuenteDatos: descripcionFuenteDatos,
+        esObjetoFuenteDatos: esObjetoFuenteDatos,
+        objetoPadreIDFuenteDatos: objetoPadreIDFuenteDatos,
+        guardarFuenteDatos: guardarFuenteDatos
       });
     }
   }, {
@@ -146,7 +166,7 @@ function (_React$Component) {
   }, {
     key: "terminoCrearFuenteDatosPasarAEdit",
     value: function terminoCrearFuenteDatosPasarAEdit(nombreFuenteDatos) {
-      var _this2 = this;
+      var _this3 = this;
 
       var transaction = new _mssql["default"].Transaction(this.props.pool);
       transaction.begin(function (err) {
@@ -165,7 +185,7 @@ function (_React$Component) {
             transaction.commit(function (err) {
               if (result.recordset != undefined) {
                 if (result.recordset.length) {
-                  _this2.editarFuenteDatos(result.recordset[0].ID, result.recordset[0].nombre, result.recordset[0].peso, result.recordset[0].tolerancia, result.recordset[0].valorIdeal, result.recordset[0].idRiesgoPadre);
+                  _this3.editarFuenteDatos(result.recordset[0].ID, result.recordset[0].nombre, result.recordset[0].descripcion, result.recordset[0].esObjeto, result.recordset[0].objetoPadreID, result.recordset[0].guardar);
                 }
               }
             });
@@ -181,23 +201,32 @@ function (_React$Component) {
           pool: this.props.pool,
           configuracionHome: this.props.configuracionHome,
           crearFuenteDatos: this.crearFuenteDatos,
+          goOptions: this.props.goOptions,
+          retornoSeleccionTabla: this.props.retornoSeleccionTabla,
           editarFuenteDatos: this.editarFuenteDatos
-        }, " "));
+        }));
       } else if (this.state.componenteActual.localeCompare("crearFuenteDatos") == 0) {
-        return _react["default"].createElement("div", null, _react["default"].createElement(_CrearFuenteDatos["default"], {
+        return _react["default"].createElement("div", null, _react["default"].createElement(_CrearFuenteDatosHome["default"], {
           pool: this.props.pool,
           showCondicionVar: this.props.showCondicionVar,
           terminoCrearCampo: this.terminoCrearFuenteDatosPasarAEdit,
           idTablaSeleccionada: this.props.idTablaSeleccionada,
+          columnas: this.state.columnas,
           nombreTablaSeleccionada: this.props.nombreTablaSeleccionada,
+          goOptions: this.props.goOptions,
+          retornoSeleccionTabla: this.props.retornoSeleccionTabla,
+          retornoSeleccionFuenteDatos: this.retornoSeleccionFuenteDatos,
           configuracionHome: this.props.configuracionHome
-        }, " "));
+        }));
       } else if (this.state.componenteActual.localeCompare("editarFuenteDatos") == 0) {
         return _react["default"].createElement("div", null, _react["default"].createElement(_EditarFuenteDatos["default"], {
           pool: this.props.pool,
           showFormula: this.props.showFormula,
           showCondicionVar: this.props.showCondicionVar,
           showRiesgos: this.props.showRiesgos,
+          goOptions: this.props.goOptions,
+          retornoSeleccionTabla: this.props.retornoSeleccionTabla,
+          retornoSeleccionFuenteDatos: this.retornoSeleccionFuenteDatos,
           retornoSeleccionRiesgo: this.retornoSeleccionRiesgoSameComponent,
           retornoSeleccionRiesgoUmbral: this.retornoSeleccionRiesgoDiffComponent,
           configuracionHome: this.props.configuracionHome,
@@ -205,11 +234,12 @@ function (_React$Component) {
           showUmbralHome: this.props.showUmbralHome,
           idFuenteDatos: this.state.idFuenteDatos,
           nombreFuenteDatos: this.state.nombreFuenteDatos,
-          tipoFuenteDatos: this.state.tipoFuenteDatos,
+          descripcionFuenteDatos: this.state.descripcionFuenteDatos,
+          esObjetoFuenteDatos: this.state.esObjetoFuenteDatos,
+          objetoPadreIDFuenteDatos: this.state.objetoPadreIDFuenteDatos,
           guardarFuenteDatos: this.state.guardarFuenteDatos,
-          formulaFuenteDatos: this.state.formulaFuenteDatos,
           updateFormula: this.props.updateFormula
-        }, " "));
+        }));
       }
     }
   }]);

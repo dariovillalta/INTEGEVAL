@@ -65,7 +65,6 @@ function (_React$Component) {
     _this.hideLoadingScreen = _this.hideLoadingScreen.bind(_assertThisInitialized(_this));
     _this.updateNavBar = _this.updateNavBar.bind(_assertThisInitialized(_this));
     _this.updateFormula = _this.updateFormula.bind(_assertThisInitialized(_this));
-    _this.crearArregloFormula = _this.crearArregloFormula.bind(_assertThisInitialized(_this));
     return _this;
   }
 
@@ -98,39 +97,10 @@ function (_React$Component) {
   }, {
     key: "updateFormula",
     value: function updateFormula(idVarEditar, tablaVarEditar) {
-      var _this2 = this;
-
-      var transaction = new sql.Transaction(this.props.pool);
-      transaction.begin(function (err) {
-        var rolledBack = false;
-        transaction.on('rollback', function (aborted) {
-          rolledBack = true;
-        });
-        var request = new sql.Request(transaction);
-        request.query("select formula from " + tablaVarEditar + " where ID = " + idVarEditar, function (err, result) {
-          if (err) {
-            if (!rolledBack) {
-              console.log(err);
-              transaction.rollback(function (err) {});
-            }
-          } else {
-            transaction.commit(function (err) {
-              if (result.recordset.length > 0) {
-                _this2.crearArregloFormula(result.recordset[0].formula);
-              }
-            });
-          }
-        });
-      }); // fin transaction
-
       this.setState({
         idVarEditarFormula: idVarEditar,
         tablaVarEditarFormula: tablaVarEditar
       });
-    }
-  }, {
-    key: "crearArregloFormula",
-    value: function crearArregloFormula(formula) {//
     }
   }, {
     key: "render",
@@ -161,7 +131,8 @@ function (_React$Component) {
           configuracionHome: this.props.showRiskControlHome,
           pool: this.props.pool,
           showFormula: this.props.showFormula,
-          showCondicionVar: this.props.showCondicionVar
+          showCondicionVar: this.props.showCondicionVar,
+          updateFormula: this.updateFormula
         }, " "));
       } else if (this.props.router.showFormula) {
         return _react["default"].createElement("div", null, _react["default"].createElement(_Formula["default"], {
@@ -182,7 +153,8 @@ function (_React$Component) {
           configuracionHome: this.props.showRiskControlHome,
           pool: this.props.pool,
           showFormula: this.props.showFormula,
-          showCondicionVar: this.props.showCondicionVar
+          showCondicionVar: this.props.showCondicionVar,
+          showRiesgos: this.props.showRiesgos
         }, " "));
       } else if (this.props.router.showRiesgos) {
         return _react["default"].createElement("div", null, _react["default"].createElement(_RiesgoHome["default"], {
@@ -193,7 +165,7 @@ function (_React$Component) {
           pool: this.props.pool,
           showFormula: this.props.showFormula,
           showCondicionVar: this.props.showCondicionVar,
-          updateFormula: this.props.updateFormula
+          updateFormula: this.updateFormula
         }, " "));
       } else if (this.props.router.showCalulo) {
         return _react["default"].createElement("div", null, _react["default"].createElement(_Calculo["default"], {

@@ -49,7 +49,7 @@ function (_React$Component) {
         className: "page-header"
       }, _react["default"].createElement("h2", {
         className: "pageheader-title"
-      }, "Configuraci\xF3n"), _react["default"].createElement("div", {
+      }, "Tipo de Variables"), _react["default"].createElement("div", {
         className: "page-breadcrumb"
       }, _react["default"].createElement("nav", {
         "aria-label": "breadcrumb"
@@ -65,7 +65,7 @@ function (_React$Component) {
       }, "Configuraci\xF3n")), _react["default"].createElement("li", {
         className: "breadcrumb-item active font-16",
         "aria-current": "page"
-      }, "Variables"))))))), _react["default"].createElement("div", {
+      }, "Tipo de Variables"))))))), _react["default"].createElement("div", {
         className: "row"
       }, _react["default"].createElement("div", {
         className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
@@ -78,7 +78,7 @@ function (_React$Component) {
       }, _react["default"].createElement("a", {
         className: "btn btn-outline-info btn-block btnWhiteColorHover font-bold font-20",
         onClick: this.props.goFuentes
-      }, "Configuraci\xF3n Fuentes de Datos"), _react["default"].createElement("a", {
+      }, "Configuraci\xF3n de Conexiones y Variables de Origen"), _react["default"].createElement("a", {
         className: "btn btn-outline-brand btn-block btnWhiteColorHover font-bold font-20",
         onClick: this.props.goVariables
       }, "Creaci\xF3n / Configuraci\xF3n de Variables")))))));

@@ -32,13 +32,24 @@ export default class FuenteDatosHome extends React.Component {
         if(this.state.idTablaSeleccionada == -1) {
             return (
                 <div>
-                    <ConfiguracionTablas pool={this.props.pool} configuracionHome={this.props.configuracionHome} terminoSeleccionTabla={this.terminoSeleccionTabla}> </ConfiguracionTablas>
+                    <ConfiguracionTablas pool={this.props.pool}
+                                    configuracionHome={this.props.configuracionHome}
+                                    goOptions={this.props.goOptions}
+                                    terminoSeleccionTabla={this.terminoSeleccionTabla}>
+                    </ConfiguracionTablas>
                 </div>
             );
         } else {
             return (
                 <div>
-                    <CamposHome pool={this.props.pool} retornoSeleccionTabla={this.retornoSeleccionTabla} configuracionHome={this.props.configuracionHome} idTablaSeleccionada={this.state.idTablaSeleccionada} nombreTablaSeleccionada={this.state.nombreTablaSeleccionada} terminoSeleccionTabla={this.terminoSeleccionTabla}> </CamposHome>
+                    <CamposHome pool={this.props.pool}
+                                retornoSeleccionTabla={this.retornoSeleccionTabla}
+                                configuracionHome={this.props.configuracionHome}
+                                idTablaSeleccionada={this.state.idTablaSeleccionada}
+                                nombreTablaSeleccionada={this.state.nombreTablaSeleccionada}
+                                goOptions={this.props.goOptions}
+                                terminoSeleccionTabla={this.terminoSeleccionTabla}>
+                    </CamposHome>
                 </div>
             );
         }

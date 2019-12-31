@@ -46,19 +46,6 @@ export default class App extends React.Component {
             userName: null,
             permision: ""
         }
-        // or using a configuration object
-        /*const connectionString = {
-            connectionString: 'DSN=ClasificacionCartera',
-            connectionTimeout: 360,
-            loginTimeout: 360
-        }
-        odbc.connect(connectionString, (error, connection) => {
-            console.log(connection);
-            connection.columns(null, null, null, null, (error, result) => {
-                if (error) { return; } // handle
-                console.log(result);
-            });
-        });*/
         // connection2 is now an open Connection
         this.login = this.login.bind(this);
         this.logOff = this.logOff.bind(this);
@@ -78,32 +65,6 @@ export default class App extends React.Component {
         });
     }
 
-    select(){
-        const config = {
-            user: 'SA',
-            password: 'password111!',
-            server: 'localhost',
-            database: 'RCL_Dev',
-            stream: true,
-            pool: {
-                max: 40,
-                min: 0,
-                idleTimeoutMillis: 60000
-            }
-        }
-        const pool = new sql.ConnectionPool(config, err => {
-            console.log("11");
-            if(err) {
-                console.log(err);
-            } else {
-                console.log("222");
-                return pool.query('select * from Activos_Bancos', (err, result) => {
-                    console.log("333");
-                    console.log(result);
-                });
-            }
-        });
-    }
     render() {
         return (
             <div>
