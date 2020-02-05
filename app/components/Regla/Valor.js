@@ -248,9 +248,10 @@ function (_React$Component) {
           );
       }*/
       return _react["default"].createElement("div", {
-        className: "row border-bottom",
+        className: "row",
         style: {
-          width: "100%"
+          width: "100%",
+          borderBottom: "3px solid #d2d2e4"
         }
       }, _react["default"].createElement("div", {
         className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"

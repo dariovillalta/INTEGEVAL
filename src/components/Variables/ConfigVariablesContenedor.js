@@ -1,8 +1,8 @@
 import React from 'react';
 
 import OpcionesVariableHome from './OpcionesVariableHome.js';
-import FuenteDatosHome from './FuenteDatos/FuenteDatosHome.js';
-import VariableHome from './CrearVariable/VariableHome.js';
+import ConexionesHome from './Conexiones/ConexionesHome.js';
+import VariableHome from './Variables/VariableHome.js';
 
 export default class ConfigVariablesContenedor extends React.Component {
     constructor() {
@@ -45,10 +45,10 @@ export default class ConfigVariablesContenedor extends React.Component {
         if(this.state.showFuentes) {
             return (
                 <div>
-                    <FuenteDatosHome pool={this.props.pool}
+                    <ConexionesHome pool={this.props.pool}
                                 goOptions={this.goOptions}
                                 configuracionHome={this.props.configuracionHome}>
-                    </FuenteDatosHome>
+                    </ConexionesHome>
                 </div>
             );
         } else if(this.state.showVariables) {

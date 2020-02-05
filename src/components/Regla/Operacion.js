@@ -108,8 +108,8 @@ export default class Operacion extends React.Component {
             );
         } else*/ if(this.props.esBoolean) {
             return (
-                <div className={"row"} style={{width: "100%"}}>
-                    <div className={"border-bottom"} style={{width: "100%"}}>
+                <div className={"row"} style={{width: "100%", borderBottom: "3px solid #d2d2e4"}}>
+                    <div style={{width: "100%"}}>
                         <div className={"text-center"} style={{width: "100%", height: "100%"}}>
                             <div className={"font-18"} style={{width: "100%", display: "flex", alignItems: "center", justifyContent: "center"}}>
                                 Seleccionar Operación
@@ -121,14 +121,15 @@ export default class Operacion extends React.Component {
                                 </span>
                             </label>
                         </div>
+                        <br/>
                     </div>
                     <br/>
                 </div>
             );
         } else if(this.props.esNumero || this.props.esFecha || this.props.esTexto) {
             return (
-                <div className={"row"} style={{width: "100%"}}>
-                    <div className={"border-bottom"} style={{width: "100%", height: "100%"}}>
+                <div className={"row"} style={{width: "100%", borderBottom: "3px solid #d2d2e4"}}>
+                    <div style={{width: "100%", height: "100%"}}>
                         <div className={"font-18"} style={{width: "100%", display: "flex", alignItems: "center", justifyContent: "center"}}>
                             Seleccionar Operación
                         </div>
@@ -185,6 +186,7 @@ export default class Operacion extends React.Component {
                                 </label>
                             </div>
                         </div>
+                        <br/>
                     </div>
                     <br/>
                 </div>

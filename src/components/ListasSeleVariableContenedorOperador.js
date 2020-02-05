@@ -16,7 +16,7 @@ export default class ListasSeleVariableContenedorOperador extends React.Componen
         return (
             <div style={{width: "100%", height: "100%"}}>
                 <div className={"row"} style={{border: "1px solid #e6e6f2", height: "75%"}}>
-                    <ListasSeleVariable mostrarRosa={this.props.mostrarRosa} variables={this.props.operaciones} seleccionarMultiple={this.props.seleccionarMultiple} retornoSeleccion={this.retornoSeleccionVariable} titulo={"Algebraicas"}></ListasSeleVariable>
+                    <ListasSeleVariable mostrarRosa={this.props.mostrarRosa} variables={this.props.operaciones} seleccionarMultiple={this.props.seleccionarMultiple} retornoSeleccion={this.retornoSeleccionVariable} titulo={"Algebraicas"} indiceTabla={false}></ListasSeleVariable>
                 </div>
             </div>
         );

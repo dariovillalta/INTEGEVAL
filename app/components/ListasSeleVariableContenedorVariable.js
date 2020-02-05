@@ -46,8 +46,8 @@ function (_React$Component) {
 
   _createClass(ListasSeleVariableContenedorVariable, [{
     key: "retornoSeleccionVariable",
-    value: function retornoSeleccionVariable(variable) {
-      this.props.retornoSeleccionVariable(this.props.esOperacion, variable);
+    value: function retornoSeleccionVariable(variable, posicion) {
+      this.props.retornoSeleccionVariable(this.props.esOperacion, variable, posicion);
     } //EN VEZ DE TABLAS, FUENTE DE DATOS
 
   }, {
@@ -79,7 +79,8 @@ function (_React$Component) {
           variables: _this2.props.camposTablas[i],
           seleccionarMultiple: _this2.props.seleccionarMultiple,
           retornoSeleccion: _this2.retornoSeleccionVariable,
-          titulo: tabla.nombre
+          titulo: tabla.nombre,
+          indiceTabla: i
         }) : null);
       }), this.props.variables.length > 0 ? _react["default"].createElement("div", {
         style: {
@@ -91,7 +92,8 @@ function (_React$Component) {
         variables: this.props.variables,
         seleccionarMultiple: this.props.seleccionarMultiple,
         retornoSeleccion: this.retornoSeleccionVariable,
-        titulo: "Variable Escalares"
+        titulo: "Variable Escalares",
+        indiceTabla: false
       })) : null, this.props.objetos.map(function (objeto, i) {
         return _react["default"].createElement("div", {
           style: {
@@ -103,9 +105,10 @@ function (_React$Component) {
           mostrarRosa: _this2.props.mostrarRosa,
           variables: _this2.props.camposDeObjetos[i],
           seleccionarMultiple: _this2.props.seleccionarMultiple,
-          retornoSeleccion: _this2.retornoClickLista,
+          retornoSeleccion: _this2.retornoSeleccionVariable,
           titulo: objeto.nombre,
-          key: i
+          key: i,
+          indiceTabla: false
         }) : null);
       })));
     }

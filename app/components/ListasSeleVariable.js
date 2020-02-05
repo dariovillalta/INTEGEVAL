@@ -104,7 +104,7 @@ function (_React$Component) {
       this.setState({
         indicesVarSeleccionados: nuevoArr
       });
-      this.props.retornoSeleccion(arregloCeldasSeleccionadas);
+      this.props.retornoSeleccion(arregloCeldasSeleccionadas, this.props.indiceTabla);
     }
   }, {
     key: "deseleccionarIndice",
@@ -123,7 +123,7 @@ function (_React$Component) {
       this.setState({
         indicesVarSeleccionados: nuevoArr
       });
-      this.props.retornoSeleccion(arregloCeldasSeleccionadas);
+      this.props.retornoSeleccion(arregloCeldasSeleccionadas, this.props.indiceTabla);
     }
   }, {
     key: "render",

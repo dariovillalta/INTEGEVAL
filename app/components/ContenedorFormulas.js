@@ -23,9 +23,9 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
 
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
 function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
@@ -50,27 +50,14 @@ function (_React$Component) {
     _this.state = {
       mostrarCrearCondicion: true,
       asignaciones: []
+      /*this.mostrarCrearCondicion = this.mostrarCrearCondicion.bind(this);
+      this.mostrarAsignarFormula = this.mostrarAsignarFormula.bind(this);*/
+
     };
-    _this.mostrarCrearCondicion = _this.mostrarCrearCondicion.bind(_assertThisInitialized(_this));
-    _this.mostrarAsignarFormula = _this.mostrarAsignarFormula.bind(_assertThisInitialized(_this));
     return _this;
   }
 
   _createClass(ContenedorFormulas, [{
-    key: "mostrarCrearCondicion",
-    value: function mostrarCrearCondicion() {
-      this.setState({
-        mostrarCrearCondicion: true
-      });
-    }
-  }, {
-    key: "mostrarAsignarFormula",
-    value: function mostrarAsignarFormula() {
-      this.setState({
-        mostrarCrearCondicion: false
-      });
-    }
-  }, {
     key: "render",
     value: function render() {
       var _this2 = this;
@@ -88,17 +75,25 @@ function (_React$Component) {
         style: {
           color: "#fafafa"
         },
-        onClick: this.props.crearRiesgo
+        onClick: function onClick() {
+          return _this2.props.goToCreateFormula(-1);
+        }
       }, "Crear Asignaci\xF3n / F\xF3rmula")), _react["default"].createElement("hr", null), _react["default"].createElement("div", {
         className: "text-center"
       }, this.props.asignaciones.map(function (asignacion, i) {
-        return _react["default"].createElement("a", {
+        return _react["default"].createElement("div", null, _react["default"].createElement("input", {
+          type: "radio",
+          name: "formulas",
+          className: "custom-control-input"
+        }), _react["default"].createElement("a", {
           className: "btn btn-success btn-primary col-xs-10 col-10 btnWhiteColorHover font-bold font-20",
           style: {
             color: "#fafafa"
           },
-          onClick: _this2.props.crearRiesgo
-        }, "asignacion.formula");
+          onClick: function onClick() {
+            return _this2.props.goToCreateFormula(i);
+          }
+        }, asignacion.formula));
       }), this.props.asignaciones.length == 0 ? _react["default"].createElement("a", {
         style: {
           color: "#fafafa"

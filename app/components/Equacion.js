@@ -56,7 +56,7 @@ function (_React$Component) {
         return _react["default"].createElement(_CeldaEquacion["default"], {
           clickEnFormula: _this.props.clickEnFormula,
           variable: variable,
-          key: variable.nombre,
+          key: variable.valor + "" + i,
           height: variable.height,
           width: variable.width,
           formula: _this.props.formula,

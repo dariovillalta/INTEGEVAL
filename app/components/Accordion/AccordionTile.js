@@ -68,7 +68,8 @@ function (_React$Component) {
         style: {
           cursor: 'pointer',
           width: '100%',
-          backgroundColor: this.props.color
+          backgroundColor: this.props.color,
+          borderTop: "1px solid #d2d2e4"
         },
         className: "card-header"
       }, _react["default"].createElement("span", {
@@ -101,7 +102,6 @@ function (_React$Component) {
           marginRight: "10px"
         }
       }) : _react["default"].createElement("span", null)), isOpen && _react["default"].createElement("div", {
-        className: "card-body",
         style: {
           backgroundColor: this.props.color
         }

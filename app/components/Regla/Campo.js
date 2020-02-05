@@ -9,6 +9,8 @@ var _react = _interopRequireDefault(require("react"));
 
 var _ListasSeleVariable = _interopRequireDefault(require("../ListasSeleVariable.js"));
 
+var _Accordion = _interopRequireDefault(require("../Accordion/Accordion.js"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -67,63 +69,61 @@ function (_React$Component) {
       return _react["default"].createElement("div", {
         className: "row",
         style: {
-          height: "150px",
           width: "100%"
         }
       }, _react["default"].createElement("div", {
-        className: "border-bottom",
         style: {
-          height: "100%",
           width: "100%",
-          padding: "0% 1%"
+          borderBottom: "3px solid #d2d2e4"
         }
       }, _react["default"].createElement("div", {
         className: "font-18",
         style: {
           width: "100%",
-          height: "20%",
+          height: "20px",
           display: "flex",
           alignItems: "center",
           justifyContent: "center"
         }
-      }, "Seleccionar Campo"), _react["default"].createElement("div", {
-        className: "row",
-        style: {
-          height: "80%",
-          width: "100%"
-        }
-      }, _react["default"].createElement(_ListasSeleVariable["default"], {
-        mostrarRosa: true,
-        variables: this.props.campos,
-        seleccionarMultiple: false,
-        retornoSeleccion: this.checkFieldType,
-        titulo: "Campos De Tabla"
-      })), this.props.calculoVariables ? _react["default"].createElement("div", {
-        style: {
-          width: "100%",
-          height: "100%"
-        }
+      }, _react["default"].createElement("h4", null, "Seleccionar Campo")), _react["default"].createElement(_Accordion["default"], {
+        showTrash: false,
+        showEdit: false,
+        color: "#ffffff"
+      }, _react["default"].createElement("div", {
+        label: "Conexiones"
+      }, this.props.conexiones.map(function (conexion, i) {
+        return _react["default"].createElement("div", {
+          className: "row",
+          key: conexion.valor + i,
+          style: {
+            height: "80%",
+            width: "100%"
+          }
+        }, _react["default"].createElement(_ListasSeleVariable["default"], {
+          mostrarRosa: false,
+          variables: _this2.props.camposConexiones[i],
+          seleccionarMultiple: false,
+          retornoSeleccion: _this2.checkFieldType,
+          titulo: conexion.valor
+        }));
+      })), _react["default"].createElement("div", {
+        label: "Variables"
       }, this.props.variables.map(function (variable, i) {
         return _react["default"].createElement("div", {
-          style: {
-            width: "100%",
-            height: "100%"
-          },
-          key: variable.ID
-        }, _this2.props.camposVariables[i] != undefined ? _react["default"].createElement("div", {
           className: "row",
+          key: variable.valor + i,
           style: {
-            height: "100%",
+            height: "80%",
             width: "100%"
           }
         }, _react["default"].createElement(_ListasSeleVariable["default"], {
           mostrarRosa: true,
           variables: _this2.props.camposVariables[i],
           seleccionarMultiple: false,
-          retornoSeleccion: _this2.retornoSeleccionVariable,
-          titulo: variable.nombre
-        })) : null);
-      })) : null, _react["default"].createElement("br", null)));
+          retornoSeleccion: _this2.checkFieldType,
+          titulo: variable.valor
+        }));
+      }))), _react["default"].createElement("br", null)));
     }
   }]);
 

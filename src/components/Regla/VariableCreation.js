@@ -21,7 +21,10 @@ export default class VariableCreation extends React.Component {
             },
             errorCreacionRegla: {campo: "", descripcion: "", mostrar: false},
             mensajeModal: {mostrarMensaje: false, mensajeConfirmado: false, esError: false, esConfirmar: false, titulo: "", mensaje: ""},
-            campos: [],
+            conexiones: [],
+            camposConexiones: [],
+            variables: [],
+            camposVariables: [],
             campoSeleccionadoNombre: '{campo}',
             textoOperacion: '{operación}',
             textoValor: '{valor}'
@@ -33,6 +36,12 @@ export default class VariableCreation extends React.Component {
         this.esFecha = this.esFecha.bind(this);
         this.esTexto = this.esTexto.bind(this);
         this.loadFields = this.loadFields.bind(this);
+        this.getConections = this.getConections.bind(this);
+        this.getFieldsConections = this.getFieldsConections.bind(this);
+        this.getFieldConections = this.getFieldConections.bind(this);
+        this.getVariables = this.getVariables.bind(this);
+        this.getFieldsVariables = this.getFieldsVariables.bind(this);
+        this.getFieldVariables = this.getFieldVariables.bind(this);
         this.saveRule = this.saveRule.bind(this);
         this.dismissReglaNewError = this.dismissReglaNewError.bind(this);
         this.showSuccesMessage = this.showSuccesMessage.bind(this);
@@ -47,7 +56,7 @@ export default class VariableCreation extends React.Component {
         if(this.props.calculoVariables) {
             //
         }
-        //this.loadFields();
+        this.loadFields();
     }
 
     retornoSeleccionVariable(campoSeleccionadoInput) {
@@ -109,6 +118,11 @@ export default class VariableCreation extends React.Component {
     }
 
     loadFields() {
+        this.getConections();
+        this.getVariables();
+    }
+
+    getConections () {
         const transaction = new sql.Transaction( this.props.pool );
         transaction.begin(err => {
             var rolledBack = false;
@@ -116,7 +130,7 @@ export default class VariableCreation extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("select * from Campos where tabla = 'Cliente' or tabla = 'Préstamo'", (err, result) => {
+            request.query("select * from Tablas", (err, result) => {
                 if (err) {
                     if (!rolledBack) {
                         console.log(err);
@@ -128,19 +142,123 @@ export default class VariableCreation extends React.Component {
                     transaction.commit(err => {
                         var temp = [];
                         for (var i = 0; i < result.recordset.length; i++) {
-                            var existe = false;
-                            for (var j = 0; j < temp.length; j++) {
-                                if(temp[j].nombre.localeCompare(result.recordset[i].nombre) == 0) {
-                                    existe = true;
-                                    break;
-                                }
-                            };
-                            if(existe == false) {
-                                temp.push(result.recordset[i]);
-                            }
+                            temp.push({valor: result.recordset[i].tabla});
                         };
                         this.setState({
-                            campos: temp
+                            conexiones: temp
+                        }, this.getFieldsConections );
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    getFieldsConections () {
+        var arregloTemp = [];
+        for (var i = 0; i < this.state.conexiones.length; i++) {
+            this.getFieldConections(this.state.conexiones[i].valor, i, arregloTemp);
+        };
+    }
+
+    getFieldConections(nombreTabla, index, array) {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("select * from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME = '"+nombreTabla+"'", (err, result) => {
+                if (err) {
+                    if (!rolledBack) {
+                        console.log(err);
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        var nombreColumnas = [];
+                        for (var i = 0; i < result.recordset.length; i++) {
+                            nombreColumnas.push({valor: result.recordset[i].COLUMN_NAME, tipo: result.recordset[i].DATA_TYPE});
+                        };
+                        if(array[index] == undefined) {
+                            array[index] = [];
+                        }
+                        array[index] = $.merge(array[index], nombreColumnas);
+                        this.setState({
+                            camposConexiones: array
+                        });
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    getVariables () {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("select * from Variables", (err, result) => {
+                if (err) {
+                    if (!rolledBack) {
+                        console.log(err);
+                        transaction.rollback(err => {
+                        });
+                        return [];
+                    }
+                } else {
+                    transaction.commit(err => {
+                        var temp = [];
+                        for (var i = 0; i < result.recordset.length; i++) {
+                            temp.push({valor: result.recordset[i].nombre});
+                        };
+                        this.setState({
+                            variables: temp
+                        }, this.getFieldsVariables );
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    getFieldsVariables () {
+        var arregloTemp = [];
+        for (var i = 0; i < this.state.variables.length; i++) {
+            this.getFieldVariables(this.state.variables[i].ID, i, arregloTemp);
+        };
+    }
+
+    getFieldVariables(variableID, index, array) {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("select * from VariablesCampos where variableID = "+variableID, (err, result) => {
+                if (err) {
+                    if (!rolledBack) {
+                        console.log(err);
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        var nombreColumnas = [];
+                        for (var i = 0; i < result.recordset.length; i++) {
+                            nombreColumnas.push({valor: result.recordset[i].nombre, tipo: result.recordset[i].tipo});
+                        };
+                        if(array[index] == undefined) {
+                            array[index] = [];
+                        }
+                        array[index] = $.merge(array[index], nombreColumnas);
+                        this.setState({
+                            camposVariables: array
                         });
                     });
                 }
@@ -426,14 +544,18 @@ export default class VariableCreation extends React.Component {
         return (
             <div style={{width: "100%"}}>
                 <h3 className={"card-header"}>Crear Condición / Instrucción</h3>
-                <div style={{height: "50px", width: "100%", display: "flex", alignItems: "center", justifyContent: "center", borderBottom: "1px solid #d2d2e4"}}>
+                <div style={{height: "50px", width: "100%", display: "flex", alignItems: "center", justifyContent: "center", borderBottom: "3px solid #d2d2e4"}}>
                     SI {this.state.campoSeleccionadoNombre} {this.state.textoOperacion} {this.state.textoValor}
                 </div>
+                <br/>
                 <Campo esNumero={this.esNumero}
                     esBoolean={this.esBoolean}
                     esFecha={this.esFecha}
                     esTexto={this.esTexto}
-                    campos={this.props.campos}
+                    conexiones={this.state.conexiones}
+                    camposConexiones={this.state.camposConexiones}
+                    variables={this.state.variables}
+                    camposVariables={this.state.camposVariables}
                     retornoSeleccionVariable={this.retornoSeleccionVariable}> </Campo>
                 <br/>
                 <Operacion esNumero={this.state.tipoCampo.esNumero}
@@ -441,7 +563,6 @@ export default class VariableCreation extends React.Component {
                     esFecha={this.state.tipoCampo.esFecha}
                     esTexto={this.state.tipoCampo.esTexto}
                     retornoSeleccionOperacion={this.retornoSeleccionOperacion}> </Operacion>
-                <br/>
                 <br/>
                 <Valor esNumero={this.state.tipoCampo.esNumero}
                     esBoolean={this.state.tipoCampo.esBoolean}

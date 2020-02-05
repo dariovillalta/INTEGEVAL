@@ -190,7 +190,7 @@ export default class Valor extends React.Component {
             );
         }*/
         return (
-            <div className={"row border-bottom"} style={{width: "100%"}}>
+            <div className={"row"} style={{width: "100%", borderBottom: "3px solid #d2d2e4"}}>
                 <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
                     <label htmlFor="valor" className="col-form-label">Valor:</label>
                 </div>

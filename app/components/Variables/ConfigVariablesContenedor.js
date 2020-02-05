@@ -9,9 +9,9 @@ var _react = _interopRequireDefault(require("react"));
 
 var _OpcionesVariableHome = _interopRequireDefault(require("./OpcionesVariableHome.js"));
 
-var _FuenteDatosHome = _interopRequireDefault(require("./FuenteDatos/FuenteDatosHome.js"));
+var _ConexionesHome = _interopRequireDefault(require("./Conexiones/ConexionesHome.js"));
 
-var _VariableHome = _interopRequireDefault(require("./CrearVariable/VariableHome.js"));
+var _VariableHome = _interopRequireDefault(require("./Variables/VariableHome.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
@@ -86,7 +86,7 @@ function (_React$Component) {
     key: "render",
     value: function render() {
       if (this.state.showFuentes) {
-        return _react["default"].createElement("div", null, _react["default"].createElement(_FuenteDatosHome["default"], {
+        return _react["default"].createElement("div", null, _react["default"].createElement(_ConexionesHome["default"], {
           pool: this.props.pool,
           goOptions: this.goOptions,
           configuracionHome: this.props.configuracionHome

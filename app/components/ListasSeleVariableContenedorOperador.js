@@ -68,7 +68,8 @@ function (_React$Component) {
         variables: this.props.operaciones,
         seleccionarMultiple: this.props.seleccionarMultiple,
         retornoSeleccion: this.retornoSeleccionVariable,
-        titulo: "Algebraicas"
+        titulo: "Algebraicas",
+        indiceTabla: false
       })));
     }
   }]);

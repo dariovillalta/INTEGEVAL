@@ -1,6 +1,7 @@
 import React from 'react';
 
 import ListasSeleVariable from '../ListasSeleVariable.js';
+import Accordion from '../Accordion/Accordion.js';
 
 export default class Campo extends React.Component {
     constructor(props) {
@@ -23,33 +24,27 @@ export default class Campo extends React.Component {
     
     render() {
         return (
-            <div className={"row"}  style={{height: "150px", width: "100%"}}>
-            	<div className={"border-bottom"}  style={{height: "100%", width: "100%", padding: "0% 1%"}}>
-                    <div className={"font-18"} style={{width: "100%", height: "20%", display: "flex", alignItems: "center", justifyContent: "center"}}>
-                        Seleccionar Campo
+            <div className={"row"}  style={{width: "100%"}}>
+            	<div style={{width: "100%", borderBottom: "3px solid #d2d2e4"}}>
+                    <div className={"font-18"} style={{width: "100%", height: "20px", display: "flex", alignItems: "center", justifyContent: "center"}}>
+                        <h4>Seleccionar Campo</h4>
                     </div>
-                    <div className={"row"} style={{height: "80%", width: "100%"}}>
-                        <ListasSeleVariable mostrarRosa={true} variables={this.props.campos} seleccionarMultiple={false} retornoSeleccion={this.checkFieldType} titulo={"Campos De Tabla"}></ListasSeleVariable>
-                    </div>
-                    {
-                        this.props.calculoVariables
-                        ?
-                            <div style={{width: "100%", height: "100%"}}>
-                                {this.props.variables.map((variable, i) => (
-                                    <div style={{width: "100%", height: "100%"}} key={variable.ID}>
-                                        {
-                                            this.props.camposVariables[i] != undefined
-                                            ?
-                                                <div className={"row"} style={{height: "100%", width: "100%"}}>
-                                                    <ListasSeleVariable mostrarRosa={true} variables={this.props.camposVariables[i]} seleccionarMultiple={false} retornoSeleccion={this.retornoSeleccionVariable} titulo={variable.nombre}></ListasSeleVariable>
-                                                </div>
-                                            : null
-                                        }
-                                    </div>
-                                ))}
-                            </div>
-                        : null
-                    }
+                    <Accordion showTrash={false} showEdit={false} color={"#ffffff"}>
+                        <div label={"Conexiones"}>
+                            {this.props.conexiones.map((conexion, i) => (
+                                <div className={"row"} key={conexion.valor+i} style={{height: "80%", width: "100%"}}>
+                                    <ListasSeleVariable mostrarRosa={false} variables={this.props.camposConexiones[i]} seleccionarMultiple={false} retornoSeleccion={this.checkFieldType} titulo={conexion.valor}></ListasSeleVariable>
+                                </div>
+                            ))}
+                        </div>
+                        <div label={"Variables"}>
+                            {this.props.variables.map((variable, i) => (
+                                <div className={"row"} key={variable.valor+i} style={{height: "80%", width: "100%"}}>
+                                    <ListasSeleVariable mostrarRosa={true} variables={this.props.camposVariables[i]} seleccionarMultiple={false} retornoSeleccion={this.checkFieldType} titulo={variable.valor}></ListasSeleVariable>
+                                </div>
+                            ))}
+                        </div>
+                    </Accordion>
                     <br/>
                 </div>
             </div>

@@ -151,10 +151,10 @@ function (_React$Component) {
         return _react["default"].createElement("div", {
           className: "row",
           style: {
-            width: "100%"
+            width: "100%",
+            borderBottom: "3px solid #d2d2e4"
           }
         }, _react["default"].createElement("div", {
-          className: "border-bottom",
           style: {
             width: "100%"
           }
@@ -191,15 +191,15 @@ function (_React$Component) {
             height: "30px",
             width: "30px"
           }
-        }))))), _react["default"].createElement("br", null));
+        })))), _react["default"].createElement("br", null)), _react["default"].createElement("br", null));
       } else if (this.props.esNumero || this.props.esFecha || this.props.esTexto) {
         return _react["default"].createElement("div", {
           className: "row",
           style: {
-            width: "100%"
+            width: "100%",
+            borderBottom: "3px solid #d2d2e4"
           }
         }, _react["default"].createElement("div", {
-          className: "border-bottom",
           style: {
             width: "100%",
             height: "100%"
@@ -342,7 +342,7 @@ function (_React$Component) {
             height: "30px",
             width: "30px"
           }
-        })))))), _react["default"].createElement("br", null));
+        }))))), _react["default"].createElement("br", null)), _react["default"].createElement("br", null));
       }
       /*else if(this.props.esTexto) {
         return (

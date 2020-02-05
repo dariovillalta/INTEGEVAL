@@ -45,7 +45,7 @@ export default class ListasSeleVariable extends React.Component {
         this.setState({
             indicesVarSeleccionados: nuevoArr
         });
-        this.props.retornoSeleccion(arregloCeldasSeleccionadas);
+        this.props.retornoSeleccion(arregloCeldasSeleccionadas, this.props.indiceTabla);
     }
 
     deseleccionarIndice (variable, indice) {
@@ -60,7 +60,7 @@ export default class ListasSeleVariable extends React.Component {
         this.setState({
             indicesVarSeleccionados: nuevoArr
         });
-        this.props.retornoSeleccion(arregloCeldasSeleccionadas);
+        this.props.retornoSeleccion(arregloCeldasSeleccionadas, this.props.indiceTabla);
     }
     
     render() {

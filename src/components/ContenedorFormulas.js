@@ -15,20 +15,8 @@ export default class ContenedorFormulas extends React.Component {
             mostrarCrearCondicion: true,
             asignaciones: []
         }
-        this.mostrarCrearCondicion = this.mostrarCrearCondicion.bind(this);
-        this.mostrarAsignarFormula = this.mostrarAsignarFormula.bind(this);
-    }
-
-    mostrarCrearCondicion () {
-        this.setState({
-            mostrarCrearCondicion: true
-        });
-    }
-
-    mostrarAsignarFormula () {
-        this.setState({
-            mostrarCrearCondicion: false
-        });
+        /*this.mostrarCrearCondicion = this.mostrarCrearCondicion.bind(this);
+        this.mostrarAsignarFormula = this.mostrarAsignarFormula.bind(this);*/
     }
     
     render() {
@@ -37,12 +25,15 @@ export default class ContenedorFormulas extends React.Component {
                 <h3 className={"card-header"}>Crear Asignación / Fórmula</h3>
                 <br/>
                 <div className={"text-center"}>
-                    <a className={"btn btn-success col-xs-10 col-10 btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.props.crearRiesgo}>Crear Asignación / Fórmula</a>
+                    <a className={"btn btn-success col-xs-10 col-10 btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={() => this.props.goToCreateFormula(-1)}>Crear Asignación / Fórmula</a>
                 </div>
                 <hr/>
                 <div className={"text-center"}>
                     {this.props.asignaciones.map((asignacion, i) => (
-                        <a className={"btn btn-success btn-primary col-xs-10 col-10 btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.props.crearRiesgo}>asignacion.formula</a>
+                        <div>
+                            <input type="radio" name="formulas" className="custom-control-input"/>
+                            <a className={"btn btn-success btn-primary col-xs-10 col-10 btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={() => this.props.goToCreateFormula(i)}>{asignacion.formula}</a>
+                        </div>
                     ))}
                     {
                         this.props.asignaciones.length == 0

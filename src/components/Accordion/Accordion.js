@@ -66,7 +66,14 @@ export default class Accordion extends React.Component {
         } else {
             return (
                 <div style={{width: "100%"}}>
-                    <AccordionTile showTrash={this.props.showTrash} deleteVariable={this.props.deleteVariable} showEdit={this.props.showEdit} editVariable={this.props.editVariable} isOpen={!!openSections[children.props.label]} label={children.props.label} onClick={onClick} color={this.props.color}>
+                    <AccordionTile showTrash={this.props.showTrash}
+                                    deleteVariable={this.props.deleteVariable}
+                                    showEdit={this.props.showEdit}
+                                    editVariable={this.props.editVariable}
+                                    isOpen={!!openSections[children.props.label]}
+                                    label={children.props.label}
+                                    onClick={onClick}
+                                    color={this.props.color}>
                         {children}
                     </AccordionTile>
                 </div>

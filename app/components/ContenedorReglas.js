@@ -27,8 +27,6 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
-var indexSeleccionado;
-
 var ContenedorReglas =
 /*#__PURE__*/
 function (_React$Component) {
@@ -68,19 +66,23 @@ function (_React$Component) {
       }
 
       ;
+      var indexSeleccionado, tipoIndiceSeleccionado;
 
       if (this.props.reglas.length > 0) {
         if (this.props.reglas.length == 1) {
           indexSeleccionado = 0;
 
-          if (index.localeCompare("arriba") == 0) {
+          if (objeto.localeCompare("arriba") == 0) {
             $("#reglaInit").addClass("colorPunteroFormula");
             $("#reglaInit").addClass("blink");
-          } else if (index.localeCompare("abajo") == 0) {
+            tipoIndiceSeleccionado = 'arriba';
+          } else if (objeto.localeCompare("abajo") == 0) {
             $("#reglaFin").addClass("colorPunteroFormula");
             $("#reglaFin").addClass("blink");
+            tipoIndiceSeleccionado = 'abajo';
           } else {
             $("#unicaRegla").css("border", "2px solid #F9D342");
+            if (this.props.reglas[index].esCondicion) tipoIndiceSeleccionado = 'esOtraRegla';else tipoIndiceSeleccionado = 'esOtraFormula';
           }
         } else {
           indexSeleccionado = index;
@@ -88,13 +90,18 @@ function (_React$Component) {
           if (objeto.localeCompare("arriba") == 0) {
             $("#reglaInit" + index).addClass("colorPunteroFormula");
             $("#reglaInit" + index).addClass("blink");
+            tipoIndiceSeleccionado = 'arriba';
           } else if (objeto.localeCompare("abajo") == 0) {
             $("#reglaFin" + index).addClass("colorPunteroFormula");
             $("#reglaFin" + index).addClass("blink");
+            tipoIndiceSeleccionado = 'abajo';
           } else {
             $("#regla" + index).css("border", "2px solid #F9D342");
+            if (this.props.reglas[index].esCondicion) tipoIndiceSeleccionado = 'esOtraRegla';else tipoIndiceSeleccionado = 'esOtraFormula';
           }
         }
+
+        this.props.retornarIndiceSeleccionado(indexSeleccionado, tipoIndiceSeleccionado);
       }
     }
   }, {
@@ -163,7 +170,8 @@ function (_React$Component) {
       }), _react["default"].createElement("br", null)) : null, this.props.reglas.length > 1 ? _react["default"].createElement("div", {
         style: {
           width: "100%",
-          height: "100%"
+          height: "100%",
+          overflowX: "scroll"
         }
       }, this.props.reglas.map(function (regla, i) {
         return _react["default"].createElement("div", {
@@ -237,7 +245,7 @@ function (_React$Component) {
             backgroundColor: "white",
             borderRadius: "15px",
             padding: "0% 2%",
-            width: "80%",
+            width: 100 - _this2.props.reglas[i].nivel * 10 + "%",
             marginLeft: "auto",
             marginRight: "0"
           }

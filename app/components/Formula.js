@@ -50,6 +50,34 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 //const campos = [{valor: "idCLiente", tipo: "variable"}, {valor: "saldoTotal", tipo: "variable"}, {valor: "tipoPersona", tipo: "variable"}, {valor: "impuestosTotal", tipo: "variable"}, {valor: "nombreCliente", tipo: "variable"}, {valor: "diasMora", tipo: "variable"}, {valor: "mesMora", tipo: "variable"}];
 //var tablas = [], camposTablas = [];
 var operaciones = [{
+  valor: "Asignar Valor Único",
+  tipo: "signo"
+}, {
+  valor: "Asignar Valor Multiples",
+  tipo: "signo"
+}, {
+  valor: "Contar",
+  tipo: "signo"
+}];
+var operacionesNumero = [{
+  valor: "Asignar Valor Único",
+  tipo: "signo"
+}, {
+  valor: "Asignar Valor Multiples",
+  tipo: "signo"
+}, {
+  valor: "Contar",
+  tipo: "signo"
+}, {
+  valor: "Calcular Promedio",
+  tipo: "signo"
+}, {
+  valor: "Máximo",
+  tipo: "signo"
+}, {
+  valor: "Mínimo",
+  tipo: "signo"
+}, {
   valor: "+",
   tipo: "signo"
 }, {
@@ -61,11 +89,47 @@ var operaciones = [{
 }, {
   valor: "/",
   tipo: "signo"
+}];
+var operacionesFecha = [{
+  valor: "Asignar Valor Único",
+  tipo: "signo"
 }, {
-  valor: "COUNT",
+  valor: "Asignar Valor Multiples",
+  tipo: "signo"
+}, {
+  valor: "Contar",
   tipo: "signo"
 }];
-var variables = [];
+var operacionesBoolean = [{
+  valor: "Asignar Valor Único",
+  tipo: "signo"
+}, {
+  valor: "Asignar Valor Multiples",
+  tipo: "signo"
+}, {
+  valor: "Contar",
+  tipo: "signo"
+}];
+var operacionesCadena = [{
+  valor: "Asignar Valor Único",
+  tipo: "signo"
+}, {
+  valor: "Asignar Valor Multiples",
+  tipo: "signo"
+}, {
+  valor: "Contar",
+  tipo: "signo"
+}, {
+  valor: "+",
+  tipo: "signo"
+}];
+/*const operaciones = [{valor: "Asignar Valor Único", tipo: "signo"}, {valor: "Asignar Valor Único Si", tipo: "signo"}, {valor: "Asignar Valor Multiples", tipo: "signo"}, {valor: "Asignar Valor Multiples Si", tipo: "signo"}, {valor: "Contar", tipo: "signo"}, {valor: "Contar Si", tipo: "signo"}];
+const operacionesNumero = [{valor: "Asignar Valor Único", tipo: "signo"}, {valor: "Asignar Valor Único Si", tipo: "signo"}, {valor: "Asignar Valor Multiples", tipo: "signo"}, {valor: "Asignar Valor Multiples Si", tipo: "signo"}, {valor: "Contar", tipo: "signo"}, {valor: "Contar Si", tipo: "signo"}, {valor: "Calcular Promedio", tipo: "signo"}, {valor: "Máximo", tipo: "signo"}, {valor: "Mínimo", tipo: "signo"}, {valor: "+", tipo: "signo"}, {valor: "-", tipo: "signo"}, {valor: "*", tipo: "signo"}, {valor: "/", tipo: "signo"}];
+const operacionesFecha = [{valor: "Asignar Valor Único", tipo: "signo"}, {valor: "Asignar Valor Único Si", tipo: "signo"}, {valor: "Asignar Valor Multiples", tipo: "signo"}, {valor: "Asignar Valor Multiples Si", tipo: "signo"}, {valor: "Contar", tipo: "signo"}, {valor: "Contar Si", tipo: "signo"}];
+const operacionesBoolean = [{valor: "Asignar Valor Único", tipo: "signo"}, {valor: "Asignar Valor Único Si", tipo: "signo"}, {valor: "Asignar Valor Multiples", tipo: "signo"}, {valor: "Asignar Valor Multiples Si", tipo: "signo"}, {valor: "Contar", tipo: "signo"}, {valor: "Contar Si", tipo: "signo"}];
+const operacionesCadena = [{valor: "Asignar Valor Único", tipo: "signo"}, {valor: "Asignar Valor Único Si", tipo: "signo"}, {valor: "Asignar Valor Multiples", tipo: "signo"}, {valor: "Asignar Valor Multiples Si", tipo: "signo"}, {valor: "Contar", tipo: "signo"}, {valor: "Contar Si", tipo: "signo"}, {valor: "+", tipo: "signo"}];*/
+
+var variablesEscalares = [];
 var objetos = [];
 var camposDeObjetos = [];
 var anchuraSeccionFormula = ["100%", "50", "33%", "25%", "25%", "17%", "15%", "13%", "11%", "10%", "9%"];
@@ -113,10 +177,17 @@ function (_React$Component) {
     _this.state = {
       formula: [],
       tablas: [],
-      camposTablas: []
+      camposTablas: [],
+      variablesEscalares: [],
+      variables: [],
+      camposVariables: [],
+      operaciones: operacionesCadena
     };
     _this.clickEnFormula = _this.clickEnFormula.bind(_assertThisInitialized(_this));
-    _this.retornoClickLista = _this.retornoClickLista.bind(_assertThisInitialized(_this));
+    _this.retornoSeleccionCampo = _this.retornoSeleccionCampo.bind(_assertThisInitialized(_this));
+    _this.retornoSeleccionOperacion = _this.retornoSeleccionOperacion.bind(_assertThisInitialized(_this));
+    _this.existeReglaAsignacion = _this.existeReglaAsignacion.bind(_assertThisInitialized(_this));
+    _this.retornarCodigoOperacion = _this.retornarCodigoOperacion.bind(_assertThisInitialized(_this));
     _this.agregarAFormula = _this.agregarAFormula.bind(_assertThisInitialized(_this));
     _this.updateFormulaState = _this.updateFormulaState.bind(_assertThisInitialized(_this));
     _this.getFormula = _this.getFormula.bind(_assertThisInitialized(_this));
@@ -126,11 +197,16 @@ function (_React$Component) {
     _this.getPalabraFormula = _this.getPalabraFormula.bind(_assertThisInitialized(_this));
     _this.agregarFormulaAnchuraYAltura = _this.agregarFormulaAnchuraYAltura.bind(_assertThisInitialized(_this));
     _this.findVariableInFormula = _this.findVariableInFormula.bind(_assertThisInitialized(_this));
-    _this.iniciarGuardarVariable = _this.iniciarGuardarVariable.bind(_assertThisInitialized(_this));
+    _this.iniciarGuardarFormula = _this.iniciarGuardarFormula.bind(_assertThisInitialized(_this));
     _this.guardarVariable = _this.guardarVariable.bind(_assertThisInitialized(_this));
     _this.loadTablas = _this.loadTablas.bind(_assertThisInitialized(_this));
     _this.initLoadTablasCampos = _this.initLoadTablasCampos.bind(_assertThisInitialized(_this));
     _this.loadTablasCampos = _this.loadTablasCampos.bind(_assertThisInitialized(_this));
+    _this.loadScalarVariables = _this.loadScalarVariables.bind(_assertThisInitialized(_this));
+    _this.loadScalarVariablesFields = _this.loadScalarVariablesFields.bind(_assertThisInitialized(_this));
+    _this.loadVariables = _this.loadVariables.bind(_assertThisInitialized(_this));
+    _this.initLoadVariablesCampos = _this.initLoadVariablesCampos.bind(_assertThisInitialized(_this));
+    _this.loadVariablesCampos = _this.loadVariablesCampos.bind(_assertThisInitialized(_this));
     return _this;
   }
 
@@ -141,8 +217,10 @@ function (_React$Component) {
       console.log(arrregloPrueba);
       this.findVariableInFormula(arrregloPrueba, "b", '');
       console.log( posicionDeIndicadorSeleccionadoEnFormula );*/
-      this.getFormula();
+      //this.getFormula();
       this.loadTablas();
+      this.loadScalarVariables();
+      this.loadVariables();
     }
   }, {
     key: "findVariableInFormula",
@@ -178,35 +256,24 @@ function (_React$Component) {
       console.log('nueva');
       console.log(nueva);*/
       for (var i = 0; i < this.state.formula.length; i++) {
-        $("#indicadorIzquierda" + this.state.formula[i].valor).removeClass("colorPunteroFormula");
-        $("#indicadorIzquierda" + this.state.formula[i].valor).removeClass("blink");
-        $("#indicadorIzquierda" + this.state.formula[i].valor).addClass("highlightFormulaBackground");
-        $("#indicadorDerecha" + this.state.formula[i].valor).removeClass("colorPunteroFormula");
-        $("#indicadorDerecha" + this.state.formula[i].valor).removeClass("blink");
-        $("#indicadorDerecha" + this.state.formula[i].valor).addClass("highlightFormulaBackground");
+        $("#indicadorIzquierda" + this.state.formula[i].valor + i).removeClass("colorPunteroFormula");
+        $("#indicadorIzquierda" + this.state.formula[i].valor + i).removeClass("blink");
+        $("#indicadorIzquierda" + this.state.formula[i].valor + i).addClass("highlightFormulaBackground");
+        $("#indicadorDerecha" + this.state.formula[i].valor + i).removeClass("colorPunteroFormula");
+        $("#indicadorDerecha" + this.state.formula[i].valor + i).removeClass("blink");
+        $("#indicadorDerecha" + this.state.formula[i].valor + i).addClass("highlightFormulaBackground");
       }
 
       ;
 
       if (posicion == null) {
-        console.log('1');
-        console.log(this.state.formula);
         posicionIndicador = '';
         this.findVariableInFormula(this.state.formula, nombre, '');
-        console.log('posicionDeIndicadorSeleccionadoEnFormula');
-        console.log(posicionDeIndicadorSeleccionadoEnFormula);
 
         var temp = _toConsumableArray(this.state.formula);
 
-        console.log('temp');
-        console.log(temp);
-        console.log(temp + posicionDeIndicadorSeleccionadoEnFormula);
         var tempVar;
         eval("tempVar = temp" + posicionDeIndicadorSeleccionadoEnFormula);
-        console.log('index = ' + index);
-        console.log('tempVar');
-        console.log(tempVar);
-        console.log(tempVar.activa);
         tempVar.activa = !tempVar.activa;
         temp.splice(index, 1, tempVar);
         this.setState({
@@ -215,21 +282,17 @@ function (_React$Component) {
       } else if (posicion.localeCompare("izquierda") == 0) {
         console.log('2');
         posicionIndicador = 'izquierda';
-        $("#indicadorIzquierda" + nombre).addClass("colorPunteroFormula");
-        $("#indicadorIzquierda" + nombre).addClass("blink");
-        $("#indicadorIzquierda" + nombre).removeClass("highlightFormulaBackground");
+        $("#indicadorIzquierda" + nombre + index).addClass("colorPunteroFormula");
+        $("#indicadorIzquierda" + nombre + index).addClass("blink");
+        $("#indicadorIzquierda" + nombre + index).removeClass("highlightFormulaBackground");
         this.findVariableInFormula(this.state.formula, nombre, '');
-        console.log('posicionDeIndicadorSeleccionadoEnFormula');
-        console.log(posicionDeIndicadorSeleccionadoEnFormula);
       } else if (posicion.localeCompare("derecha") == 0) {
         console.log('3');
         posicionIndicador = 'derecha';
-        $("#indicadorDerecha" + nombre).addClass("colorPunteroFormula");
-        $("#indicadorDerecha" + nombre).addClass("blink");
-        $("#indicadorDerecha" + nombre).removeClass("highlightFormulaBackground");
+        $("#indicadorDerecha" + nombre + index).addClass("colorPunteroFormula");
+        $("#indicadorDerecha" + nombre + index).addClass("blink");
+        $("#indicadorDerecha" + nombre + index).removeClass("highlightFormulaBackground");
         this.findVariableInFormula(this.state.formula, nombre, '');
-        console.log('posicionDeIndicadorSeleccionadoEnFormula');
-        console.log(posicionDeIndicadorSeleccionadoEnFormula);
       } else if (posicion.localeCompare("empty") == 0) {
         if ($("#indicadorFormulaVacia").hasClass("colorPunteroFormula")) {
           $("#indicadorFormulaVacia").removeClass("blink");
@@ -241,44 +304,150 @@ function (_React$Component) {
       }
     }
   }, {
-    key: "retornoClickLista",
-    value: function retornoClickLista(esOperacionLista, variablesNuevas) {
-      if (esOperacionLista) {
-        operacionSeleccionada = variablesNuevas;
-      } else {
-        variableSeleccionada = variablesNuevas;
+    key: "retornoSeleccionCampo",
+    value: function retornoSeleccionCampo(esOperacion, variable, posicionTabla) {
+      if (variable[0].valor.length > 0) {
+        var columnaSeleccionada = variable[0];
+        variableSeleccionada = variable[0];
+        console.log('variableSeleccionada');
+        console.log(variableSeleccionada);
+        var tipoVariable = '';
+
+        if (columnaSeleccionada.tipo.localeCompare("int") == 0 || columnaSeleccionada.tipo.localeCompare("decimal") == 0) {
+          tipoVariable = 'Número';
+          this.setState({
+            operaciones: operacionesNumero
+          });
+        } else if (columnaSeleccionada.tipo.localeCompare("varchar") == 0) {
+          tipoVariable = 'Cadena';
+          this.setState({
+            operaciones: operacionesCadena
+          });
+        } else if (columnaSeleccionada.tipo.localeCompare("date") == 0) {
+          tipoVariable = 'Fecha';
+          this.setState({
+            operaciones: operacionesFecha
+          });
+        } else if (columnaSeleccionada.tipo.localeCompare("bit") == 0) {
+          tipoVariable = 'Booleano';
+          this.setState({
+            operaciones: operacionesBoolean
+          });
+        }
+
+        this.props.retornoCampo(columnaSeleccionada, tipoVariable, posicionTabla);
+      }
+    }
+  }, {
+    key: "retornoSeleccionOperacion",
+    value: function retornoSeleccionOperacion(esOperacion, operacion) {
+      if (operacion[0].valor.length > 0) {
+        operacionSeleccionada = operacion[0];
+        this.props.retornoOperacion(operacionSeleccionada);
+      }
+    }
+  }, {
+    key: "existeReglaAsignacion",
+    value: function existeReglaAsignacion(operacion) {
+      for (var i = 0; i < this.state.operaciones.length; i++) {
+        if (this.state.operaciones[i].valor.localeCompare("Asignar Valor Único") == 0 && this.state.operaciones[i].valor.localeCompare(operacion) == 0 || this.state.operaciones[i].valor.localeCompare("Asignar Valor Único Si") == 0 && this.state.operaciones[i].valor.localeCompare(operacion) == 0 || this.state.operaciones[i].valor.localeCompare("Asignar Valor Multiples") == 0 && this.state.operaciones[i].valor.localeCompare(operacion) == 0 || this.state.operaciones[i].valor.localeCompare("Asignar Valor Multiples Si") == 0 && this.state.operaciones[i].valor.localeCompare(operacion) == 0 || this.state.operaciones[i].valor.localeCompare("Contar") == 0 && this.state.operaciones[i].valor.localeCompare(operacion) == 0 || this.state.operaciones[i].valor.localeCompare("Contar Si") == 0 && this.state.operaciones[i].valor.localeCompare(operacion) == 0 || this.state.operaciones[i].valor.localeCompare("Calcular Promedio") == 0 && this.state.operaciones[i].valor.localeCompare(operacion) == 0 || this.state.operaciones[i].valor.localeCompare("Máximo") == 0 && this.state.operaciones[i].valor.localeCompare(operacion) == 0 || this.state.operaciones[i].valor.localeCompare("Mínimo") == 0 && this.state.operaciones[i].valor.localeCompare(operacion) == 0
+        /*|| 
+        this.state.operaciones[i].valor.localeCompare("Sumar") == 0*/
+        ) {
+            return true;
+          }
       }
 
-      console.log('operacionSeleccionada');
-      console.log(operacionSeleccionada);
-      console.log('variableSeleccionada');
-      console.log(variableSeleccionada);
+      ;
+      return false;
+    }
+  }, {
+    key: "retornarCodigoOperacion",
+    value: function retornarCodigoOperacion(codigo) {
+      if (codigo.localeCompare("Asignar Valor Único") == 0) {
+        return "ASIGUNI";
+      }
+
+      if (codigo.localeCompare("Asignar Valor Único Si") == 0) {
+        return "ASIGUNI";
+      }
+
+      if (codigo.localeCompare("Asignar Valor Multiples") == 0) {
+        return "ASIGMUL";
+      }
+
+      if (codigo.localeCompare("Asignar Valor Multiples Si") == 0) {
+        return "ASIGMUL";
+      }
+
+      if (codigo.localeCompare("Contar") == 0) {
+        return "COUNT";
+      }
+
+      if (codigo.localeCompare("Contar Si") == 0) {
+        return "COUNT";
+      }
+
+      if (codigo.localeCompare("Calcular Promedio") == 0) {
+        return "PROM";
+      }
+
+      if (codigo.localeCompare("Máximo") == 0) {
+        return "MAX";
+      }
+
+      if (codigo.localeCompare("Mínimo") == 0) {
+        return "MIN";
+      }
+
+      if (codigo.localeCompare("Sumar") == 0) {
+        return "SUM";
+      }
     }
   }, {
     key: "agregarAFormula",
     value: function agregarAFormula() {
+      console.log('this.state.formula');
+      console.log(this.state.formula);
+
       if (this.state.formula.length == 0 && $("div").hasClass("colorPunteroFormula")) {
         //caso inicial, agregar primera variable
         var formulaTemp = _toConsumableArray(this.state.formula);
 
-        variableSeleccionada[0].activa = false;
-        variableSeleccionada[0].tipo = "variable";
+        variableSeleccionada.activa = false;
+        variableSeleccionada.tipo = "variable";
+        variableSeleccionada.texto = variableSeleccionada.valor;
+        variableSeleccionada.operacion = '';
+
+        if (this.existeReglaAsignacion(operacionSeleccionada.valor)) {
+          variableSeleccionada.texto = this.retornarCodigoOperacion(operacionSeleccionada.valor) + "(" + variableSeleccionada.valor + ")";
+          variableSeleccionada.operacion = this.retornarCodigoOperacion(operacionSeleccionada.valor);
+        }
+
         formulaTemp = formulaTemp.concat(variableSeleccionada);
-        console.log('formulaTemp 1');
-        console.log(formulaTemp);
         this.agregarFormulaAnchuraYAltura(formulaTemp, false);
-        console.log('formulaTemp 2');
-        console.log(formulaTemp);
         this.setState({
           formula: formulaTemp
-        }, console.log(this.state.formula));
+        }, this.iniciarGuardarFormula);
+        var self = this;
+        setTimeout(function () {
+          console.log(self.state.formula);
+        }, 2000);
       } else if (this.state.formula.length > 0 && $("div").hasClass("colorPunteroFormula")) {
         //caso inicial, agregar primera variable
         var formulaTemp = _toConsumableArray(this.state.formula); //var formulaTemp = this.state.formula.slice();
 
 
-        variableSeleccionada[0].activa = false;
-        variableSeleccionada[0].tipo = "variable";
+        variableSeleccionada.activa = false;
+        variableSeleccionada.tipo = "variable";
+        variableSeleccionada.texto = variableSeleccionada.valor;
+        variableSeleccionada.operacion = '';
+
+        if (this.existeReglaAsignacion(operacionSeleccionada.valor)) {
+          variableSeleccionada.texto = this.retornarCodigoOperacion(operacionSeleccionada.valor) + "(" + variableSeleccionada.valor + ")";
+          variableSeleccionada.operacion = this.retornarCodigoOperacion(operacionSeleccionada.valor);
+        }
+
         var posicionArreglo = '',
             ultimoIndice = '',
             noHaLeidoUltimoIndice = true;
@@ -300,76 +469,41 @@ function (_React$Component) {
         ; //var tempVar;
         //eval("tempVar = temp"+posicionArreglo);
 
-        console.log('posicionArreglo');
-        console.log(posicionArreglo);
-        console.log('ultimoIndice');
-        console.log(ultimoIndice);
-        console.log('formulaTemp');
-        console.log(formulaTemp);
+        console.log('variableSeleccionada');
+        console.log(variableSeleccionada);
+        console.log('operacionSeleccionada');
+        console.log(operacionSeleccionada);
 
         if (posicionIndicador.localeCompare("derecha") == 0) {
           if (posicionArreglo.length > 0) {
-            formulaTemp[posicionArreglo].splice(parseInt(ultimoIndice) + 1, 0, variableSeleccionada[0]);
-            formulaTemp[posicionArreglo].splice(parseInt(ultimoIndice) + 1, 0, operacionSeleccionada[0]);
+            formulaTemp[posicionArreglo].splice(parseInt(ultimoIndice) + 1, 0, variableSeleccionada);
+            formulaTemp[posicionArreglo].splice(parseInt(ultimoIndice) + 1, 0, operacionSeleccionada);
           } else {
-            formulaTemp.splice(parseInt(ultimoIndice) + 1, 0, variableSeleccionada[0]);
-            formulaTemp.splice(parseInt(ultimoIndice) + 1, 0, operacionSeleccionada[0]);
+            formulaTemp.splice(parseInt(ultimoIndice) + 1, 0, variableSeleccionada);
+            formulaTemp.splice(parseInt(ultimoIndice) + 1, 0, operacionSeleccionada);
           } //eval("formulaTemp[posicionArreglo].splice(parseInt(ultimoIndice)+1, 0, variableSeleccionada[0])");
 
         } else {
           if (posicionArreglo.length > 0) {
-            formulaTemp[posicionArreglo].splice(parseInt(ultimoIndice), 0, operacionSeleccionada[0]);
-            formulaTemp[posicionArreglo].splice(parseInt(ultimoIndice), 0, variableSeleccionada[0]);
+            formulaTemp[posicionArreglo].splice(parseInt(ultimoIndice), 0, operacionSeleccionada);
+            formulaTemp[posicionArreglo].splice(parseInt(ultimoIndice), 0, variableSeleccionada);
           } else {
-            formulaTemp.splice(parseInt(ultimoIndice), 0, operacionSeleccionada[0]);
-            formulaTemp.splice(parseInt(ultimoIndice), 0, variableSeleccionada[0]);
+            formulaTemp.splice(parseInt(ultimoIndice), 0, operacionSeleccionada);
+            formulaTemp.splice(parseInt(ultimoIndice), 0, variableSeleccionada);
           }
         }
 
-        console.log('formulaTemp 1');
-        console.log(formulaTemp);
         this.agregarFormulaAnchuraYAltura(formulaTemp, false);
-        console.log('formulaTemp 2');
-        console.log(formulaTemp);
         this.setState({
           formula: formulaTemp
-        }, console.log(this.state.formula));
+        }, this.iniciarGuardarFormula);
+        var self = this;
+        setTimeout(function () {
+          console.log(self.state.formula);
+        }, 2000);
       } else if (!$("div").hasClass("colorPunteroFormula")) {
         alert("Seleccione una posición en la fórmula.");
       }
-      /*var formulaTemp = [...this.state.formula];
-      variableSeleccionada[0].activa = false;
-      if(ladoIndice.localeCompare("centro") == 0) {
-          if(formulaTemp.length >= 3)
-              formulaTemp = [];
-          formulaTemp = formulaTemp.concat(variableSeleccionada);
-          ladoIndice = "izquierda";
-      } else if(ladoIndice.localeCompare("izquierda") == 0) {
-          if(formulaTemp.length >= 3)
-              formulaTemp = [];
-          formulaTemp.splice(0, 0, operacionSeleccionada[0]);
-          formulaTemp.splice(0, 0, variableSeleccionada[0]);
-      } else if(ladoIndice.localeCompare("derecha") == 0) {
-          if(formulaTemp.length >= 3)
-              formulaTemp = [];
-          formulaTemp = formulaTemp.concat(operacionSeleccionada);
-          formulaTemp = formulaTemp.concat(variableSeleccionada);
-      }
-      console.log('formulaTemp')
-      console.log(formulaTemp)
-      var width;
-      if(formulaTemp < anchuraSeccionFormula.length) {
-          width = anchuraSeccionFormula[formulaTemp.length-1];
-      } else {
-          width = anchuraSeccionFormula[anchuraSeccionFormula.length%formulaTemp.length];
-      }
-      this.setState({
-          formula: formulaTemp,
-          anchuraSeccionFormula: width
-      }, console.log(this.state.formula) );
-      console.log('this.state.formula')
-      console.log(this.state.formula)*/
-
     }
   }, {
     key: "updateFormulaState",
@@ -619,8 +753,8 @@ function (_React$Component) {
 
     }
   }, {
-    key: "iniciarGuardarVariable",
-    value: function iniciarGuardarVariable() {
+    key: "iniciarGuardarFormula",
+    value: function iniciarGuardarFormula() {
       var formula = '';
 
       for (var i = 0; i < this.state.formula.length; i++) {
@@ -629,7 +763,8 @@ function (_React$Component) {
 
       ;
       console.log('formula');
-      console.log(formula); //this.guardarVariable(formula);
+      console.log(formula);
+      this.props.anadirFormula(formula, this.state.formula); //this.guardarVariable(formula);
     }
   }, {
     key: "guardarVariable",
@@ -718,7 +853,10 @@ function (_React$Component) {
 
               for (var i = 0; i < result.recordset.length; i++) {
                 nombreColumnas.push({
-                  valor: result.recordset[i].COLUMN_NAME
+                  valor: result.recordset[i].COLUMN_NAME,
+                  tipo: result.recordset[i].DATA_TYPE,
+                  esFuenteDato: true,
+                  idConexionTabla: _this5.state.tablas[index].ID
                 });
               }
 
@@ -739,33 +877,164 @@ function (_React$Component) {
       }); // fin transaction
     }
   }, {
+    key: "loadScalarVariables",
+    value: function loadScalarVariables() {
+      var _this6 = this;
+
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("select * from Variables where esObjeto = 'false'", function (err, result) {
+          if (err) {
+            if (!rolledBack) {
+              console.log(err);
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              for (var i = 0; i < result.recordset.length; i++) {
+                _this6.loadScalarVariablesFields(result.recordset[i]);
+              }
+
+              ;
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
+    key: "loadScalarVariablesFields",
+    value: function loadScalarVariablesFields(variable) {
+      var _this7 = this;
+
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("select * from VariablesCampos where variableID = " + variable.ID, function (err, result) {
+          if (err) {
+            if (!rolledBack) {
+              console.log(err);
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              var temp = _toConsumableArray(_this7.state.variablesEscalares);
+
+              for (var i = 0; i < result.recordset.length; i++) {
+                temp.push({
+                  valor: result.recordset[i].nombre,
+                  tipo: result.recordset[i],
+                  esFuenteDato: false
+                });
+              }
+
+              ;
+
+              _this7.setState({
+                variablesEscalares: temp
+              });
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
+    key: "loadVariables",
+    value: function loadVariables() {
+      var _this8 = this;
+
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("select * from Variables where esObjeto = 'true'", function (err, result) {
+          if (err) {
+            if (!rolledBack) {
+              console.log(err);
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              _this8.setState({
+                variables: result.recordset
+              }, _this8.initLoadVariablesCampos);
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
+    key: "initLoadVariablesCampos",
+    value: function initLoadVariablesCampos() {
+      var arregloTemp = [];
+
+      for (var i = 0; i < this.state.variables.length; i++) {
+        this.loadVariablesCampos(this.state.variables[i].ID, i, arregloTemp);
+      }
+
+      ;
+    }
+  }, {
+    key: "loadVariablesCampos",
+    value: function loadVariablesCampos(variableID, index, array) {
+      var _this9 = this;
+
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("select * from VariablesCampos where variableID = " + variableID, function (err, result) {
+          if (err) {
+            if (!rolledBack) {
+              console.log(err);
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              var nombreColumnas = [];
+
+              for (var i = 0; i < result.recordset.length; i++) {
+                nombreColumnas.push({
+                  valor: result.recordset[i].nombre,
+                  tipo: result.recordset[i].tipo,
+                  esFuenteDato: false
+                });
+              }
+
+              ;
+
+              if (array[index] == undefined) {
+                array[index] = [];
+              }
+
+              array[index] = $.merge(array[index], nombreColumnas);
+
+              _this9.setState({
+                camposVariables: array
+              });
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
     key: "render",
     value: function render() {
-      return _react["default"].createElement("div", null, _react["default"].createElement("div", {
-        className: "row"
-      }, _react["default"].createElement("div", {
-        className: "col-xl-6 col-lg-6 col-md-6 col-sm-6 col-6"
-      }, _react["default"].createElement("div", {
-        className: "text-center",
-        style: {
-          width: "100%"
-        }
-      }, _react["default"].createElement("a", {
-        href: "#",
-        className: "btn btn-primary font-bold font-20",
-        onClick: this.props.showVariables
-      }, "Ir a Condiciones"))), _react["default"].createElement("div", {
-        className: "col-xl-6 col-lg-6 col-md-6 col-sm-6 col-6"
-      }, _react["default"].createElement("div", {
-        className: "text-center",
-        style: {
-          width: "100%"
-        }
-      }, _react["default"].createElement("a", {
-        href: "#",
-        className: "btn btn-brand font-bold font-20",
-        onClick: this.props.showVariables
-      }, "Crear Variables")))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
+      return _react["default"].createElement("div", null, this.props.navbar, _react["default"].createElement("div", {
         className: "row"
       }, _react["default"].createElement("div", {
         className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
@@ -835,11 +1104,11 @@ function (_React$Component) {
         mostrarRosa: true,
         tablas: this.state.tablas,
         camposTablas: this.state.camposTablas,
-        variables: variables,
-        objetos: objetos,
-        camposDeObjetos: camposDeObjetos,
+        variables: this.state.variablesEscalares,
+        objetos: this.state.variables,
+        camposDeObjetos: this.state.camposVariables,
         seleccionarMultiple: false,
-        retornoSeleccionVariable: this.retornoClickLista
+        retornoSeleccionVariable: this.retornoSeleccionCampo
       }))), _react["default"].createElement("div", {
         style: {
           width: "50%",
@@ -867,9 +1136,9 @@ function (_React$Component) {
       }, _react["default"].createElement(_ListasSeleVariableContenedorOperador["default"], {
         esOperacion: true,
         mostrarRosa: false,
-        operaciones: operaciones,
+        operaciones: this.state.operaciones,
         seleccionarMultiple: false,
-        retornoSeleccionVariable: this.retornoClickLista
+        retornoSeleccionVariable: this.retornoSeleccionOperacion
       })))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
         className: "text-center",
         style: {
@@ -879,18 +1148,7 @@ function (_React$Component) {
         href: "#",
         className: "btn btn-primary active",
         onClick: this.agregarAFormula
-      }, "Agregar a F\xF3rmula")), _react["default"].createElement("br", null))))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
-        className: "text-center",
-        style: {
-          width: "100%"
-        }
-      }, _react["default"].createElement("a", {
-        className: "btn btn-success btn-block btnWhiteColorHover font-bold font-20",
-        style: {
-          color: "#fafafa"
-        },
-        onClick: this.iniciarGuardarVariable
-      }, "Guardar F\xF3rmula")), _react["default"].createElement("br", null));
+      }, "Agregar F\xF3rmula")), _react["default"].createElement("br", null))))), _react["default"].createElement("br", null));
     }
   }]);
 

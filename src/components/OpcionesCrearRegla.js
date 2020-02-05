@@ -12,8 +12,7 @@ export default class OpcionesCrearRegla extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            mostrarCrearCondicion: true,
-            asignaciones: []
+            mostrarCrearCondicion: true
         }
         this.mostrarCrearCondicion = this.mostrarCrearCondicion.bind(this);
         this.mostrarAsignarFormula = this.mostrarAsignarFormula.bind(this);
@@ -22,12 +21,16 @@ export default class OpcionesCrearRegla extends React.Component {
     mostrarCrearCondicion () {
         this.setState({
             mostrarCrearCondicion: true
+        }, () => {
+            this.props.retornarEstadoVistaEsCondicion(this.state.mostrarCrearCondicion);
         });
     }
 
     mostrarAsignarFormula () {
         this.setState({
             mostrarCrearCondicion: false
+        }, () => {
+            this.props.retornarEstadoVistaEsCondicion(this.state.mostrarCrearCondicion);
         });
     }
     
@@ -36,10 +39,10 @@ export default class OpcionesCrearRegla extends React.Component {
             <div style={{width: "100%"}}>
                 <div className={"row"} style={{width: "100%"}}>
                     <div style={{backgroundColor: "#f5f5f5", height: "40px", width: "100%", display: "flex", alignItems: "center", justifyContent: "center"}}>
-                        <div className={"border-right addPointer"} style={{backgroundColor: "white", height: "98%", width: "40%", display: "flex", alignItems: "center", justifyContent: "center"}} onClick={this.mostrarCrearCondicion}>
+                        <div className={"border-right addPointer"} style={{backgroundColor: "white", height: "98%", width: "40%", display: "flex", alignItems: "center", justifyContent: "center", borderBottom: this.state.mostrarCrearCondicion ? "1px solid #304ffe" : ""}} onClick={this.mostrarCrearCondicion}>
                             CONDICIONES / COMPARACIONES
                         </div>
-                        <div className={"addPointer"} style={{backgroundColor: "white", height: "98%", width: "40%", display: "flex", alignItems: "center", justifyContent: "center"}} onClick={this.mostrarAsignarFormula}>
+                        <div className={"addPointer"} style={{backgroundColor: "white", height: "98%", width: "40%", display: "flex", alignItems: "center", justifyContent: "center", borderBottom: !this.state.mostrarCrearCondicion ? "1px solid #304ffe" : ""}} onClick={this.mostrarAsignarFormula}>
                             ASIGNACIONES / FÓRMULAS
                         </div>
                     </div>
@@ -52,7 +55,8 @@ export default class OpcionesCrearRegla extends React.Component {
                                         valoresDropdown={this.props.valoresDropdown}
                                         callbackCrearRegla={this.props.callbackCrearRegla}>
                             </VariableCreation>
-                        :   <ContenedorFormulas asignaciones={this.state.asignaciones}>
+                        :   <ContenedorFormulas asignaciones={this.props.asignaciones}
+                                                            goToCreateFormula={this.props.goToCreateFormula}>
                             </ContenedorFormulas>
                     }
                 </div>

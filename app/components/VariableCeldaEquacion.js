@@ -58,7 +58,7 @@ function (_React$Component) {
           "float": "left"
         }
       }, _react["default"].createElement("div", {
-        id: "indicadorIzquierda" + this.props.variable.valor,
+        id: "indicadorIzquierda" + this.props.variable.valor + this.props.index,
         className: "highlightFormulaBackground",
         style: {
           height: "80%",
@@ -99,7 +99,7 @@ function (_React$Component) {
         }
       }, _react["default"].createElement("p", {
         className: "highlightFormulaText"
-      }, this.props.variable.valor))), _react["default"].createElement("div", {
+      }, this.props.variable.texto))), _react["default"].createElement("div", {
         style: {
           height: "100%",
           width: "5%",
@@ -109,7 +109,7 @@ function (_React$Component) {
           "float": "left"
         }
       }, _react["default"].createElement("div", {
-        id: "indicadorDerecha" + this.props.variable.valor,
+        id: "indicadorDerecha" + this.props.variable.valor + this.props.index,
         className: "highlightFormulaBackground",
         style: {
           height: "80%",

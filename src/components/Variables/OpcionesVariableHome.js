@@ -12,7 +12,7 @@ export default class OpcionesVariableHome extends React.Component {
                                 <nav aria-label="breadcrumb">
                                     <ol className={"breadcrumb"}>
                                         <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.props.configuracionHome}><a href="#" className={"breadcrumb-link"}>Configuraci&oacute;n</a></li>
-                                        <li className={"breadcrumb-item active font-16"} aria-current="page">Tipo de Variables</li>
+                                        <li className={"breadcrumb-item active font-16"} aria-current="page">Tipo de Configuraci&oacute;n</li>
                                     </ol>
                                 </nav>
                             </div>
@@ -24,7 +24,7 @@ export default class OpcionesVariableHome extends React.Component {
                         <div className={"card influencer-profile-data"}>
                             <div className={"card-body"}>
                                 <div className={"row border-top border-bottom addPaddingToConfig"}>
-                                    <a className={"btn btn-outline-info btn-block btnWhiteColorHover font-bold font-20"} onClick={this.props.goFuentes}>Configuración de Conexiones y Variables de Origen</a>
+                                    <a className={"btn btn-outline-info btn-block btnWhiteColorHover font-bold font-20"} onClick={this.props.goFuentes}>Configuración de Conexiones</a>
                                     <a className={"btn btn-outline-brand btn-block btnWhiteColorHover font-bold font-20"} onClick={this.props.goVariables}>Creación / Configuración de Variables</a>
                                 </div>
                             </div>

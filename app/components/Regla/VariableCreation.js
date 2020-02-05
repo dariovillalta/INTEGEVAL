@@ -72,7 +72,10 @@ function (_React$Component) {
         titulo: "",
         mensaje: ""
       },
-      campos: [],
+      conexiones: [],
+      camposConexiones: [],
+      variables: [],
+      camposVariables: [],
       campoSeleccionadoNombre: '{campo}',
       textoOperacion: '{operación}',
       textoValor: '{valor}'
@@ -84,6 +87,12 @@ function (_React$Component) {
     _this.esFecha = _this.esFecha.bind(_assertThisInitialized(_this));
     _this.esTexto = _this.esTexto.bind(_assertThisInitialized(_this));
     _this.loadFields = _this.loadFields.bind(_assertThisInitialized(_this));
+    _this.getConections = _this.getConections.bind(_assertThisInitialized(_this));
+    _this.getFieldsConections = _this.getFieldsConections.bind(_assertThisInitialized(_this));
+    _this.getFieldConections = _this.getFieldConections.bind(_assertThisInitialized(_this));
+    _this.getVariables = _this.getVariables.bind(_assertThisInitialized(_this));
+    _this.getFieldsVariables = _this.getFieldsVariables.bind(_assertThisInitialized(_this));
+    _this.getFieldVariables = _this.getFieldVariables.bind(_assertThisInitialized(_this));
     _this.saveRule = _this.saveRule.bind(_assertThisInitialized(_this));
     _this.dismissReglaNewError = _this.dismissReglaNewError.bind(_assertThisInitialized(_this));
     _this.showSuccesMessage = _this.showSuccesMessage.bind(_assertThisInitialized(_this));
@@ -98,9 +107,10 @@ function (_React$Component) {
       if (this.props.calculoFuenteDatos) {//
       }
 
-      if (this.props.calculoVariables) {} //
-      //this.loadFields();
+      if (this.props.calculoVariables) {//
+      }
 
+      this.loadFields();
     }
   }, {
     key: "retornoSeleccionVariable",
@@ -169,6 +179,12 @@ function (_React$Component) {
   }, {
     key: "loadFields",
     value: function loadFields() {
+      this.getConections();
+      this.getVariables();
+    }
+  }, {
+    key: "getConections",
+    value: function getConections() {
       var _this2 = this;
 
       var transaction = new _mssql["default"].Transaction(this.props.pool);
@@ -178,7 +194,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("select * from Campos where tabla = 'Cliente' or tabla = 'Préstamo'", function (err, result) {
+        request.query("select * from Tablas", function (err, result) {
           if (err) {
             if (!rolledBack) {
               console.log(err);
@@ -190,26 +206,166 @@ function (_React$Component) {
               var temp = [];
 
               for (var i = 0; i < result.recordset.length; i++) {
-                var existe = false;
-
-                for (var j = 0; j < temp.length; j++) {
-                  if (temp[j].nombre.localeCompare(result.recordset[i].nombre) == 0) {
-                    existe = true;
-                    break;
-                  }
-                }
-
-                ;
-
-                if (existe == false) {
-                  temp.push(result.recordset[i]);
-                }
+                temp.push({
+                  valor: result.recordset[i].tabla
+                });
               }
 
               ;
 
               _this2.setState({
-                campos: temp
+                conexiones: temp
+              }, _this2.getFieldsConections);
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
+    key: "getFieldsConections",
+    value: function getFieldsConections() {
+      var arregloTemp = [];
+
+      for (var i = 0; i < this.state.conexiones.length; i++) {
+        this.getFieldConections(this.state.conexiones[i].valor, i, arregloTemp);
+      }
+
+      ;
+    }
+  }, {
+    key: "getFieldConections",
+    value: function getFieldConections(nombreTabla, index, array) {
+      var _this3 = this;
+
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("select * from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME = '" + nombreTabla + "'", function (err, result) {
+          if (err) {
+            if (!rolledBack) {
+              console.log(err);
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              var nombreColumnas = [];
+
+              for (var i = 0; i < result.recordset.length; i++) {
+                nombreColumnas.push({
+                  valor: result.recordset[i].COLUMN_NAME,
+                  tipo: result.recordset[i].DATA_TYPE
+                });
+              }
+
+              ;
+
+              if (array[index] == undefined) {
+                array[index] = [];
+              }
+
+              array[index] = $.merge(array[index], nombreColumnas);
+
+              _this3.setState({
+                camposConexiones: array
+              });
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
+    key: "getVariables",
+    value: function getVariables() {
+      var _this4 = this;
+
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("select * from Variables", function (err, result) {
+          if (err) {
+            if (!rolledBack) {
+              console.log(err);
+              transaction.rollback(function (err) {});
+              return [];
+            }
+          } else {
+            transaction.commit(function (err) {
+              var temp = [];
+
+              for (var i = 0; i < result.recordset.length; i++) {
+                temp.push({
+                  valor: result.recordset[i].nombre
+                });
+              }
+
+              ;
+
+              _this4.setState({
+                variables: temp
+              }, _this4.getFieldsVariables);
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
+    key: "getFieldsVariables",
+    value: function getFieldsVariables() {
+      var arregloTemp = [];
+
+      for (var i = 0; i < this.state.variables.length; i++) {
+        this.getFieldVariables(this.state.variables[i].ID, i, arregloTemp);
+      }
+
+      ;
+    }
+  }, {
+    key: "getFieldVariables",
+    value: function getFieldVariables(variableID, index, array) {
+      var _this5 = this;
+
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("select * from VariablesCampos where variableID = " + variableID, function (err, result) {
+          if (err) {
+            if (!rolledBack) {
+              console.log(err);
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              var nombreColumnas = [];
+
+              for (var i = 0; i < result.recordset.length; i++) {
+                nombreColumnas.push({
+                  valor: result.recordset[i].nombre,
+                  tipo: result.recordset[i].tipo
+                });
+              }
+
+              ;
+
+              if (array[index] == undefined) {
+                array[index] = [];
+              }
+
+              array[index] = $.merge(array[index], nombreColumnas);
+
+              _this5.setState({
+                camposVariables: array
               });
             });
           }
@@ -219,7 +375,7 @@ function (_React$Component) {
   }, {
     key: "saveRule",
     value: function saveRule() {
-      var _this3 = this;
+      var _this6 = this;
 
       var seleccionCampoIDSelect = $("#campo").val();
 
@@ -344,14 +500,14 @@ function (_React$Component) {
                                   }
 
                                   ;
-                                  var transaction1 = new _mssql["default"].Transaction(_this3.props.pool);
+                                  var transaction1 = new _mssql["default"].Transaction(_this6.props.pool);
                                   transaction1.begin(function (err) {
                                     var rolledBack = false;
                                     transaction1.on('rollback', function (aborted) {
                                       rolledBack = true;
                                     });
                                     var request1 = new _mssql["default"].Request(transaction1);
-                                    request1.query("insert into Reglas (campoTablaID, campoCampoID, campoTipo, operacion, tipoOperacion, valor, valorTipo, esListaValor, esCampoValor, valorTablaID, texto, nombreTablaRes, idTipoTabla) values (" + campoTablaID + ", " + campoID + ", '" + campoTipo + "', '" + operacion + "', '" + operacionTipo + "','" + valorCampos + "', '', '" + esListaValor + "', '" + esCampoValor + "', " + valorLista + ", '" + texto + "', '" + _this3.props.tipoTablaRes + "', " + _this3.props.idTipoTabla + ")", function (err, result) {
+                                    request1.query("insert into Reglas (campoTablaID, campoCampoID, campoTipo, operacion, tipoOperacion, valor, valorTipo, esListaValor, esCampoValor, valorTablaID, texto, nombreTablaRes, idTipoTabla) values (" + campoTablaID + ", " + campoID + ", '" + campoTipo + "', '" + operacion + "', '" + operacionTipo + "','" + valorCampos + "', '', '" + esListaValor + "', '" + esCampoValor + "', " + valorLista + ", '" + texto + "', '" + _this6.props.tipoTablaRes + "', " + _this6.props.idTipoTabla + ")", function (err, result) {
                                       if (err) {
                                         if (!rolledBack) {
                                           console.log(err);
@@ -359,7 +515,7 @@ function (_React$Component) {
                                         }
                                       } else {
                                         transaction1.commit(function (err) {
-                                          _this3.showSuccesMessage("Exito", "Regla creada con éxito.");
+                                          _this6.showSuccesMessage("Exito", "Regla creada con éxito.");
                                         });
                                       }
                                     });
@@ -577,14 +733,17 @@ function (_React$Component) {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          borderBottom: "1px solid #d2d2e4"
+          borderBottom: "3px solid #d2d2e4"
         }
-      }, "SI ", this.state.campoSeleccionadoNombre, " ", this.state.textoOperacion, " ", this.state.textoValor), _react["default"].createElement(_Campo["default"], {
+      }, "SI ", this.state.campoSeleccionadoNombre, " ", this.state.textoOperacion, " ", this.state.textoValor), _react["default"].createElement("br", null), _react["default"].createElement(_Campo["default"], {
         esNumero: this.esNumero,
         esBoolean: this.esBoolean,
         esFecha: this.esFecha,
         esTexto: this.esTexto,
-        campos: this.props.campos,
+        conexiones: this.state.conexiones,
+        camposConexiones: this.state.camposConexiones,
+        variables: this.state.variables,
+        camposVariables: this.state.camposVariables,
         retornoSeleccionVariable: this.retornoSeleccionVariable
       }, " "), _react["default"].createElement("br", null), _react["default"].createElement(_Operacion["default"], {
         esNumero: this.state.tipoCampo.esNumero,
@@ -592,7 +751,7 @@ function (_React$Component) {
         esFecha: this.state.tipoCampo.esFecha,
         esTexto: this.state.tipoCampo.esTexto,
         retornoSeleccionOperacion: this.retornoSeleccionOperacion
-      }, " "), _react["default"].createElement("br", null), _react["default"].createElement("br", null), _react["default"].createElement(_Valor["default"], {
+      }, " "), _react["default"].createElement("br", null), _react["default"].createElement(_Valor["default"], {
         esNumero: this.state.tipoCampo.esNumero,
         esBoolean: this.state.tipoCampo.esBoolean,
         esFecha: this.state.tipoCampo.esFecha,

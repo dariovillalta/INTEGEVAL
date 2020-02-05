@@ -84,8 +84,9 @@ function (_React$Component) {
       }, _react["default"].createElement("div", {
         className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
       }, _react["default"].createElement(_ContenedorReglas["default"], {
-        reglas: reglas
-      }, " "))));
+        reglas: this.state.reglas,
+        retornarIndiceSeleccionado: this.props.retornarIndiceSeleccionado
+      }))));
     }
   }]);
 

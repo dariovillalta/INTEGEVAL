@@ -48,8 +48,7 @@ function (_React$Component) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(OpcionesCrearRegla).call(this, props));
     _this.state = {
-      mostrarCrearCondicion: true,
-      asignaciones: []
+      mostrarCrearCondicion: true
     };
     _this.mostrarCrearCondicion = _this.mostrarCrearCondicion.bind(_assertThisInitialized(_this));
     _this.mostrarAsignarFormula = _this.mostrarAsignarFormula.bind(_assertThisInitialized(_this));
@@ -59,15 +58,23 @@ function (_React$Component) {
   _createClass(OpcionesCrearRegla, [{
     key: "mostrarCrearCondicion",
     value: function mostrarCrearCondicion() {
+      var _this2 = this;
+
       this.setState({
         mostrarCrearCondicion: true
+      }, function () {
+        _this2.props.retornarEstadoVistaEsCondicion(_this2.state.mostrarCrearCondicion);
       });
     }
   }, {
     key: "mostrarAsignarFormula",
     value: function mostrarAsignarFormula() {
+      var _this3 = this;
+
       this.setState({
         mostrarCrearCondicion: false
+      }, function () {
+        _this3.props.retornarEstadoVistaEsCondicion(_this3.state.mostrarCrearCondicion);
       });
     }
   }, {
@@ -99,7 +106,8 @@ function (_React$Component) {
           width: "40%",
           display: "flex",
           alignItems: "center",
-          justifyContent: "center"
+          justifyContent: "center",
+          borderBottom: this.state.mostrarCrearCondicion ? "1px solid #304ffe" : ""
         },
         onClick: this.mostrarCrearCondicion
       }, "CONDICIONES / COMPARACIONES"), _react["default"].createElement("div", {
@@ -110,7 +118,8 @@ function (_React$Component) {
           width: "40%",
           display: "flex",
           alignItems: "center",
-          justifyContent: "center"
+          justifyContent: "center",
+          borderBottom: !this.state.mostrarCrearCondicion ? "1px solid #304ffe" : ""
         },
         onClick: this.mostrarAsignarFormula
       }, "ASIGNACIONES / F\xD3RMULAS"))), _react["default"].createElement("div", {
@@ -126,7 +135,8 @@ function (_React$Component) {
         valoresDropdown: this.props.valoresDropdown,
         callbackCrearRegla: this.props.callbackCrearRegla
       }) : _react["default"].createElement(_ContenedorFormulas["default"], {
-        asignaciones: this.state.asignaciones
+        asignaciones: this.props.asignaciones,
+        goToCreateFormula: this.props.goToCreateFormula
       })));
     }
   }]);
