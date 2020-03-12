@@ -62,7 +62,8 @@ export default class ConfigVariablesContenedor extends React.Component {
                                 configuracionHome={this.props.configuracionHome}
                                 showFormula={this.props.showFormula}
                                 showCondicionVar={this.props.showCondicionVar}
-                                updateFormula={this.props.updateFormula}>
+                                updateFormula={this.props.updateFormula}
+                                showSQL={this.props.showSQL}>
                     </VariableHome>
                 </div>
             );

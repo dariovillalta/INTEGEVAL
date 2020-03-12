@@ -218,6 +218,7 @@ export default class FuenteDatoVariable extends React.Component {
                 titulo: "Valor Único"
             });
         }
+        //this.props.actualizarEstadoSiEsObjeto(this.state.mostrarEsObjeto);
     }
 
     render() {
@@ -229,7 +230,7 @@ export default class FuenteDatoVariable extends React.Component {
                         <label htmlFor="nombreFuenteDato" className="col-form-label">Nombre de Variable</label>
                     </div>
                     <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
-                        <input id="nombreFuenteDato" type="text" className="form-control form-control-sm"/>
+                        <input id="nombreFuenteDato" defaultValue={this.props.nombreVariable} onKeyUp={this.props.actualizarNombreVariable} type="text" className="form-control form-control-sm"/>
                     </div>
                 </div>
                 <div className={"row"} style={{width: "100%"}}>
@@ -237,7 +238,7 @@ export default class FuenteDatoVariable extends React.Component {
                         <label htmlFor="descripcionFuenteDato" className="col-form-label">Descripción de Variable:</label>
                     </div>
                     <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9"}>
-                        <textarea className="form-control" id="descripcionFuenteDato" rows="3"></textarea>
+                        <textarea defaultValue={this.props.descripcionVariable} onKeyUp={this.props.actualizarDescripcionVariable} className="form-control" id="descripcionFuenteDato" rows="3"></textarea>
                     </div>
                 </div>
                 <br/>
@@ -279,16 +280,18 @@ export default class FuenteDatoVariable extends React.Component {
                 <div className={"row"} style={{width: "100%", border: "1px solid #e6e6f2"}}>
                     <FuenteDatoVariableAtributos atributos={this.props.atributos}
                                                         titulo={this.state.titulo}
+                                                        nombreCampoNuevoAtributosVario={this.props.nombreCampoNuevoAtributosVario}
+                                                        actualizarNombreCampoNuevoAtributosVario={this.props.actualizarNombreCampoNuevoAtributosVario}
                                                         crearAtributoVariable={this.props.crearAtributoVariable}
                                                         mostrarEsObjeto={this.state.mostrarEsObjeto}
                                                         retornoTipoDeAsignacion={this.props.retornoTipoDeAsignacion}
-                                                        crearAtributoVariable={this.props.crearAtributoVariable}
-                                                        goToCreateConditions={this.props.goToCreateConditions}>
+                                                        goToCreateConditions={this.props.goToCreateConditions}
+                                                        goCreateVariableFieldSQL={this.props.goCreateVariableFieldSQL}>
                     </FuenteDatoVariableAtributos>
                 </div>
                 <br/>
                 <div className={"row"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
-                    <a className={"btn btn-brand btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.crearFuenteDato}>Crear Fuente de Dato</a>
+                    <a className={"btn btn-brand btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.props.guardarVariable}>Crear Variable</a>
                 </div>
                 <br/>
             </div>

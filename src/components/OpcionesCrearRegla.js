@@ -53,9 +53,18 @@ export default class OpcionesCrearRegla extends React.Component {
                                         retornarCampo={this.props.retornarCampo}
                                         camposDropdown={this.props.camposDropdown}
                                         valoresDropdown={this.props.valoresDropdown}
+                                        mostrarOpcionSino={this.props.mostrarOpcionSino}
+                                        conexiones={this.props.conexiones}
+                                        camposConexiones={this.props.camposConexiones}
+                                        variables={this.props.variables}
+                                        camposVariables={this.props.camposVariables}
+                                        retornoCampo={this.props.retornoCampo}
+                                        retornoOperacion={this.props.retornoOperacion}
+                                        actualizarNivelNuevaRegla={this.props.actualizarNivelNuevaRegla}
                                         callbackCrearRegla={this.props.callbackCrearRegla}>
                             </VariableCreation>
                         :   <ContenedorFormulas asignaciones={this.props.asignaciones}
+                                                            callbackCrearRegla={this.props.callbackCrearRegla}
                                                             goToCreateFormula={this.props.goToCreateFormula}>
                             </ContenedorFormulas>
                     }

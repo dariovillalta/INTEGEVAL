@@ -166,8 +166,6 @@ export default class EditarRiesgo extends React.Component {
                                             </select>
                                         </div>
                                     </div>
-                                    <a className={"btn btn-secondary btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.props.showFormula}>Fórmula</a>
-                                    <a className={"btn btn-success btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.props.showCondicionVar}>Condiciones para el Cálculo</a>
                                     <a className={"btn btn-brand btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.goCrearUmbral}>Umbrales</a>
                                     <br/>
                                     <div className={"row"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>

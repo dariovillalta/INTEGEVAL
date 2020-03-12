@@ -67,6 +67,7 @@ function (_React$Component) {
 
       ;
       var indexSeleccionado, tipoIndiceSeleccionado;
+      this.props.actualizarEstadoSeleccionSinoNuevaRegla(false);
 
       if (this.props.reglas.length > 0) {
         if (this.props.reglas.length == 1) {
@@ -82,7 +83,13 @@ function (_React$Component) {
             tipoIndiceSeleccionado = 'abajo';
           } else {
             $("#unicaRegla").css("border", "2px solid #F9D342");
-            if (this.props.reglas[index].esCondicion) tipoIndiceSeleccionado = 'esOtraRegla';else tipoIndiceSeleccionado = 'esOtraFormula';
+
+            if (this.props.reglas[0].esCondicion) {
+              tipoIndiceSeleccionado = 'esOtraRegla';
+              this.props.actualizarEstadoSeleccionSinoNuevaRegla(true);
+            } else {
+              tipoIndiceSeleccionado = 'esOtraFormula';
+            }
           }
         } else {
           indexSeleccionado = index;
@@ -97,11 +104,18 @@ function (_React$Component) {
             tipoIndiceSeleccionado = 'abajo';
           } else {
             $("#regla" + index).css("border", "2px solid #F9D342");
-            if (this.props.reglas[index].esCondicion) tipoIndiceSeleccionado = 'esOtraRegla';else tipoIndiceSeleccionado = 'esOtraFormula';
+
+            if (this.props.reglas[index].esCondicion) {
+              tipoIndiceSeleccionado = 'esOtraRegla';
+              this.props.actualizarEstadoSeleccionSinoNuevaRegla(true);
+            } else {
+              tipoIndiceSeleccionado = 'esOtraFormula';
+            }
           }
         }
 
         this.props.retornarIndiceSeleccionado(indexSeleccionado, tipoIndiceSeleccionado);
+        this.props.retornarIndiceSeleccionadoParaMostrarCampoObjetivo(this.props.reglas[index], tipoIndiceSeleccionado);
       }
     }
   }, {
@@ -109,6 +123,8 @@ function (_React$Component) {
     value: function render() {
       var _this2 = this;
 
+      console.log('this.props.reglas');
+      console.log(this.props.reglas);
       return _react["default"].createElement("div", null, this.props.reglas.length == 0 ? _react["default"].createElement("div", {
         style: {
           width: "100%",
@@ -122,24 +138,24 @@ function (_React$Component) {
           alignItems: "center",
           justifyContent: "center"
         }
-      }, "No existen reglas creadas"), _react["default"].createElement("br", null)) : null, this.props.reglas.length == 1 ? _react["default"].createElement("div", {
+      }, "No existen reglas creadas"), _react["default"].createElement("br", null)) : null, this.props.reglas.length == 1 && this.props.reglas[0].length == 1 ? _react["default"].createElement("div", {
         style: {
           width: "100%",
           height: "100%"
         }
-      }, _react["default"].createElement("div", {
+      }, !this.props.reglas[0][0].esCondicion ? _react["default"].createElement("div", {
         id: "reglaInit",
         onClick: function onClick() {
-          return _this2.seleccionRegla("arriba");
+          return _this2.seleccionRegla(0, "arriba");
         },
         className: "highlightFormulaBackground addPointer",
         style: {
           width: "100%",
           height: "10px"
         }
-      }), _react["default"].createElement("div", {
+      }) : null, _react["default"].createElement("div", {
         onClick: function onClick() {
-          return _this2.seleccionRegla("reglaUnica");
+          return _this2.seleccionRegla(0, "reglaUnica");
         },
         className: "row",
         style: {
@@ -157,10 +173,10 @@ function (_React$Component) {
           marginLeft: "auto",
           marginRight: "0"
         }
-      }, this.props.reglas[0].texto)), _react["default"].createElement("div", {
+      }, this.props.reglas[0][0].esCondicion ? "SI " : "", this.props.reglas[0][0].texto)), _react["default"].createElement("div", {
         id: "reglaFin",
         onClick: function onClick() {
-          return _this2.seleccionRegla("abajo");
+          return _this2.seleccionRegla(0, "abajo");
         },
         className: "highlightFormulaBackground addPointer",
         style: {
@@ -173,93 +189,110 @@ function (_React$Component) {
           height: "100%",
           overflowX: "scroll"
         }
-      }, this.props.reglas.map(function (regla, i) {
+      }, this.props.reglas.map(function (reglaSegmento, i) {
         return _react["default"].createElement("div", {
           style: {
             width: "100%",
             height: "100%"
           }
-        }, i == 0 ? _react["default"].createElement("div", {
-          style: {
-            width: "100%",
-            height: "100%"
-          }
-        }, _react["default"].createElement("div", {
-          id: "reglaInit" + i,
-          onClick: function onClick() {
-            return _this2.seleccionRegla(i, "arriba");
-          },
-          className: "highlightFormulaBackground addPointer",
-          style: {
-            width: "100%",
-            height: "10px"
-          }
-        }), _react["default"].createElement("div", {
-          onClick: function onClick() {
-            return _this2.seleccionRegla(i, "condicion");
-          },
-          className: "row",
-          style: {
-            width: "100%",
-            margin: "1% 0% 1% 0%"
-          }
-        }, _react["default"].createElement("div", {
-          id: "regla" + i,
-          className: "addPointer",
-          style: {
-            backgroundColor: "white",
-            borderRadius: "15px",
-            padding: "0% 2%",
-            width: "100%",
-            marginLeft: "auto",
-            marginRight: "0"
-          }
-        }, _this2.props.reglas[i].texto)), _react["default"].createElement("div", {
-          id: "reglaFin" + i,
-          onClick: function onClick() {
-            return _this2.seleccionRegla(i, "abajo");
-          },
-          className: "highlightFormulaBackground addPointer",
-          style: {
-            width: "100%",
-            height: "10px"
-          }
-        })) : _react["default"].createElement("div", {
-          style: {
-            width: "100%",
-            height: "100%"
-          }
-        }, _react["default"].createElement("div", {
-          onClick: function onClick() {
-            return _this2.seleccionRegla(i, "condicion");
-          },
-          className: "row",
-          style: {
-            width: "100%",
-            margin: "1% 0% 1% 0%"
-          }
-        }, _react["default"].createElement("div", {
-          id: "regla" + i,
-          className: "addPointer",
-          style: {
-            backgroundColor: "white",
-            borderRadius: "15px",
-            padding: "0% 2%",
-            width: 100 - _this2.props.reglas[i].nivel * 10 + "%",
-            marginLeft: "auto",
-            marginRight: "0"
-          }
-        }, _this2.props.reglas[i].texto)), _react["default"].createElement("div", {
-          id: "reglaFin" + i,
-          onClick: function onClick() {
-            return _this2.seleccionRegla(i, "abajo");
-          },
-          className: "highlightFormulaBackground addPointer",
-          style: {
-            width: "100%",
-            height: "10px"
-          }
-        })));
+        }, reglaSegmento.map(function (regla, i) {
+          return _react["default"].createElement("div", {
+            style: {
+              width: "100%",
+              height: "100%"
+            }
+          }, i == 0 ? _react["default"].createElement("div", {
+            style: {
+              width: "100%",
+              height: "100%"
+            }
+          }, !regla.esCondicion ? _react["default"].createElement("div", {
+            id: "reglaInit" + i,
+            onClick: function onClick() {
+              return _this2.seleccionRegla(i, "arriba");
+            },
+            className: "highlightFormulaBackground addPointer",
+            style: {
+              width: "100%",
+              height: "10px"
+            }
+          }) : null, _react["default"].createElement("div", {
+            onClick: function onClick() {
+              return _this2.seleccionRegla(i, "condicion");
+            },
+            className: "row",
+            style: {
+              width: "100%",
+              margin: "1% 0% 1% 0%"
+            }
+          }, _react["default"].createElement("div", {
+            id: "regla" + i,
+            className: "addPointer",
+            style: {
+              backgroundColor: "white",
+              borderRadius: "15px",
+              padding: "0% 2%",
+              width: 100 - _this2.props.reglas[i].nivel * 10 + "%",
+              marginLeft: "auto",
+              marginRight: "0"
+            }
+          }, regla.esCondicion ? "SI " : "", _this2.props.reglas[i].texto)), regla.ultimoSiAnidado ? _react["default"].createElement("div", {
+            id: "reglaFin" + i,
+            onClick: function onClick() {
+              return _this2.seleccionRegla(i, "abajo");
+            },
+            className: "highlightFormulaBackground addPointer",
+            style: {
+              width: "100%",
+              height: "10px"
+            }
+          }) : null) : _react["default"].createElement("div", {
+            style: {
+              width: "100%",
+              height: "100%"
+            }
+          }, !regla.esCondicion ? _react["default"].createElement("div", {
+            id: "reglaInit" + i,
+            onClick: function onClick() {
+              return _this2.seleccionRegla(i, "arriba");
+            },
+            className: "highlightFormulaBackground addPointer",
+            style: {
+              width: "100%",
+              height: "10px"
+            }
+          }) : null, _react["default"].createElement("div", {
+            onClick: function onClick() {
+              return _this2.seleccionRegla(i, "condicion");
+            },
+            className: "row",
+            style: {
+              width: "100%",
+              margin: "1% 0% 1% 0%"
+            }
+          }, _react["default"].createElement("div", {
+            id: "regla" + i,
+            className: "addPointer",
+            style: {
+              backgroundColor: "white",
+              borderRadius: "15px",
+              padding: "0% 2%",
+              width: 100 - _this2.props.reglas[i].nivel * 10 + "%",
+              marginLeft: "auto",
+              marginRight: "0"
+            }
+          }, regla.esCondicion ? "SI " : "", _this2.props.reglas[i].texto)), regla.ultimoSiAnidado ? _react["default"].createElement("div", {
+            id: "reglaFin" + i,
+            onClick: function onClick() {
+              return _this2.seleccionRegla(i, "abajo");
+            },
+            className: "highlightFormulaBackground addPointer",
+            style: {
+              width: "100%",
+              height: "10px"
+            }
+          }) : null));
+        }));
       }), _react["default"].createElement("br", null)) : null);
     }
   }]);

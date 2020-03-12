@@ -115,7 +115,7 @@ export default class Operacion extends React.Component {
                                 Seleccionar Operación
                             </div>
                             <label className={"custom-control custom-radio custom-control-inline"}>
-                                <input type="radio" value="==" name="operacionRadio" className={"custom-control-input"} onClick={() => this.props.retornoSeleccionOperacion("ES IGUAL A")}/>
+                                <input type="radio" value="==" name="operacionRadio" className={"custom-control-input"} onClick={() => this.props.retornoSeleccionOperacion("ES IGUAL A", "ES_IGUAL")}/>
                                 <span className={"custom-control-label"}>
                                     <img src="./assets/equal-icons/equal.png" alt="" style={{height: "30px", width: "30px"}}/>
                                 </span>
@@ -136,7 +136,7 @@ export default class Operacion extends React.Component {
                         <div className={"row"}>
                             <div className={"col-xl-3 offset-xl-1 col-3 offset-1"}>
                                 <label className={"custom-control custom-radio custom-control-inline"}>
-                                    <input type="radio" value="<" name="operacionRadio" className={"custom-control-input"} onClick={() => this.props.retornoSeleccionOperacion("ES MENOR A")}/>
+                                    <input type="radio" value="<" name="operacionRadio" className={"custom-control-input"} onClick={() => this.props.retornoSeleccionOperacion("ES MENOR A", "ES_MENOR")}/>
                                     <span className={"custom-control-label"}>
                                         <img src="./assets/equal-icons/lessThan.png" alt="" style={{height: "30px", width: "30px"}}/>
                                     </span>
@@ -144,7 +144,7 @@ export default class Operacion extends React.Component {
                             </div>
                             <div className={"col-xl-3 col-3"}>
                                 <label className={"custom-control custom-radio custom-control-inline"}>
-                                    <input type="radio" value="<=" name="operacionRadio" className={"custom-control-input"} onClick={() => this.props.retornoSeleccionOperacion("ES MENOR O IGUAL A")}/>
+                                    <input type="radio" value="<=" name="operacionRadio" className={"custom-control-input"} onClick={() => this.props.retornoSeleccionOperacion("ES MENOR O IGUAL A", "ES_MENOR_O_IGUAL")}/>
                                     <span className={"custom-control-label"}>
                                         <img src="./assets/equal-icons/lessThanEqual.png" alt="" style={{height: "30px", width: "30px"}}/>
                                     </span>
@@ -152,7 +152,7 @@ export default class Operacion extends React.Component {
                             </div>
                             <div className={"col-xl-3 col-3"}>
                                 <label className={"custom-control custom-radio custom-control-inline"}>
-                                    <input type="radio" value=">" name="operacionRadio" className={"custom-control-input"} onClick={() => this.props.retornoSeleccionOperacion("ES MAYOR O IGUAL A")}/>
+                                    <input type="radio" value=">" name="operacionRadio" className={"custom-control-input"} onClick={() => this.props.retornoSeleccionOperacion("ES MAYOR O IGUAL A", "ES_MAYOR_O_IGUAL")}/>
                                     <span className={"custom-control-label"}>
                                         <img src="./assets/equal-icons/greaterThanEqual.png" alt="" style={{height: "30px", width: "30px"}}/>
                                     </span>
@@ -160,7 +160,7 @@ export default class Operacion extends React.Component {
                             </div>
                             <div className={"col-xl-2 col-2"}>
                                 <label className={"custom-control custom-radio custom-control-inline"}>
-                                    <input type="radio" value=">=" name="operacionRadio" className={"custom-control-input"} onClick={() => this.props.retornoSeleccionOperacion("ES MAYOR A")}/>
+                                    <input type="radio" value=">=" name="operacionRadio" className={"custom-control-input"} onClick={() => this.props.retornoSeleccionOperacion("ES MAYOR A", "ES_MAYOR")}/>
                                     <span className={"custom-control-label"}>
                                         <img src="./assets/equal-icons/greater.png" alt="" style={{height: "30px", width: "30px"}}/>
                                     </span>
@@ -171,7 +171,7 @@ export default class Operacion extends React.Component {
                         <div className={"row"}>
                             <div className={"col-xl-3 offset-xl-4 col-3 offset-4"}>
                                 <label className={"custom-control custom-radio custom-control-inline"}>
-                                    <input type="radio" value="==" name="operacionRadio" className={"custom-control-input"} onClick={() => this.props.retornoSeleccionOperacion("ES IGUAL A")}/>
+                                    <input type="radio" value="==" name="operacionRadio" className={"custom-control-input"} onClick={() => this.props.retornoSeleccionOperacion("ES IGUAL A", "ES_IGUAL")}/>
                                     <span className={"custom-control-label"}>
                                         <img src="./assets/equal-icons/equal.png" alt="" style={{height: "30px", width: "30px"}}/>
                                     </span>
@@ -179,7 +179,7 @@ export default class Operacion extends React.Component {
                             </div>
                             <div className={"col-xl-3 col-3"}>
                                 <label className={"custom-control custom-radio custom-control-inline"}>
-                                    <input type="radio" value="!=" name="operacionRadio" className={"custom-control-input"} onClick={() => this.props.retornoSeleccionOperacion("NO ES IGUAL A")}/>
+                                    <input type="radio" value="!=" name="operacionRadio" className={"custom-control-input"} onClick={() => this.props.retornoSeleccionOperacion("NO ES IGUAL A", "NO_ES_IGUAL")}/>
                                     <span className={"custom-control-label"}>
                                         <img src="./assets/equal-icons/not equal.png" alt="" style={{height: "30px", width: "30px"}}/>
                                     </span>

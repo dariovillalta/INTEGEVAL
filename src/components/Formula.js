@@ -8,11 +8,11 @@ import ListasSeleVariableContenedorOperador from './ListasSeleVariableContenedor
 
 //const campos = [{valor: "idCLiente", tipo: "variable"}, {valor: "saldoTotal", tipo: "variable"}, {valor: "tipoPersona", tipo: "variable"}, {valor: "impuestosTotal", tipo: "variable"}, {valor: "nombreCliente", tipo: "variable"}, {valor: "diasMora", tipo: "variable"}, {valor: "mesMora", tipo: "variable"}];
 //var tablas = [], camposTablas = [];
-const operaciones = [{valor: "Asignar Valor Único", tipo: "signo"}, {valor: "Asignar Valor Multiples", tipo: "signo"}, {valor: "Contar", tipo: "signo"}];
-const operacionesNumero = [{valor: "Asignar Valor Único", tipo: "signo"}, {valor: "Asignar Valor Multiples", tipo: "signo"}, {valor: "Contar", tipo: "signo"}, {valor: "Calcular Promedio", tipo: "signo"}, {valor: "Máximo", tipo: "signo"}, {valor: "Mínimo", tipo: "signo"}, {valor: "+", tipo: "signo"}, {valor: "-", tipo: "signo"}, {valor: "*", tipo: "signo"}, {valor: "/", tipo: "signo"}];
-const operacionesFecha = [{valor: "Asignar Valor Único", tipo: "signo"}, {valor: "Asignar Valor Multiples", tipo: "signo"}, {valor: "Contar", tipo: "signo"}];
-const operacionesBoolean = [{valor: "Asignar Valor Único", tipo: "signo"}, {valor: "Asignar Valor Multiples", tipo: "signo"}, {valor: "Contar", tipo: "signo"}];
-const operacionesCadena = [{valor: "Asignar Valor Único", tipo: "signo"}, {valor: "Asignar Valor Multiples", tipo: "signo"}, {valor: "Contar", tipo: "signo"}, {valor: "+", tipo: "signo"}];
+const operaciones = [{valor: "Asignar", tipo: "signo"}, {valor: "Contar", tipo: "signo"}];
+const operacionesNumero = [{valor: "Asignar", tipo: "signo"}, {valor: "Contar", tipo: "signo"}, {valor: "Calcular Promedio", tipo: "signo"}, {valor: "Máximo", tipo: "signo"}, {valor: "Mínimo", tipo: "signo"}, {valor: "+", tipo: "signo"}, {valor: "-", tipo: "signo"}, {valor: "*", tipo: "signo"}, {valor: "/", tipo: "signo"}];
+const operacionesFecha = [{valor: "Asignar", tipo: "signo"}, {valor: "Contar", tipo: "signo"}];
+const operacionesBoolean = [{valor: "Asignar", tipo: "signo"}, {valor: "Contar", tipo: "signo"}];
+const operacionesCadena = [{valor: "Asignar", tipo: "signo"}, {valor: "Contar", tipo: "signo"}, {valor: "+", tipo: "signo"}];
 /*const operaciones = [{valor: "Asignar Valor Único", tipo: "signo"}, {valor: "Asignar Valor Único Si", tipo: "signo"}, {valor: "Asignar Valor Multiples", tipo: "signo"}, {valor: "Asignar Valor Multiples Si", tipo: "signo"}, {valor: "Contar", tipo: "signo"}, {valor: "Contar Si", tipo: "signo"}];
 const operacionesNumero = [{valor: "Asignar Valor Único", tipo: "signo"}, {valor: "Asignar Valor Único Si", tipo: "signo"}, {valor: "Asignar Valor Multiples", tipo: "signo"}, {valor: "Asignar Valor Multiples Si", tipo: "signo"}, {valor: "Contar", tipo: "signo"}, {valor: "Contar Si", tipo: "signo"}, {valor: "Calcular Promedio", tipo: "signo"}, {valor: "Máximo", tipo: "signo"}, {valor: "Mínimo", tipo: "signo"}, {valor: "+", tipo: "signo"}, {valor: "-", tipo: "signo"}, {valor: "*", tipo: "signo"}, {valor: "/", tipo: "signo"}];
 const operacionesFecha = [{valor: "Asignar Valor Único", tipo: "signo"}, {valor: "Asignar Valor Único Si", tipo: "signo"}, {valor: "Asignar Valor Multiples", tipo: "signo"}, {valor: "Asignar Valor Multiples Si", tipo: "signo"}, {valor: "Contar", tipo: "signo"}, {valor: "Contar Si", tipo: "signo"}];
@@ -200,6 +200,7 @@ export default class Formula extends React.Component {
                 });
             }
             this.props.retornoCampo(columnaSeleccionada, tipoVariable, posicionTabla);
+            this.props.retornoTipoDeAsignacion(tipoVariable);
         }
     }
 
@@ -212,12 +213,8 @@ export default class Formula extends React.Component {
 
     existeReglaAsignacion (operacion) {
         for (var i = 0; i < this.state.operaciones.length; i++) {
-            if( (this.state.operaciones[i].valor.localeCompare("Asignar Valor Único") == 0 && this.state.operaciones[i].valor.localeCompare(operacion) == 0) || 
-                (this.state.operaciones[i].valor.localeCompare("Asignar Valor Único Si") == 0 && this.state.operaciones[i].valor.localeCompare(operacion) == 0) || 
-                (this.state.operaciones[i].valor.localeCompare("Asignar Valor Multiples") == 0 && this.state.operaciones[i].valor.localeCompare(operacion) == 0) || 
-                (this.state.operaciones[i].valor.localeCompare("Asignar Valor Multiples Si") == 0 && this.state.operaciones[i].valor.localeCompare(operacion) == 0) || 
+            if( (this.state.operaciones[i].valor.localeCompare("Asignar") == 0 && this.state.operaciones[i].valor.localeCompare(operacion) == 0) || 
                 (this.state.operaciones[i].valor.localeCompare("Contar") == 0 && this.state.operaciones[i].valor.localeCompare(operacion) == 0) || 
-                (this.state.operaciones[i].valor.localeCompare("Contar Si") == 0 && this.state.operaciones[i].valor.localeCompare(operacion) == 0) || 
                 (this.state.operaciones[i].valor.localeCompare("Calcular Promedio") == 0 && this.state.operaciones[i].valor.localeCompare(operacion) == 0) || 
                 (this.state.operaciones[i].valor.localeCompare("Máximo") == 0 && this.state.operaciones[i].valor.localeCompare(operacion) == 0) || 
                 (this.state.operaciones[i].valor.localeCompare("Mínimo") == 0 && this.state.operaciones[i].valor.localeCompare(operacion) == 0) /*|| 
@@ -229,22 +226,10 @@ export default class Formula extends React.Component {
     }
 
     retornarCodigoOperacion (codigo) {
-        if(codigo.localeCompare("Asignar Valor Único") == 0) {
-            return "ASIGUNI";
-        }
-        if(codigo.localeCompare("Asignar Valor Único Si") == 0) {
-            return "ASIGUNI";
-        }
-        if(codigo.localeCompare("Asignar Valor Multiples") == 0) {
-            return "ASIGMUL";
-        }
-        if(codigo.localeCompare("Asignar Valor Multiples Si") == 0) {
-            return "ASIGMUL";
+        if(codigo.localeCompare("Asignar") == 0) {
+            return "ASIG";
         }
         if(codigo.localeCompare("Contar") == 0) {
-            return "COUNT";
-        }
-        if(codigo.localeCompare("Contar Si") == 0) {
             return "COUNT";
         }
         if(codigo.localeCompare("Calcular Promedio") == 0) {
@@ -270,6 +255,9 @@ export default class Formula extends React.Component {
             variableSeleccionada.tipo = "variable";
             variableSeleccionada.texto = variableSeleccionada.valor;
             variableSeleccionada.operacion = '';
+            //variableSeleccionada.tipoColumnaEnTabla = ;
+            console.log('variableSeleccionada');
+            console.log(variableSeleccionada);
             if(this.existeReglaAsignacion(operacionSeleccionada.valor)) {
                 variableSeleccionada.texto = this.retornarCodigoOperacion(operacionSeleccionada.valor) + "(" + variableSeleccionada.valor + ")";
                 variableSeleccionada.operacion = this.retornarCodigoOperacion(operacionSeleccionada.valor);
@@ -547,12 +535,22 @@ export default class Formula extends React.Component {
 
     iniciarGuardarFormula () {
         var formula = '';
+        console.log('this.state.formula')
+        console.log(this.state.formula)
         for (var i = 0; i < this.state.formula.length; i++) {
-            formula += this.state.formula[i].valor;
+            if(this.state.formula[i].operacion != undefined && this.state.formula[i].operacion.localeCompare("ASIG") == 0) {
+                formula += "ASIG("+this.state.formula[i].valor+")";
+            } else {
+                formula += this.state.formula[i].valor;
+            }
         };
         console.log('formula');
         console.log(formula);
-        this.props.anadirFormula(formula, this.state.formula);
+        var objetoFormula = {variableID: -1, variableCampoID: -1, numeroDeFormulaDeVariable: -1, formula: formula};
+        /*console.log('formula');
+        console.log(this.state.formula);*/
+        //this.props.anadirFormula(formula, this.state.formula);
+        this.props.anadirFormula(objetoFormula, this.state.formula);
         //this.guardarVariable(formula);
     }
 

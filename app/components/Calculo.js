@@ -34,27 +34,31 @@ var arregloDeFuentesDeDatos = []; //Arreglo con las fuentes de datos
 //objeto: {tablaID, nombre, descripcion, esObjeto, objetoPadreID, guardar, nivel, [arreglo de atributos]}
 //objeto arreglo de atributos: {nombre, tipo, formula}
 
-var arregloDeVariables = []; //Arreglo con las variables
+window.arregloDeVariables = []; //Arreglo con las variables
 //objeto: {nombre, descripcion, esObjeto, objetoPadreID, guardar, nivel, [arreglo de atributos]}
 //objeto arreglo de atributos: {nombre, tipo, formula}
 
-var arregloDeReglas = []; //Arreglo con las reglas / instrucciones correspondientes a la posicion del atributo
+window.arregloDeReglas = []; //Arreglo con las reglas / instrucciones correspondientes a la posicion del atributo
 
-var arregloDeFormulas = []; //Arreglo con las formulas / asignaciones correspondientes a la posicion del atributo
+window.arregloDeFormulas = []; //Arreglo con las formulas / asignaciones correspondientes a la posicion del atributo
 
-var arregloDeElementosDeFormulas = []; //Arreglo con las fuentes de datos correspondientes a la posicion de la formula
+window.arregloDeElementosDeFormulas = []; //Arreglo con las fuentes de datos correspondientes a la posicion de la formula
 
-var arregloConexionesATablas = []; //Arreglo con los valores para poder conectarse a las tablas
+window.arregloConexionesATablas = []; //Arreglo con los valores para poder conectarse a las tablas
 
-var arregloResultadosDeTablas = []; //Arreglo con los valores obtenidos despues de conectarse a las tablas
+window.arregloResultadosDeTablas = []; //Arreglo con los valores obtenidos despues de conectarse a las tablas
 
 var banderaImportacionCamposVariablesINICIO = 0; //Bandera para saber si termino de importar los campos de las variables
 
 var banderaImportacionCamposVariablesFIN = 0; //Bandera para saber si termino de importar los campos de las variables
 
-var banderaImportacionReglasCamposVariablesINICIO = 0; //Bandera para saber si termino de importar las reglas de los campos de las variables
+var banderaImportacionSegmentosCamposVariablesINICIO = 0; //Bandera para saber si termino de importar los segmentos de reglas de los campos de las variables
 
-var banderaImportacionReglasCamposVariablesFIN = 0; //Bandera para saber si termino de importar las reglas de los campos de las variables
+var banderaImportacionSegmentosCamposVariablesFIN = 0; //Bandera para saber si termino de importar los segmentos de reglas de los campos de las variables
+
+var banderaImportacionReglasSegmentosCamposVariablesINICIO = 0; //Bandera para saber si termino de importar las reglas de los segmentos de los campos de las variables
+
+var banderaImportacionReglasSegmentosCamposVariablesFIN = 0; //Bandera para saber si termino de importar las reglas de los segmentos de los campos de las variables
 
 var banderaImportacionFormulasCamposVariablesINICIO = 0; //Bandera para saber si termino de importar las formulas de los campos de las variables
 
@@ -95,9 +99,12 @@ function (_React$Component) {
     _this.traerVariables = _this.traerVariables.bind(_assertThisInitialized(_this));
     _this.traerAtributosVariables = _this.traerAtributosVariables.bind(_assertThisInitialized(_this));
     _this.revisarFinImportacionCamposVariables = _this.revisarFinImportacionCamposVariables.bind(_assertThisInitialized(_this));
-    _this.inicioTraerReglasDeCampos = _this.inicioTraerReglasDeCampos.bind(_assertThisInitialized(_this));
-    _this.traerReglasDeCampos = _this.traerReglasDeCampos.bind(_assertThisInitialized(_this));
-    _this.revisarFinImportacionReglasCampos = _this.revisarFinImportacionReglasCampos.bind(_assertThisInitialized(_this));
+    _this.inicioTraerSegmentosDeCampos = _this.inicioTraerSegmentosDeCampos.bind(_assertThisInitialized(_this));
+    _this.traerSegmentosDeCampos = _this.traerSegmentosDeCampos.bind(_assertThisInitialized(_this));
+    _this.revisarFinImportacionSegmentosCampos = _this.revisarFinImportacionSegmentosCampos.bind(_assertThisInitialized(_this));
+    _this.inicioTraerReglasDeSegmentos = _this.inicioTraerReglasDeSegmentos.bind(_assertThisInitialized(_this));
+    _this.traerReglasDeSegmentos = _this.traerReglasDeSegmentos.bind(_assertThisInitialized(_this));
+    _this.revisarFinImportacionReglasSegmentos = _this.revisarFinImportacionReglasSegmentos.bind(_assertThisInitialized(_this));
     _this.inicioTraerFormulasDeCampos = _this.inicioTraerFormulasDeCampos.bind(_assertThisInitialized(_this));
     _this.traerFormulasDeCampos = _this.traerFormulasDeCampos.bind(_assertThisInitialized(_this));
     _this.revisarFinImportacionFormulasCampos = _this.revisarFinImportacionFormulasCampos.bind(_assertThisInitialized(_this));
@@ -112,6 +119,16 @@ function (_React$Component) {
     _this.traerResultadosDeFuenteDeDatos = _this.traerResultadosDeFuenteDeDatos.bind(_assertThisInitialized(_this));
     _this.finTraerResultadosDeFuenteDeDatos = _this.finTraerResultadosDeFuenteDeDatos.bind(_assertThisInitialized(_this));
     _this.iniciarHilo = _this.iniciarHilo.bind(_assertThisInitialized(_this));
+    _this.codigoIniciacion = _this.codigoIniciacion.bind(_assertThisInitialized(_this));
+    _this.iniciacionElementosFormula = _this.iniciacionElementosFormula.bind(_assertThisInitialized(_this));
+    _this.iniciacionVariable = _this.iniciacionVariable.bind(_assertThisInitialized(_this));
+    _this.iniciacionCampo = _this.iniciacionCampo.bind(_assertThisInitialized(_this));
+    _this.crearCodigoFuenteDato = _this.crearCodigoFuenteDato.bind(_assertThisInitialized(_this));
+    _this.crearCodigoReglas = _this.crearCodigoReglas.bind(_assertThisInitialized(_this));
+    _this.arregloCodigoRegla = _this.arregloCodigoRegla.bind(_assertThisInitialized(_this));
+    _this.agregarCodigoGuardarVariable = _this.agregarCodigoGuardarVariable.bind(_assertThisInitialized(_this));
+    _this.crearNivel = _this.crearNivel.bind(_assertThisInitialized(_this));
+    _this.isValidDate = _this.isValidDate.bind(_assertThisInitialized(_this));
     return _this;
   }
 
@@ -225,19 +242,20 @@ function (_React$Component) {
     key: "revisarFinImportacionCamposVariables",
     value: function revisarFinImportacionCamposVariables() {
       if (banderaImportacionCamposVariablesINICIO == banderaImportacionCamposVariablesFIN) {
-        this.inicioTraerReglasDeCampos();
+        this.inicioTraerSegmentosDeCampos();
       }
     }
   }, {
-    key: "inicioTraerReglasDeCampos",
-    value: function inicioTraerReglasDeCampos() {
-      banderaImportacionReglasCamposVariablesINICIO = 0;
-      banderaImportacionReglasCamposVariablesFIN = 0;
+    key: "inicioTraerSegmentosDeCampos",
+    value: function inicioTraerSegmentosDeCampos() {
+      console.log('inicioTraerSegmentosDeCampos');
+      banderaImportacionSegmentosCamposVariablesINICIO = 0;
+      banderaImportacionSegmentosCamposVariablesFIN = 0;
 
       for (var i = 0; i < arregloDeVariables.length; i++) {
         for (var j = 0; j < arregloDeVariables[i].atributos.length; j++) {
-          banderaImportacionReglasCamposVariablesFIN++;
-          this.traerReglasDeCampos(arregloDeVariables[i].atributos[j].ID, i, j);
+          banderaImportacionSegmentosCamposVariablesFIN++;
+          this.traerSegmentosDeCampos(arregloDeVariables[i].ID, arregloDeVariables[i].atributos[j].ID, i, j);
         }
 
         ;
@@ -246,8 +264,8 @@ function (_React$Component) {
       ;
     }
   }, {
-    key: "traerReglasDeCampos",
-    value: function traerReglasDeCampos(variableCampoID, i, j) {
+    key: "traerSegmentosDeCampos",
+    value: function traerSegmentosDeCampos(variableID, variableCampoID, i, j) {
       var _this5 = this;
 
       var transaction = new _mssql["default"].Transaction(this.props.pool);
@@ -257,34 +275,99 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("select * from Reglas where campoVariablePadreID = " + variableCampoID, function (err, result) {
+        request.query("select * from SegmentoReglas where variableID = " + variableID + " and variableCampoID = " + variableCampoID, function (err, result) {
           if (err) {
             if (!rolledBack) {
               console.log(err);
-              banderaImportacionReglasCamposVariablesINICIO++;
+              banderaImportacionSegmentosCamposVariablesINICIO++;
               transaction.rollback(function (err) {});
             }
           } else {
             transaction.commit(function (err) {
-              banderaImportacionReglasCamposVariablesINICIO++;
-              arregloDeVariables[i].atributos[j].formulas = result.recordset;
+              banderaImportacionSegmentosCamposVariablesINICIO++;
+              arregloDeVariables[i].atributos[j].segmentoReglas = result.recordset;
 
-              _this5.revisarFinImportacionReglasCampos();
+              _this5.revisarFinImportacionSegmentosCampos();
             });
           }
         });
       }); // fin transaction
     }
   }, {
-    key: "revisarFinImportacionReglasCampos",
-    value: function revisarFinImportacionReglasCampos() {
-      if (banderaImportacionReglasCamposVariablesINICIO == banderaImportacionReglasCamposVariablesFIN) {
+    key: "revisarFinImportacionSegmentosCampos",
+    value: function revisarFinImportacionSegmentosCampos() {
+      if (banderaImportacionSegmentosCamposVariablesINICIO == banderaImportacionSegmentosCamposVariablesFIN) {
+        this.inicioTraerReglasDeSegmentos();
+      }
+    }
+  }, {
+    key: "inicioTraerReglasDeSegmentos",
+    value: function inicioTraerReglasDeSegmentos() {
+      console.log('inicioTraerReglasDeSegmentos');
+      banderaImportacionReglasSegmentosCamposVariablesINICIO = 0;
+      banderaImportacionReglasSegmentosCamposVariablesFIN = 0;
+
+      for (var i = 0; i < arregloDeVariables.length; i++) {
+        for (var j = 0; j < arregloDeVariables[i].atributos.length; j++) {
+          for (var k = 0; k < arregloDeVariables[i].atributos[j].segmentoReglas.length; k++) {
+            banderaImportacionReglasSegmentosCamposVariablesFIN++;
+            this.traerReglasDeSegmentos(arregloDeVariables[i].ID, arregloDeVariables[i].atributos[j].ID, arregloDeVariables[i].atributos[j].segmentoReglas[k].ID, i, j, k);
+          }
+
+          ;
+        }
+
+        ;
+      }
+
+      ;
+    }
+  }, {
+    key: "traerReglasDeSegmentos",
+    value: function traerReglasDeSegmentos(variableID, variableCampoID, segmentoCampoID, i, j, k) {
+      var _this6 = this;
+
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("select * from Reglas where variableID = " + variableID + " and variableCampoID = " + variableCampoID + " and segmentoReglaID = " + segmentoCampoID, function (err, result) {
+          if (err) {
+            if (!rolledBack) {
+              console.log(err);
+              banderaImportacionReglasSegmentosCamposVariablesINICIO++;
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              banderaImportacionReglasSegmentosCamposVariablesINICIO++;
+              arregloDeVariables[i].atributos[j].segmentoReglas[k].reglas = result.recordset;
+
+              _this6.revisarFinImportacionReglasSegmentos();
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
+    key: "revisarFinImportacionReglasSegmentos",
+    value: function revisarFinImportacionReglasSegmentos() {
+      console.log('banderaImportacionReglasSegmentosCamposVariablesINICIO');
+      console.log(banderaImportacionReglasSegmentosCamposVariablesINICIO);
+      console.log('banderaImportacionReglasSegmentosCamposVariablesFIN');
+      console.log(banderaImportacionReglasSegmentosCamposVariablesFIN);
+
+      if (banderaImportacionReglasSegmentosCamposVariablesINICIO == banderaImportacionReglasSegmentosCamposVariablesFIN) {
         this.inicioTraerFormulasDeCampos();
       }
     }
   }, {
     key: "inicioTraerFormulasDeCampos",
     value: function inicioTraerFormulasDeCampos() {
+      console.log('inicioTraerFormulasDeCampos');
       banderaImportacionFormulasCamposVariablesINICIO = 0;
       banderaImportacionFormulasCamposVariablesFIN = 0;
 
@@ -302,7 +385,7 @@ function (_React$Component) {
   }, {
     key: "traerFormulasDeCampos",
     value: function traerFormulasDeCampos(variableCampoID, i, j) {
-      var _this6 = this;
+      var _this7 = this;
 
       var transaction = new _mssql["default"].Transaction(this.props.pool);
       transaction.begin(function (err) {
@@ -323,7 +406,7 @@ function (_React$Component) {
               banderaImportacionFormulasCamposVariablesINICIO++;
               arregloDeVariables[i].atributos[j].formulas = result.recordset;
 
-              _this6.revisarFinImportacionFormulasCampos();
+              _this7.revisarFinImportacionFormulasCampos();
             });
           }
         });
@@ -339,6 +422,7 @@ function (_React$Component) {
   }, {
     key: "inicioTraerElementosFormulasDeCampos",
     value: function inicioTraerElementosFormulasDeCampos() {
+      console.log('inicioTraerElementosFormulasDeCampos');
       banderaImportacionElementosFormulasCamposVariablesINICIO = 0;
       banderaImportacionElementosFormulasCamposVariablesFIN = 0;
 
@@ -360,7 +444,7 @@ function (_React$Component) {
   }, {
     key: "traerElementosFormulasDeCampos",
     value: function traerElementosFormulasDeCampos(idFormula, i, j, k) {
-      var _this7 = this;
+      var _this8 = this;
 
       var transaction = new _mssql["default"].Transaction(this.props.pool);
       transaction.begin(function (err) {
@@ -369,7 +453,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("select * from ElementoFormulasVariablesCampos where idFormula = " + idFormula, function (err, result) {
+        request.query("select * from ElementoFormulasVariablesCampos where formulaID = " + idFormula, function (err, result) {
           if (err) {
             if (!rolledBack) {
               console.log(err);
@@ -381,7 +465,7 @@ function (_React$Component) {
               banderaImportacionElementosFormulasCamposVariablesINICIO++;
               arregloDeVariables[i].atributos[j].formulas[k].fuenteDeDatos = result.recordset;
 
-              _this7.revisarFinImportacionElementosFormulasCampos();
+              _this8.revisarFinImportacionElementosFormulasCampos();
             });
           }
         });
@@ -397,6 +481,7 @@ function (_React$Component) {
   }, {
     key: "inicioTraerConeccionesATablas",
     value: function inicioTraerConeccionesATablas() {
+      console.log('inicioTraerConeccionesATablas');
       banderaImportacionConecionesATablasINICIO = 0;
       banderaImportacionConecionesATablasFIN = 0;
       arregloConexionesATablas = [];
@@ -409,10 +494,10 @@ function (_React$Component) {
                 banderaImportacionConecionesATablasFIN++; //para asegurar que ID no sea asyncrono
 
                 arregloConexionesATablas.push({
-                  ID: arregloDeVariables[i].atributos[j].formulas[k].fuenteDeDatos[l].idConexionTabla
+                  ID: arregloDeVariables[i].atributos[j].formulas[k].fuenteDeDatos[l].conexionTablaID
                 });
                 arregloDeVariables[i].atributos[j].formulas[k].fuenteDeDatos[l];
-                this.traerConeccionesATablas(arregloDeVariables[i].atributos[j].formulas[k].fuenteDeDatos[l].idConexionTabla, arregloConexionesATablas.length - 1);
+                this.traerConeccionesATablas(arregloDeVariables[i].atributos[j].formulas[k].fuenteDeDatos[l].conexionTablaID, arregloConexionesATablas.length - 1);
               }
             }
 
@@ -431,7 +516,7 @@ function (_React$Component) {
     key: "noHaSidoImportadaConeccion",
     value: function noHaSidoImportadaConeccion(fuenteDeDato) {
       for (var i = 0; i < arregloConexionesATablas.length; i++) {
-        if (arregloConexionesATablas[i].ID == fuenteDeDato.idConexionTabla) {
+        if (arregloConexionesATablas[i].ID == fuenteDeDato.conexionTablaID) {
           return false;
         }
       }
@@ -442,7 +527,7 @@ function (_React$Component) {
   }, {
     key: "traerConeccionesATablas",
     value: function traerConeccionesATablas(tablaID, indexARemplazar) {
-      var _this8 = this;
+      var _this9 = this;
 
       var transaction = new _mssql["default"].Transaction(this.props.pool);
       transaction.begin(function (err) {
@@ -463,7 +548,7 @@ function (_React$Component) {
               banderaImportacionConecionesATablasINICIO++;
               if (result.recordset.length > 0) arregloConexionesATablas[indexARemplazar] = result.recordset[0];
 
-              _this8.finTraerConeccionesATablas();
+              _this9.finTraerConeccionesATablas();
             });
           }
         });
@@ -479,13 +564,14 @@ function (_React$Component) {
   }, {
     key: "inicioTraerResultadosDeFuenteDeDatos",
     value: function inicioTraerResultadosDeFuenteDeDatos() {
+      console.log('inicioTraerResultadosDeFuenteDeDatos');
       banderaImportacionValoresDeTablasDeFuenteDeDatosINICIO = 0;
       banderaImportacionValoresDeTablasDeFuenteDeDatosFIN = 0;
       arregloResultadosDeTablas = [];
 
       for (var i = 0; i < arregloConexionesATablas.length; i++) {
         banderaImportacionValoresDeTablasDeFuenteDeDatosFIN++;
-        this.traerResultadosDeFuenteDeDatos(arregloConexionesATablas[i]);
+        this.traerResultadosDeFuenteDeDatos(arregloConexionesATablas[i], i);
       }
 
       ;
@@ -493,7 +579,7 @@ function (_React$Component) {
   }, {
     key: "traerResultadosDeFuenteDeDatos",
     value: function traerResultadosDeFuenteDeDatos(tabla, index) {
-      var _this9 = this;
+      var _this10 = this;
 
       var pool = new _mssql["default"].ConnectionPool({
         user: tabla.usuario,
@@ -515,9 +601,11 @@ function (_React$Component) {
       pool.connect(function (err) {
         pool.request().query("select * from " + tabla.tabla, function (err, result) {
           banderaImportacionValoresDeTablasDeFuenteDeDatosINICIO++;
+          console.log('resultados tabla: ' + tabla.tabla);
+          console.log(result.recordset);
           if (result.recordset != undefined && result.recordset.length > 0) arregloResultadosDeTablas.splice(index, 0, result.recordset);
 
-          _this9.finTraerResultadosDeFuenteDeDatos();
+          _this10.finTraerResultadosDeFuenteDeDatos();
         });
       }); // fin pool connect
     }
@@ -553,9 +641,14 @@ function (_React$Component) {
           for (var k = 0; k < arregloDeVariables[i].atributos[j].formulas.length; k++) {
             for (var l = 0; l < arregloDeVariables[i].atributos[j].formulas[k].fuenteDeDatos.length; l++) {
               for (var m = 0; m < arregloConexionesATablas.length; m++) {
-                if (arregloDeVariables[i].atributos[j].formulas[k].fuenteDeDatos[l].idConexionTabla == arregloConexionesATablas[m].ID) {
-                  if (arregloAgrupacionElementosFormulaPorConexionATabla[m] == undefined) arregloAgrupacionElementosFormulaPorConexionATabla[m] = 0;
-                  arregloAgrupacionElementosFormulaPorConexionATabla[m].push(arregloDeVariables[i].atributos[j].formulas[k].fuenteDeDatos[l]);
+                if (arregloDeVariables[i].atributos[j].formulas[k].fuenteDeDatos[l].conexionTablaID == arregloConexionesATablas[m].ID) {
+                  if (arregloAgrupacionElementosFormulaPorConexionATabla[m] == undefined) arregloAgrupacionElementosFormulaPorConexionATabla[m] = [];
+                  arregloAgrupacionElementosFormulaPorConexionATabla[m].push({
+                    fuenteDato: arregloDeVariables[i].atributos[j].formulas[k].fuenteDeDatos[l],
+                    variable: arregloDeVariables[i],
+                    atributo: arregloDeVariables[i].atributos[j],
+                    index: l
+                  });
                 }
               }
 
@@ -571,29 +664,758 @@ function (_React$Component) {
         ;
       }
 
+      ;
+      console.log('arregloAgrupacionElementosFormulaPorConexionATabla');
+      console.log(arregloAgrupacionElementosFormulaPorConexionATabla); //INICIALIZANDO / CREANDO VARIABLES CON SUS CAMPOS
+
+      /*var codigoIniciacionVariables = '';
+      for (var i = 0; i < arregloDeVariables.length; i++) {
+          if(i != 0)
+              codigoIniciacionVariables += '\n\n';
+          codigoIniciacionVariables += '\n// INSTANCIACIONES VARIABLE: '+arregloDeVariables[i].nombre;
+          codigoIniciacionVariables += '\n' + this.codigoIniciacion(arregloDeVariables[i], "variable"); //variable, tipoVariable, esObjeto, atributo
+          for (var j = 0; j < arregloDeVariables[i].atributos.length; j++) {
+              codigoIniciacionVariables += '\n' + this.codigoIniciacion(arregloDeVariables[i], "atributo", arregloDeVariables[i].atributos[j]); ////variable, tipoVariable, esObjeto, atributo
+              for (var k = 0; k < arregloDeVariables[i].atributos[j].formulas.length; k++) {
+                  //codigoIniciacionVariables += this.codigoIniciacion(arregloDeVariables[i].atributos[j].formulas[k]);
+                  for (var l = 0; l < arregloDeVariables[i].atributos[j].formulas[k].fuenteDeDatos.length; l++) {
+                      console.log('arregloDeVariables[i].atributos[j].formulas[k].fuenteDeDatos[l]');
+                      console.log(arregloDeVariables[i].atributos[j].formulas[k].fuenteDeDatos[l]);
+                      codigoIniciacionVariables += '\n' + this.codigoIniciacion(arregloDeVariables[i].atributos[j].formulas[k].fuenteDeDatos[l], "fuenteDato", l); ////variable, tipoVariable, esObjeto, atributo
+                  };
+              };
+          };
+      };
+      console.log('codigoIniciacionVariables');
+      console.log(codigoIniciacionVariables);*/
+
+      var codigo = '';
+
+      for (var i = 0; i <= nivelMaximoVariables; i++) {
+        if (i == 0) {
+          var llamarSiguienteNivel = false;
+          if (nivelMaximoVariables >= 1) llamarSiguienteNivel = true;
+          codigo += this.crearCodigoFuenteDato(llamarSiguienteNivel, arregloAgrupacionElementosFormulaPorConexionATabla);
+        } else {
+          var llamarSiguienteNivel = false;
+          if (nivelMaximoVariables > i) llamarSiguienteNivel = true;
+          this.crearNivel(i, llamarSiguienteNivel);
+        }
+      }
+
+      ;
+      window['calculoPrincipal'] = new Function('return function calculoPrincipalMain(){' + codigo + '}')();
+      window['calculoPrincipal']();
+      console.log(window['calculoPrincipal']);
+
+      for (var a = 0; a < arregloDeVariables.length; a++) {
+        console.log('window[arregloDeVariables[a].nombre]');
+        console.log(window[arregloDeVariables[a].nombre]);
+      }
+
       ; //CREAR CODIGO DE LLENAR / CALCULAR ELEMENTOS DE FORMULAS
 
-      var codigoElementosFormula = '';
+      /*var codigoElementosFormula = '';
+      for (var i = 0; i < arregloConexionesATablas.length; i++) {
+          if(i != 0)
+              codigoElementosFormula += '\n\n';
+          codigoElementosFormula += '\n// TABLA: '+arregloConexionesATablas[i].nombre;
+          //codigoElementosFormula += 'for (int i = 0; i < arregloConexionesATablas['+i+'].length; i++) {';
+          codigoElementosFormula += 'for (int i = 0; i < arregloResultadosDeTablas['+i+'].length; i++) {';
+          for (var j = 0; j < arregloAgrupacionElementosFormulaPorConexionATabla[i].length; j++) {
+              var codigoCalculoVariable = this.crearCampo(arregloAgrupacionElementosFormulaPorConexionATabla[i][j]);
+              for (var k = 0; k < codigoCalculoVariable.length; k++) {
+                  codigoElementosFormula += '\n\t' + codigoCalculoVariable[k];
+              };
+          };
+          codigoElementosFormula += '\n}';
+           for (var j = 0; j < arregloAgrupacionElementosFormulaPorConexionATabla[i].length; j++) {
+              var codigoCalculoVariable = this.codigoElementosFormula(arregloAgrupacionElementosFormulaPorConexionATabla[i][j]);
+              for (var k = 0; k < codigoCalculoVariable.length; k++) {
+                  codigoElementosFormula += '\n\t' + codigoCalculoVariable[k];
+              };
+          };
+      };*/
+    }
+  }, {
+    key: "codigoIniciacion",
+    value: function codigoIniciacion(variable, tipoVariable, atributo, tabsText) {
+      if (tipoVariable.localeCompare("fuenteDato") == 0) {
+        //atributo en este caso, es el valor del index del elemento en formula
+        return this.iniciacionElementosFormula(variable, atributo, tabsText);
+      } else if (tipoVariable.localeCompare("variable") == 0) {
+        return this.iniciacionVariable(variable, tabsText);
+      } else if (tipoVariable.localeCompare("atributo") == 0) {
+        return this.iniciacionCampo(variable, atributo, tabsText);
+      }
+    }
+  }, {
+    key: "iniciacionElementosFormula",
+    value: function iniciacionElementosFormula(variable, index) {
+      var iniciacionElementosFormula = '';
+
+      if (variable.tipoColumnaEnTabla.toLowerCase().localeCompare("date") == 0 && (variable.operacion.localeCompare("MAX") == 0 || variable.operacion.localeCompare("MIN") == 0)) {
+        //CUANDO ES FECHA Y OPERACION ES MAX O MIN DE FUENTE DE DATOS, SE OBTIENE LA FECHA MAXIMA O MENOR ENCONTRADA
+        //FORMULA NOMBRE FUENTE DE DATO (ELEMENTO DE FORMULA):
+        //[nombreColumnaEnTabla]+[variableID]+[variableCampoID]+[idFormula]+[idConexionTabla]+[i]
+        iniciacionElementosFormula += tabsText + 'var ' + variable.nombreColumnaEnTabla + variable.variableID + variable.variableCampoID + variable.idFormula + variable.idConexionTabla + index;
+        iniciacionElementosFormula += ' = new Date(1964, 4, 28);'; //POPS BIRTHDAY -- FECHA NULA
+      } else if (variable.tipoColumnaEnTabla.toLowerCase().localeCompare("date") == 0 && variable.operacion.length > 0) {
+        //CUANDO ES FECHA Y OPERACION NO ES MAX O MIN DE FUENTE DE DATOS, SE OBTIENE UN NUMERO QUE VARIA POR OPERACION (DIA, MES, AÑO, COUNT)
+        //FORMULA NOMBRE FUENTE DE DATO (ELEMENTO DE FORMULA):
+        //[nombreColumnaEnTabla]+[variableID]+[variableCampoID]+[idFormula]+[idConexionTabla]+[i]
+        iniciacionElementosFormula += tabsText + 'var ' + variable.nombreColumnaEnTabla + variable.variableID + variable.variableCampoID + variable.idFormula + variable.idConexionTabla + index;
+        iniciacionElementosFormula += ' = 0;';
+      }
+
+      if (variable.tipoColumnaEnTabla.toLowerCase().localeCompare("bool") == 0 && variable.operacion.localeCompare("COUNT") == 0) {
+        //CUANDO ES BOOL Y OPERACION ES COUNT DE FUENTE DE DATOS
+        //FORMULA NOMBRE FUENTE DE DATO (ELEMENTO DE FORMULA):
+        //[nombreColumnaEnTabla]+[variableID]+[variableCampoID]+[idFormula]+[idConexionTabla]+[i]
+        iniciacionElementosFormula += tabsText + 'var ' + variable.nombreColumnaEnTabla + variable.variableID + variable.variableCampoID + variable.idFormula + variable.idConexionTabla + index;
+        iniciacionElementosFormula += ' = 0;';
+      }
+
+      if (variable.tipoColumnaEnTabla.toLowerCase().localeCompare("numero") == 0 && this.existeOperacion(variable.operacion)) {
+        //FORMULA NOMBRE FUENTE DE DATO (ELEMENTO DE FORMULA):
+        //[nombreColumnaEnTabla]+[variableID]+[variableCampoID]+[idFormula]+[idConexionTabla]+[i]
+        iniciacionElementosFormula += tabsText + 'var ' + variable.nombreColumnaEnTabla + variable.variableID + variable.variableCampoID + variable.idFormula + variable.idConexionTabla + index;
+        iniciacionElementosFormula += ' = 0;';
+      }
+
+      if (variable.tipoColumnaEnTabla.toLowerCase().localeCompare("cadena") == 0 && variable.operacion.localeCompare("COUNT") == 0) {
+        //CUANDO ES BOOL Y OPERACION ES COUNT DE FUENTE DE DATOS
+        //FORMULA NOMBRE FUENTE DE DATO (ELEMENTO DE FORMULA):
+        //[nombreColumnaEnTabla]+[variableID]+[variableCampoID]+[idFormula]+[idConexionTabla]+[i]
+        iniciacionElementosFormula += tabsText + 'var ' + variable.nombreColumnaEnTabla + variable.variableID + variable.variableCampoID + variable.idFormula + variable.idConexionTabla + index;
+        iniciacionElementosFormula += ' = 0;';
+      }
+
+      return iniciacionElementosFormula;
+    }
+  }, {
+    key: "iniciacionVariable",
+    value: function iniciacionVariable(variable, tabsText) {
+      var iniciacionVariable = '';
+
+      if (variable.esObjeto) {
+        iniciacionVariable += tabsText + 'var ' + variable.nombre + 'NU3V0 = {};';
+        iniciacionVariable += '\n' + tabsText + 'var ' + variable.nombre + 'GU4RD4RV4L0R = false;';
+      } //validacion necesario porque cuando variable sea primitiva, codigo de instanciacion sera en campo / atributo
+
+
+      return iniciacionVariable;
+    }
+  }, {
+    key: "iniciacionCampo",
+    value: function iniciacionCampo(variable, campo, tabsText) {
+      var iniciacionVariable = '';
+
+      if (!variable.esObjeto) {
+        if (campo.tipo.toLowerCase().localeCompare("date") == 0) {
+          iniciacionVariable += tabsText + 'var ' + variable.nombre + 'NU3V0 = new Date(1964, 5, 28);'; //POPS BIRTHDAY == null
+        }
+
+        if (campo.tipo.toLowerCase().localeCompare("bool") == 0) {
+          iniciacionVariable += tabsText + 'var ' + variable.nombre + 'NU3V0 = false;';
+        }
+
+        if (campo.tipo.toLowerCase().localeCompare("numero") == 0) {
+          iniciacionVariable += tabsText + 'var ' + variable.nombre + 'NU3V0 = -1;';
+        }
+
+        if (campo.tipo.toLowerCase().localeCompare("cadena") == 0) {
+          iniciacionVariable += tabsText + 'var ' + variable.nombre + 'NU3V0 = "";';
+        }
+      } else {
+        if (campo.tipo.toLowerCase().localeCompare("date") == 0) {
+          iniciacionVariable += tabsText + variable.nombre + 'NU3V0.' + campo.nombre + ' = new Date(1964, 5, 28);'; //POPS BIRTHDAY == null
+        }
+
+        if (campo.tipo.toLowerCase().localeCompare("bool") == 0) {
+          iniciacionVariable += tabsText + variable.nombre + 'NU3V0.' + campo.nombre + ' = false;';
+        }
+
+        if (campo.tipo.toLowerCase().localeCompare("numero") == 0) {
+          iniciacionVariable += tabsText + variable.nombre + 'NU3V0.' + campo.nombre + ' = -1;';
+        }
+
+        if (campo.tipo.toLowerCase().localeCompare("cadena") == 0) {
+          iniciacionVariable += tabsText + variable.nombre + 'NU3V0.' + campo.nombre + ' = "";';
+        }
+      }
+
+      return iniciacionVariable;
+    }
+  }, {
+    key: "crearCodigoFuenteDato",
+    value: function crearCodigoFuenteDato(llamarSiguienteNivel, arregloAgrupacionElementosFormulaPorConexionATabla) {
+      //la creacion del codigo en esta parte pertenece a los campos que tienen asignacion unica de columna de tabla, y asignacion unica de columna de tabla con operacion como SUM, COUNT ect
+      var codigo = '';
 
       for (var i = 0; i < arregloConexionesATablas.length; i++) {
-        if (i != 0) codigoElementosFormula += '\n\n';
-        codigoElementosFormula += 'for (int i = 0; i < arregloConexionesATablas[' + i + '].length; i++) {';
+        //if(i > 0)
+        codigo += '\n';
+        codigo += '\t//CODIGO TABLA: ' + arregloConexionesATablas[i].nombre;
+        codigo += '\n\tfor ( var i = 0; i < arregloConexionesATablas.length; i++) {';
+        codigo += '\n\t\tfor ( var j = 0; j < arregloResultadosDeTablas[i].length; j++) {';
 
-        for (var j = 0; j < arregloAgrupacionElementosFormulaPorConexionATabla[i].length; j++) {
-          var codigoCalculoVariable = codigoRegla(arregloAgrupacionElementosFormulaPorConexionATabla[i][j]);
+        for (var a = 0; a < arregloDeVariables.length; a++) {
+          window[arregloDeVariables[a].nombre] = [];
+          console.log('window[arregloDeVariables[a].nombre]');
+          console.log(window[arregloDeVariables[a].nombre]);
 
-          for (var k = 0; k < codigoCalculoVariable.length; k++) {
-            codigoElementosFormula += '\n\t' + codigoCalculoVariable[k];
+          for (var j = 0; j < arregloAgrupacionElementosFormulaPorConexionATabla[i].length; j++) {
+            if (arregloDeVariables[a].ID == arregloAgrupacionElementosFormulaPorConexionATabla[i][j].variable.ID) {
+              codigo += '\n\t\t//INICIACION VARIABLE: ' + arregloDeVariables[a].nombre;
+              codigo += '\n' + this.codigoIniciacion(arregloDeVariables[a], "variable", {}, '\t\t\t'); //variable, tipoVariable, atributo
+
+              for (var b = 0; b < arregloDeVariables[a].atributos.length; b++) {
+                codigo += '\n' + this.codigoIniciacion(arregloDeVariables[a], "atributo", arregloDeVariables[a].atributos[b], '\t\t\t'); ////variable, tipoVariable, atributo
+
+                for (var c = 0; c < arregloDeVariables[a].atributos[b].formulas.length; c++) {
+                  for (var d = 0; d < arregloDeVariables[a].atributos[b].formulas[c].fuenteDeDatos.length; d++) {
+                    /*console.log('arregloDeVariables[i].atributos[j].formulas[k].fuenteDeDatos[l]');
+                    console.log(arregloDeVariables[i].atributos[j].formulas[k].fuenteDeDatos[l]);*/
+                    codigo += '\n' + this.codigoIniciacion(arregloDeVariables[a].atributos[b].formulas[c].fuenteDeDatos[d], "fuenteDato", d, '\t\t\t'); ////variable, tipoVariable, atributo
+                  }
+
+                  ;
+                }
+
+                ;
+
+                for (var p = 0; p < arregloDeVariables[a].atributos[b].segmentoReglas.length; p++) {
+                  //viendo si el segmento de reglas pertenece a la tabla
+                  if (arregloDeVariables[a].atributos[b].segmentoReglas[p].conexionTablaID == arregloConexionesATablas[i].ID) {
+                    codigo += this.crearCodigoReglas(arregloDeVariables[a].atributos[b].segmentoReglas[p].reglas, 3, a, b);
+                  }
+                }
+
+                ;
+                codigo += '\n'; //codigo final para guardar nuevo valor en arreglo
+
+                if (b == arregloDeVariables[a].atributos.length - 1) {
+                  //crear codigo guardar variable hasta llegar al ultimo campo
+                  for (var p = 0; p < arregloDeVariables[a].atributos[b].segmentoReglas.length; p++) {
+                    //viendo si el segmento de reglas pertenece a la tabla
+                    if (arregloDeVariables[a].atributos[b].segmentoReglas) {//
+                    }
+
+                    if (arregloDeVariables[a].atributos[b].segmentoReglas[p].conexionTablaID == arregloConexionesATablas[i].ID) {
+                      for (var c = 0; c < arregloDeVariables[a].atributos[b].segmentoReglas[p].reglas.length; c++) {
+                        for (var d = 0; d < arregloDeVariables[a].atributos[b].formulas.length; d++) {
+                          if (arregloDeVariables[a].atributos[b].segmentoReglas[p].reglas[c].formulaID == arregloDeVariables[a].atributos[b].formulas[d].ID) {
+                            codigo += this.agregarCodigoGuardarVariable(arregloDeVariables[a], arregloDeVariables[a].atributos[b], arregloDeVariables[a].atributos[b].formulas[d], arregloDeVariables[a].atributos[b].formulas[d].fuenteDeDatos, 3);
+                          }
+                        }
+
+                        ;
+                      }
+
+                      ;
+                    }
+                  }
+
+                  ;
+                }
+              }
+
+              ;
+              break;
+            }
           }
 
           ;
         }
 
         ;
-        codigoElementosFormula += '\n}';
+        codigo += '\n\t}';
+        codigo += '\n}';
+
+        if (llamarSiguienteNivel) {
+          codigo += '\nnivel1();';
+        }
+        /*for (var p = 0; p < arregloDeVariables[a].atributos[b].segmentoReglas.length; p++) {
+            //viendo si el segmento de reglas pertenece a la tabla
+            if(arregloDeVariables[a].atributos[b].segmentoReglas[p].conexionTablaID == arregloConexionesATablas[i].ID) {
+                codigo += this.agregarCodigoFinal(arregloDeVariables[a].atributos[b].segmentoReglas[p].reglas, 2, a, b);
+            }
+        };*/
+
       }
 
       ;
+      console.log('codigo');
+      console.log(codigo);
+      return codigo;
+    }
+  }, {
+    key: "crearCodigoReglas",
+    value: function crearCodigoReglas(reglas, tabs, posicionVariable, posicionCampo) {
+      var codigo = '';
+
+      for (var n = 0; n < reglas.length; n++) {
+        if (reglas[n].reglaPadreID == -1) {
+          var resultado = this.arregloCodigoRegla(reglas[n], tabs, posicionVariable, posicionCampo, [], reglas);
+          if (resultado.length > 0) resultado[0].codigo = "\n" + resultado[0].codigo; //$.merge( prestamosCuerpo, resultado );
+
+          for (var i = 0; i < resultado.length; i++) {
+            codigo += resultado[i].codigo;
+          }
+
+          ;
+        }
+      }
+
+      ;
+      return codigo;
+    }
+  }, {
+    key: "agregarCodigoGuardarVariable",
+    value: function agregarCodigoGuardarVariable(variable, campo, formulas, elementoFormula, tabs) {
+      var codigo = '';
+      var tabsText = '';
+
+      for (var i = 0; i < tabs; i++) {
+        tabsText += '\t';
+      }
+
+      ; //ver si elementoFormula es asignacion de columna
+
+      for (var i = 0; i < elementoFormula.length; i++) {
+        if (elementoFormula[i].operacion.toLowerCase().localeCompare("asig") == 0) {
+          codigo += '\n' + tabsText + 'if (' + variable.nombre + 'GU4RD4RV4L0R' + ') {';
+
+          if (variable.esObjeto) {
+            codigo += '\n' + tabsText + '\twindow["' + variable.nombre + '"].push(' + variable.nombre + 'NU3V0);';
+          } else {
+            codigo += '\n' + tabsText + '\twindow["' + variable.nombre + '"] = ' + variable.nombre + 'NU3V0;';
+          }
+
+          codigo += '\n' + tabsText + '}';
+        }
+      }
+
+      ;
+      return codigo;
+    }
+  }, {
+    key: "crearNivel",
+    value: function crearNivel() {} //elementoFormula: objeto elementoFormula
+
+  }, {
+    key: "codigoElementosFormula",
+    value: function codigoElementosFormula(elementoFormula, tabSpaces, objetoEnTabla, instanciacion) {
+      var columnasDeTablaSeleccionadas = this.getColumnasDeTablaSeleccionadas(elementoFormula);
+
+      if (elementoFormula.operacion.length == 0 && columnasDeTablaSeleccionadas.length == 1) {
+        this.codigoElementosFormulaAsignacion();
+      } else if (elementoFormula.operacion.length > 0 && columnasDeTablaSeleccionadas.length == 1) {
+        this.codigoElementosFormulaAsignacionOperacion();
+      } else {
+        this.codigoElementosFormulaGlobal();
+      }
+    }
+  }, {
+    key: "codigoElementosFormulaAsignacion",
+    value: function codigoElementosFormulaAsignacion(elementoFormula, tabSpaces, objetoEnTabla, instanciacion) {
+      var cadenaRetorno = '';
+
+      if (elementoFormula.fuenteDato.tipoColumnaEnTabla.localeCompare("date") == 0) {
+        if (elementoFormula.fuenteDato.operacion.localeCompare("MAX") == 0) {
+          cadenaRetorno += tabSpaces + 'if(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ' != undefined && this.isValidDate(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ') ) {';
+          cadenaRetorno += '\n' + tabSpaces + '\tif(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + '.getTime() > window[' + instanciacion + '].getTime() && (window[' + instanciacion + '].getDate() != 28 && window[' + instanciacion + '].getMonth() != 4 && window[' + instanciacion + '].getFullYear() != 1964) ) {';
+          cadenaRetorno += '\n' + tabSpaces + '\t\twindow[' + instanciacion + '] = new Date(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ')';
+          cadenaRetorno += '\n' + tabSpaces + '\t} else if (window[' + instanciacion + '].getDate() == 28 && window[' + instanciacion + '].getMonth() == 4 && window[' + instanciacion + '].getFullYear() == 1964) {'; //valor nulo
+
+          cadenaRetorno += '\n' + tabSpaces + '\t\twindow[' + instanciacion + '] = new Date(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ')';
+          cadenaRetorno += '\n' + tabSpaces + '\t}';
+          cadenaRetorno += '\n' + tabSpaces + '}';
+        } else if (elementoFormula.fuenteDato.operacion.localeCompare("MIN") == 0) {
+          cadenaRetorno += tabSpaces + 'if(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ' != undefined && this.isValidDate(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ') ) {';
+          cadenaRetorno += '\n' + tabSpaces + '\tif(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + '.getTime() < window[' + instanciacion + '].getTime() && (window[' + instanciacion + '].getDate() != 28 && window[' + instanciacion + '].getMonth() != 4 && window[' + instanciacion + '].getFullYear() != 1964) ) {';
+          cadenaRetorno += '\n' + tabSpaces + '\t\twindow[' + instanciacion + '] = new Date(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ')';
+          cadenaRetorno += '\n' + tabSpaces + '\t} else if (window[' + instanciacion + '].getDate() == 28 && window[' + instanciacion + '].getMonth() == 4 && window[' + instanciacion + '].getFullYear() == 1964) {'; //valor nulo
+
+          cadenaRetorno += '\n' + tabSpaces + '\t\twindow[' + instanciacion + '] = new Date(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ')';
+          cadenaRetorno += '\n' + tabSpaces + '\t}';
+          cadenaRetorno += '\n' + tabSpaces + '}';
+        } else if (elementoFormula.fuenteDato.operacion.localeCompare("DIA") == 0) {
+          cadenaRetorno += tabSpaces + 'if(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ' != undefined && this.isValidDate(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ') ) {';
+          cadenaRetorno += '\n' + tabSpaces + '\twindow[' + instanciacion + ']++';
+          cadenaRetorno += '\n' + tabSpaces + '}';
+        } else if (elementoFormula.fuenteDato.operacion.localeCompare("MES") == 0) {} else if (elementoFormula.fuenteDato.operacion.localeCompare("AÑO") == 0) {} else if (elementoFormula.fuenteDato.operacion.localeCompare("COUNT") == 0) {
+          cadenaRetorno += tabSpaces + 'if(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ' != undefined && this.isValidDate(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ') ) {';
+          cadenaRetorno += '\n' + tabSpaces + '\twindow[' + instanciacion + ']++';
+          cadenaRetorno += '\n' + tabSpaces + '}';
+        } else if (elementoFormula.fuenteDato.operacion.length == 0) {}
+      } else if (elementoFormula.fuenteDato.tipoColumnaEnTabla.localeCompare("bool") == 0) {
+        if (elementoFormula.fuenteDato.operacion.localeCompare("COUNT") == 0) {
+          cadenaRetorno += tabSpaces + 'if(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ' != undefined && this.isValidDate(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ') ) {';
+          cadenaRetorno += '\n' + tabSpaces + '\twindow[' + instanciacion + ']++';
+          cadenaRetorno += '\n' + tabSpaces + '}';
+        }
+      } else if (elementoFormula.fuenteDato.tipoColumnaEnTabla.localeCompare("bool") == 0) {
+        if (elementoFormula.fuenteDato.operacion.localeCompare("COUNT") == 0) {
+          cadenaRetorno += tabSpaces + 'if(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ' != undefined && this.isValidDate(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ') ) {';
+          cadenaRetorno += '\n' + tabSpaces + '\twindow[' + instanciacion + ']++';
+          cadenaRetorno += '\n' + tabSpaces + '}';
+        }
+      } else if (elementoFormula.fuenteDato.tipoColumnaEnTabla.localeCompare("cadena") == 0) {
+        if (elementoFormula.fuenteDato.operacion.localeCompare("COUNT") == 0) {
+          cadenaRetorno += tabSpaces + 'if(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ' != undefined && this.isValidDate(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ') ) {';
+          cadenaRetorno += '\n' + tabSpaces + '\twindow[' + instanciacion + ']++';
+          cadenaRetorno += '\n' + tabSpaces + '}';
+        }
+      }
+    }
+  }, {
+    key: "codigoElementosFormulaAsignacionOperacion",
+    value: function codigoElementosFormulaAsignacionOperacion(elementoFormula, tabSpaces, objetoEnTabla, instanciacion) {
+      var cadenaRetorno = '';
+
+      if (elementoFormula.fuenteDato.tipoColumnaEnTabla.localeCompare("date") == 0) {
+        if (elementoFormula.fuenteDato.operacion.localeCompare("MAX") == 0) {
+          cadenaRetorno += tabSpaces + 'if(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ' != undefined && this.isValidDate(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ') ) {';
+          cadenaRetorno += '\n' + tabSpaces + '\tif(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + '.getTime() > window[' + instanciacion + '].getTime() && (window[' + instanciacion + '].getDate() != 28 && window[' + instanciacion + '].getMonth() != 4 && window[' + instanciacion + '].getFullYear() != 1964) ) {';
+          cadenaRetorno += '\n' + tabSpaces + '\t\twindow[' + instanciacion + '] = new Date(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ')';
+          cadenaRetorno += '\n' + tabSpaces + '\t} else if (window[' + instanciacion + '].getDate() == 28 && window[' + instanciacion + '].getMonth() == 4 && window[' + instanciacion + '].getFullYear() == 1964) {'; //valor nulo
+
+          cadenaRetorno += '\n' + tabSpaces + '\t\twindow[' + instanciacion + '] = new Date(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ')';
+          cadenaRetorno += '\n' + tabSpaces + '\t}';
+          cadenaRetorno += '\n' + tabSpaces + '}';
+        } else if (elementoFormula.fuenteDato.operacion.localeCompare("MIN") == 0) {
+          cadenaRetorno += tabSpaces + 'if(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ' != undefined && this.isValidDate(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ') ) {';
+          cadenaRetorno += '\n' + tabSpaces + '\tif(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + '.getTime() < window[' + instanciacion + '].getTime() && (window[' + instanciacion + '].getDate() != 28 && window[' + instanciacion + '].getMonth() != 4 && window[' + instanciacion + '].getFullYear() != 1964) ) {';
+          cadenaRetorno += '\n' + tabSpaces + '\t\twindow[' + instanciacion + '] = new Date(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ')';
+          cadenaRetorno += '\n' + tabSpaces + '\t} else if (window[' + instanciacion + '].getDate() == 28 && window[' + instanciacion + '].getMonth() == 4 && window[' + instanciacion + '].getFullYear() == 1964) {'; //valor nulo
+
+          cadenaRetorno += '\n' + tabSpaces + '\t\twindow[' + instanciacion + '] = new Date(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ')';
+          cadenaRetorno += '\n' + tabSpaces + '\t}';
+          cadenaRetorno += '\n' + tabSpaces + '}';
+        } else if (elementoFormula.fuenteDato.operacion.localeCompare("DIA") == 0) {
+          cadenaRetorno += tabSpaces + 'if(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ' != undefined && this.isValidDate(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ') ) {';
+          cadenaRetorno += '\n' + tabSpaces + '\twindow[' + instanciacion + ']++';
+          cadenaRetorno += '\n' + tabSpaces + '}';
+        } else if (elementoFormula.fuenteDato.operacion.localeCompare("MES") == 0) {} else if (elementoFormula.fuenteDato.operacion.localeCompare("AÑO") == 0) {} else if (elementoFormula.fuenteDato.operacion.localeCompare("COUNT") == 0) {
+          cadenaRetorno += tabSpaces + 'if(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ' != undefined && this.isValidDate(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ') ) {';
+          cadenaRetorno += '\n' + tabSpaces + '\twindow[' + instanciacion + ']++';
+          cadenaRetorno += '\n' + tabSpaces + '}';
+        } else if (elementoFormula.fuenteDato.operacion.length == 0) {}
+      } else if (elementoFormula.fuenteDato.tipoColumnaEnTabla.localeCompare("bool") == 0) {
+        if (elementoFormula.fuenteDato.operacion.localeCompare("COUNT") == 0) {
+          cadenaRetorno += tabSpaces + 'if(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ' != undefined && this.isValidDate(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ') ) {';
+          cadenaRetorno += '\n' + tabSpaces + '\twindow[' + instanciacion + ']++';
+          cadenaRetorno += '\n' + tabSpaces + '}';
+        }
+      } else if (elementoFormula.fuenteDato.tipoColumnaEnTabla.localeCompare("bool") == 0) {
+        if (elementoFormula.fuenteDato.operacion.localeCompare("COUNT") == 0) {
+          cadenaRetorno += tabSpaces + 'if(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ' != undefined && this.isValidDate(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ') ) {';
+          cadenaRetorno += '\n' + tabSpaces + '\twindow[' + instanciacion + ']++';
+          cadenaRetorno += '\n' + tabSpaces + '}';
+        }
+      } else if (elementoFormula.fuenteDato.tipoColumnaEnTabla.localeCompare("cadena") == 0) {
+        if (elementoFormula.fuenteDato.operacion.localeCompare("COUNT") == 0) {
+          cadenaRetorno += tabSpaces + 'if(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ' != undefined && this.isValidDate(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ') ) {';
+          cadenaRetorno += '\n' + tabSpaces + '\twindow[' + instanciacion + ']++';
+          cadenaRetorno += '\n' + tabSpaces + '}';
+        }
+      }
+    }
+  }, {
+    key: "codigoElementosFormulaGlobal",
+    value: function codigoElementosFormulaGlobal(elementoFormula, tabSpaces, objetoEnTabla, instanciacion) {
+      var cadenaRetorno = '';
+
+      if (elementoFormula.fuenteDato.tipoColumnaEnTabla.localeCompare("date") == 0) {
+        if (elementoFormula.fuenteDato.operacion.localeCompare("MAX") == 0) {
+          cadenaRetorno += tabSpaces + 'if(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ' != undefined && this.isValidDate(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ') ) {';
+          cadenaRetorno += '\n' + tabSpaces + '\tif(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + '.getTime() > window[' + instanciacion + '].getTime() && (window[' + instanciacion + '].getDate() != 28 && window[' + instanciacion + '].getMonth() != 4 && window[' + instanciacion + '].getFullYear() != 1964) ) {';
+          cadenaRetorno += '\n' + tabSpaces + '\t\twindow[' + instanciacion + '] = new Date(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ')';
+          cadenaRetorno += '\n' + tabSpaces + '\t} else if (window[' + instanciacion + '].getDate() == 28 && window[' + instanciacion + '].getMonth() == 4 && window[' + instanciacion + '].getFullYear() == 1964) {'; //valor nulo
+
+          cadenaRetorno += '\n' + tabSpaces + '\t\twindow[' + instanciacion + '] = new Date(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ')';
+          cadenaRetorno += '\n' + tabSpaces + '\t}';
+          cadenaRetorno += '\n' + tabSpaces + '}';
+        } else if (elementoFormula.fuenteDato.operacion.localeCompare("MIN") == 0) {
+          cadenaRetorno += tabSpaces + 'if(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ' != undefined && this.isValidDate(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ') ) {';
+          cadenaRetorno += '\n' + tabSpaces + '\tif(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + '.getTime() < window[' + instanciacion + '].getTime() && (window[' + instanciacion + '].getDate() != 28 && window[' + instanciacion + '].getMonth() != 4 && window[' + instanciacion + '].getFullYear() != 1964) ) {';
+          cadenaRetorno += '\n' + tabSpaces + '\t\twindow[' + instanciacion + '] = new Date(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ')';
+          cadenaRetorno += '\n' + tabSpaces + '\t} else if (window[' + instanciacion + '].getDate() == 28 && window[' + instanciacion + '].getMonth() == 4 && window[' + instanciacion + '].getFullYear() == 1964) {'; //valor nulo
+
+          cadenaRetorno += '\n' + tabSpaces + '\t\twindow[' + instanciacion + '] = new Date(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ')';
+          cadenaRetorno += '\n' + tabSpaces + '\t}';
+          cadenaRetorno += '\n' + tabSpaces + '}';
+        } else if (elementoFormula.fuenteDato.operacion.localeCompare("DIA") == 0) {
+          cadenaRetorno += tabSpaces + 'if(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ' != undefined && this.isValidDate(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ') ) {';
+          cadenaRetorno += '\n' + tabSpaces + '\twindow[' + instanciacion + ']++';
+          cadenaRetorno += '\n' + tabSpaces + '}';
+        } else if (elementoFormula.fuenteDato.operacion.localeCompare("MES") == 0) {} else if (elementoFormula.fuenteDato.operacion.localeCompare("AÑO") == 0) {} else if (elementoFormula.fuenteDato.operacion.localeCompare("COUNT") == 0) {
+          cadenaRetorno += tabSpaces + 'if(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ' != undefined && this.isValidDate(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ') ) {';
+          cadenaRetorno += '\n' + tabSpaces + '\twindow[' + instanciacion + ']++';
+          cadenaRetorno += '\n' + tabSpaces + '}';
+        } else if (elementoFormula.fuenteDato.operacion.length == 0) {}
+      } else if (elementoFormula.fuenteDato.tipoColumnaEnTabla.localeCompare("bool") == 0) {
+        if (elementoFormula.fuenteDato.operacion.localeCompare("COUNT") == 0) {
+          cadenaRetorno += tabSpaces + 'if(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ' != undefined && this.isValidDate(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ') ) {';
+          cadenaRetorno += '\n' + tabSpaces + '\twindow[' + instanciacion + ']++';
+          cadenaRetorno += '\n' + tabSpaces + '}';
+        }
+      } else if (elementoFormula.fuenteDato.tipoColumnaEnTabla.localeCompare("bool") == 0) {
+        if (elementoFormula.fuenteDato.operacion.localeCompare("COUNT") == 0) {
+          cadenaRetorno += tabSpaces + 'if(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ' != undefined && this.isValidDate(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ') ) {';
+          cadenaRetorno += '\n' + tabSpaces + '\twindow[' + instanciacion + ']++';
+          cadenaRetorno += '\n' + tabSpaces + '}';
+        }
+      } else if (elementoFormula.fuenteDato.tipoColumnaEnTabla.localeCompare("cadena") == 0) {
+        if (elementoFormula.fuenteDato.operacion.localeCompare("COUNT") == 0) {
+          cadenaRetorno += tabSpaces + 'if(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ' != undefined && this.isValidDate(' + objetoEnTabla + '.' + elementoFormula.fuenteDato.nombreColumnaEnTabla + ') ) {';
+          cadenaRetorno += '\n' + tabSpaces + '\twindow[' + instanciacion + ']++';
+          cadenaRetorno += '\n' + tabSpaces + '}';
+        }
+      }
+    }
+  }, {
+    key: "arregloCodigoRegla",
+    value: function arregloCodigoRegla(regla, tabs, posicionVariable, posicionCampo, arreglo, arregloDeReglas) {
+      var tabsText = '';
+
+      for (var i = 0; i < tabs; i++) {
+        tabsText += '\t';
+      }
+
+      ;
+      var posicionesIF = [];
+
+      if (!regla.esCondicion) {
+        //asignaciones
+        //si no es condicion, la variable de referencia se le agrega NU3V0 que hace referencia al objeto temporal vacio
+        if (regla.operacion.indexOf('ASIG') == 0) {
+          //trayendo formula correcta
+          var formula = arregloDeVariables[posicionVariable].atributos[posicionCampo].formulas.filter(function (formula) {
+            return regla.formulaID == formula.ID;
+          });
+
+          if (formula.length > 0) {
+            arreglo.push({
+              codigo: tabsText + "if (arregloResultadosDeTablas[i][j]." + formula[0].fuenteDeDatos[0].nombreColumnaEnTabla + " != undefined) {",
+              tipo: "ASIG"
+            });
+            arreglo.push({
+              codigo: "\n\t" + tabsText + arregloDeVariables[posicionVariable].nombre + "NU3V0." + arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre + " = arregloResultadosDeTablas[i][j]." + formula[0].fuenteDeDatos[0].nombreColumnaEnTabla + ";",
+              tipo: "ASIG"
+            });
+            arreglo.push({
+              codigo: "\n\t" + tabsText + arregloDeVariables[posicionVariable].nombre + "GU4RD4RV4L0R = true;",
+              tipo: "BANDERA_ASIG"
+            });
+            arreglo.push({
+              codigo: "\n" + tabsText + "}",
+              tipo: "ASIG"
+            });
+          }
+        } else if (regla.operacion.indexOf('MAX') == 0) {
+          //trayendo formula correcta
+          var formula = arregloDeVariables[posicionVariable].atributos[posicionCampo].formulas.filter(function (formula) {
+            return regla.formulaID == formula.ID;
+          });
+
+          if (formula.length > 0) {
+            if (arregloDeVariables[posicionVariable].atributos[posicionCampo].tipo.toLowerCase().localeCompare("date") == 0) {
+              isValidDate;
+              arreglo.push({
+                codigo: tabsText + "if (" + arregloDeVariables[posicionVariable].nombre + "NU3V0." + arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre + ".getTime() < arregloResultadosDeTablas[i][j]." + formula[0].fuenteDeDatos[0].nombreColumnaEnTabla + ".getTime())",
+                tipo: "MAX"
+              });
+              arreglo.push({
+                codigo: tabsText + "\tif (" + arregloDeVariables[posicionVariable].nombre + "NU3V0." + arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre + ".getTime() < arregloResultadosDeTablas[i][j]." + formula[0].fuenteDeDatos[0].nombreColumnaEnTabla + ".getTime())",
+                tipo: "MAX"
+              });
+              arreglo.push({
+                codigo: tabsText + "\t\t" + arregloDeVariables[posicionVariable].nombre + "NU3V0." + arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre + " = new Date(arregloResultadosDeTablas[i][j]." + formula[0].fuenteDeDatos[0].nombreColumnaEnTabla + ")",
+                tipo: "MAX"
+              });
+            } else if (arregloDeVariables[posicionVariable].atributos[posicionCampo].tipo.toLowerCase().localeCompare("int") == 0) {
+              arreglo.push({
+                codigo: tabsText + "if (" + arregloDeVariables[posicionVariable].nombre + "NU3V0." + arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre + " < arregloResultadosDeTablas[i][j]." + formula[0].fuenteDeDatos[0].nombreColumnaEnTabla + ")",
+                tipo: "MAX"
+              });
+              arreglo.push({
+                codigo: tabsText + "\t" + arregloDeVariables[posicionVariable].nombre + "NU3V0." + arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre + " = arregloResultadosDeTablas[i][j]." + formula[0].fuenteDeDatos[0].nombreColumnaEnTabla,
+                tipo: "MAX"
+              });
+            }
+          }
+        } else if (regla.operacion.indexOf('MIN') == 0) {} else if (regla.operacion.indexOf('PROM') == 0) {} else if (regla.operacion.indexOf('SUM') == 0) {} else if (regla.operacion.indexOf('FORMULA') == 0) {
+          console.log("WINDSORSSS");
+          /*for (var i = 0; i < arregloDeVariables[posicionVariable].atributos[posicionCampo].formulas.length; i++) {
+              if(arregloDeVariables[posicionVariable].atributos[posicionCampo].formulas[i].ID == regla.formulaID) {
+                  for (var j = 0; j < arregloDeVariables[posicionVariable].atributos[posicionCampo].formulas[i].fuenteDeDatos.length; j++) {
+                      //obteniendo variable original a partir del elemento formula
+                      //puede ser var primitiva, campo de variable, o columna de tabla
+                      if(arregloDeVariables[posicionVariable].atributos[posicionCampo].formulas[i].fuenteDeDatos[j].esFuenteDeDato) {
+                          //
+                      }
+                      arreglo.push({codigo: "\n"+tabsText+"var "+arregloDeVariables[posicionVariable].atributos[posicionCampo].formulas[i].fuenteDeDatos[j].nombreVariable+posicionVariable+posicionCampo+i+" = "+arregloDeVariables+";", tipo: "INICIACION_TEMP_ELEMENTOSFORMULAS"});
+                  };
+              }
+          };*/
+        }
+      } else {
+        //condiciones if
+        var arregloValoresAComparar = [];
+        var copiaReglaOriginal = $.extend(true, {}, arreglo);
+        var tamArreglo = arreglo.length;
+
+        for (var j = 0; j < tamArreglo; j++) {
+          for (var i = 0; i < arregloLista.length; i++) {
+            if (i == 0) {
+              var textoFinal = ' != 0 ';
+              if (i + 1 == arregloLista.length) textoFinal += " ) {";
+              var campo = regla.campoObjetivo.split("=")[1];
+              var valor = getListValue(arregloLista[i], campo);
+              arreglo[j].codigo += valor + "')" + textoFinal;
+            } else {
+              var textoFinal = ' != 0 ';
+              if (i + 1 == arregloLista.length) textoFinal += " ) {";
+              var campo = regla.campoObjetivo.split("=")[1];
+              var valor = getListValue(arregloLista[i], campo);
+              arreglo[j].codigo += " && " + copiaRegla[j].codigo.split(" ( ")[1] + valor + "')" + textoFinal;
+            }
+          }
+
+          ;
+        }
+
+        ;
+      }
+
+      if (regla.valor.indexOf('LISTA') == 0) {
+        if (esCondicion) {
+          var arregloLista = regla.valor.split("=")[1].split(",");
+          var copiaRegla = $.extend(true, {}, arreglo);
+          var tamArreglo = arreglo.length;
+
+          if (regla.operacion == "no") {
+            for (var j = 0; j < tamArreglo; j++) {
+              for (var i = 0; i < arregloLista.length; i++) {
+                if (i == 0) {
+                  var textoFinal = ' != 0 ';
+                  if (i + 1 == arregloLista.length) textoFinal += " ) {";
+                  var campo = regla.campoObjetivo.split("=")[1];
+                  var valor = getListValue(arregloLista[i], campo);
+                  arreglo[j].codigo += valor + "')" + textoFinal;
+                } else {
+                  var textoFinal = ' != 0 ';
+                  if (i + 1 == arregloLista.length) textoFinal += " ) {";
+                  var campo = regla.campoObjetivo.split("=")[1];
+                  var valor = getListValue(arregloLista[i], campo);
+                  arreglo[j].codigo += " && " + copiaRegla[j].codigo.split(" ( ")[1] + valor + "')" + textoFinal;
+                }
+              }
+            }
+
+            ;
+          } else {
+            for (var j = 0; j < tamArreglo; j++) {
+              for (var i = 0; i < arregloLista.length; i++) {
+                if (i == 0) {
+                  var textoFinal = ' == 0 ';
+                  if (i + 1 == arregloLista.length) textoFinal += " ) {";
+                  var campo = regla.campoObjetivo.split("=")[1];
+                  var valor = getListValue(arregloLista[i], campo);
+                  arreglo[j].codigo += valor + "')" + textoFinal;
+                } else {
+                  var textoFinal = ' == 0 ';
+                  if (i + 1 == arregloLista.length) textoFinal += " ) {";
+                  var campo = regla.campoObjetivo.split("=")[1];
+                  var valor = getListValue(arregloLista[i], campo);
+                  arreglo[j].codigo += " || " + copiaRegla[j].codigo.split(" ( ")[1] + valor + "')" + textoFinal;
+                }
+              }
+            }
+
+            ;
+          }
+        }
+      } else if (regla.valor.indexOf('FACTOR') == 0 && !noAgregarFactor) {} else if (regla.valor.indexOf('COLUMNA') == 0) {} else if (regla.valor.indexOf('FECHA') == 0 && !noAgregarFecha) {}
+
+      var cuerpo = arregloDeReglas.filter(function (object) {
+        return object.reglaPadre == regla.ID;
+      });
+
+      if (cuerpo.length > 0) {
+        var arregloCuerpo = [];
+
+        for (var i = 0; i < cuerpo.length; i++) {
+          var cuantasTabs = tabs;
+          if (regla.esCondicion) cuantasTabs++;
+          var retorno = this.arregloCodigoRegla(regla, tabs + 1, posicionVariable, posicionCampo, arreglo, arregloDeReglas);
+          retorno[0].codigo = "\n" + retorno[0].codigo;
+          $.merge(arregloCuerpo, retorno);
+        }
+
+        ;
+
+        for (var i = 0; i < posicionesIF.length; i++) {
+          arreglo.splice.apply(arreglo, [posicionesIF[i], 0].concat(arregloCuerpo));
+          if (regla.esCondicion) arreglo.splice(posicionesIF[i] + arregloCuerpo.length, 0, {
+            codigo: "\n" + tabsText + "}",
+            filtro: regla.filtro
+          });
+
+          for (var j = i; j < posicionesIF.length; j++) {
+            posicionesIF[j] += arregloCuerpo.length;
+          }
+
+          ;
+        }
+
+        ;
+        if (posicionesIF.length == 0) $.merge(arreglo, arregloCuerpo);
+        return arreglo;
+      } else {
+        if (regla.esCondicion) {
+          for (var i = 0; i < posicionesIF.length; i++) {
+            arreglo.splice(posicionesIF[i], 0, {
+              codigo: "\n" + tabsText + "}",
+              filtro: regla.filtro
+            });
+          }
+
+          ;
+        }
+
+        return arreglo;
+      }
+    }
+  }, {
+    key: "isValidDate",
+    value: function isValidDate(fecha) {
+      if (Object.prototype.toString.call(fecha) === "[object Date]") {
+        if (isNaN(fecha.getTime())) {
+          alert("Ingrese una fecha valida.");
+          return false;
+        } else {
+          return true;
+        }
+      } else {
+        alert("Ingrese una fecha valida.");
+        return false;
+      }
+    }
+  }, {
+    key: "existeOperacion",
+    value: function existeOperacion(operacion) {
+      for (var i = 0; i < this.state.operaciones.length; i++) {
+        if (operacion.localeCompare("COUNT") == 0 || operacion.localeCompare("MAX") == 0 || operacion.localeCompare("MIN") == 0 || operacion.localeCompare("DIA") == 0 || operacion.localeCompare("MES") == 0 || operacion.localeCompare("AÑO") == 0 || operacion.localeCompare("PROM") == 0 || operacion.localeCompare("SUM") == 0) {
+          return true;
+        }
+      }
+
+      ;
+      return false;
     }
   }, {
     key: "render",

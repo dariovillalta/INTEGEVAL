@@ -23,9 +23,9 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
 
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
@@ -35,6 +35,7 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 var variables = [];
 var objetos = [];
 var camposDeObjetos = [];
+var formulaSeleccionada;
 
 var ContenedorFormulas =
 /*#__PURE__*/
@@ -50,14 +51,27 @@ function (_React$Component) {
     _this.state = {
       mostrarCrearCondicion: true,
       asignaciones: []
-      /*this.mostrarCrearCondicion = this.mostrarCrearCondicion.bind(this);
-      this.mostrarAsignarFormula = this.mostrarAsignarFormula.bind(this);*/
-
     };
+    _this.actualizarSeleccionFormula = _this.actualizarSeleccionFormula.bind(_assertThisInitialized(_this));
+    _this.verificarSeleccionFormula = _this.verificarSeleccionFormula.bind(_assertThisInitialized(_this));
     return _this;
   }
 
   _createClass(ContenedorFormulas, [{
+    key: "actualizarSeleccionFormula",
+    value: function actualizarSeleccionFormula(asignacion) {
+      formulaSeleccionada = asignacion;
+    }
+  }, {
+    key: "verificarSeleccionFormula",
+    value: function verificarSeleccionFormula() {
+      if (formulaSeleccionada != undefined && formulaSeleccionada != null) {
+        this.props.callbackCrearRegla(true);
+      } else {
+        alert("Seleccione por lo menos una formula");
+      }
+    }
+  }, {
     key: "render",
     value: function render() {
       var _this2 = this;
@@ -68,7 +82,7 @@ function (_React$Component) {
         }
       }, _react["default"].createElement("h3", {
         className: "card-header"
-      }, "Crear Asignaci\xF3n / F\xF3rmula"), _react["default"].createElement("br", null), _react["default"].createElement("div", {
+      }, "Crear F\xF3rmula (Asignaci\xF3n)"), _react["default"].createElement("br", null), _react["default"].createElement("div", {
         className: "text-center"
       }, _react["default"].createElement("a", {
         className: "btn btn-success col-xs-10 col-10 btnWhiteColorHover font-bold font-20",
@@ -78,38 +92,45 @@ function (_React$Component) {
         onClick: function onClick() {
           return _this2.props.goToCreateFormula(-1);
         }
-      }, "Crear Asignaci\xF3n / F\xF3rmula")), _react["default"].createElement("hr", null), _react["default"].createElement("div", {
-        className: "text-center"
-      }, this.props.asignaciones.map(function (asignacion, i) {
-        return _react["default"].createElement("div", null, _react["default"].createElement("input", {
-          type: "radio",
-          name: "formulas",
-          className: "custom-control-input"
-        }), _react["default"].createElement("a", {
-          className: "btn btn-success btn-primary col-xs-10 col-10 btnWhiteColorHover font-bold font-20",
+      }, "Crear")), _react["default"].createElement("hr", null), _react["default"].createElement("h3", {
+        className: "card-header"
+      }, "Editar F\xF3rmula (Asignaci\xF3n)"), _react["default"].createElement("br", null), _react["default"].createElement("div", null, this.props.asignaciones.map(function (asignacion, i) {
+        return _react["default"].createElement("div", {
+          key: i,
           style: {
-            color: "#fafafa"
-          },
-          onClick: function onClick() {
-            return _this2.props.goToCreateFormula(i);
+            paddingLeft: "10px",
+            paddingRight: "5px"
           }
-        }, asignacion.formula));
-      }), this.props.asignaciones.length == 0 ? _react["default"].createElement("a", {
+        }, i != 0 ? _react["default"].createElement("br", null) : null, _react["default"].createElement("label", {
+          className: "custom-control custom-radio"
+        }, _react["default"].createElement("input", {
+          type: "radio",
+          name: "formulasRadio",
+          className: "custom-control-input",
+          onClick: function onClick() {
+            return _this2.actualizarSeleccionFormula(asignacion);
+          }
+        }), _react["default"].createElement("span", {
+          className: "custom-control-label"
+        }, asignacion.formula)));
+      }), this.props.asignaciones.length == 0 ? _react["default"].createElement("div", {
+        className: "text-center"
+      }, _react["default"].createElement("a", {
         style: {
           color: "#fafafa"
         },
         className: "btn btn-dark col-xs-10 col-10 btnWhiteColorHover font-bold font-20"
-      }, "No existen asignaciones / f\xF3rmulas creadas") : null), _react["default"].createElement("hr", null), _react["default"].createElement("div", {
+      }, "No existen asignaciones / f\xF3rmulas creadas")) : null), _react["default"].createElement("hr", null), _react["default"].createElement("div", {
         className: "text-center"
       }, _react["default"].createElement("a", {
-        onClick: this.props.callbackCrearRegla,
+        onClick: this.verificarSeleccionFormula,
         className: "btn btn-primary col-xs-6 col-6",
         style: {
           color: "white",
           fontSize: "1.2em",
           fontWeight: "bold"
         }
-      }, "Crear Condici\xF3n / Instrucci\xF3n")), _react["default"].createElement("br", null));
+      }, "Agregar Asignaci\xF3n / F\xF3rmula a Reglas")), _react["default"].createElement("br", null));
     }
   }]);
 

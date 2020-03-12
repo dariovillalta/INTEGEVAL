@@ -7325,3 +7325,8 @@ Media Query
 .addPointer:hover {
     cursor: pointer;
 }
+
+.abrirModalCrearCondicionOnHover:hover {
+    box-shadow: 0 0 15px 0 #d2d2e4;
+    text-shadow: 1px 1px 1px #292826;
+}

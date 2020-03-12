@@ -50,20 +50,14 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 //const campos = [{valor: "idCLiente", tipo: "variable"}, {valor: "saldoTotal", tipo: "variable"}, {valor: "tipoPersona", tipo: "variable"}, {valor: "impuestosTotal", tipo: "variable"}, {valor: "nombreCliente", tipo: "variable"}, {valor: "diasMora", tipo: "variable"}, {valor: "mesMora", tipo: "variable"}];
 //var tablas = [], camposTablas = [];
 var operaciones = [{
-  valor: "Asignar Valor Único",
-  tipo: "signo"
-}, {
-  valor: "Asignar Valor Multiples",
+  valor: "Asignar",
   tipo: "signo"
 }, {
   valor: "Contar",
   tipo: "signo"
 }];
 var operacionesNumero = [{
-  valor: "Asignar Valor Único",
-  tipo: "signo"
-}, {
-  valor: "Asignar Valor Multiples",
+  valor: "Asignar",
   tipo: "signo"
 }, {
   valor: "Contar",
@@ -91,30 +85,21 @@ var operacionesNumero = [{
   tipo: "signo"
 }];
 var operacionesFecha = [{
-  valor: "Asignar Valor Único",
-  tipo: "signo"
-}, {
-  valor: "Asignar Valor Multiples",
+  valor: "Asignar",
   tipo: "signo"
 }, {
   valor: "Contar",
   tipo: "signo"
 }];
 var operacionesBoolean = [{
-  valor: "Asignar Valor Único",
-  tipo: "signo"
-}, {
-  valor: "Asignar Valor Multiples",
+  valor: "Asignar",
   tipo: "signo"
 }, {
   valor: "Contar",
   tipo: "signo"
 }];
 var operacionesCadena = [{
-  valor: "Asignar Valor Único",
-  tipo: "signo"
-}, {
-  valor: "Asignar Valor Multiples",
+  valor: "Asignar",
   tipo: "signo"
 }, {
   valor: "Contar",
@@ -336,6 +321,7 @@ function (_React$Component) {
         }
 
         this.props.retornoCampo(columnaSeleccionada, tipoVariable, posicionTabla);
+        this.props.retornoTipoDeAsignacion(tipoVariable);
       }
     }
   }, {
@@ -350,7 +336,7 @@ function (_React$Component) {
     key: "existeReglaAsignacion",
     value: function existeReglaAsignacion(operacion) {
       for (var i = 0; i < this.state.operaciones.length; i++) {
-        if (this.state.operaciones[i].valor.localeCompare("Asignar Valor Único") == 0 && this.state.operaciones[i].valor.localeCompare(operacion) == 0 || this.state.operaciones[i].valor.localeCompare("Asignar Valor Único Si") == 0 && this.state.operaciones[i].valor.localeCompare(operacion) == 0 || this.state.operaciones[i].valor.localeCompare("Asignar Valor Multiples") == 0 && this.state.operaciones[i].valor.localeCompare(operacion) == 0 || this.state.operaciones[i].valor.localeCompare("Asignar Valor Multiples Si") == 0 && this.state.operaciones[i].valor.localeCompare(operacion) == 0 || this.state.operaciones[i].valor.localeCompare("Contar") == 0 && this.state.operaciones[i].valor.localeCompare(operacion) == 0 || this.state.operaciones[i].valor.localeCompare("Contar Si") == 0 && this.state.operaciones[i].valor.localeCompare(operacion) == 0 || this.state.operaciones[i].valor.localeCompare("Calcular Promedio") == 0 && this.state.operaciones[i].valor.localeCompare(operacion) == 0 || this.state.operaciones[i].valor.localeCompare("Máximo") == 0 && this.state.operaciones[i].valor.localeCompare(operacion) == 0 || this.state.operaciones[i].valor.localeCompare("Mínimo") == 0 && this.state.operaciones[i].valor.localeCompare(operacion) == 0
+        if (this.state.operaciones[i].valor.localeCompare("Asignar") == 0 && this.state.operaciones[i].valor.localeCompare(operacion) == 0 || this.state.operaciones[i].valor.localeCompare("Contar") == 0 && this.state.operaciones[i].valor.localeCompare(operacion) == 0 || this.state.operaciones[i].valor.localeCompare("Calcular Promedio") == 0 && this.state.operaciones[i].valor.localeCompare(operacion) == 0 || this.state.operaciones[i].valor.localeCompare("Máximo") == 0 && this.state.operaciones[i].valor.localeCompare(operacion) == 0 || this.state.operaciones[i].valor.localeCompare("Mínimo") == 0 && this.state.operaciones[i].valor.localeCompare(operacion) == 0
         /*|| 
         this.state.operaciones[i].valor.localeCompare("Sumar") == 0*/
         ) {
@@ -364,27 +350,11 @@ function (_React$Component) {
   }, {
     key: "retornarCodigoOperacion",
     value: function retornarCodigoOperacion(codigo) {
-      if (codigo.localeCompare("Asignar Valor Único") == 0) {
-        return "ASIGUNI";
-      }
-
-      if (codigo.localeCompare("Asignar Valor Único Si") == 0) {
-        return "ASIGUNI";
-      }
-
-      if (codigo.localeCompare("Asignar Valor Multiples") == 0) {
-        return "ASIGMUL";
-      }
-
-      if (codigo.localeCompare("Asignar Valor Multiples Si") == 0) {
-        return "ASIGMUL";
+      if (codigo.localeCompare("Asignar") == 0) {
+        return "ASIG";
       }
 
       if (codigo.localeCompare("Contar") == 0) {
-        return "COUNT";
-      }
-
-      if (codigo.localeCompare("Contar Si") == 0) {
         return "COUNT";
       }
 
@@ -417,7 +387,10 @@ function (_React$Component) {
         variableSeleccionada.activa = false;
         variableSeleccionada.tipo = "variable";
         variableSeleccionada.texto = variableSeleccionada.valor;
-        variableSeleccionada.operacion = '';
+        variableSeleccionada.operacion = ''; //variableSeleccionada.tipoColumnaEnTabla = ;
+
+        console.log('variableSeleccionada');
+        console.log(variableSeleccionada);
 
         if (this.existeReglaAsignacion(operacionSeleccionada.valor)) {
           variableSeleccionada.texto = this.retornarCodigoOperacion(operacionSeleccionada.valor) + "(" + variableSeleccionada.valor + ")";
@@ -756,15 +729,31 @@ function (_React$Component) {
     key: "iniciarGuardarFormula",
     value: function iniciarGuardarFormula() {
       var formula = '';
+      console.log('this.state.formula');
+      console.log(this.state.formula);
 
       for (var i = 0; i < this.state.formula.length; i++) {
-        formula += this.state.formula[i].valor;
+        if (this.state.formula[i].operacion != undefined && this.state.formula[i].operacion.localeCompare("ASIG") == 0) {
+          formula += "ASIG(" + this.state.formula[i].valor + ")";
+        } else {
+          formula += this.state.formula[i].valor;
+        }
       }
 
       ;
       console.log('formula');
       console.log(formula);
-      this.props.anadirFormula(formula, this.state.formula); //this.guardarVariable(formula);
+      var objetoFormula = {
+        variableID: -1,
+        variableCampoID: -1,
+        numeroDeFormulaDeVariable: -1,
+        formula: formula
+      };
+      /*console.log('formula');
+      console.log(this.state.formula);*/
+      //this.props.anadirFormula(formula, this.state.formula);
+
+      this.props.anadirFormula(objetoFormula, this.state.formula); //this.guardarVariable(formula);
     }
   }, {
     key: "guardarVariable",

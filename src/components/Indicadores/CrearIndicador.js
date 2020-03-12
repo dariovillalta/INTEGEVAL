@@ -13,14 +13,36 @@ export default class CrearIndicador extends React.Component {
         var nombre = $("#nombreIndicador").val();
         var codigo = $("#codigo").val();
         var formula = '';
-        var peso = $("#peso").val();
-        var tolerancia = $("#tolerancia").val();
-        var valorIdeal = $("#valorIdeal").val();
+        var peso = parseInt($("#peso").val());
+        var tolerancia = parseInt($("#tolerancia").val());
+        var valorIdeal = parseInt($("#valorIdeal").val());
         var tipoValorIdeal = $("#tipoValorIdeal").val();
         var periodicidad = $("#periodicidad").val();
         var tipoIndicador = $("#tipoIndicador").val();
         var analista = $("#analista").val();
         var riesgoPadre = this.props.riesgoPadre;
+        console.log('nombre');
+        console.log(nombre);
+        console.log('codigo');
+        console.log(codigo);
+        console.log('formula');
+        console.log(formula);
+        console.log('peso');
+        console.log(peso);
+        console.log('tolerancia');
+        console.log(tolerancia);
+        console.log('valorIdeal');
+        console.log(valorIdeal);
+        console.log('tipoValorIdeal');
+        console.log(tipoValorIdeal);
+        console.log('periodicidad');
+        console.log(periodicidad);
+        console.log('tipoIndicador');
+        console.log(tipoIndicador);
+        console.log('analista');
+        console.log(analista);
+        console.log('riesgoPadre');
+        console.log(riesgoPadre);
         const transaction = new sql.Transaction( this.props.pool );
         transaction.begin(err => {
             var rolledBack = false;
@@ -37,9 +59,6 @@ export default class CrearIndicador extends React.Component {
                     }
                 } else {
                     transaction.commit(err => {
-                        if(result.recordset.length) {
-                            this.terminoSeleccionIndicador(result.recordset[0].ID, result.recordset[0].nombre);
-                        }
                     });
                 }
             });
@@ -135,7 +154,10 @@ export default class CrearIndicador extends React.Component {
                                             <label htmlFor="tipoIndicador" className="col-form-label">Tipo Indicador</label>
                                         </div>
                                         <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"}>
-                                            <input id="tipoIndicador" type="text" className="form-control form-control-sm"/>
+                                            <select id="tipoIndicador" className="form-control">
+                                                <option value="riesgoInherente">Riesgo Inherente</option>
+                                                <option value="calidadGestion">Calidad de Gestión</option>
+                                            </select>
                                         </div>
                                     </div>
                                     <div className={"row"} style={{width: "100%"}}>

@@ -117,7 +117,7 @@ function (_React$Component) {
       var riesgoPadre = parseInt(this.props.riesgoPadre);
       var nivel = 0;
 
-      if (this.props.riesgoPadre == -1) {
+      if (this.props.riesgoPadre == undefined || this.props.riesgoPadre == -1) {
         riesgoPadre = parseInt($("#riesgoPadre").val());
       }
 

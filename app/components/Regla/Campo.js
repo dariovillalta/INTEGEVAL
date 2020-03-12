@@ -71,21 +71,7 @@ function (_React$Component) {
         style: {
           width: "100%"
         }
-      }, _react["default"].createElement("div", {
-        style: {
-          width: "100%",
-          borderBottom: "3px solid #d2d2e4"
-        }
-      }, _react["default"].createElement("div", {
-        className: "font-18",
-        style: {
-          width: "100%",
-          height: "20px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center"
-        }
-      }, _react["default"].createElement("h4", null, "Seleccionar Campo")), _react["default"].createElement(_Accordion["default"], {
+      }, _react["default"].createElement(_Accordion["default"], {
         showTrash: false,
         showEdit: false,
         color: "#ffffff"
@@ -123,7 +109,7 @@ function (_React$Component) {
           retornoSeleccion: _this2.checkFieldType,
           titulo: variable.valor
         }));
-      }))), _react["default"].createElement("br", null)));
+      }))));
     }
   }]);
 

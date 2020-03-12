@@ -50,8 +50,7 @@ function (_React$Component) {
     _classCallCheck(this, FuenteDatoVariableAtributos);
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(FuenteDatoVariableAtributos).call(this, props));
-    /*this.actualizarSeleccionColumna = this.actualizarSeleccionColumna.bind(this);
-    this.actualizarSeleccionOperacion = this.actualizarSeleccionOperacion.bind(this);*/
+    /*this.actualizarSeleccionColumna = this.actualizarSeleccionColumna.bind(this);*/
 
     _this.actualizarIndiceAtributoSeleccionado = _this.actualizarIndiceAtributoSeleccionado.bind(_assertThisInitialized(_this));
     return _this;
@@ -62,9 +61,6 @@ function (_React$Component) {
     value: function componentDidMount() {}
     /*actualizarSeleccionColumna (columna) {
         this.props.clickEnVariable(columna)
-    }
-     actualizarSeleccionOperacion (operacion) {
-        this.props.clickEnOperacion(operacion)
     }*/
 
   }, {
@@ -104,38 +100,6 @@ function (_React$Component) {
       }, _react["default"].createElement("div", {
         className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
       }, _react["default"].createElement("div", {
-        style: {
-          width: "100%"
-        }
-      }, _react["default"].createElement("div", {
-        className: "row",
-        style: {
-          width: "100%",
-          height: "150px"
-        }
-      }, _react["default"].createElement("div", {
-        className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3"
-      }, _react["default"].createElement("label", {
-        htmlFor: "nombreAtributo",
-        className: "col-form-label"
-      }, "Tipo de Asignaci\xF3n:")), _react["default"].createElement("div", {
-        className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9",
-        style: {
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center"
-        }
-      }, _react["default"].createElement(_ListasSeleVariable["default"], {
-        mostrarRosa: true,
-        variables: [{
-          valor: "Asignar Valor Único"
-        }, {
-          valor: "Asignar Valores Multiples"
-        }],
-        seleccionarMultiple: false,
-        retornoSeleccion: this.props.retornoTipoDeAsignacion,
-        titulo: "Tipo de Asignación"
-      })))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
         className: "row",
         style: {
           width: "100%"
@@ -163,7 +127,15 @@ function (_React$Component) {
         onClick: function onClick() {
           return _this2.actualizarIndiceAtributoSeleccionado(-1);
         }
-      }, "(Condiciones | Instrucciones) para el C\xE1lculo "), _react["default"].createElement("br", null))) : _react["default"].createElement("div", {
+      }, "(Condiciones | Instrucciones) para el C\xE1lculo "), _react["default"].createElement("br", null), _react["default"].createElement("a", {
+        className: "btn btn-success btn-block btnWhiteColorHover font-bold font-20",
+        style: {
+          color: "#fafafa"
+        },
+        onClick: function onClick() {
+          return _this2.goCreateVariableFieldSQLTemp();
+        }
+      }, "Crear Instrucci\xF3n SQL "), _react["default"].createElement("br", null))) : _react["default"].createElement("div", {
         className: "row"
       }, _react["default"].createElement("div", {
         className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
@@ -179,7 +151,7 @@ function (_React$Component) {
       }, _react["default"].createElement("div", {
         className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3"
       }, _react["default"].createElement("label", {
-        htmlFor: "nombreAtributo",
+        htmlFor: "nombreAtributoNuevoCampo",
         className: "col-form-label"
       }, "Nombre de Atributo:")), _react["default"].createElement("div", {
         className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9",
@@ -189,38 +161,12 @@ function (_React$Component) {
           justifyContent: "center"
         }
       }, _react["default"].createElement("input", {
-        id: "nombreAtributo",
+        id: "nombreAtributoNuevoCampo",
+        defaultValue: this.props.nombreCampoNuevoAtributosVario,
+        onKeyUp: this.props.actualizarNombreCampoNuevoAtributosVario,
         type: "text",
         className: "form-control form-control-sm"
       })))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
-        className: "row",
-        style: {
-          width: "100%",
-          height: "150px"
-        }
-      }, _react["default"].createElement("div", {
-        className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3"
-      }, _react["default"].createElement("label", {
-        htmlFor: "nombreAtributo",
-        className: "col-form-label"
-      }, "Tipo de Asignaci\xF3n:")), _react["default"].createElement("div", {
-        className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9",
-        style: {
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center"
-        }
-      }, _react["default"].createElement(_ListasSeleVariable["default"], {
-        mostrarRosa: true,
-        variables: [{
-          valor: "Asignar Valor Único"
-        }, {
-          valor: "Asignar Valores Multiples"
-        }],
-        seleccionarMultiple: false,
-        retornoSeleccion: function retornoSeleccion() {},
-        titulo: "Tipo de Asignación"
-      }))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
         className: "row",
         style: {
           width: "100%"
@@ -248,7 +194,15 @@ function (_React$Component) {
         onClick: function onClick() {
           return _this2.actualizarIndiceAtributoSeleccionado(-1);
         }
-      }, "(Condiciones | Instrucciones) para el C\xE1lculo "), _react["default"].createElement("br", null), _react["default"].createElement("div", {
+      }, "(Condiciones | Instrucciones) para el C\xE1lculo "), _react["default"].createElement("br", null), _react["default"].createElement("a", {
+        className: "btn btn-success btn-block btnWhiteColorHover font-bold font-20",
+        style: {
+          color: "#fafafa"
+        },
+        onClick: function onClick() {
+          return _this2.props.goCreateVariableFieldSQL();
+        }
+      }, "Crear Instrucci\xF3n SQL "), _react["default"].createElement("br", null), _react["default"].createElement("div", {
         className: "row",
         style: {
           display: "flex",
@@ -260,7 +214,7 @@ function (_React$Component) {
         style: {
           color: "#fafafa"
         },
-        onClick: this.props.crearAtributoFuenteDatos
+        onClick: this.props.crearAtributoVariable
       }, "Crear Atributo")), _react["default"].createElement("br", null), this.props.atributos.map(function (atributo, i) {
         return _react["default"].createElement("div", {
           style: {
@@ -291,36 +245,9 @@ function (_React$Component) {
         }, _react["default"].createElement("input", {
           id: "nombreAtributo",
           type: "text",
+          defaultValue: atributo.nombre,
           className: "form-control form-control-sm"
         })))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
-          className: "row",
-          style: {
-            width: "100%",
-            height: "150px"
-          }
-        }, _react["default"].createElement("div", {
-          className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3"
-        }, _react["default"].createElement("label", {
-          htmlFor: "nombreAtributo",
-          className: "col-form-label"
-        }, "Tipo de Asignaci\xF3n:")), _react["default"].createElement("div", {
-          className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9",
-          style: {
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center"
-          }
-        }, _react["default"].createElement(_ListasSeleVariable["default"], {
-          mostrarRosa: true,
-          variables: [{
-            valor: "Asignar Valor Único"
-          }, {
-            valor: "Asignar Valores Multiples"
-          }],
-          seleccionarMultiple: false,
-          retornoSeleccion: function retornoSeleccion() {},
-          titulo: "Tipo de Asignación"
-        }))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
           className: "row",
           style: {
             width: "100%"
@@ -340,13 +267,13 @@ function (_React$Component) {
         }, _react["default"].createElement("a", {
           className: "breadcrumb-item active font-20",
           "aria-current": "page"
-        }, _this2.props.tipoVariable))), _react["default"].createElement("br", null), _react["default"].createElement("a", {
+        }, atributo.tipo))), _react["default"].createElement("br", null), _react["default"].createElement("a", {
           className: "btn btn-success btn-block btnWhiteColorHover font-bold font-20",
           style: {
             color: "#fafafa"
           },
           onClick: function onClick() {
-            return _this2.actualizarIndiceAtributoSeleccionado(-1);
+            return _this2.actualizarIndiceAtributoSeleccionado(i);
           }
         }, "(Condiciones | Instrucciones) para el C\xE1lculo "), _react["default"].createElement("br", null), _react["default"].createElement("div", {
           className: "row",
@@ -360,7 +287,7 @@ function (_React$Component) {
           style: {
             color: "#fafafa"
           },
-          onClick: _this2.props.crearAtributoFuenteDatos
+          onClick: _this2.props.crearAtributoVariable
         }, "Editar Atributo")), _react["default"].createElement("br", null));
       }))));
     }

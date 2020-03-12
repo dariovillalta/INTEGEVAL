@@ -13,8 +13,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "d
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -255,13 +253,12 @@ function (_React$Component) {
         this.setState({
           titulo: "Valor Único"
         });
-      }
+      } //this.props.actualizarEstadoSiEsObjeto(this.state.mostrarEsObjeto);
+
     }
   }, {
     key: "render",
     value: function render() {
-      var _React$createElement;
-
       return _react["default"].createElement("div", null, _react["default"].createElement("br", null), _react["default"].createElement("div", {
         className: "row",
         style: {
@@ -281,6 +278,8 @@ function (_React$Component) {
         }
       }, _react["default"].createElement("input", {
         id: "nombreFuenteDato",
+        defaultValue: this.props.nombreVariable,
+        onKeyUp: this.props.actualizarNombreVariable,
         type: "text",
         className: "form-control form-control-sm"
       }))), _react["default"].createElement("div", {
@@ -296,6 +295,8 @@ function (_React$Component) {
       }, "Descripci\xF3n de Variable:")), _react["default"].createElement("div", {
         className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9"
       }, _react["default"].createElement("textarea", {
+        defaultValue: this.props.descripcionVariable,
+        onKeyUp: this.props.actualizarDescripcionVariable,
         className: "form-control",
         id: "descripcionFuenteDato",
         rows: "3"
@@ -374,13 +375,17 @@ function (_React$Component) {
           width: "100%",
           border: "1px solid #e6e6f2"
         }
-      }, _react["default"].createElement(_FuenteDatoVariableAtributos["default"], (_React$createElement = {
+      }, _react["default"].createElement(_FuenteDatoVariableAtributos["default"], {
         atributos: this.props.atributos,
         titulo: this.state.titulo,
+        nombreCampoNuevoAtributosVario: this.props.nombreCampoNuevoAtributosVario,
+        actualizarNombreCampoNuevoAtributosVario: this.props.actualizarNombreCampoNuevoAtributosVario,
         crearAtributoVariable: this.props.crearAtributoVariable,
         mostrarEsObjeto: this.state.mostrarEsObjeto,
-        retornoTipoDeAsignacion: this.props.retornoTipoDeAsignacion
-      }, _defineProperty(_React$createElement, "crearAtributoVariable", this.props.crearAtributoVariable), _defineProperty(_React$createElement, "goToCreateConditions", this.props.goToCreateConditions), _React$createElement))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
+        retornoTipoDeAsignacion: this.props.retornoTipoDeAsignacion,
+        goToCreateConditions: this.props.goToCreateConditions,
+        goCreateVariableFieldSQL: this.props.goCreateVariableFieldSQL
+      })), _react["default"].createElement("br", null), _react["default"].createElement("div", {
         className: "row",
         style: {
           display: "flex",
@@ -392,8 +397,8 @@ function (_React$Component) {
         style: {
           color: "#fafafa"
         },
-        onClick: this.crearFuenteDato
-      }, "Crear Fuente de Dato")), _react["default"].createElement("br", null));
+        onClick: this.props.guardarVariable
+      }, "Crear Variable")), _react["default"].createElement("br", null));
     }
   }]);
 

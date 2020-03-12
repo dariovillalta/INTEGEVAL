@@ -96,7 +96,7 @@ function (_React$Component) {
         className: "page-header"
       }, _react["default"].createElement("h2", {
         className: "pageheader-title"
-      }, "Crear Fuente de Datos"), _react["default"].createElement("div", {
+      }, "Crear Variable"), _react["default"].createElement("div", {
         className: "page-breadcrumb"
       }, _react["default"].createElement("nav", {
         "aria-label": "breadcrumb"
@@ -140,9 +140,17 @@ function (_React$Component) {
       }, this.state.mostrarFuenteDatoVariable ? _react["default"].createElement(_FuenteDatoVariable["default"], {
         campos: this.props.columnas,
         goToCreateConditions: this.props.goToCreateConditions,
+        goCreateVariableFieldSQL: this.props.goCreateVariableFieldSQL,
+        guardarVariable: this.props.guardarVariable,
         crearAtributoVariable: this.props.crearAtributoVariable,
         cambioDeArreglosDeAtributos: this.props.cambioDeArreglosDeAtributos,
         retornoTipoDeAsignacion: this.props.retornoTipoDeAsignacion,
+        nombreVariable: this.props.nombreVariable,
+        actualizarNombreVariable: this.props.actualizarNombreVariable,
+        descripcionVariable: this.props.descripcionVariable,
+        actualizarDescripcionVariable: this.props.actualizarDescripcionVariable,
+        nombreCampoNuevoAtributosVario: this.props.nombreCampoNuevoAtributosVario,
+        actualizarNombreCampoNuevoAtributosVario: this.props.actualizarNombreCampoNuevoAtributosVario,
         atributos: this.props.atributos
       }) : null, this.state.mostrarFuenteDatoForma ? _react["default"].createElement(_FuenteDatoForma["default"], null) : null, this.state.mostrarFuenteDatoExcel ? _react["default"].createElement(_FuenteDatoExcel["default"], null) : null), _react["default"].createElement("div", {
         className: "border-bottom",

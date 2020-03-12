@@ -101,7 +101,8 @@ function (_React$Component) {
           configuracionHome: this.props.configuracionHome,
           showFormula: this.props.showFormula,
           showCondicionVar: this.props.showCondicionVar,
-          updateFormula: this.props.updateFormula
+          updateFormula: this.props.updateFormula,
+          showSQL: this.props.showSQL
         }));
       } else {
         return _react["default"].createElement("div", null, _react["default"].createElement(_OpcionesVariableHome["default"], {

@@ -41,7 +41,7 @@ export default class CrearRiesgo extends React.Component {
         var tipoValorIdeal = $("#tipoValorIdeal").val();
         var riesgoPadre = parseInt(this.props.riesgoPadre);
         var nivel = 0;
-        if(this.props.riesgoPadre == -1) {
+        if(this.props.riesgoPadre == undefined || this.props.riesgoPadre == -1) {
             riesgoPadre = parseInt($("#riesgoPadre").val());
         }
         console.log('nombre');

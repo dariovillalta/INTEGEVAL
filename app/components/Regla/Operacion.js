@@ -180,7 +180,7 @@ function (_React$Component) {
           name: "operacionRadio",
           className: "custom-control-input",
           onClick: function onClick() {
-            return _this.props.retornoSeleccionOperacion("ES IGUAL A");
+            return _this.props.retornoSeleccionOperacion("ES IGUAL A", "ES_IGUAL");
           }
         }), _react["default"].createElement("span", {
           className: "custom-control-label"
@@ -224,7 +224,7 @@ function (_React$Component) {
           name: "operacionRadio",
           className: "custom-control-input",
           onClick: function onClick() {
-            return _this.props.retornoSeleccionOperacion("ES MENOR A");
+            return _this.props.retornoSeleccionOperacion("ES MENOR A", "ES_MENOR");
           }
         }), _react["default"].createElement("span", {
           className: "custom-control-label"
@@ -245,7 +245,7 @@ function (_React$Component) {
           name: "operacionRadio",
           className: "custom-control-input",
           onClick: function onClick() {
-            return _this.props.retornoSeleccionOperacion("ES MENOR O IGUAL A");
+            return _this.props.retornoSeleccionOperacion("ES MENOR O IGUAL A", "ES_MENOR_O_IGUAL");
           }
         }), _react["default"].createElement("span", {
           className: "custom-control-label"
@@ -266,7 +266,7 @@ function (_React$Component) {
           name: "operacionRadio",
           className: "custom-control-input",
           onClick: function onClick() {
-            return _this.props.retornoSeleccionOperacion("ES MAYOR O IGUAL A");
+            return _this.props.retornoSeleccionOperacion("ES MAYOR O IGUAL A", "ES_MAYOR_O_IGUAL");
           }
         }), _react["default"].createElement("span", {
           className: "custom-control-label"
@@ -287,7 +287,7 @@ function (_React$Component) {
           name: "operacionRadio",
           className: "custom-control-input",
           onClick: function onClick() {
-            return _this.props.retornoSeleccionOperacion("ES MAYOR A");
+            return _this.props.retornoSeleccionOperacion("ES MAYOR A", "ES_MAYOR");
           }
         }), _react["default"].createElement("span", {
           className: "custom-control-label"
@@ -310,7 +310,7 @@ function (_React$Component) {
           name: "operacionRadio",
           className: "custom-control-input",
           onClick: function onClick() {
-            return _this.props.retornoSeleccionOperacion("ES IGUAL A");
+            return _this.props.retornoSeleccionOperacion("ES IGUAL A", "ES_IGUAL");
           }
         }), _react["default"].createElement("span", {
           className: "custom-control-label"
@@ -331,7 +331,7 @@ function (_React$Component) {
           name: "operacionRadio",
           className: "custom-control-input",
           onClick: function onClick() {
-            return _this.props.retornoSeleccionOperacion("NO ES IGUAL A");
+            return _this.props.retornoSeleccionOperacion("NO ES IGUAL A", "NO_ES_IGUAL");
           }
         }), _react["default"].createElement("span", {
           className: "custom-control-label"

@@ -72,7 +72,7 @@ function (_React$Component) {
           } else {
             transaction.commit(function (err) {
               _this2.setState({
-                variables: result.recordset
+                riesgos: result.recordset
               });
 
               _this2.getIndicators();
@@ -181,11 +181,12 @@ function (_React$Component) {
           style: {
             color: "#fafafa"
           },
-          onClick: _this4.props.goCrearIndicador(riesgo.ID)
+          onClick: function onClick() {
+            return _this4.props.goCrearIndicador(riesgo.ID);
+          }
         }, "Crear Indicador"))) : null)), _react["default"].createElement("br", null));
       }), this.state.riesgos.length == 0 ? _react["default"].createElement("a", {
-        className: "btn btn-outline-dark btn-block btnWhiteColorHover fontSize1EM",
-        onClick: this.props.showRiesgos
+        className: "btn btn-outline-dark btn-block btnWhiteColorHover fontSize1EM"
       }, "No existen riesgos creados, presione para crear") : null)));
     }
   }]);

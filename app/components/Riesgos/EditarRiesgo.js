@@ -318,18 +318,6 @@ function (_React$Component) {
           value: riesgo.ID
         }, riesgo.nombre);
       })))), _react["default"].createElement("a", {
-        className: "btn btn-secondary btn-block btnWhiteColorHover font-bold font-20",
-        style: {
-          color: "#fafafa"
-        },
-        onClick: this.props.showFormula
-      }, "F\xF3rmula"), _react["default"].createElement("a", {
-        className: "btn btn-success btn-block btnWhiteColorHover font-bold font-20",
-        style: {
-          color: "#fafafa"
-        },
-        onClick: this.props.showCondicionVar
-      }, "Condiciones para el C\xE1lculo"), _react["default"].createElement("a", {
         className: "btn btn-brand btn-block btnWhiteColorHover font-bold font-20",
         style: {
           color: "#fafafa"

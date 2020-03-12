@@ -59,19 +59,39 @@ function (_React$Component) {
   _createClass(CrearIndicador, [{
     key: "crearIndicador",
     value: function crearIndicador() {
-      var _this2 = this;
-
       var nombre = $("#nombreIndicador").val();
       var codigo = $("#codigo").val();
       var formula = '';
-      var peso = $("#peso").val();
-      var tolerancia = $("#tolerancia").val();
-      var valorIdeal = $("#valorIdeal").val();
+      var peso = parseInt($("#peso").val());
+      var tolerancia = parseInt($("#tolerancia").val());
+      var valorIdeal = parseInt($("#valorIdeal").val());
       var tipoValorIdeal = $("#tipoValorIdeal").val();
       var periodicidad = $("#periodicidad").val();
       var tipoIndicador = $("#tipoIndicador").val();
       var analista = $("#analista").val();
       var riesgoPadre = this.props.riesgoPadre;
+      console.log('nombre');
+      console.log(nombre);
+      console.log('codigo');
+      console.log(codigo);
+      console.log('formula');
+      console.log(formula);
+      console.log('peso');
+      console.log(peso);
+      console.log('tolerancia');
+      console.log(tolerancia);
+      console.log('valorIdeal');
+      console.log(valorIdeal);
+      console.log('tipoValorIdeal');
+      console.log(tipoValorIdeal);
+      console.log('periodicidad');
+      console.log(periodicidad);
+      console.log('tipoIndicador');
+      console.log(tipoIndicador);
+      console.log('analista');
+      console.log(analista);
+      console.log('riesgoPadre');
+      console.log(riesgoPadre);
       var transaction = new _mssql["default"].Transaction(this.props.pool);
       transaction.begin(function (err) {
         var rolledBack = false;
@@ -86,11 +106,7 @@ function (_React$Component) {
               transaction.rollback(function (err) {});
             }
           } else {
-            transaction.commit(function (err) {
-              if (result.recordset.length) {
-                _this2.terminoSeleccionIndicador(result.recordset[0].ID, result.recordset[0].nombre);
-              }
-            });
+            transaction.commit(function (err) {});
           }
         });
       }); // fin transaction
@@ -270,11 +286,14 @@ function (_React$Component) {
         className: "col-form-label"
       }, "Tipo Indicador")), _react["default"].createElement("div", {
         className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
-      }, _react["default"].createElement("input", {
+      }, _react["default"].createElement("select", {
         id: "tipoIndicador",
-        type: "text",
-        className: "form-control form-control-sm"
-      }))), _react["default"].createElement("div", {
+        className: "form-control"
+      }, _react["default"].createElement("option", {
+        value: "riesgoInherente"
+      }, "Riesgo Inherente"), _react["default"].createElement("option", {
+        value: "calidadGestion"
+      }, "Calidad de Gesti\xF3n")))), _react["default"].createElement("div", {
         className: "row",
         style: {
           width: "100%"

@@ -32,7 +32,7 @@ export default class SeleccionarIndicador extends React.Component {
                 } else {
                     transaction.commit(err => {
                         this.setState({
-                            variables: result.recordset
+                            riesgos: result.recordset
                         });
                         this.getIndicators();
                     });
@@ -109,7 +109,7 @@ export default class SeleccionarIndicador extends React.Component {
                                                     <a className={"btn btn-outline-info btn-block btnWhiteColorHover fontSize1EM"} key={indicador.ID}>{indicador.nombre}</a>
                                                 )}
                                                 <div className={"row"}>
-                                                    <a className={"btn btn-success btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.props.goCrearIndicador(riesgo.ID)}>Crear Indicador</a>
+                                                    <a className={"btn btn-success btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={() => this.props.goCrearIndicador(riesgo.ID)}>Crear Indicador</a>
                                                 </div>
                                             </div>
                                         ) : (
@@ -121,7 +121,7 @@ export default class SeleccionarIndicador extends React.Component {
                             </div>
                         ))}
                         { this.state.riesgos.length == 0 ? (
-                            <a className={"btn btn-outline-dark btn-block btnWhiteColorHover fontSize1EM"} onClick={this.props.showRiesgos}>No existen riesgos creados, presione para crear</a>
+                            <a className={"btn btn-outline-dark btn-block btnWhiteColorHover fontSize1EM"}>No existen riesgos creados, presione para crear</a>
                         ) : (
                             null
                         )}

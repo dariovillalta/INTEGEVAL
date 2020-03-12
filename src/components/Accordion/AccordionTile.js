@@ -21,7 +21,7 @@ export default class AccordionTile extends React.Component {
 
     return (
       <div>
-        <div onClick={onClick} style={{ cursor: 'pointer', width: '100%', backgroundColor: this.props.color, borderTop: "1px solid #d2d2e4"}} className={"card-header"}>
+        <div onClick={onClick} style={{ cursor: 'pointer', width: '100%', backgroundColor: this.props.color, border: "1px solid #d2d2e4"}} className={"card-header"}>
           <span style={{ color: 'black', fontFamily: 'Circular Std Medium'}}>{label}</span>
           <div style={{ float: 'right' }}>
             {!isOpen && <span>&#9650;</span>}

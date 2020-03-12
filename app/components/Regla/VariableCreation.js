@@ -19,6 +19,8 @@ var _ErrorMessage = _interopRequireDefault(require("../ErrorMessage.js"));
 
 var _MessageModal = _interopRequireDefault(require("../MessageModal.js"));
 
+var _Modal = _interopRequireDefault(require("../Modal/Modal.js"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -72,13 +74,12 @@ function (_React$Component) {
         titulo: "",
         mensaje: ""
       },
-      conexiones: [],
-      camposConexiones: [],
-      variables: [],
-      camposVariables: [],
       campoSeleccionadoNombre: '{campo}',
       textoOperacion: '{operación}',
-      textoValor: '{valor}'
+      textoValor: '{valor}',
+      showModalCampo: false,
+      showModalOperacion: false,
+      showModalValor: false
     };
     _this.retornoSeleccionVariable = _this.retornoSeleccionVariable.bind(_assertThisInitialized(_this));
     _this.retornoSeleccionOperacion = _this.retornoSeleccionOperacion.bind(_assertThisInitialized(_this));
@@ -86,32 +87,23 @@ function (_React$Component) {
     _this.esBoolean = _this.esBoolean.bind(_assertThisInitialized(_this));
     _this.esFecha = _this.esFecha.bind(_assertThisInitialized(_this));
     _this.esTexto = _this.esTexto.bind(_assertThisInitialized(_this));
-    _this.loadFields = _this.loadFields.bind(_assertThisInitialized(_this));
-    _this.getConections = _this.getConections.bind(_assertThisInitialized(_this));
-    _this.getFieldsConections = _this.getFieldsConections.bind(_assertThisInitialized(_this));
-    _this.getFieldConections = _this.getFieldConections.bind(_assertThisInitialized(_this));
-    _this.getVariables = _this.getVariables.bind(_assertThisInitialized(_this));
-    _this.getFieldsVariables = _this.getFieldsVariables.bind(_assertThisInitialized(_this));
-    _this.getFieldVariables = _this.getFieldVariables.bind(_assertThisInitialized(_this));
     _this.saveRule = _this.saveRule.bind(_assertThisInitialized(_this));
+    _this.actualizarValor = _this.actualizarValor.bind(_assertThisInitialized(_this));
+    _this.showCampoModal = _this.showCampoModal.bind(_assertThisInitialized(_this));
+    _this.showOperacionModal = _this.showOperacionModal.bind(_assertThisInitialized(_this));
+    _this.showValorModal = _this.showValorModal.bind(_assertThisInitialized(_this));
+    _this.closeCampoModal = _this.closeCampoModal.bind(_assertThisInitialized(_this));
+    _this.closeOperacionModal = _this.closeOperacionModal.bind(_assertThisInitialized(_this));
+    _this.closeValorModal = _this.closeValorModal.bind(_assertThisInitialized(_this));
     _this.dismissReglaNewError = _this.dismissReglaNewError.bind(_assertThisInitialized(_this));
     _this.showSuccesMessage = _this.showSuccesMessage.bind(_assertThisInitialized(_this));
     _this.dismissMessageModal = _this.dismissMessageModal.bind(_assertThisInitialized(_this));
-    _this.actualizarValor = _this.actualizarValor.bind(_assertThisInitialized(_this));
     return _this;
   }
 
   _createClass(VariableCreation, [{
     key: "componentDidMount",
-    value: function componentDidMount() {
-      if (this.props.calculoFuenteDatos) {//
-      }
-
-      if (this.props.calculoVariables) {//
-      }
-
-      this.loadFields();
-    }
+    value: function componentDidMount() {}
   }, {
     key: "retornoSeleccionVariable",
     value: function retornoSeleccionVariable(campoSeleccionadoInput) {
@@ -119,13 +111,20 @@ function (_React$Component) {
       this.setState({
         campoSeleccionadoNombre: campo.valor
       });
-      this.props.retornarCampo(campo);
+      var nivelRegla = 0;
+      if (campo.nivel != undefined) nivelRegla = campo.nivel;
+      this.props.actualizarNivelNuevaRegla(nivelRegla);
+      this.props.retornoCampo(campo);
     }
   }, {
     key: "retornoSeleccionOperacion",
-    value: function retornoSeleccionOperacion(textoOperacionNuevo) {
+    value: function retornoSeleccionOperacion(textoOperacionNuevo, operacion) {
       this.setState({
         textoOperacion: textoOperacionNuevo
+      });
+      this.props.retornoOperacion({
+        operacion: operacion,
+        operacionTexto: textoOperacionNuevo
       });
     }
   }, {
@@ -177,205 +176,9 @@ function (_React$Component) {
       });
     }
   }, {
-    key: "loadFields",
-    value: function loadFields() {
-      this.getConections();
-      this.getVariables();
-    }
-  }, {
-    key: "getConections",
-    value: function getConections() {
-      var _this2 = this;
-
-      var transaction = new _mssql["default"].Transaction(this.props.pool);
-      transaction.begin(function (err) {
-        var rolledBack = false;
-        transaction.on('rollback', function (aborted) {
-          rolledBack = true;
-        });
-        var request = new _mssql["default"].Request(transaction);
-        request.query("select * from Tablas", function (err, result) {
-          if (err) {
-            if (!rolledBack) {
-              console.log(err);
-              transaction.rollback(function (err) {});
-              return [];
-            }
-          } else {
-            transaction.commit(function (err) {
-              var temp = [];
-
-              for (var i = 0; i < result.recordset.length; i++) {
-                temp.push({
-                  valor: result.recordset[i].tabla
-                });
-              }
-
-              ;
-
-              _this2.setState({
-                conexiones: temp
-              }, _this2.getFieldsConections);
-            });
-          }
-        });
-      }); // fin transaction
-    }
-  }, {
-    key: "getFieldsConections",
-    value: function getFieldsConections() {
-      var arregloTemp = [];
-
-      for (var i = 0; i < this.state.conexiones.length; i++) {
-        this.getFieldConections(this.state.conexiones[i].valor, i, arregloTemp);
-      }
-
-      ;
-    }
-  }, {
-    key: "getFieldConections",
-    value: function getFieldConections(nombreTabla, index, array) {
-      var _this3 = this;
-
-      var transaction = new _mssql["default"].Transaction(this.props.pool);
-      transaction.begin(function (err) {
-        var rolledBack = false;
-        transaction.on('rollback', function (aborted) {
-          rolledBack = true;
-        });
-        var request = new _mssql["default"].Request(transaction);
-        request.query("select * from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME = '" + nombreTabla + "'", function (err, result) {
-          if (err) {
-            if (!rolledBack) {
-              console.log(err);
-              transaction.rollback(function (err) {});
-            }
-          } else {
-            transaction.commit(function (err) {
-              var nombreColumnas = [];
-
-              for (var i = 0; i < result.recordset.length; i++) {
-                nombreColumnas.push({
-                  valor: result.recordset[i].COLUMN_NAME,
-                  tipo: result.recordset[i].DATA_TYPE
-                });
-              }
-
-              ;
-
-              if (array[index] == undefined) {
-                array[index] = [];
-              }
-
-              array[index] = $.merge(array[index], nombreColumnas);
-
-              _this3.setState({
-                camposConexiones: array
-              });
-            });
-          }
-        });
-      }); // fin transaction
-    }
-  }, {
-    key: "getVariables",
-    value: function getVariables() {
-      var _this4 = this;
-
-      var transaction = new _mssql["default"].Transaction(this.props.pool);
-      transaction.begin(function (err) {
-        var rolledBack = false;
-        transaction.on('rollback', function (aborted) {
-          rolledBack = true;
-        });
-        var request = new _mssql["default"].Request(transaction);
-        request.query("select * from Variables", function (err, result) {
-          if (err) {
-            if (!rolledBack) {
-              console.log(err);
-              transaction.rollback(function (err) {});
-              return [];
-            }
-          } else {
-            transaction.commit(function (err) {
-              var temp = [];
-
-              for (var i = 0; i < result.recordset.length; i++) {
-                temp.push({
-                  valor: result.recordset[i].nombre
-                });
-              }
-
-              ;
-
-              _this4.setState({
-                variables: temp
-              }, _this4.getFieldsVariables);
-            });
-          }
-        });
-      }); // fin transaction
-    }
-  }, {
-    key: "getFieldsVariables",
-    value: function getFieldsVariables() {
-      var arregloTemp = [];
-
-      for (var i = 0; i < this.state.variables.length; i++) {
-        this.getFieldVariables(this.state.variables[i].ID, i, arregloTemp);
-      }
-
-      ;
-    }
-  }, {
-    key: "getFieldVariables",
-    value: function getFieldVariables(variableID, index, array) {
-      var _this5 = this;
-
-      var transaction = new _mssql["default"].Transaction(this.props.pool);
-      transaction.begin(function (err) {
-        var rolledBack = false;
-        transaction.on('rollback', function (aborted) {
-          rolledBack = true;
-        });
-        var request = new _mssql["default"].Request(transaction);
-        request.query("select * from VariablesCampos where variableID = " + variableID, function (err, result) {
-          if (err) {
-            if (!rolledBack) {
-              console.log(err);
-              transaction.rollback(function (err) {});
-            }
-          } else {
-            transaction.commit(function (err) {
-              var nombreColumnas = [];
-
-              for (var i = 0; i < result.recordset.length; i++) {
-                nombreColumnas.push({
-                  valor: result.recordset[i].nombre,
-                  tipo: result.recordset[i].tipo
-                });
-              }
-
-              ;
-
-              if (array[index] == undefined) {
-                array[index] = [];
-              }
-
-              array[index] = $.merge(array[index], nombreColumnas);
-
-              _this5.setState({
-                camposVariables: array
-              });
-            });
-          }
-        });
-      }); // fin transaction
-    }
-  }, {
     key: "saveRule",
     value: function saveRule() {
-      var _this6 = this;
+      var _this2 = this;
 
       var seleccionCampoIDSelect = $("#campo").val();
 
@@ -500,14 +303,14 @@ function (_React$Component) {
                                   }
 
                                   ;
-                                  var transaction1 = new _mssql["default"].Transaction(_this6.props.pool);
+                                  var transaction1 = new _mssql["default"].Transaction(_this2.props.pool);
                                   transaction1.begin(function (err) {
                                     var rolledBack = false;
                                     transaction1.on('rollback', function (aborted) {
                                       rolledBack = true;
                                     });
                                     var request1 = new _mssql["default"].Request(transaction1);
-                                    request1.query("insert into Reglas (campoTablaID, campoCampoID, campoTipo, operacion, tipoOperacion, valor, valorTipo, esListaValor, esCampoValor, valorTablaID, texto, nombreTablaRes, idTipoTabla) values (" + campoTablaID + ", " + campoID + ", '" + campoTipo + "', '" + operacion + "', '" + operacionTipo + "','" + valorCampos + "', '', '" + esListaValor + "', '" + esCampoValor + "', " + valorLista + ", '" + texto + "', '" + _this6.props.tipoTablaRes + "', " + _this6.props.idTipoTabla + ")", function (err, result) {
+                                    request1.query("insert into Reglas (campoTablaID, campoCampoID, campoTipo, operacion, tipoOperacion, valor, valorTipo, esListaValor, esCampoValor, valorTablaID, texto, nombreTablaRes, idTipoTabla) values (" + campoTablaID + ", " + campoID + ", '" + campoTipo + "', '" + operacion + "', '" + operacionTipo + "','" + valorCampos + "', '', '" + esListaValor + "', '" + esCampoValor + "', " + valorLista + ", '" + texto + "', '" + _this2.props.tipoTablaRes + "', " + _this2.props.idTipoTabla + ")", function (err, result) {
                                       if (err) {
                                         if (!rolledBack) {
                                           console.log(err);
@@ -515,7 +318,7 @@ function (_React$Component) {
                                         }
                                       } else {
                                         transaction1.commit(function (err) {
-                                          _this6.showSuccesMessage("Exito", "Regla creada con éxito.");
+                                          _this2.showSuccesMessage("Exito", "Regla creada con éxito.");
                                         });
                                       }
                                     });
@@ -666,6 +469,48 @@ function (_React$Component) {
       });
     }
   }, {
+    key: "showCampoModal",
+    value: function showCampoModal() {
+      this.setState({
+        showModalCampo: true
+      });
+    }
+  }, {
+    key: "showOperacionModal",
+    value: function showOperacionModal() {
+      this.setState({
+        showModalOperacion: true
+      });
+    }
+  }, {
+    key: "showValorModal",
+    value: function showValorModal() {
+      this.setState({
+        showModalValor: true
+      });
+    }
+  }, {
+    key: "closeCampoModal",
+    value: function closeCampoModal() {
+      this.setState({
+        showModalCampo: false
+      });
+    }
+  }, {
+    key: "closeOperacionModal",
+    value: function closeOperacionModal() {
+      this.setState({
+        showModalOperacion: false
+      });
+    }
+  }, {
+    key: "closeValorModal",
+    value: function closeValorModal() {
+      this.setState({
+        showModalValor: false
+      });
+    }
+  }, {
     key: "dismissReglaNewError",
     value: function dismissReglaNewError() {
       this.setState({
@@ -720,13 +565,18 @@ function (_React$Component) {
   }, {
     key: "render",
     value: function render() {
+      var _this3 = this;
+
+      console.log("this.props.mostrarOpcionSino");
+      console.log(this.props.mostrarOpcionSino);
       return _react["default"].createElement("div", {
         style: {
           width: "100%"
         }
       }, _react["default"].createElement("h3", {
         className: "card-header"
-      }, "Crear Condici\xF3n / Instrucci\xF3n"), _react["default"].createElement("div", {
+      }, "Crear Condici\xF3n (Instrucci\xF3n)"), _react["default"].createElement("div", {
+        className: "font-24",
         style: {
           height: "50px",
           width: "100%",
@@ -735,23 +585,51 @@ function (_React$Component) {
           justifyContent: "center",
           borderBottom: "3px solid #d2d2e4"
         }
-      }, "SI ", this.state.campoSeleccionadoNombre, " ", this.state.textoOperacion, " ", this.state.textoValor), _react["default"].createElement("br", null), _react["default"].createElement(_Campo["default"], {
+      }, "SI ", this.state.campoSeleccionadoNombre, " ", this.state.textoOperacion, " ", this.state.textoValor), _react["default"].createElement("div", {
+        className: "font-18 addPointer abrirModalCrearCondicionOnHover",
+        onClick: this.showCampoModal,
+        style: {
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          borderBottom: "3px solid #d2d2e4"
+        }
+      }, _react["default"].createElement("h4", null, "Seleccionar Campo a Comparar")), _react["default"].createElement(_Modal["default"], {
+        show: this.state.showModalCampo,
+        titulo: "Seleccionar Campo a Comparar",
+        onClose: this.closeCampoModal
+      }, _react["default"].createElement(_Campo["default"], {
         esNumero: this.esNumero,
         esBoolean: this.esBoolean,
         esFecha: this.esFecha,
         esTexto: this.esTexto,
-        conexiones: this.state.conexiones,
-        camposConexiones: this.state.camposConexiones,
-        variables: this.state.variables,
-        camposVariables: this.state.camposVariables,
+        conexiones: this.props.conexiones,
+        camposConexiones: this.props.camposConexiones,
+        variables: this.props.variables,
+        camposVariables: this.props.camposVariables,
         retornoSeleccionVariable: this.retornoSeleccionVariable
-      }, " "), _react["default"].createElement("br", null), _react["default"].createElement(_Operacion["default"], {
+      })), _react["default"].createElement("div", {
+        className: "font-18 addPointer abrirModalCrearCondicionOnHover",
+        onClick: this.showOperacionModal,
+        style: {
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          borderBottom: "3px solid #d2d2e4"
+        }
+      }, _react["default"].createElement("h4", null, "Seleccionar Operaci\xF3n a Aplicar")), _react["default"].createElement(_Modal["default"], {
+        show: this.state.showModalOperacion,
+        titulo: "Seleccionar Operación a Aplicar",
+        onClose: this.closeOperacionModal
+      }, _react["default"].createElement(_Operacion["default"], {
         esNumero: this.state.tipoCampo.esNumero,
         esBoolean: this.state.tipoCampo.esBoolean,
         esFecha: this.state.tipoCampo.esFecha,
         esTexto: this.state.tipoCampo.esTexto,
         retornoSeleccionOperacion: this.retornoSeleccionOperacion
-      }, " "), _react["default"].createElement("br", null), _react["default"].createElement(_Valor["default"], {
+      })), _react["default"].createElement(_Valor["default"], {
         esNumero: this.state.tipoCampo.esNumero,
         esBoolean: this.state.tipoCampo.esBoolean,
         esFecha: this.state.tipoCampo.esFecha,
@@ -760,7 +638,59 @@ function (_React$Component) {
         valoresDropdown: this.props.valoresDropdown,
         actualizarValor: this.actualizarValor,
         pool: this.props.pool
-      }, " "), _react["default"].createElement("br", null), this.state.errorCreacionRegla.mostrar ? _react["default"].createElement(_ErrorMessage["default"], {
+      }, " "), _react["default"].createElement("br", null), _react["default"].createElement(_Modal["default"], {
+        show: this.state.showModalValor,
+        titulo: "Seleccionar Valores a Comparar con el Campo",
+        onClose: this.closeValorModal
+      }, _react["default"].createElement(_Valor["default"], {
+        esNumero: this.state.tipoCampo.esNumero,
+        esBoolean: this.state.tipoCampo.esBoolean,
+        esFecha: this.state.tipoCampo.esFecha,
+        esTexto: this.state.tipoCampo.esTexto,
+        camposDropdown: this.props.camposDropdown,
+        valoresDropdown: this.props.valoresDropdown,
+        actualizarValor: this.actualizarValor,
+        pool: this.props.pool
+      })), _react["default"].createElement("div", {
+        className: "text-center",
+        style: {
+          display: this.props.mostrarOpcionSino ? "" : "none"
+        }
+      }, _react["default"].createElement("div", {
+        className: "font-18",
+        style: {
+          width: "100%",
+          height: "20px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center"
+        }
+      }, _react["default"].createElement("h4", null, "Seleccionar Estilo Condici\xF3n")), _react["default"].createElement("label", {
+        className: "custom-control custom-radio custom-control-inline"
+      }, _react["default"].createElement("input", {
+        id: "siRADIO",
+        type: "radio",
+        name: "sinoRadio",
+        defaultChecked: true,
+        className: "custom-control-input",
+        onClick: function onClick() {
+          return _this3.props.actualizarEstadoSeleccionSinoNuevaRegla(false);
+        }
+      }), _react["default"].createElement("span", {
+        className: "custom-control-label"
+      }, "SI")), _react["default"].createElement("label", {
+        className: "custom-control custom-radio custom-control-inline"
+      }, _react["default"].createElement("input", {
+        id: "sinoRADIO",
+        type: "radio",
+        name: "sinoRadio",
+        className: "custom-control-input",
+        onClick: function onClick() {
+          return _this3.props.actualizarEstadoSeleccionSinoNuevaRegla(true);
+        }
+      }), _react["default"].createElement("span", {
+        className: "custom-control-label"
+      }, "SINO"))), _react["default"].createElement("br", null), this.state.errorCreacionRegla.mostrar ? _react["default"].createElement(_ErrorMessage["default"], {
         campo: this.state.errorCreacionRegla.campo,
         descripcion: this.state.errorCreacionRegla.descripcion,
         dismissTableError: this.dismissReglaNewError
@@ -774,7 +704,9 @@ function (_React$Component) {
       }, " ") : _react["default"].createElement("span", null), _react["default"].createElement("div", {
         className: "text-center"
       }, _react["default"].createElement("a", {
-        onClick: this.props.callbackCrearRegla,
+        onClick: function onClick() {
+          return _this3.props.callbackCrearRegla(false);
+        },
         className: "btn btn-primary col-xs-6 col-6",
         style: {
           color: "white",

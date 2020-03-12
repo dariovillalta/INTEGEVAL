@@ -7,11 +7,15 @@ exports["default"] = void 0;
 
 var _react = _interopRequireDefault(require("react"));
 
+var _mssql = _interopRequireDefault(require("mssql"));
+
 var _CrearVariable = _interopRequireDefault(require("./CrearVariable.js"));
 
 var _InstruccionVariable = _interopRequireDefault(require("../../../InstruccionVariable.js"));
 
 var _Formula = _interopRequireDefault(require("../../../Formula.js"));
+
+var _InstruccionSQL = _interopRequireDefault(require("../../../InstruccionSQL.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
@@ -53,31 +57,39 @@ var tipoDeAsignacionSeleccionado; //para saber el tipo de asignacion que se debe
 /* CADA POSICION REPRESENTA UN CAMPO / ATRIBUTO / COLUMNA */
 
 /*
-    [ {nombre: "Carlos", apellido: "Carlos"}, {nombre: "Perez", apellido: "Perez"} ]
+    [ {nombre: "IDCLIENTE"}, {nombre: "NOMBRECLIENTE"} ]
+*/
+
+/*              ARREGLO DE SEGMENTO DE REGLAS               */
+
+/* CADA POSICION REPRESENTA UNA CONDICION IF PERTENECIENTE AL ATRIBUTO CORRESPONDIENTE A LA POSICION DEL ATRIBUTO */
+
+/*
+    [ [{esConexionTabla: FALSE}, {esConexionTabla: TRUE}], [{esConexionTabla: FALSE}, {esConexionTabla: TRUE}] ]
 */
 
 /*              ARREGLO DE REGLAS               */
 
-/* CADA POSICION REPRESENTA UNA REGLA PERTENECIENTE A AL ATRIBUTO CORRESPONDIENTE A LA POSICION DEL ATRIBUTO */
+/* CADA POSICION REPRESENTA UNA REGLA PERTENECIENTE AL SEGMENTO DE REGLAS CORRESPONDIENTE A LA POSICION DEL SEGMENTO DE REGLAS DENTRO DE LA POSICION DEL ATRIBUTO */
 
 /*
-    [ [{nombre: "Carlos", apellido: "Carlos"}, {nombre: "Perez", apellido: "Perez"}], [{nombre: "Carlos1", apellido: "Carlos1"}, {nombre: "Perez2", apellido: "Perez2"}] ]
+    [ [[{esCondicion: FALSE}], [{esCondicion: TRUE, esCondicion: FALSE}]], [[{esCondicion: FALSE}], [{esCondicion: FALSE}]] ]
 */
 
 /*              ARREGLO DE FORMULAS               */
 
-/* CADA POSICION REPRESENTA UNA FORMULA PERTENECIENTE A AL ATRIBUTO CORRESPONDIENTE A LA POSICION DEL ATRIBUTO */
+/* CADA POSICION REPRESENTA UNA FORMULA PERTENECIENTE AL ATRIBUTO CORRESPONDIENTE A LA POSICION DEL ATRIBUTO */
 
 /*
-    [ [{nombre: "Carlos", apellido: "Carlos"}, {nombre: "Perez", apellido: "Perez"}], [{nombre: "Carlos1", apellido: "Carlos1"}, {nombre: "Perez2", apellido: "Perez2"}] ]
+    [ [{formula: "x + y"}, {formula: "2x + 2y"}], [{formula: "3x + 3y"}] ]
 */
 
 /*              ARREGLO DE ELEMENTOS DE FORMULAS               */
 
-/* CADA POSICION REPRESENTA UNA VARIABLE DENTRO DE LA FORMULA FORMULA PERTENECIENTE A AL ATRIBUTO CORRESPONDIENTE A LA POSICION DEL ATRIBUTO */
+/* CADA POSICION REPRESENTA UN ELEMENTO DE FORMULA PERTENECIENTE A LA FORMULA CORRESPONDIENTE A LA POSICION DE LA FORMULA DENTRO DE LA POSICION DEL ATRIBUTO */
 
 /*
-    [ [[{nombre: "Carlos", apellido: "Carlos"}, {nombre: "Perez", apellido: "Perez"}], []], [[{nombre: "Carlos1", apellido: "Carlos1"}, {nombre: "Perez2", apellido: "Perez2"}], []] ]
+    [ [[{formula: "sum(saldo)"}, {formula: "asig(impuesto)"}], []], [[{formula: "sum(saldo)"}], []] ]
 */
 
 var nivelNuevoAtributoVarios = 0; //nivel del nuevo atributo a agregar | cambia con al seleccionar regla, o agregar variable a una formula
@@ -92,14 +104,20 @@ var posicionAtributoSeleccionado = -1; //posicion del arreglo donde se debe inse
 
 var indiceSeleccionadoFormula = -1; //indice seleccionado formula
 
+var nombreVariable = '';
+var descripcionVariable = '';
+var nombreCampoNuevoAtributosVario = '';
 var atributosVario = [];
 var reglasVariosAtributos = [];
+var segmentoReglasVariosAtributos = [];
 var formulasVariosAtributos = [];
 var elementosFormulasVariosAtributos = [];
 var atributosUnico = [];
 var reglasUnAtributo = [];
+var segmentoReglasUnAtributo = [];
 var formulasUnAtributo = [];
 var elementosFormulasUnAtributos = [];
+var banderaEsObjeto = true; //bandera para saber si la variable actual es objeto o no a traves de las diferentes vistas / componentes
 
 var CrearFuenteDatosHome =
 /*#__PURE__*/
@@ -115,27 +133,7 @@ function (_React$Component) {
     _this.state = {
       componenteActual: 'crearVariable',
       atributos: [],
-      reglas: [{
-        texto: "Regla 1",
-        nivel: 1,
-        esCondicion: false
-      }, {
-        texto: "Regla 2",
-        nivel: 2,
-        esCondicion: true
-      }, {
-        texto: "Regla 3",
-        nivel: 3,
-        esCondicion: false
-      }, {
-        texto: "Regla 4",
-        nivel: 1,
-        esCondicion: false
-      }, {
-        texto: "Regla 5",
-        nivel: 2,
-        esCondicion: false
-      }],
+      reglas: [],
       formulas: [],
       esCondicion: true,
       //bandera para estado de nueva regla / instruccion, saber si es nueva comparacion o regla / instruccion = verdadero; si es falso = es nueva formula / asignacion
@@ -145,18 +143,22 @@ function (_React$Component) {
     _this.sortRules = _this.sortRules.bind(_assertThisInitialized(_this));
     _this.returnToCreateVariable = _this.returnToCreateVariable.bind(_assertThisInitialized(_this));
     _this.goToCreateConditions = _this.goToCreateConditions.bind(_assertThisInitialized(_this));
+    _this.goToCreateConditionsClickNavBarFormula = _this.goToCreateConditionsClickNavBarFormula.bind(_assertThisInitialized(_this));
     _this.goToCreateFormula = _this.goToCreateFormula.bind(_assertThisInitialized(_this));
+    _this.goCreateVariableFieldSQL = _this.goCreateVariableFieldSQL.bind(_assertThisInitialized(_this));
     _this.createVariable = _this.createVariable.bind(_assertThisInitialized(_this));
     _this.getVariableID = _this.getVariableID.bind(_assertThisInitialized(_this));
     _this.createVariableField = _this.createVariableField.bind(_assertThisInitialized(_this));
     _this.getVariableFieldID = _this.getVariableFieldID.bind(_assertThisInitialized(_this));
+    _this.createVariableFieldRuleSegments = _this.createVariableFieldRuleSegments.bind(_assertThisInitialized(_this));
+    _this.getVariableFieldRuleSegments = _this.getVariableFieldRuleSegments.bind(_assertThisInitialized(_this));
     _this.createVariableFieldRules = _this.createVariableFieldRules.bind(_assertThisInitialized(_this));
     _this.createVariableFieldFormula = _this.createVariableFieldFormula.bind(_assertThisInitialized(_this));
     _this.getVariableFieldFormulaID = _this.getVariableFieldFormulaID.bind(_assertThisInitialized(_this));
     _this.createVariableFieldFormulaElement = _this.createVariableFieldFormulaElement.bind(_assertThisInitialized(_this));
     _this.retornarCampo = _this.retornarCampo.bind(_assertThisInitialized(_this));
     _this.actualizarCondicion = _this.actualizarCondicion(_assertThisInitialized(_this));
-    _this.cambioDeArreglosDeAtributos = _this.cambioDeArreglosDeAtributos(_assertThisInitialized(_this));
+    _this.cambioDeArreglosDeAtributos = _this.cambioDeArreglosDeAtributos.bind(_assertThisInitialized(_this));
     _this.guardarVariable = _this.guardarVariable.bind(_assertThisInitialized(_this));
     _this.guardarVariableUnAtributo = _this.guardarVariableUnAtributo.bind(_assertThisInitialized(_this));
     _this.guardarVariableVariosAtributo = _this.guardarVariableVariosAtributo.bind(_assertThisInitialized(_this));
@@ -167,6 +169,11 @@ function (_React$Component) {
     _this.retornoOperacion = _this.retornoOperacion.bind(_assertThisInitialized(_this));
     _this.retornoTipoDeAsignacion = _this.retornoTipoDeAsignacion.bind(_assertThisInitialized(_this));
     _this.actualizarIndiceSeleccionadoReglas = _this.actualizarIndiceSeleccionadoReglas.bind(_assertThisInitialized(_this));
+    _this.actualizarNivelNuevaRegla = _this.actualizarNivelNuevaRegla.bind(_assertThisInitialized(_this));
+    _this.actualizarNombreVariable = _this.actualizarNombreVariable.bind(_assertThisInitialized(_this));
+    _this.actualizarDescripcionVariable = _this.actualizarDescripcionVariable.bind(_assertThisInitialized(_this));
+    _this.actualizarNombreCampoNuevoAtributosVario = _this.actualizarNombreCampoNuevoAtributosVario.bind(_assertThisInitialized(_this));
+    _this.retornarCodigoOperacion = _this.retornarCodigoOperacion.bind(_assertThisInitialized(_this));
     return _this;
   }
 
@@ -249,16 +256,16 @@ function (_React$Component) {
 
       posicionAtributoSeleccionado = indice; //tipoElementoSeleccionado = tipoIndice;
 
-      var esObjeto, formulas, reglas;
-      var posicionSel = posicionAtributoSeleccionado;
+      var formulas, reglas;
+      var posicionSel = posicionAtributoSeleccionado; //indice = -1 cuando se va a condiciones de un campo nuevo
+      //cuando se presiona NavBar indice es igual indice anterior
+      //cuando se selecciona un campo existente indice = posicion campo
 
       if (posicionAtributoSeleccionado == -1) {
         posicionSel = this.state.atributos.length;
       }
 
-      if ($("#esObjetoFuenteDato").is(':checked')) esObjeto = true;else esObjeto = false;
-
-      if (esObjeto) {
+      if (banderaEsObjeto) {
         formulas = formulasVariosAtributos;
         reglas = reglasVariosAtributos;
       } else {
@@ -266,6 +273,16 @@ function (_React$Component) {
         reglas = reglasUnAtributo;
       }
 
+      console.log('posicionSel');
+      console.log(posicionSel);
+      console.log('formulas[posicionSel]');
+      console.log(formulas[posicionSel]);
+      console.log('reglas[posicionSel]');
+      console.log(reglas[posicionSel]);
+      console.log('formulas');
+      console.log(formulas);
+      console.log('reglas');
+      console.log(reglas);
       if (formulas[posicionSel] == undefined) formulas[posicionSel] = [];
       if (reglas[posicionSel] == undefined) reglas[posicionSel] = [];
       this.setState({
@@ -274,6 +291,11 @@ function (_React$Component) {
         formulas: formulas[posicionSel],
         reglas: reglas[posicionSel]
       });
+    }
+  }, {
+    key: "goToCreateConditionsClickNavBarFormula",
+    value: function goToCreateConditionsClickNavBarFormula() {
+      this.goToCreateConditions(posicionAtributoSeleccionado);
     }
   }, {
     key: "goToCreateFormula",
@@ -323,7 +345,7 @@ function (_React$Component) {
       }, "Crear Variable")), _react["default"].createElement("li", {
         className: "breadcrumb-item font-16",
         "aria-current": "page",
-        onClick: this.goToCreateConditions
+        onClick: this.goToCreateConditionsClickNavBarFormula
       }, _react["default"].createElement("a", {
         href: "#",
         className: "breadcrumb-link"
@@ -339,18 +361,73 @@ function (_React$Component) {
       });
     }
   }, {
+    key: "goCreateVariableFieldSQL",
+    value: function goCreateVariableFieldSQL() {
+      var navbar = _react["default"].createElement("div", {
+        className: "row"
+      }, _react["default"].createElement("div", {
+        className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
+      }, _react["default"].createElement("div", {
+        className: "page-header"
+      }, _react["default"].createElement("h2", {
+        className: "pageheader-title"
+      }, "Condiciones"), _react["default"].createElement("div", {
+        className: "page-breadcrumb"
+      }, _react["default"].createElement("nav", {
+        "aria-label": "breadcrumb"
+      }, _react["default"].createElement("ol", {
+        className: "breadcrumb"
+      }, _react["default"].createElement("li", {
+        className: "breadcrumb-item font-16",
+        "aria-current": "page",
+        onClick: this.props.configuracionHome
+      }, _react["default"].createElement("a", {
+        href: "#",
+        className: "breadcrumb-link"
+      }, "Configuraci\xF3n")), _react["default"].createElement("li", {
+        className: "breadcrumb-item font-16",
+        "aria-current": "page",
+        onClick: this.props.goOptions
+      }, _react["default"].createElement("a", {
+        href: "#",
+        className: "breadcrumb-link"
+      }, "Tipo de Configuraci\xF3n")), _react["default"].createElement("li", {
+        className: "breadcrumb-item font-16",
+        "aria-current": "page",
+        onClick: this.props.retornoSeleccionVariables
+      }, _react["default"].createElement("a", {
+        href: "#",
+        className: "breadcrumb-link"
+      }, "Variables")), _react["default"].createElement("li", {
+        className: "breadcrumb-item font-16",
+        "aria-current": "page",
+        onClick: this.returnToCreateVariable
+      }, _react["default"].createElement("a", {
+        href: "#",
+        className: "breadcrumb-link"
+      }, "Crear Variable")), _react["default"].createElement("li", {
+        className: "breadcrumb-item active font-16",
+        "aria-current": "page"
+      }, "Instrucci\xF3n SQL")))))));
+
+      this.setState({
+        navbar: navbar,
+        componenteActual: "variableSQL"
+      });
+    }
+  }, {
     key: "createVariable",
     value: function createVariable(variable, campos) {
       var _this2 = this;
 
       //validaciones existe por lo menos regla asignar
-      var transaction = new sql.Transaction(this.props.pool);
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
       transaction.begin(function (err) {
         var rolledBack = false;
         transaction.on('rollback', function (aborted) {
           rolledBack = true;
         });
-        var request = new sql.Request(transaction);
+        var request = new _mssql["default"].Request(transaction);
         request.query("insert into Variables (nombre, descripcion, esObjeto, objetoPadreID, guardar) values ('" + variable.nombre + "', '" + variable.descripcion + "', '" + variable.esObjeto + "', " + variable.objetoPadreID + ", '" + variable.guardar + "')", function (err, result) {
           if (err) {
             if (!rolledBack) {
@@ -361,7 +438,7 @@ function (_React$Component) {
             transaction.commit(function (err) {
               alert("variable creada.");
 
-              _this2.props.getVariableID(atributoFuenteDato, campos);
+              _this2.getVariableID(variable, campos);
             });
           }
         });
@@ -373,13 +450,13 @@ function (_React$Component) {
       var _this3 = this;
 
       //validaciones existe por lo menos regla asignar
-      var transaction = new sql.Transaction(this.props.pool);
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
       transaction.begin(function (err) {
         var rolledBack = false;
         transaction.on('rollback', function (aborted) {
           rolledBack = true;
         });
-        var request = new sql.Request(transaction);
+        var request = new _mssql["default"].Request(transaction);
         request.query("select * from Variables where nombre = '" + variable.nombre + "'", function (err, result) {
           if (err) {
             if (!rolledBack) {
@@ -390,7 +467,7 @@ function (_React$Component) {
             transaction.commit(function (err) {
               if (result.recordset.length > 0) {
                 for (var i = 0; i < campos.length; i++) {
-                  _this3.createVariableField(result.recordset[0], campos[i]);
+                  _this3.createVariableField(result.recordset[0], campos[i], i);
                 }
 
                 ;
@@ -402,17 +479,17 @@ function (_React$Component) {
     }
   }, {
     key: "createVariableField",
-    value: function createVariableField(variable, variableCampo) {
+    value: function createVariableField(variable, variableCampo, posicionAtributo) {
       var _this4 = this;
 
-      var transaction = new sql.Transaction(this.props.pool);
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
       transaction.begin(function (err) {
         var rolledBack = false;
         transaction.on('rollback', function (aborted) {
           rolledBack = true;
         });
-        var request = new sql.Request(transaction);
-        request.query("insert into VariablesCampos (variableID, nombre, tipo, campoEsArreglo, nivel) values (" + variable.ID + ", '" + variableCampo.nombre + "', '" + variableCampo.tipo + "', '" + variableCampo.campoEsArreglo + "', " + variableCampo.nivel + ")", function (err, result) {
+        var request = new _mssql["default"].Request(transaction);
+        request.query("insert into VariablesCampos (variableID, nombre, tipo, nivel) values (" + variable.ID + ", '" + variableCampo.nombre + "', '" + variableCampo.tipo + "', " + variableCampo.nivel + ")", function (err, result) {
           if (err) {
             if (!rolledBack) {
               console.log(err);
@@ -421,7 +498,7 @@ function (_React$Component) {
           } else {
             transaction.commit(function (err) {
               //this.props.terminoCrearCampo(variable, variableCampo);
-              _this4.props.getVariableFieldID(variable, variableCampo);
+              _this4.getVariableFieldID(variable, variableCampo, posicionAtributo);
             });
           }
         });
@@ -429,17 +506,17 @@ function (_React$Component) {
     }
   }, {
     key: "getVariableFieldID",
-    value: function getVariableFieldID(variable, variableCampo) {
+    value: function getVariableFieldID(variable, variableCampo, posicionAtributo) {
       var _this5 = this;
 
       //validaciones existe por lo menos regla asignar
-      var transaction = new sql.Transaction(this.props.pool);
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
       transaction.begin(function (err) {
         var rolledBack = false;
         transaction.on('rollback', function (aborted) {
           rolledBack = true;
         });
-        var request = new sql.Request(transaction);
+        var request = new _mssql["default"].Request(transaction);
         request.query("select * from VariablesCampos where nombre = '" + variableCampo.nombre + "' and variableID = " + variable.ID, function (err, result) {
           if (err) {
             if (!rolledBack) {
@@ -456,25 +533,107 @@ function (_React$Component) {
 
               var esObjeto;
               if ($("#esObjetoFuenteDato").is(':checked')) esObjeto = true;else esObjeto = false;
-              var reglas, formulas;
+              var formulas, segmentoRegla;
 
               if (esObjeto) {
-                reglas = reglasVariosAtributos;
                 formulas = formulasVariosAtributos;
+                segmentoRegla = segmentoReglasVariosAtributos;
               } else {
-                reglas = reglasUnAtributo;
                 formulas = formulasUnAtributo;
+                segmentoRegla = segmentoReglasUnAtributo;
               }
 
-              if (reglas[posicionSel] != undefined) {
-                for (var i = 0; i < reglas[posicionSel].length; i++) {
-                  _this5.createVariableFieldRules(variable, variableCampo, reglas[i]);
+              for (var j = 0; j < formulas[posicionAtributo].length; j++) {
+                formulas[posicionAtributo][j].posicionFormulaEnCampo = j;
+
+                _this5.createVariableFieldFormula(variable, result.recordset[0], formulas[posicionAtributo][j], posicionAtributo, j);
+              }
+
+              ;
+
+              if (formulas[posicionAtributo].length == 0) {
+                for (var j = 0; j < segmentoRegla[posicionAtributo].length; j++) {
+                  segmentoRegla[posicionAtributo][j].posicionSegmentoEnCampo = j;
+
+                  _this5.createVariableFieldRuleSegments(variable, result.recordset[0], segmentoRegla[posicionAtributo][j], posicionAtributo, j);
                 }
 
                 ;
-              } else if (formulas[posicionSel] != undefined) {
-                for (var i = 0; i < formulas[posicionSel].length; i++) {
-                  _this5.createVariableFieldFormula(variable, variableCampo, formulas[i], i);
+              }
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
+    key: "createVariableFieldRuleSegments",
+    value: function createVariableFieldRuleSegments(variable, variableCampo, segmento, posicionAtributo, posicionSegmento, formula) {
+      var _this6 = this;
+
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("insert into SegmentoReglas (conexionTablaID, variableID, variableCampoID, esConexionTabla, posicionSegmentoEnCampo, nivelMax) values (" + segmento.conexionTablaID + ", " + variable.ID + ", " + variableCampo.ID + ", '" + segmento.esConexionTabla + "', " + posicionSegmento + ", " + segmento.nivelMax + ")", function (err, result) {
+          if (err) {
+            if (!rolledBack) {
+              console.log(err);
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              _this6.getVariableFieldRuleSegments(variable, variableCampo, segmento, posicionAtributo, posicionSegmento, formula);
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
+    key: "getVariableFieldRuleSegments",
+    value: function getVariableFieldRuleSegments(variable, variableCampo, segmento, posicionAtributo, posicionSegmento, formula) {
+      var _this7 = this;
+
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("select * from SegmentoReglas where conexionTablaID = " + segmento.conexionTablaID + " and variableID = " + variable.ID + " and variableCampoID = " + variableCampo.ID + " and esConexionTabla = '" + segmento.esConexionTabla + "' and posicionSegmentoEnCampo = " + posicionSegmento + " and nivelMax = " + segmento.nivelMax, function (err, result) {
+          if (err) {
+            if (!rolledBack) {
+              console.log(err);
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              console.log('resultado FormulasVariablesCampos');
+              console.log(result.recordset);
+
+              if (result.recordset.length > 0) {
+                var reglas;
+
+                if (banderaEsObjeto) {
+                  reglas = reglasVariosAtributos;
+                } else {
+                  reglas = reglasUnAtributo;
+                }
+
+                for (var k = 0; k < reglas[posicionAtributo][posicionSegmento].length; k++) {
+                  reglas[posicionAtributo][posicionSegmento][k].segmentoReglaID = result.recordset[0].ID; //crear reglas que sean de comparacion (esCondicion = verdadero)
+
+                  if (reglas[posicionAtributo][posicionSegmento][k].esCondicion) {
+                    _this7.createVariableFieldRules(variable, variableCampo, result.recordset[0], reglas[posicionAtributo][posicionSegmento][k]);
+                  } else if (!reglas[posicionAtributo][posicionSegmento][k].esCondicion) {
+                    //crear reglas que sean de asignacion (esCondicion = falso) con el id de formula correcto
+                    reglas[posicionAtributo][posicionSegmento][k].formulaID = formula.ID;
+
+                    _this7.createVariableFieldRules(variable, variableCampo, result.recordset[0], reglas[posicionAtributo][posicionSegmento][k]);
+                  }
                 }
 
                 ;
@@ -486,15 +645,15 @@ function (_React$Component) {
     }
   }, {
     key: "createVariableFieldRules",
-    value: function createVariableFieldRules(variable, variableCampo, regla) {
-      var transaction = new sql.Transaction(this.props.pool);
+    value: function createVariableFieldRules(variable, variableCampo, segmento, regla) {
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
       transaction.begin(function (err) {
         var rolledBack = false;
         transaction.on('rollback', function (aborted) {
           rolledBack = true;
         });
-        var request = new sql.Request(transaction);
-        request.query("insert into Reglas (variableID, variableCampoID, reglaPadreID, esCondicion, operacion, valor, texto, nivel) values (" + variable.ID + ", " + variableCampo.ID + ", " + regla.reglaPadreID + ", '" + regla.esCondicion + "', '" + regla.operacion + "', '" + regla.valor + "', '" + regla.texto + "', " + regla.nivel + ")", function (err, result) {
+        var request = new _mssql["default"].Request(transaction);
+        request.query("insert into Reglas (segmentoReglaID, variableID, variableCampoID, formulaID, reglaPadreID, conexionTablaID, nombreColumnaEnTabla, esCondicion, operacion, operacionTexto, valor, texto, nivel) values (" + segmento.ID + ", " + variable.ID + ", " + variableCampo.ID + ", " + regla.formulaID + ", " + regla.reglaPadreID + ", " + regla.conexionTablaID + ", '" + regla.nombreColumnaEnTabla + "', '" + regla.esCondicion + "', '" + regla.operacion + "', '" + regla.operacionTexto + "', '" + regla.valor + "', '" + regla.texto + "', " + regla.nivel + ")", function (err, result) {
           if (err) {
             if (!rolledBack) {
               console.log(err);
@@ -508,17 +667,17 @@ function (_React$Component) {
     }
   }, {
     key: "createVariableFieldFormula",
-    value: function createVariableFieldFormula(variable, variableCampo, formula, indiceFormula) {
-      var _this6 = this;
+    value: function createVariableFieldFormula(variable, variableCampo, formula, posicionAtributo, posicionFormula) {
+      var _this8 = this;
 
-      var transaction = new sql.Transaction(this.props.pool);
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
       transaction.begin(function (err) {
         var rolledBack = false;
         transaction.on('rollback', function (aborted) {
           rolledBack = true;
         });
-        var request = new sql.Request(transaction);
-        request.query("insert into FormulasVariablesCampos (variableID, variableCampoID, formula, numeroDeFormulaDeVariable) values (" + variable.ID + ", " + variableCampo.ID + ", '" + formula.formula + "', " + formula.numeroDeFormulaDeVariable + ")", function (err, result) {
+        var request = new _mssql["default"].Request(transaction);
+        request.query("insert into FormulasVariablesCampos (variableID, variableCampoID, formula, posicionFormulaEnCampo) values (" + variable.ID + ", " + variableCampo.ID + ", '" + formula.formula + "', " + posicionFormula + ")", function (err, result) {
           if (err) {
             if (!rolledBack) {
               console.log(err);
@@ -526,7 +685,7 @@ function (_React$Component) {
             }
           } else {
             transaction.commit(function (err) {
-              _this6.props.getVariableFieldFormulaID(variable, variableCampo, formula, indiceFormula);
+              _this8.getVariableFieldFormulaID(variable, variableCampo, formula, posicionAtributo, posicionFormula);
             });
           }
         });
@@ -534,17 +693,17 @@ function (_React$Component) {
     }
   }, {
     key: "getVariableFieldFormulaID",
-    value: function getVariableFieldFormulaID(variable, variableCampo, formula, indiceFormula) {
-      var _this7 = this;
+    value: function getVariableFieldFormulaID(variable, variableCampo, formula, posicionAtributo, posicionFormula) {
+      var _this9 = this;
 
-      var transaction = new sql.Transaction(this.props.pool);
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
       transaction.begin(function (err) {
         var rolledBack = false;
         transaction.on('rollback', function (aborted) {
           rolledBack = true;
         });
-        var request = new sql.Request(transaction);
-        request.query("select * from FormulasVariablesCampos where variableID = " + variable.variableID + " and variableCampoID = " + variableCampo.ID + " and numeroDeFormulaDeVariable = '" + formula.numeroDeFormulaDeVariable + "'", function (err, result) {
+        var request = new _mssql["default"].Request(transaction);
+        request.query("select * from FormulasVariablesCampos where variableID = " + variable.ID + " and variableCampoID = " + variableCampo.ID + " and posicionFormulaEnCampo = " + posicionFormula, function (err, result) {
           if (err) {
             if (!rolledBack) {
               console.log(err);
@@ -553,25 +712,31 @@ function (_React$Component) {
           } else {
             transaction.commit(function (err) {
               if (result.recordset.length > 0) {
-                var posicionSel = posicionAtributoSeleccionado; //si fue llamado de crear atributo
+                var elementosFormulas, segmentoRegla;
 
-                if (posicionAtributoSeleccionado == -1) {
-                  posicionSel = _this7.state.atributos.length;
-                }
-
-                var elementosFormulas;
-
-                if (esObjeto) {
+                if (banderaEsObjeto) {
                   elementosFormulas = elementosFormulasVariosAtributos;
+                  segmentoRegla = segmentoReglasVariosAtributos;
                 } else {
                   elementosFormulas = elementosFormulasUnAtributos;
+                  segmentoRegla = segmentoReglasUnAtributo;
                 }
 
-                for (var i = 0; i < elementosFormulas[posicionSel][indiceFormula].length; i++) {
-                  _this7.props.createVariableFieldFormulaElement(variable, variableCampo, formula, elementosFormulas[posicionSel][indiceFormula][i]);
+                for (var i = 0; i < elementosFormulas[posicionAtributo][posicionFormula].length; i++) {
+                  _this9.createVariableFieldFormulaElement(variable, variableCampo, result.recordset[0], elementosFormulas[posicionAtributo][posicionFormula][i]);
                 }
 
-                ;
+                ; //validar que solo sea llamado la primera vez por cada atributo
+
+                if (posicionFormula == 0) {
+                  for (var j = 0; j < segmentoRegla[posicionAtributo].length; j++) {
+                    segmentoRegla[posicionAtributo][j].posicionSegmentoEnCampo = j;
+
+                    _this9.createVariableFieldRuleSegments(variable, variableCampo, segmentoRegla[posicionAtributo][j], posicionAtributo, j, result.recordset[0]);
+                  }
+
+                  ;
+                }
               }
             });
           }
@@ -581,14 +746,14 @@ function (_React$Component) {
   }, {
     key: "createVariableFieldFormulaElement",
     value: function createVariableFieldFormulaElement(variable, variableCampo, formula, elemento) {
-      var transaction = new sql.Transaction(this.props.pool);
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
       transaction.begin(function (err) {
         var rolledBack = false;
         transaction.on('rollback', function (aborted) {
           rolledBack = true;
         });
-        var request = new sql.Request(transaction);
-        request.query("insert into ElementoFormulasVariablesCampos (variableID, variableCampoID, idFormula, idConexionTabla, nombreColumnaEnTabla, nombreVariable, operacion) values (" + variable.ID + ", " + variableCampo.ID + ", " + formula.ID + ", " + elemento.idConexionTabla + ", '" + elemento.nombreColumnaEnTabla + "', '" + elemento.nombreColumnaEnTabla + "', '" + elemento.nombreVariable + "', '" + elemento.operacion + "')", function (err, result) {
+        var request = new _mssql["default"].Request(transaction);
+        request.query("insert into ElementoFormulasVariablesCampos (variableID, variableCampoID, formulaID, conexionTablaID, nombreColumnaEnTabla, tipoColumnaEnTabla, nombreVariable, descripcion, operacion) values (" + variable.ID + ", " + variableCampo.ID + ", " + formula.ID + ", " + elemento.idConexionTabla + ", '" + elemento.nombreColumnaEnTabla + "', '" + elemento.tipoColumnaEnTabla + "', '" + elemento.nombreVariable + "', '" + elemento.descripcion + "', '" + elemento.operacion + "')", function (err, result) {
           if (err) {
             if (!rolledBack) {
               console.log(err);
@@ -603,7 +768,7 @@ function (_React$Component) {
   }, {
     key: "retornarCampo",
     value: function retornarCampo(campoNuevo) {
-      campo = campoNuevo;
+      campoSeleccionado = campoNuevo;
     }
   }, {
     key: "actualizarCondicion",
@@ -631,10 +796,7 @@ function (_React$Component) {
   }, {
     key: "guardarVariable",
     value: function guardarVariable() {
-      var esObjeto;
-      if ($("#esObjetoFuenteDato").is(':checked')) esObjeto = true;else esObjeto = false;
-
-      if (esObjeto) {
+      if (!banderaEsObjeto) {
         this.guardarVariableUnAtributo();
       } else {
         this.guardarVariableVariosAtributo();
@@ -651,6 +813,13 @@ function (_React$Component) {
       if ($("#guardarFuenteDato").is(':checked')) guardarResultadosEnBaseDatos = true;else guardarResultadosEnBaseDatos = false;
       var objetoPadreID = -1;
       if ($("#esObjetoFuenteDato").is(':checked')) objetoPadreID = $("#objetoPadreID").val();
+      var nuevoNivel = 0;
+
+      if (banderaEsObjeto) {
+        nuevoNivel = nivelNuevoAtributoVarios;
+      } else {
+        nuevoNivel = nivelNuevoAtributoUnico;
+      }
 
       if (nombreVariable.length < 101 && nombreVariable.length > 0) {
         if (descripcionVariable.length < 701) {
@@ -658,49 +827,37 @@ function (_React$Component) {
           if (esObjeto != undefined) {
             if (guardarResultadosEnBaseDatos != undefined) {
               if (!isNaN(objetoPadreID)) {
-                //si no existen condiciones creadas, que se cree un arreglo vacio
+                if (tipoDeAsignacionSeleccionado != undefined && tipoDeAsignacionSeleccionado.length > 0) {
+                  if (!isNaN(nuevoNivel)) {
+                    var nuevoAtributo = {
+                      nombre: nombreVariable,
+                      tipo: tipoDeAsignacionSeleccionado,
+                      nivel: nuevoNivel
+                    }; //si la formula ya fue asignada, no agregar tipo
 
-                /*if(this.state.reglas[this.state.posicionNuevoAtributo] == undefined) {
-                    var tempCopyRules = [...this.state.reglas];
-                    tempCopyRules.push([]);
-                    this.setState({
-                        reglas: tempCopyRules
-                    });
-                }
-                //si no existen formulas creadas, que se cree un arreglo vacio
-                if(this.state.formula[this.state.posicionNuevoAtributo].ID == undefined) {
-                    var tempCopyFormulas = [...this.state.formula];
-                    tempCopyFormulas.push([]);
-                    this.setState({
-                        formula: tempCopyFormulas
-                    });
-                }*/
-                var campoEsArreglo = true;
-                if (tipoDeAsignacionSeleccionado.localeCompare("Asignar Valor Único") == 0) campoEsArreglo = false;
-                var nuevoAtributo; //si la formula ya fue asignada, no agregar tipo
+                    /*if(atributosUnico[0].tipo == undefined) {
+                        nuevoAtributo = {nombre: nombreVariable, tipo: '', campoEsArreglo: campoEsArreglo,  nivel: nivelNuevoAtributoUnico};
+                    } else {
+                        nuevoAtributo = atributosUnico[0];
+                        nuevoAtributo.nombre = nombreVariable;
+                        nuevoAtributo.campoEsArreglo = campoEsArreglo;
+                        nuevoAtributo.nivel = nivelNuevoAtributoUnico;
+                    }*/
 
-                if (atributosUnico[0].tipo == undefined) {
-                  nuevoAtributo = {
-                    nombre: nombreVariable,
-                    tipo: '',
-                    campoEsArreglo: campoEsArreglo,
-                    nivel: nivelNuevoAtributoUnico
-                  };
+                    var nuevaVariable = {
+                      nombre: nombreVariable,
+                      descripcion: descripcionVariable,
+                      esObjeto: esObjeto,
+                      objetoPadreID: objetoPadreID,
+                      guardar: guardarResultadosEnBaseDatos
+                    };
+                    this.createVariable(nuevaVariable, [nuevoAtributo]);
+                  } else {
+                    alert("Seleccione un nivel para el campo.");
+                  }
                 } else {
-                  nuevoAtributo = atributosUnico[0];
-                  nuevoAtributo.nombre = nombreVariable;
-                  nuevoAtributo.campoEsArreglo = campoEsArreglo;
-                  nuevoAtributo.nivel = nivelNuevoAtributoUnico;
+                  alert("Seleccione un tipo de asignación.");
                 }
-
-                var nuevaVariable = {
-                  nombre: nombreVariable,
-                  descripcion: descripcionVariable,
-                  esObjeto: esObjeto,
-                  objetoPadreID: objetoPadreID,
-                  guardar: guardarResultadosEnBaseDatos
-                };
-                this.createVariable(nuevaVariable, [nuevoAtributo]);
               } else {
                 alert("Tiene que ingresar un valor para objeto padre.");
               }
@@ -711,7 +868,7 @@ function (_React$Component) {
             alert("Tiene que ingresar si la variable tiene un atributo o muchos.");
           }
         } else {
-          alert("Tiene que ingresar una descripción de la variable.");
+          alert("Tiene que ingresar una descripción de la variable menor a 701 caracteres.");
         }
       } else {
         alert("Tiene que ingresar un nombre de la variable.");
@@ -719,53 +876,122 @@ function (_React$Component) {
     }
   }, {
     key: "guardarVariableVariosAtributo",
-    value: function guardarVariableVariosAtributo() {//
+    value: function guardarVariableVariosAtributo() {
+      var nombreVariable = $("#nombreFuenteDato").val();
+      var descripcionVariable = $("#descripcionFuenteDato").val();
+      var esObjeto;
+      if ($("#esObjetoFuenteDato").is(':checked')) esObjeto = true;else esObjeto = false;
+      var guardarResultadosEnBaseDatos;
+      if ($("#guardarFuenteDato").is(':checked')) guardarResultadosEnBaseDatos = true;else guardarResultadosEnBaseDatos = false;
+      var objetoPadreID = -1;
+      if ($("#esObjetoFuenteDato").is(':checked')) objetoPadreID = $("#objetoPadreID").val();
+      var nuevoNivel = 0;
+
+      if (banderaEsObjeto) {
+        nuevoNivel = nivelNuevoAtributoVarios;
+      } else {
+        nuevoNivel = nivelNuevoAtributoUnico;
+      }
+
+      if (nombreVariable.length < 101 && nombreVariable.length > 0) {
+        if (descripcionVariable.length < 701) {
+          //if(operacionSeleccionada.valor != undefined) {
+          if (esObjeto != undefined) {
+            if (guardarResultadosEnBaseDatos != undefined) {
+              if (!isNaN(objetoPadreID)) {
+                if (tipoDeAsignacionSeleccionado != undefined && tipoDeAsignacionSeleccionado.length > 0) {
+                  if (!isNaN(nuevoNivel)) {
+                    var nuevoAtributo = {
+                      nombre: nombreVariable,
+                      tipo: tipoDeAsignacionSeleccionado,
+                      nivel: nuevoNivel
+                    }; //si la formula ya fue asignada, no agregar tipo
+
+                    /*if(atributosUnico[0].tipo == undefined) {
+                        nuevoAtributo = {nombre: nombreVariable, tipo: '', campoEsArreglo: campoEsArreglo,  nivel: nivelNuevoAtributoUnico};
+                    } else {
+                        nuevoAtributo = atributosUnico[0];
+                        nuevoAtributo.nombre = nombreVariable;
+                        nuevoAtributo.campoEsArreglo = campoEsArreglo;
+                        nuevoAtributo.nivel = nivelNuevoAtributoUnico;
+                    }*/
+
+                    var nuevaVariable = {
+                      nombre: nombreVariable,
+                      descripcion: descripcionVariable,
+                      esObjeto: esObjeto,
+                      objetoPadreID: objetoPadreID,
+                      guardar: guardarResultadosEnBaseDatos
+                    };
+                    this.createVariable(nuevaVariable, atributosVario);
+                  } else {
+                    alert("Seleccione un nivel para el campo.");
+                  }
+                } else {
+                  alert("Seleccione un tipo de asignación.");
+                }
+              } else {
+                alert("Tiene que ingresar un valor para objeto padre.");
+              }
+            } else {
+              alert("Tiene que ingresar si guardar o no variable.");
+            }
+          } else {
+            alert("Tiene que ingresar si la variable tiene un atributo o muchos.");
+          }
+        } else {
+          alert("Tiene que ingresar una descripción de la variable menor a 701 caracteres.");
+        }
+      } else {
+        alert("Tiene que ingresar un nombre de la variable.");
+      }
     }
   }, {
     key: "crearAtributoVariable",
     value: function crearAtributoVariable() {
       //agrega valor a arreglo, pero no guarda en base de datos
-      var nombreAtributo = $("#nombreAtributo").val();
+      var nombreAtributo = $("#nombreAtributoNuevoCampo").val();
 
       if (nombreAtributo.length > 0) {
-        if (tipoDeAsignacionSeleccionado.length > 0) {
-          //si no existen condiciones creadas, que se cree un arreglo vacio
+        if (tipoDeAsignacionSeleccionado != undefined && tipoDeAsignacionSeleccionado.length > 0) {
+          //seleccionar arreglo a insertar, si de varios atributos o unico
+          var arreglo, nivel;
 
-          /*if(this.state.reglas[this.state.posicionNuevoAtributo] == undefined) {
-              var tempCopyRules = [...this.state.reglas];
-              tempCopyRules.push([]);
-              this.setState({
-                  reglas: tempCopyRules
-              });
-          }
-          //si no existen formulas creadas, que se cree un arreglo vacio
-          if(this.state.formula[this.state.posicionNuevoAtributo].ID == undefined) {
-              var tempCopyFormulas = [...this.state.formula];
-              tempCopyFormulas.push([]);
-              this.setState({
-                  formula: tempCopyFormulas
-              });
-          }*/
-          var campoEsArreglo = true;
-          if (tipoDeAsignacionSeleccionado.localeCompare("Asignar Valor Único") == 0) campoEsArreglo = false;
-          var nuevoAtributo; //si la formula ya fue asignada, no agregar tipo
-
-          if (this.state.atributos[this.state.posicionNuevoAtributo].nombre == undefined) {
-            nuevoAtributo = {
-              nombre: nombreAtributo,
-              tipo: '',
-              campoEsArreglo: campoEsArreglo
-            };
+          if (banderaEsObjeto) {
+            arreglo = atributosVario;
+            nivel = nivelNuevoAtributoVarios;
           } else {
-            nuevoAtributo = this.state.atributos[this.state.posicionNuevoAtributo];
-            nuevoAtributo.nombre = nombreAtributo;
-            nuevoAtributo.campoEsArreglo = campoEsArreglo;
+            arreglo = atributosUnico;
+            nivel = nivelNuevoAtributoUnico;
           }
 
-          atributosVario.push(nuevoAtributo);
+          var nuevoAtributo = {
+            nombre: nombreAtributo,
+            tipo: tipoDeAsignacionSeleccionado,
+            nivel: nivel
+          }; //si la formula ya fue asignada, no agregar tipo
+
+          /*if(this.state.atributos[this.state.posicionNuevoAtributo].nombre == undefined) {
+              nuevoAtributo = {nombre: nombreAtributo, tipo: tipoDeAsignacionSeleccionado, campoEsArreglo: campoEsArreglo};
+          } else {
+              nuevoAtributo = this.state.atributos[this.state.posicionNuevoAtributo];
+              nuevoAtributo.nombre = nombreAtributo;
+              nuevoAtributo.campoEsArreglo = campoEsArreglo;
+          }*/
+
+          arreglo.push(nuevoAtributo);
           this.setState({
-            atributos: atributosVario
+            atributos: arreglo
           });
+
+          if (banderaEsObjeto) {
+            atributosVario = arreglo;
+          } else {
+            atributosUnico = arreglo;
+          }
+
+          nombreCampoNuevoAtributosVario = '';
+          $("#nombreAtributoNuevoCampo").val("");
         } else {
           alert("Seleccione un tipo de asignación.");
         }
@@ -775,70 +1001,343 @@ function (_React$Component) {
     }
   }, {
     key: "anadirRegla",
-    value: function anadirRegla() {
+    value: function anadirRegla(esFormula) {
       //si se agrega una formula/asignacion, todas las otras formulas tienen que ser del mismo tipo para esa variable
       //si el indiceSeleccionado es igual a -1, se llamo desde nuevo atributo
       //sino, modificar elemento seleccionado
       //primer if: ver el estado de donde fue llamado el metodo
       //campoSeleccionado, operacionSeleccionada, objetoConexionSeleccionada
-      //
-      var valor = $("#valor").val();
-      var nuevaRegla = {
-        campo: campoSeleccionado.valor,
-        operacion: operacionSeleccionada.valor,
-        valor: valor,
-        texto: campoSeleccionado.valor + " " + operacionSeleccionada.valor + " " + valor,
-        reglaPadreID: -1,
-        nivel: 1
-      };
-      var posicionSel = posicionAtributoSeleccionado;
+      //indiceSeleccionadoReglas
+      //tipoElementoSeleccionadoRegla
+      console.log('indiceSeleccionadoReglas');
+      console.log(indiceSeleccionadoReglas);
+      console.log('tipoElementoSeleccionadoRegla');
+      console.log(tipoElementoSeleccionadoRegla);
 
-      if (posicionAtributoSeleccionado == -1) {
-        posicionSel = this.state.atributos.length;
-      }
+      if (!esFormula) {
+        var valor = $("#valor").val();
+        var posicionSel = posicionAtributoSeleccionado; //posicionAtributoSeleccionado = -1 cuando se va a condiciones de un campo nuevo
+        //cuando se presiona NavBar indice es igual indice anterior
+        //cuando se selecciona un campo existente indice = posicion campo
 
-      var esObjeto, reglas;
-      if ($("#esObjetoFuenteDato").is(':checked')) esObjeto = true;else esObjeto = false;
+        if (posicionAtributoSeleccionado == -1) {
+          posicionSel = this.state.atributos.length;
+        }
 
-      if (esObjeto) {
-        reglas = reglasVariosAtributos;
-      } else {
-        reglas = reglasUnAtributo;
-      }
+        var reglas;
 
-      reglas[posicionSel].push(nuevaRegla);
-      console.log('reglas');
-      console.log(reglas);
-      /*if( this.state.indiceSeleccionado != -1 || (this.state.indiceSeleccionado == -1 && this.state.reglas.length == 0) ) {
-          var operacion = $("input[name='operacionRadio']:checked").val();
-          var valor = $("#valor").val();
-          console.log('operacionSeleccionada');
-          console.log(operacionSeleccionada);
-          console.log('valor');
-          console.log(valor);
-          console.log('campoSeleccionado');
-          console.log(campoSeleccionado);
-          var posicionAInsertar = -1;
-          if(this.state.indiceSeleccionado != -1) {
-              posicionAInsertar = this.state.indiceSeleccionado;
+        if (banderaEsObjeto) {
+          reglas = reglasVariosAtributos;
+        } else {
+          reglas = reglasUnAtributo;
+        }
+
+        if (reglas[posicionSel] == undefined) {
+          [];
+        }
+
+        var nuevoNivel = 0;
+        var segmentoRegla;
+
+        if (banderaEsObjeto) {
+          nuevoNivel = nivelNuevoAtributoVarios;
+          segmentoRegla = segmentoReglasVariosAtributos;
+        } else {
+          nuevoNivel = nivelNuevoAtributoUnico;
+          segmentoRegla = segmentoReglasUnAtributo;
+        }
+
+        if (segmentoRegla.length == undefined) segmentoRegla = [];
+        if (segmentoRegla[posicionSel] == undefined) segmentoRegla[posicionSel] = [];
+        var conexionTablaID = -1,
+            variableID = -1,
+            variableCampoID = -1,
+            esConexionTabla = false,
+            nivelMax = 1,
+            nombreColumnaEnTabla = '';
+
+        if (campoSeleccionado.tablaID != undefined) {
+          conexionTablaID = campoSeleccionado.tablaID;
+          esConexionTabla = true;
+          nombreColumnaEnTabla = campoSeleccionado.valor;
+        } else {
+          variableID = campoSeleccionado.variableID;
+          variableCampoID = campoSeleccionado.ID;
+        }
+
+        var posicionInsertarReglaAtributo = 0,
+            posicionInsertarReglaSegmento = 0;
+
+        if (tipoElementoSeleccionadoRegla.localeCompare("abajo") == 0 || indiceSeleccionadoReglas == -1 && tipoElementoSeleccionadoRegla.length == 0) {
+          var segmentoReglaIndex = 0;
+
+          if (segmentoRegla[posicionSel].length > 0) {
+            segmentoReglaIndex = segmentoRegla[posicionSel].length;
           }
-          var copiaAntiguaReglas = [...this.state.reglas];
-          var nuevaRegla = {campo: campo.valor, operacion: operacion, valor: valor, texto: "TEXTO", reglaPadreID: -1, nivel: 1};
-          if(posicionAInsertar != -1) {
-              copiaAntiguaReglas.push(nuevaRegla);
+
+          segmentoRegla[posicionSel].push({
+            conexionTablaID: conexionTablaID,
+            variableID: variableID,
+            variableCampoID: variableCampoID,
+            esConexionTabla: esConexionTabla,
+            nivelMax: nivelMax,
+            segmentoReglaIndex: segmentoReglaIndex
+          });
+          posicionInsertarReglaAtributo = posicionSel;
+          posicionInsertarReglaSegmento = segmentoRegla[posicionSel].length - 1;
+        } else {
+          console.log('segmentoRegla');
+          console.log(segmentoRegla);
+          console.log('posicionSel');
+          console.log(posicionSel);
+          console.log('reglas');
+          console.log(reglas);
+          console.log('indiceSeleccionadoReglas');
+          console.log(indiceSeleccionadoReglas);
+          segmentoRegla[posicionSel][reglas[posicionSel][indiceSeleccionadoReglas].segmentoReglaID].nivelMax++;
+          posicionInsertarReglaAtributo = posicionSel;
+          posicionInsertarReglaSegmento = reglas[posicionSel][indiceSeleccionadoReglas].segmentoReglaID;
+          /*if(tipoElementoSeleccionadoRegla.localeCompare("arriba") == 0) {
+              segmentoRegla[posicionSel].push({conexionTablaID: conexionTablaID, variableID: variableID, variableCampoID: variableCampoID, esConexionTabla: esConexionTabla, nivelMax: });
           } else {
-              if(this.state.tipoIndiceSeleccionado.localeCompare("esOtraRegla") == 0) {
-                  var variablePadre = this.state.reglas[posicionAInsertar];
-                  nuevaRegla.reglaPadreID = variablePadre.ID;
-                  nuevaRegla.nivel = variablePadre.nivel + 1;
-                  var tempCopy
-                  this.actualizarNivelReglas(nuevaRegla, posicionInsertarNuevo, )
-              } if(this.state.tipoIndiceSeleccionado.localeCompare("arriba") == 0) {
-              }
-          }
+              segmentoRegla[posicionSel].nivelMax++;
+          }*/
+        }
+
+        if (reglas[posicionInsertarReglaAtributo] == undefined) {
+          reglas[posicionInsertarReglaAtributo] = [];
+        }
+
+        if (reglas[posicionInsertarReglaAtributo][posicionInsertarReglaSegmento] == undefined) {
+          reglas[posicionInsertarReglaAtributo][posicionInsertarReglaSegmento] = [];
+        }
+
+        var esCondicion = !esFormula;
+        var segmentoReglaIndex = 0;
+        if (indiceSeleccionadoReglas != -1 && reglas[indiceSeleccionadoReglas].segmentoReglaIndex != undefined) segmentoReglaIndex = reglas[indiceSeleccionadoReglas].segmentoReglaIndex;
+        var nuevaRegla = {
+          segmentoReglaID: segmentoReglaIndex,
+          conexionTablaID: conexionTablaID,
+          nombreColumnaEnTabla: nombreColumnaEnTabla,
+          formulaID: -1,
+          variableID: -1,
+          variableCampoID: -1,
+          reglaPadreID: -1,
+          esCondicion: esCondicion,
+          esConexionTabla: esConexionTabla,
+          operacion: operacionSeleccionada.operacion,
+          operacionTexto: operacionSeleccionada.operacionTexto,
+          valor: valor,
+          texto: campoSeleccionado.valor + " " + operacionSeleccionada.operacionTexto + " " + valor,
+          nivel: nuevoNivel
+        }; //if(indiceSeleccionadoReglas == -1 && tipoElementoSeleccionadoRegla.length == 0) {
+
+        if (this.state.reglas.length == 0) {
+          //cuando no existe regla creada para el campo
+          reglas[posicionInsertarReglaAtributo][posicionInsertarReglaSegmento].push(nuevaRegla);
+        } else {
+          //el campo ya tiene una regla o mas creada
+          if (tipoElementoSeleccionadoRegla.localeCompare("esOtraRegla") == 0 && $("#siRADIO").is(':checked')) {
+            //se seleciona el indice de la posicion de la regla dentro del arreglo, para que despues se pueda sacar el ID a base de la posicion
+            //se pone de regla padre a la regla seleccionada
+            nuevaRegla.reglaPadreID = indiceSeleccionadoReglas;
+            reglas[posicionInsertarReglaAtributo][posicionInsertarReglaSegmento].splice(indiceSeleccionadoReglas + 1, 0, nuevaRegla);
+          } else if (tipoElementoSeleccionadoRegla.localeCompare("esOtraRegla") == 0 && $("#sinoRADIO").is(':checked')) {
+            //se seleciona el indice de la posicion de la regla dentro del arreglo, para que despues se pueda sacar el ID a base de la posicion
+            //se pone de regla padre a la regla padre de la regla seleccionada
+            nuevaRegla.reglaPadreID = reglas[indiceSeleccionadoReglas].reglaPadreID;
+            reglas[posicionInsertarReglaAtributo][posicionInsertarReglaSegmento].splice(indiceSeleccionadoReglas + 1, 0, nuevaRegla);
+          } else if (tipoElementoSeleccionadoRegla.localeCompare("abajo") == 0) {
+            reglas[posicionInsertarReglaAtributo][posicionInsertarReglaSegmento].splice(indiceSeleccionadoReglas + 1, 0, nuevaRegla);
+          } //la condicion es anidada, o sea dentro de la condicion padre
+
+        }
+
+        if (banderaEsObjeto) {
+          reglasVariosAtributos = reglas;
+          segmentoReglasVariosAtributos = segmentoRegla;
+        } else {
+          reglasUnAtributo = reglas;
+          segmentoReglasUnAtributo = segmentoRegla;
+        }
+
+        this.setState({
+          reglas: reglas[posicionInsertarReglaAtributo][posicionInsertarReglaSegmento]
+        }); //reglas[posicionSel].push(nuevaRegla);
+
+        console.log('reglas');
+        console.log(reglas);
+        console.log('segmentoRegla');
+        console.log(segmentoRegla);
       } else {
-          alert("Seleccione una posición para agregar una nueva instrucción");
-      }*/
+        var posicionSel = posicionAtributoSeleccionado; //posicionAtributoSeleccionado = -1 cuando se va a condiciones de un campo nuevo
+        //cuando se presiona NavBar indice es igual indice anterior
+        //cuando se selecciona un campo existente indice = posicion campo
+
+        if (posicionAtributoSeleccionado == -1) {
+          posicionSel = this.state.atributos.length;
+        }
+
+        var reglas;
+
+        if (banderaEsObjeto) {
+          reglas = reglasVariosAtributos;
+        } else {
+          reglas = reglasUnAtributo;
+        }
+
+        var nuevoNivel = 0;
+        var segmentoRegla;
+
+        if (banderaEsObjeto) {
+          nuevoNivel = nivelNuevoAtributoVarios;
+          segmentoRegla = segmentoReglasVariosAtributos;
+        } else {
+          nuevoNivel = nivelNuevoAtributoUnico;
+          segmentoRegla = segmentoReglasUnAtributo;
+        }
+
+        if (segmentoRegla.length == undefined) segmentoRegla = [];
+        if (segmentoRegla[posicionSel] == undefined) segmentoRegla[posicionSel] = [];
+        var conexionTablaID = -1,
+            variableID = -1,
+            variableCampoID = -1,
+            esConexionTabla = false,
+            nivelMax = 1;
+        var posicionInsertarReglaAtributo = 0,
+            posicionInsertarReglaSegmento = 0;
+
+        if (campoSeleccionado.idConexionTabla != undefined) {
+          conexionTablaID = campoSeleccionado.idConexionTabla;
+          esConexionTabla = true;
+        } else {
+          variableID = campoSeleccionado.variableID;
+          variableCampoID = campoSeleccionado.ID;
+        }
+
+        if (tipoElementoSeleccionadoRegla.localeCompare("abajo") == 0 || indiceSeleccionadoReglas == -1 && tipoElementoSeleccionadoRegla.length == 0) {
+          var segmentoReglaIndex = 0;
+
+          if (segmentoRegla[posicionSel].length > 0) {
+            segmentoReglaIndex = segmentoRegla[posicionSel].length;
+          }
+
+          segmentoRegla[posicionSel].push({
+            conexionTablaID: conexionTablaID,
+            variableID: variableID,
+            variableCampoID: variableCampoID,
+            esConexionTabla: esConexionTabla,
+            nivelMax: nivelMax,
+            segmentoReglaIndex: segmentoReglaIndex
+          });
+          posicionInsertarReglaAtributo = posicionSel;
+          posicionInsertarReglaSegmento = segmentoRegla[posicionSel].length - 1;
+        } else {
+          segmentoRegla[posicionSel][reglas[posicionSel][indiceSeleccionadoReglas].segmentoReglaID].nivelMax++;
+          posicionInsertarReglaAtributo = posicionSel;
+          posicionInsertarReglaSegmento = reglas[posicionSel][indiceSeleccionadoReglas].segmentoReglaID;
+          /*if(tipoElementoSeleccionadoRegla.localeCompare("arriba") == 0) {
+              segmentoRegla[posicionSel].push({conexionTablaID: conexionTablaID, variableID: variableID, variableCampoID: variableCampoID, esConexionTabla: esConexionTabla, nivelMax: });
+          } else {
+              segmentoRegla[posicionSel].nivelMax++;
+          }*/
+        }
+
+        if (reglas[posicionInsertarReglaAtributo] == undefined) {
+          reglas[posicionInsertarReglaAtributo] = [];
+        }
+
+        if (reglas[posicionInsertarReglaAtributo][posicionInsertarReglaSegmento] == undefined) {
+          reglas[posicionInsertarReglaAtributo][posicionInsertarReglaSegmento] = [];
+        }
+
+        var esCondicion = !esFormula;
+        var segmentoReglaIndex = 0;
+        if (indiceSeleccionadoReglas != -1 && reglas[indiceSeleccionadoReglas].segmentoReglaIndex != undefined) segmentoReglaIndex = reglas[indiceSeleccionadoReglas].segmentoReglaIndex;
+        var nuevaRegla = {
+          segmentoReglaID: segmentoReglaIndex,
+          conexionTablaID: conexionTablaID,
+          nombreColumnaEnTabla: '',
+          formulaID: reglas[posicionInsertarReglaAtributo][posicionInsertarReglaSegmento].length,
+          variableID: -1,
+          variableCampoID: -1,
+          reglaPadreID: -1,
+          esCondicion: esCondicion,
+          esConexionTabla: esConexionTabla,
+          operacion: campoSeleccionado.operacion,
+          operacionTexto: this.retornarCodigoOperacion(campoSeleccionado.operacion),
+          valor: campoSeleccionado.operacion,
+          texto: "ASIGNACIÓN " + campoSeleccionado.valor,
+          nivel: nuevoNivel
+        };
+        console.log('this.state.reglas');
+        console.log(this.state.reglas);
+        console.log(this.state.reglas.length);
+        console.log('reglas');
+        console.log(reglas);
+        console.log('posicionInsertarReglaAtributo');
+        console.log(posicionInsertarReglaAtributo);
+        console.log('posicionInsertarReglaSegmento');
+        console.log(posicionInsertarReglaSegmento);
+        console.log('campoSeleccionado');
+        console.log(campoSeleccionado);
+
+        if (reglas.length == 0 || reglas[posicionInsertarReglaAtributo].length == 0 || reglas[posicionInsertarReglaAtributo][posicionInsertarReglaSegmento].length == 0) {
+          //cuando no existe regla creada para el campo
+          console.log('1');
+          reglas[posicionInsertarReglaAtributo][posicionInsertarReglaSegmento].push(nuevaRegla);
+        } else {
+          console.log('2'); //el campo ya tiene una regla o mas creada
+
+          if (tipoElementoSeleccionadoRegla.localeCompare("esOtraRegla") == 0 && $("#siRADIO").is(':checked')) {
+            //se seleciona el indice de la posicion de la regla dentro del arreglo, para que despues se pueda sacar el ID a base de la posicion
+            //se pone de regla padre a la regla seleccionada
+            nuevaRegla.reglaPadreID = indiceSeleccionadoReglas;
+            reglas[posicionInsertarReglaAtributo][posicionInsertarReglaSegmento].splice(indiceSeleccionadoReglas + 1, 0, nuevaRegla);
+            console.log('2.1');
+          } else if (tipoElementoSeleccionadoRegla.localeCompare("esOtraRegla") == 0 && $("#sinoRADIO").is(':checked')) {
+            //se seleciona el indice de la posicion de la regla dentro del arreglo, para que despues se pueda sacar el ID a base de la posicion
+            //se pone de regla padre a la regla padre de la regla seleccionada
+            nuevaRegla.reglaPadreID = reglas[indiceSeleccionadoReglas].reglaPadreID;
+            reglas[posicionInsertarReglaAtributo][posicionInsertarReglaSegmento].splice(indiceSeleccionadoReglas + 1, 0, nuevaRegla);
+            console.log('2.2');
+          } else if (tipoElementoSeleccionadoRegla.localeCompare("abajo") == 0) {
+            reglas[posicionInsertarReglaAtributo][posicionInsertarReglaSegmento].splice(indiceSeleccionadoReglas + 1, 0, nuevaRegla);
+            console.log('2.3');
+          } //la condicion es anidada, o sea dentro de la condicion padre
+
+        }
+
+        console.log('ANTES');
+        console.log('reglas[posicionInsertarReglaAtributo][posicionInsertarReglaSegmento]');
+        console.log(reglas[posicionInsertarReglaAtributo][posicionInsertarReglaSegmento]);
+
+        var tempNewCopy = _toConsumableArray(reglas[posicionInsertarReglaAtributo][posicionInsertarReglaSegmento]);
+
+        this.setState({
+          reglas: reglas[posicionInsertarReglaAtributo][posicionInsertarReglaSegmento]
+        }, console.log(this.state.reglas));
+        console.log('reglas');
+        console.log(reglas);
+        console.log('reglasVariosAtributos');
+        console.log(reglasVariosAtributos);
+        console.log('segmentoReglasVariosAtributos');
+        console.log(segmentoReglasVariosAtributos);
+        console.log('reglas[posicionInsertarReglaAtributo][posicionInsertarReglaSegmento]');
+        console.log(reglas[posicionInsertarReglaAtributo][posicionInsertarReglaSegmento]);
+        var self = this;
+        setTimeout(function () {
+          console.log(self.state.reglas);
+        }, 2000);
+
+        if (banderaEsObjeto) {
+          reglasVariosAtributos = reglas;
+          segmentoReglasVariosAtributos = segmentoRegla;
+        } else {
+          reglasUnAtributo = reglas;
+          segmentoReglasUnAtributo = segmentoRegla;
+        }
+      }
     }
   }, {
     key: "anadirFormula",
@@ -852,7 +1351,9 @@ function (_React$Component) {
       // 4. Put it back into our array. N.B. we *are* mutating the array here, but that's why we made a copy first
       //campos[index] = campo;
       // 5. Set the state to our new copy
-      var posicionSel = posicionAtributoSeleccionado;
+      var posicionSel = posicionAtributoSeleccionado; //indice = -1 cuando se va a condiciones de un campo nuevo
+      //cuando se presiona NavBar indice es igual indice anterior
+      //cuando se selecciona un campo existente indice = posicion campo
 
       if (posicionAtributoSeleccionado == -1) {
         posicionSel = this.state.atributos.length;
@@ -865,67 +1366,61 @@ function (_React$Component) {
       console.log('posicionSel');
       console.log(posicionSel); //copia antigua formulas
 
-      var elementosFormulas;
-      var esObjeto;
-      if ($("#esObjetoFuenteDato").is(':checked')) esObjeto = true;else esObjeto = false;
+      var elementosFormulas, copiaAntiguaFormulas;
 
-      if (esObjeto) {
+      if (banderaEsObjeto) {
+        copiaAntiguaFormulas = formulasVariosAtributos;
         elementosFormulas = elementosFormulasVariosAtributos;
       } else {
+        copiaAntiguaFormulas = formulasUnAtributo;
         elementosFormulas = elementosFormulasUnAtributos;
       }
 
+      if (copiaAntiguaFormulas[posicionSel] == undefined) copiaAntiguaFormulas[posicionSel] = [];
+      formula.numeroDeFormulaDeVariable = copiaAntiguaFormulas[posicionSel].length;
+      copiaAntiguaFormulas[posicionSel].push(formula);
+      this.setState({
+        formulas: copiaAntiguaFormulas[posicionSel]
+      });
       if (elementosFormulas[posicionSel] == undefined) elementosFormulas[posicionSel] = [];
-      if (elementosFormulas[posicionSel][indiceSeleccionadoFormula] == undefined) elementosFormulas[posicionSel][indiceSeleccionadoFormula] = [];
+      var posicionFormulaEnCampo = 0;
+      if (copiaAntiguaFormulas[posicionSel].length > 0) posicionFormulaEnCampo = copiaAntiguaFormulas[posicionSel].length - 1; //indiceSeleccionadoFormula es el indice de la formula seleccionada, las formula se asocian por campo (1 campo => muchas formulas)
+
+      if (elementosFormulas[posicionSel][posicionFormulaEnCampo] == undefined) elementosFormulas[posicionSel][posicionFormulaEnCampo] = [];
 
       for (var i = 0; i < formulaArreglo.length; i++) {
         if (formulaArreglo[i].tipo.localeCompare("variable") == 0 && formulaArreglo[i].esFuenteDato) {
-          /*if(esObjeto) {
-              elementosFormulasVariosAtributos.push({
-                  idConexionTabla: formulaArreglo[i].idConexionTabla,
-                  nombreColumnaEnTabla: formulaArreglo[i].valor,
-                  nombreVariable: formulaArreglo[i].valor,
-                  operacion: formulaArreglo[i].operacion
-              });
-          } else {
-              elementosFormulasUnAtributos.push({
-                  idConexionTabla: formulaArreglo[i].idConexionTabla,
-                  nombreColumnaEnTabla: formulaArreglo[i].valor,
-                  nombreVariable: formulaArreglo[i].valor,
-                  operacion: formulaArreglo[i].operacion
-              });
-          }*/
-          elementosFormulas[posicionSel][indiceSeleccionadoFormula].push({
+          elementosFormulas[posicionSel][posicionFormulaEnCampo].push({
             idConexionTabla: formulaArreglo[i].idConexionTabla,
             nombreColumnaEnTabla: formulaArreglo[i].valor,
+            tipoColumnaEnTabla: tipoDeAsignacionSeleccionado,
             nombreVariable: formulaArreglo[i].valor,
+            descripcion: '',
             operacion: formulaArreglo[i].operacion
           });
         }
       }
 
       ;
-      var copiaAntiguaFormulas;
 
-      if (esObjeto) {
-        copiaAntiguaFormulas = formulasVariosAtributos;
+      if (banderaEsObjeto) {
+        formulasVariosAtributos = copiaAntiguaFormulas;
+        elementosFormulasVariosAtributos = elementosFormulas;
       } else {
-        copiaAntiguaFormulas = formulasUnAtributo;
+        formulasUnAtributo = copiaAntiguaFormulas;
+        elementosFormulasUnAtributos = elementosFormulas;
       }
 
-      if (copiaAntiguaFormulas[posicionSel] == undefined) copiaAntiguaFormulas[posicionSel] = [];
-      copiaAntiguaFormulas[posicionSel].push({
-        formula: formula
-      });
-      this.setState({
-        formulas: copiaAntiguaFormulas[posicionSel]
-      });
       console.log('elementosFormulas');
       console.log(elementosFormulas);
       console.log('copiaAntiguaFormulas[posicionSel]');
       console.log(copiaAntiguaFormulas[posicionSel]);
       console.log('copiaAntiguaFormulas');
       console.log(copiaAntiguaFormulas);
+      console.log('posicionSel');
+      console.log(posicionSel);
+      console.log('posicionFormulaEnCampo');
+      console.log(posicionFormulaEnCampo);
       var self = this;
       setTimeout(function () {
         console.log(self.state.formulas);
@@ -934,20 +1429,14 @@ function (_React$Component) {
   }, {
     key: "retornoCampo",
     value: function retornoCampo(campo, tipoVariable, objetoConexion) {
-      campoSeleccionado = campo;
-      tipoElementoSeleccionado = tipoVariable;
+      campoSeleccionado = campo; //tipoDeAsignacionSeleccionado = tipoVariable;
+
       objetoConexionSeleccionada = objetoConexion;
-      console.log('campoSeleccionado');
-      console.log(campoSeleccionado);
-      console.log('tipoElementoSeleccionado');
-      console.log(tipoElementoSeleccionado);
     }
   }, {
     key: "retornoOperacion",
     value: function retornoOperacion(operacion) {
       operacionSeleccionada = operacion;
-      console.log('operacionSeleccionada');
-      console.log(operacionSeleccionada);
     }
   }, {
     key: "retornoTipoDeAsignacion",
@@ -957,13 +1446,74 @@ function (_React$Component) {
   }, {
     key: "actualizarIndiceSeleccionadoReglas",
     value: function actualizarIndiceSeleccionadoReglas(indice, tipoElemento) {
+      //indice = indice de regla dentro de arreglo de reglas
+      //tipoElemento = si la seleccion en el contenedor de reglas es cursor arriba, cursor abajo, y otra regla o otra formula
       indiceSeleccionadoReglas = indice;
       tipoElementoSeleccionadoRegla = tipoElemento;
     }
   }, {
+    key: "actualizarEstadoSiEsObjeto",
+    value: function actualizarEstadoSiEsObjeto(esObjeto) {
+      banderaEsObjeto = esObjeto;
+    }
+  }, {
+    key: "actualizarNivelNuevaRegla",
+    value: function actualizarNivelNuevaRegla(nivel) {
+      if (banderaEsObjeto) {
+        nivelNuevoAtributoVarios = nivel;
+      } else {
+        nivelNuevoAtributoUnico = nivel;
+      }
+    }
+  }, {
+    key: "actualizarNombreVariable",
+    value: function actualizarNombreVariable() {
+      var nombreVariableN = $("#nombreFuenteDato").val();
+      nombreVariable = nombreVariableN;
+    }
+  }, {
+    key: "actualizarDescripcionVariable",
+    value: function actualizarDescripcionVariable() {
+      var descripcionVariableN = $("#descripcionFuenteDato").val();
+      descripcionVariable = descripcionVariableN;
+    }
+  }, {
+    key: "actualizarNombreCampoNuevoAtributosVario",
+    value: function actualizarNombreCampoNuevoAtributosVario() {
+      var nombreCampo = $("#nombreAtributoNuevoCampo").val();
+      nombreCampoNuevoAtributosVario = nombreCampo;
+    }
+  }, {
+    key: "retornarCodigoOperacion",
+    value: function retornarCodigoOperacion(codigo) {
+      if (codigo.localeCompare("ASIG") == 0) {
+        return "ASIGNAR";
+      }
+
+      if (codigo.localeCompare("COUNT") == 0) {
+        return "CONTAR";
+      }
+
+      if (codigo.localeCompare("PROM") == 0) {
+        return "PROMEDIAR";
+      }
+
+      if (codigo.localeCompare("MAX") == 0) {
+        return "MÁXIMO";
+      }
+
+      if (codigo.localeCompare("MIN") == 0) {
+        return "MÍNIMO";
+      }
+
+      if (codigo.localeCompare("SUM") == 0) {
+        return "SUMAR";
+      }
+    }
+  }, {
     key: "render",
     value: function render() {
-      var _this8 = this;
+      var _this10 = this;
 
       if (this.state.componenteActual.localeCompare("crearVariable") == 0) {
         return _react["default"].createElement("div", {
@@ -977,11 +1527,20 @@ function (_React$Component) {
           columnas: this.props.columnas,
           atributos: this.state.atributos,
           cambioDeArreglosDeAtributos: this.cambioDeArreglosDeAtributos,
+          nombreVariable: nombreVariable,
+          actualizarNombreVariable: this.actualizarNombreVariable,
+          descripcionVariable: descripcionVariable,
+          actualizarDescripcionVariable: this.actualizarDescripcionVariable,
+          nombreCampoNuevoAtributosVario: nombreCampoNuevoAtributosVario,
+          actualizarNombreCampoNuevoAtributosVario: this.actualizarNombreCampoNuevoAtributosVario,
+          actualizarEstadoSiEsObjeto: this.actualizarEstadoSiEsObjeto,
           configuracionHome: this.props.configuracionHome,
           goOptions: this.props.goOptions,
           retornoSeleccionVariables: this.props.retornoSeleccionVariables,
           retornoTipoDeAsignacion: this.retornoTipoDeAsignacion,
           goToCreateConditions: this.goToCreateConditions,
+          goCreateVariableFieldSQL: this.goCreateVariableFieldSQL,
+          guardarVariable: this.guardarVariable,
           crearAtributoVariable: this.crearAtributoVariable
         }));
       } else if (this.state.componenteActual.localeCompare("variableCondiciones") == 0) {
@@ -1002,33 +1561,16 @@ function (_React$Component) {
           callbackCrearRegla: this.anadirRegla,
           retornarIndiceSeleccionado: this.actualizarIndiceSeleccionadoReglas,
           retornarEstadoVistaEsCondicion: function retornarEstadoVistaEsCondicion() {
-            _this8.actualizarCondicion;
+            _this10.actualizarCondicion;
           },
-          reglas: [{
-            texto: "Regla 1",
-            nivel: 1,
-            esCondicion: false
-          }, {
-            texto: "Regla 2",
-            nivel: 2,
-            esCondicion: true
-          }, {
-            texto: "Regla 3",
-            nivel: 3,
-            esCondicion: false
-          }, {
-            texto: "Regla 4",
-            nivel: 1,
-            esCondicion: false
-          }, {
-            texto: "Regla 5",
-            nivel: 2,
-            esCondicion: false
-          }],
+          retornoCampo: this.retornoCampo,
+          retornoOperacion: this.retornoOperacion,
+          reglas: this.state.reglas,
           navbar: this.state.navbar,
           goToCreateFormula: this.goToCreateFormula,
           configuracionHome: this.props.configuracionHome,
           goOptions: this.props.goOptions,
+          actualizarNivelNuevaRegla: this.actualizarNivelNuevaRegla,
           retornoSeleccionVariables: this.props.retornoSeleccionVariables
         }));
       } else if (this.state.componenteActual.localeCompare("variableFormula") == 0) {
@@ -1039,10 +1581,22 @@ function (_React$Component) {
           }
         }, _react["default"].createElement(_Formula["default"], {
           pool: this.props.pool,
+          anadirFormula: this.anadirFormula,
           retornoCampo: this.retornoCampo,
           retornoOperacion: this.retornoOperacion,
-          navbar: this.state.navbar,
-          anadirFormula: this.anadirFormula
+          retornoTipoDeAsignacion: this.retornoTipoDeAsignacion,
+          actualizarNivelNuevaRegla: this.actualizarNivelNuevaRegla,
+          navbar: this.state.navbar
+        }));
+      } else if (this.state.componenteActual.localeCompare("variableSQL") == 0) {
+        return _react["default"].createElement("div", {
+          style: {
+            width: "100%",
+            height: "100%"
+          }
+        }, _react["default"].createElement(_InstruccionSQL["default"], {
+          pool: this.props.pool,
+          navbar: this.state.navbar
         }));
       }
     }

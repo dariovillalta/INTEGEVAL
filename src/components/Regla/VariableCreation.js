@@ -6,6 +6,7 @@ import Operacion from './Operacion.js';
 import Valor from './Valor.js';
 import ErrorMessage from '../ErrorMessage.js';
 import MessageModal from '../MessageModal.js';
+import Modal from '../Modal/Modal.js';
 
 var campo;
 
@@ -21,13 +22,12 @@ export default class VariableCreation extends React.Component {
             },
             errorCreacionRegla: {campo: "", descripcion: "", mostrar: false},
             mensajeModal: {mostrarMensaje: false, mensajeConfirmado: false, esError: false, esConfirmar: false, titulo: "", mensaje: ""},
-            conexiones: [],
-            camposConexiones: [],
-            variables: [],
-            camposVariables: [],
             campoSeleccionadoNombre: '{campo}',
             textoOperacion: '{operación}',
-            textoValor: '{valor}'
+            textoValor: '{valor}',
+            showModalCampo: false,
+            showModalOperacion: false,
+            showModalValor: false
         }
         this.retornoSeleccionVariable = this.retornoSeleccionVariable.bind(this);
         this.retornoSeleccionOperacion = this.retornoSeleccionOperacion.bind(this);
@@ -35,28 +35,20 @@ export default class VariableCreation extends React.Component {
         this.esBoolean = this.esBoolean.bind(this);
         this.esFecha = this.esFecha.bind(this);
         this.esTexto = this.esTexto.bind(this);
-        this.loadFields = this.loadFields.bind(this);
-        this.getConections = this.getConections.bind(this);
-        this.getFieldsConections = this.getFieldsConections.bind(this);
-        this.getFieldConections = this.getFieldConections.bind(this);
-        this.getVariables = this.getVariables.bind(this);
-        this.getFieldsVariables = this.getFieldsVariables.bind(this);
-        this.getFieldVariables = this.getFieldVariables.bind(this);
         this.saveRule = this.saveRule.bind(this);
+        this.actualizarValor = this.actualizarValor.bind(this);
+        this.showCampoModal = this.showCampoModal.bind(this);
+        this.showOperacionModal = this.showOperacionModal.bind(this);
+        this.showValorModal = this.showValorModal.bind(this);
+        this.closeCampoModal = this.closeCampoModal.bind(this);
+        this.closeOperacionModal = this.closeOperacionModal.bind(this);
+        this.closeValorModal = this.closeValorModal.bind(this);
         this.dismissReglaNewError = this.dismissReglaNewError.bind(this);
         this.showSuccesMessage = this.showSuccesMessage.bind(this);
         this.dismissMessageModal = this.dismissMessageModal.bind(this);
-        this.actualizarValor = this.actualizarValor.bind(this);
     }
 
     componentDidMount() {
-        if(this.props.calculoFuenteDatos) {
-            //
-        }
-        if(this.props.calculoVariables) {
-            //
-        }
-        this.loadFields();
     }
 
     retornoSeleccionVariable(campoSeleccionadoInput) {
@@ -64,13 +56,18 @@ export default class VariableCreation extends React.Component {
         this.setState({
             campoSeleccionadoNombre: campo.valor
         });
-        this.props.retornarCampo(campo);
+        var nivelRegla = 0;
+        if(campo.nivel != undefined)
+            nivelRegla = campo.nivel;
+        this.props.actualizarNivelNuevaRegla(nivelRegla);
+        this.props.retornoCampo(campo);
     }
 
-    retornoSeleccionOperacion(textoOperacionNuevo) {
+    retornoSeleccionOperacion(textoOperacionNuevo, operacion) {
         this.setState({
             textoOperacion: textoOperacionNuevo
         });
+        this.props.retornoOperacion({operacion: operacion, operacionTexto: textoOperacionNuevo});
     }
 
     esNumero() {
@@ -115,155 +112,6 @@ export default class VariableCreation extends React.Component {
                 esTexto: true
             }
         });
-    }
-
-    loadFields() {
-        this.getConections();
-        this.getVariables();
-    }
-
-    getConections () {
-        const transaction = new sql.Transaction( this.props.pool );
-        transaction.begin(err => {
-            var rolledBack = false;
-            transaction.on('rollback', aborted => {
-                rolledBack = true;
-            });
-            const request = new sql.Request(transaction);
-            request.query("select * from Tablas", (err, result) => {
-                if (err) {
-                    if (!rolledBack) {
-                        console.log(err);
-                        transaction.rollback(err => {
-                        });
-                        return [];
-                    }
-                } else {
-                    transaction.commit(err => {
-                        var temp = [];
-                        for (var i = 0; i < result.recordset.length; i++) {
-                            temp.push({valor: result.recordset[i].tabla});
-                        };
-                        this.setState({
-                            conexiones: temp
-                        }, this.getFieldsConections );
-                    });
-                }
-            });
-        }); // fin transaction
-    }
-
-    getFieldsConections () {
-        var arregloTemp = [];
-        for (var i = 0; i < this.state.conexiones.length; i++) {
-            this.getFieldConections(this.state.conexiones[i].valor, i, arregloTemp);
-        };
-    }
-
-    getFieldConections(nombreTabla, index, array) {
-        const transaction = new sql.Transaction( this.props.pool );
-        transaction.begin(err => {
-            var rolledBack = false;
-            transaction.on('rollback', aborted => {
-                rolledBack = true;
-            });
-            const request = new sql.Request(transaction);
-            request.query("select * from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME = '"+nombreTabla+"'", (err, result) => {
-                if (err) {
-                    if (!rolledBack) {
-                        console.log(err);
-                        transaction.rollback(err => {
-                        });
-                    }
-                } else {
-                    transaction.commit(err => {
-                        var nombreColumnas = [];
-                        for (var i = 0; i < result.recordset.length; i++) {
-                            nombreColumnas.push({valor: result.recordset[i].COLUMN_NAME, tipo: result.recordset[i].DATA_TYPE});
-                        };
-                        if(array[index] == undefined) {
-                            array[index] = [];
-                        }
-                        array[index] = $.merge(array[index], nombreColumnas);
-                        this.setState({
-                            camposConexiones: array
-                        });
-                    });
-                }
-            });
-        }); // fin transaction
-    }
-
-    getVariables () {
-        const transaction = new sql.Transaction( this.props.pool );
-        transaction.begin(err => {
-            var rolledBack = false;
-            transaction.on('rollback', aborted => {
-                rolledBack = true;
-            });
-            const request = new sql.Request(transaction);
-            request.query("select * from Variables", (err, result) => {
-                if (err) {
-                    if (!rolledBack) {
-                        console.log(err);
-                        transaction.rollback(err => {
-                        });
-                        return [];
-                    }
-                } else {
-                    transaction.commit(err => {
-                        var temp = [];
-                        for (var i = 0; i < result.recordset.length; i++) {
-                            temp.push({valor: result.recordset[i].nombre});
-                        };
-                        this.setState({
-                            variables: temp
-                        }, this.getFieldsVariables );
-                    });
-                }
-            });
-        }); // fin transaction
-    }
-
-    getFieldsVariables () {
-        var arregloTemp = [];
-        for (var i = 0; i < this.state.variables.length; i++) {
-            this.getFieldVariables(this.state.variables[i].ID, i, arregloTemp);
-        };
-    }
-
-    getFieldVariables(variableID, index, array) {
-        const transaction = new sql.Transaction( this.props.pool );
-        transaction.begin(err => {
-            var rolledBack = false;
-            transaction.on('rollback', aborted => {
-                rolledBack = true;
-            });
-            const request = new sql.Request(transaction);
-            request.query("select * from VariablesCampos where variableID = "+variableID, (err, result) => {
-                if (err) {
-                    if (!rolledBack) {
-                        console.log(err);
-                        transaction.rollback(err => {
-                        });
-                    }
-                } else {
-                    transaction.commit(err => {
-                        var nombreColumnas = [];
-                        for (var i = 0; i < result.recordset.length; i++) {
-                            nombreColumnas.push({valor: result.recordset[i].nombre, tipo: result.recordset[i].tipo});
-                        };
-                        if(array[index] == undefined) {
-                            array[index] = [];
-                        }
-                        array[index] = $.merge(array[index], nombreColumnas);
-                        this.setState({
-                            camposVariables: array
-                        });
-                    });
-                }
-            });
-        }); // fin transaction
     }
 
     saveRule() {
@@ -516,6 +364,42 @@ export default class VariableCreation extends React.Component {
         });
     }
 
+    showCampoModal () {
+        this.setState({
+            showModalCampo: true
+        });
+    }
+
+    showOperacionModal () {
+        this.setState({
+            showModalOperacion: true
+        });
+    }
+    
+    showValorModal () {
+        this.setState({
+            showModalValor: true
+        });
+    }
+
+    closeCampoModal () {
+        this.setState({
+            showModalCampo: false
+        });
+    }
+
+    closeOperacionModal () {
+        this.setState({
+            showModalOperacion: false
+        });
+    }
+    
+    closeValorModal () {
+        this.setState({
+            showModalValor: false
+        });
+    }
+
     dismissReglaNewError() {
         this.setState({
             errorCreacionRegla: {campo: "", descripcion: "", mostrar: false}
@@ -541,29 +425,44 @@ export default class VariableCreation extends React.Component {
     }
 
     render() {
+        console.log("this.props.mostrarOpcionSino");
+        console.log(this.props.mostrarOpcionSino);
         return (
             <div style={{width: "100%"}}>
-                <h3 className={"card-header"}>Crear Condición / Instrucción</h3>
-                <div style={{height: "50px", width: "100%", display: "flex", alignItems: "center", justifyContent: "center", borderBottom: "3px solid #d2d2e4"}}>
+                <h3 className={"card-header"}>Crear Condición (Instrucción)</h3>
+                <div className={"font-24"} style={{height: "50px", width: "100%", display: "flex", alignItems: "center", justifyContent: "center", borderBottom: "3px solid #d2d2e4"}}>
                     SI {this.state.campoSeleccionadoNombre} {this.state.textoOperacion} {this.state.textoValor}
                 </div>
-                <br/>
-                <Campo esNumero={this.esNumero}
-                    esBoolean={this.esBoolean}
-                    esFecha={this.esFecha}
-                    esTexto={this.esTexto}
-                    conexiones={this.state.conexiones}
-                    camposConexiones={this.state.camposConexiones}
-                    variables={this.state.variables}
-                    camposVariables={this.state.camposVariables}
-                    retornoSeleccionVariable={this.retornoSeleccionVariable}> </Campo>
-                <br/>
-                <Operacion esNumero={this.state.tipoCampo.esNumero}
-                    esBoolean={this.state.tipoCampo.esBoolean}
-                    esFecha={this.state.tipoCampo.esFecha}
-                    esTexto={this.state.tipoCampo.esTexto}
-                    retornoSeleccionOperacion={this.retornoSeleccionOperacion}> </Operacion>
-                <br/>
+                <div className={"font-18 addPointer abrirModalCrearCondicionOnHover"} onClick={this.showCampoModal} style={{width: "100%",display: "flex", alignItems: "center", justifyContent: "center", borderBottom: "3px solid #d2d2e4"}}>
+                    <h4>Seleccionar Campo a Comparar</h4>
+                </div>
+                <Modal show={this.state.showModalCampo}
+                    titulo={"Seleccionar Campo a Comparar"}
+                    onClose={this.closeCampoModal}>
+                        <Campo esNumero={this.esNumero}
+                            esBoolean={this.esBoolean}
+                            esFecha={this.esFecha}
+                            esTexto={this.esTexto}
+                            conexiones={this.props.conexiones}
+                            camposConexiones={this.props.camposConexiones}
+                            variables={this.props.variables}
+                            camposVariables={this.props.camposVariables}
+                            retornoSeleccionVariable={this.retornoSeleccionVariable}>
+                        </Campo>
+                </Modal>
+                <div className={"font-18 addPointer abrirModalCrearCondicionOnHover"} onClick={this.showOperacionModal} style={{width: "100%",display: "flex", alignItems: "center", justifyContent: "center", borderBottom: "3px solid #d2d2e4"}}>
+                    <h4>Seleccionar Operación a Aplicar</h4>
+                </div>
+                <Modal show={this.state.showModalOperacion}
+                    titulo={"Seleccionar Operación a Aplicar"}
+                    onClose={this.closeOperacionModal}>
+                        <Operacion esNumero={this.state.tipoCampo.esNumero}
+                            esBoolean={this.state.tipoCampo.esBoolean}
+                            esFecha={this.state.tipoCampo.esFecha}
+                            esTexto={this.state.tipoCampo.esTexto}
+                            retornoSeleccionOperacion={this.retornoSeleccionOperacion}>
+                        </Operacion>
+                </Modal>
                 <Valor esNumero={this.state.tipoCampo.esNumero}
                     esBoolean={this.state.tipoCampo.esBoolean}
                     esFecha={this.state.tipoCampo.esFecha}
@@ -572,6 +471,31 @@ export default class VariableCreation extends React.Component {
                     valoresDropdown={this.props.valoresDropdown}
                     actualizarValor={this.actualizarValor}
                     pool={this.props.pool}> </Valor>
+                <br/>
+                <Modal show={this.state.showModalValor}
+                    titulo={"Seleccionar Valores a Comparar con el Campo"}
+                    onClose={this.closeValorModal}>
+                        <Valor esNumero={this.state.tipoCampo.esNumero}
+                            esBoolean={this.state.tipoCampo.esBoolean}
+                            esFecha={this.state.tipoCampo.esFecha}
+                            esTexto={this.state.tipoCampo.esTexto}
+                            camposDropdown={this.props.camposDropdown}
+                            valoresDropdown={this.props.valoresDropdown}
+                            actualizarValor={this.actualizarValor}
+                            pool={this.props.pool}>
+                        </Valor>
+                </Modal>
+                <div className={"text-center"} style={{display: (this.props.mostrarOpcionSino ? "" : "none" ) }}>
+                    <div className={"font-18"} style={{width: "100%", height: "20px", display: "flex", alignItems: "center", justifyContent: "center"}}>
+                        <h4>Seleccionar Estilo Condición</h4>
+                    </div>
+                    <label className="custom-control custom-radio custom-control-inline">
+                        <input id="siRADIO" type="radio" name="sinoRadio" defaultChecked className="custom-control-input" onClick={() => this.props.actualizarEstadoSeleccionSinoNuevaRegla(false)}/><span className="custom-control-label">SI</span>
+                    </label>
+                    <label className="custom-control custom-radio custom-control-inline">
+                        <input id="sinoRADIO" type="radio" name="sinoRadio" className="custom-control-input" onClick={() => this.props.actualizarEstadoSeleccionSinoNuevaRegla(true)}/><span className="custom-control-label">SINO</span>
+                    </label>
+                </div>
                 <br/>
                 { this.state.errorCreacionRegla.mostrar ? (
                     <ErrorMessage campo={this.state.errorCreacionRegla.campo} descripcion={this.state.errorCreacionRegla.descripcion} dismissTableError={this.dismissReglaNewError}> </ErrorMessage>
@@ -584,7 +508,7 @@ export default class VariableCreation extends React.Component {
                     <span></span>
                 )}
                 <div className={"text-center"}>
-                    <a onClick={this.props.callbackCrearRegla} className={"btn btn-primary col-xs-6 col-6"} style={{color: "white", fontSize: "1.2em", fontWeight: "bold"}}>Crear Condición / Instrucción</a>
+                    <a onClick={() => this.props.callbackCrearRegla(false)} className={"btn btn-primary col-xs-6 col-6"} style={{color: "white", fontSize: "1.2em", fontWeight: "bold"}}>Crear Condición / Instrucción</a>
                 </div>
                 <br/>
             </div>

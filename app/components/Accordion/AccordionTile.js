@@ -69,7 +69,7 @@ function (_React$Component) {
           cursor: 'pointer',
           width: '100%',
           backgroundColor: this.props.color,
-          borderTop: "1px solid #d2d2e4"
+          border: "1px solid #d2d2e4"
         },
         className: "card-header"
       }, _react["default"].createElement("span", {

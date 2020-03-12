@@ -50,7 +50,7 @@ export default class CrearVariable extends React.Component {
                 <div className={"row"}>
                     <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
                         <div className={"page-header"}>
-                            <h2 className={"pageheader-title"}>Crear Fuente de Datos</h2>
+                            <h2 className={"pageheader-title"}>Crear Variable</h2>
                             <div className={"page-breadcrumb"}>
                                 <nav aria-label="breadcrumb">
                                     <ol className={"breadcrumb"}>
@@ -73,9 +73,17 @@ export default class CrearVariable extends React.Component {
                                         ?
                                             <FuenteDatoVariable campos={this.props.columnas}
                                                                 goToCreateConditions={this.props.goToCreateConditions}
+                                                                goCreateVariableFieldSQL={this.props.goCreateVariableFieldSQL}
+                                                                guardarVariable={this.props.guardarVariable}
                                                                 crearAtributoVariable={this.props.crearAtributoVariable}
                                                                 cambioDeArreglosDeAtributos={this.props.cambioDeArreglosDeAtributos}
                                                                 retornoTipoDeAsignacion={this.props.retornoTipoDeAsignacion}
+                                                                nombreVariable={this.props.nombreVariable}
+                                                                actualizarNombreVariable={this.props.actualizarNombreVariable}
+                                                                descripcionVariable={this.props.descripcionVariable}
+                                                                actualizarDescripcionVariable={this.props.actualizarDescripcionVariable}
+                                                                nombreCampoNuevoAtributosVario={this.props.nombreCampoNuevoAtributosVario}
+                                                                actualizarNombreCampoNuevoAtributosVario={this.props.actualizarNombreCampoNuevoAtributosVario}
                                                                 atributos={this.props.atributos}>
                                             </FuenteDatoVariable>
                                         : null

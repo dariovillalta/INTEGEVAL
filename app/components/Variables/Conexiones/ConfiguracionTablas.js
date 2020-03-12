@@ -515,7 +515,7 @@ function (_React$Component) {
       }, _react["default"].createElement("a", {
         href: "#",
         className: "breadcrumb-link"
-      }, "Tipo de Variable")), _react["default"].createElement("li", {
+      }, "Tipo de Configuraci\xF3n")), _react["default"].createElement("li", {
         className: "breadcrumb-item active font-16",
         "aria-current": "page"
       }, "Tablas"))))))), _react["default"].createElement("div", {
