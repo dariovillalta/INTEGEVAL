@@ -5,16 +5,20 @@ import SeleccionarRiesgo from './SeleccionarRiesgo.js';
 import CrearRiesgo from './CrearRiesgo.js';
 import EditarRiesgo from './EditarRiesgo.js';
 
-var isMounted = false, riesgos = [];
+var isMounted = false;
 
 export default class RiesgoHome extends React.Component {
 
     constructor(props) {
         super(props);
         this.state = {
+            riesgos: [],
+            pesoDisponible: 0,
             idRiesgoSeleccionado: -1,
             componenteActual: "selRiesgo"
         }
+        this.getRiesgos = this.getRiesgos.bind(this);
+        this.acutalizarPesoMaximoDisponible = this.acutalizarPesoMaximoDisponible.bind(this);
         this.crearRiesgo = this.crearRiesgo.bind(this);
         this.retornoSeleccionRiesgoSameComponent = this.retornoSeleccionRiesgoSameComponent.bind(this);
         this.retornoSeleccionRiesgoDiffComponent = this.retornoSeleccionRiesgoDiffComponent.bind(this);
@@ -25,6 +29,10 @@ export default class RiesgoHome extends React.Component {
 
     componentDidMount() {
         isMounted = true;
+        this.getRiesgos();
+    }
+
+    getRiesgos () {
         const transaction = new sql.Transaction( this.props.pool );
         transaction.begin(err => {
             var rolledBack = false;
@@ -41,12 +49,30 @@ export default class RiesgoHome extends React.Component {
                     }
                 } else {
                     transaction.commit(err => {
-                        riesgos = result.recordset;
+                        this.setState({
+                            riesgos: result.recordset
+                        }, this.acutalizarPesoMaximoDisponible );
                     });
                 }
             });
         }); // fin transaction
     }
+
+    acutalizarPesoMaximoDisponible () {
+        var pesoInstitucional = 100;
+        var pesoExistente = 0;
+        for (var i = 0; i < this.state.riesgos.length; i++) {
+            pesoExistente += this.state.riesgos[i].peso;
+        };
+        console.log('pesoInstitucional');
+        console.log(pesoInstitucional);
+        console.log('pesoExistente');
+        console.log(pesoExistente);
+        this.setState({
+            pesoDisponible: pesoInstitucional-pesoExistente
+        });
+    }
+
     componentWillUnmount() {
         isMounted = false;
     }
@@ -108,7 +134,7 @@ export default class RiesgoHome extends React.Component {
         }, 3500);
     }
 
-    terminoCrearRiesgoPasarAEdit (nombreRiesgo) {
+    terminoCrearRiesgoPasarAEdit () {
         const transaction = new sql.Transaction( this.props.pool );
         transaction.begin(err => {
             var rolledBack = false;
@@ -116,7 +142,7 @@ export default class RiesgoHome extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("select * from Riesgos where nombre = '"+nombreRiesgo+"'", (err, result) => {
+            request.query("select top 1 * from Riesgos order by ID desc", (err, result) => {
                 if (err) {
                     if (!rolledBack) {
                         console.log(err);
@@ -140,19 +166,19 @@ export default class RiesgoHome extends React.Component {
         if(this.state.componenteActual.localeCompare("selRiesgo") == 0) {
             return (
                 <div>
-                    <SeleccionarRiesgo pool={this.props.pool} configuracionHome={this.props.configuracionHome} crearRiesgo={this.crearRiesgo} editarRiesgo={this.editarRiesgo}> </SeleccionarRiesgo>
+                    <SeleccionarRiesgo pool={this.props.pool} configuracionHome={this.props.configuracionHome} crearRiesgo={this.crearRiesgo} editarRiesgo={this.editarRiesgo} riesgos={this.state.riesgos}> </SeleccionarRiesgo>
                 </div>
             );
         } else if(this.state.componenteActual.localeCompare("crearRiesgo") == 0) {
             return (
                 <div>
-                    <CrearRiesgo pool={this.props.pool} showFormula={this.props.showFormula} showCondicionVar={this.props.showCondicionVar} showRiesgos={this.props.showRiesgos} retornoSeleccionRiesgo={this.retornoSeleccionRiesgoSameComponent} retornoSeleccionRiesgoUmbral={this.retornoSeleccionRiesgoDiffComponent} configuracionHome={this.props.configuracionHome} updateNavBar={this.props.updateNavBar} showUmbralHome={this.props.showUmbralHome} riesgos={riesgos} terminoCrearRiesgo={this.terminoCrearRiesgoPasarAEdit}> </CrearRiesgo>
+                    <CrearRiesgo pool={this.props.pool} showFormula={this.props.showFormula} showCondicionVar={this.props.showCondicionVar} showRiesgos={this.props.showRiesgos} retornoSeleccionRiesgo={this.retornoSeleccionRiesgoSameComponent} retornoSeleccionRiesgoUmbral={this.retornoSeleccionRiesgoDiffComponent} configuracionHome={this.props.configuracionHome} updateNavBar={this.props.updateNavBar} showUmbralHome={this.props.showUmbralHome} riesgos={this.state.riesgos} terminoCrearRiesgo={this.terminoCrearRiesgoPasarAEdit} actualizarRiesgos={this.getRiesgos} pesoMaximo={this.state.pesoDisponible}> </CrearRiesgo>
                 </div>
             );
         } else if(this.state.componenteActual.localeCompare("editarRiesgo") == 0) {
             return (
                 <div>
-                    <EditarRiesgo pool={this.props.pool} showFormula={this.props.showFormula} showCondicionVar={this.props.showCondicionVar} showRiesgos={this.props.showRiesgos} retornoSeleccionRiesgo={this.retornoSeleccionRiesgoSameComponent} retornoSeleccionRiesgoUmbral={this.retornoSeleccionRiesgoDiffComponent} configuracionHome={this.props.configuracionHome} updateNavBar={this.props.updateNavBar} showUmbralHome={this.props.showUmbralHome} riesgos={riesgos} nombreRiesgo={this.state.nombreRiesgo} pesoRiesgo={this.state.pesoRiesgo} toleranciaRiesgo={this.state.toleranciaRiesgo} valorIdealRiesgo={this.state.valorIdealRiesgo} padreRiesgo={this.state.padreRiesgo} updateFormula={this.props.updateFormula} idRiesgoSeleccionado={this.state.idRiesgoSeleccionado}> </EditarRiesgo>
+                    <EditarRiesgo pool={this.props.pool} showFormula={this.props.showFormula} showCondicionVar={this.props.showCondicionVar} showRiesgos={this.props.showRiesgos} retornoSeleccionRiesgo={this.retornoSeleccionRiesgoSameComponent} retornoSeleccionRiesgoUmbral={this.retornoSeleccionRiesgoDiffComponent} configuracionHome={this.props.configuracionHome} updateNavBar={this.props.updateNavBar} showUmbralHome={this.props.showUmbralHome} riesgos={this.state.riesgos} nombreRiesgo={this.state.nombreRiesgo} pesoRiesgo={this.state.pesoRiesgo} toleranciaRiesgo={this.state.toleranciaRiesgo} valorIdealRiesgo={this.state.valorIdealRiesgo} padreRiesgo={this.state.padreRiesgo} updateFormula={this.props.updateFormula} idRiesgoSeleccionado={this.state.idRiesgoSeleccionado}> </EditarRiesgo>
                 </div>
             );
         }

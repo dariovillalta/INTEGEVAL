@@ -43,8 +43,7 @@ function (_React$Component) {
   _createClass(Modal, [{
     key: "render",
     value: function render() {
-      console.log(this.props); // Render nothing if the "show" prop is false
-
+      // Render nothing if the "show" prop is false
       if (!this.props.show) {
         return null;
       }

@@ -315,7 +315,8 @@ function (_React$Component) {
         value: "-1"
       }, "Ninguno"), this.props.riesgos.map(function (riesgo, i) {
         return _react["default"].createElement("option", {
-          value: riesgo.ID
+          value: riesgo.ID,
+          key: riesgo.ID
         }, riesgo.nombre);
       })))), _react["default"].createElement("a", {
         className: "btn btn-brand btn-block btnWhiteColorHover font-bold font-20",

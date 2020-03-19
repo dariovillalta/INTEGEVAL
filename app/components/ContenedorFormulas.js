@@ -66,7 +66,7 @@ function (_React$Component) {
     key: "verificarSeleccionFormula",
     value: function verificarSeleccionFormula() {
       if (formulaSeleccionada != undefined && formulaSeleccionada != null) {
-        this.props.callbackCrearRegla(true);
+        this.props.callbackCrearRegla(true, formulaSeleccionada);
       } else {
         alert("Seleccione por lo menos una formula");
       }

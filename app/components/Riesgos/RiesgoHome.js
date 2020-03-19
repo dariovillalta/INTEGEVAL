@@ -35,8 +35,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
-var isMounted = false,
-    riesgos = [];
+var isMounted = false;
 
 var RiesgoHome =
 /*#__PURE__*/
@@ -50,9 +49,13 @@ function (_React$Component) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(RiesgoHome).call(this, props));
     _this.state = {
+      riesgos: [],
+      pesoDisponible: 0,
       idRiesgoSeleccionado: -1,
       componenteActual: "selRiesgo"
     };
+    _this.getRiesgos = _this.getRiesgos.bind(_assertThisInitialized(_this));
+    _this.acutalizarPesoMaximoDisponible = _this.acutalizarPesoMaximoDisponible.bind(_assertThisInitialized(_this));
     _this.crearRiesgo = _this.crearRiesgo.bind(_assertThisInitialized(_this));
     _this.retornoSeleccionRiesgoSameComponent = _this.retornoSeleccionRiesgoSameComponent.bind(_assertThisInitialized(_this));
     _this.retornoSeleccionRiesgoDiffComponent = _this.retornoSeleccionRiesgoDiffComponent.bind(_assertThisInitialized(_this));
@@ -66,6 +69,13 @@ function (_React$Component) {
     key: "componentDidMount",
     value: function componentDidMount() {
       isMounted = true;
+      this.getRiesgos();
+    }
+  }, {
+    key: "getRiesgos",
+    value: function getRiesgos() {
+      var _this2 = this;
+
       var transaction = new _mssql["default"].Transaction(this.props.pool);
       transaction.begin(function (err) {
         var rolledBack = false;
@@ -81,11 +91,32 @@ function (_React$Component) {
             }
           } else {
             transaction.commit(function (err) {
-              riesgos = result.recordset;
+              _this2.setState({
+                riesgos: result.recordset
+              }, _this2.acutalizarPesoMaximoDisponible);
             });
           }
         });
       }); // fin transaction
+    }
+  }, {
+    key: "acutalizarPesoMaximoDisponible",
+    value: function acutalizarPesoMaximoDisponible() {
+      var pesoInstitucional = 100;
+      var pesoExistente = 0;
+
+      for (var i = 0; i < this.state.riesgos.length; i++) {
+        pesoExistente += this.state.riesgos[i].peso;
+      }
+
+      ;
+      console.log('pesoInstitucional');
+      console.log(pesoInstitucional);
+      console.log('pesoExistente');
+      console.log(pesoExistente);
+      this.setState({
+        pesoDisponible: pesoInstitucional - pesoExistente
+      });
     }
   }, {
     key: "componentWillUnmount",
@@ -159,8 +190,8 @@ function (_React$Component) {
     }
   }, {
     key: "terminoCrearRiesgoPasarAEdit",
-    value: function terminoCrearRiesgoPasarAEdit(nombreRiesgo) {
-      var _this2 = this;
+    value: function terminoCrearRiesgoPasarAEdit() {
+      var _this3 = this;
 
       var transaction = new _mssql["default"].Transaction(this.props.pool);
       transaction.begin(function (err) {
@@ -169,7 +200,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("select * from Riesgos where nombre = '" + nombreRiesgo + "'", function (err, result) {
+        request.query("select top 1 * from Riesgos order by ID desc", function (err, result) {
           if (err) {
             if (!rolledBack) {
               console.log(err);
@@ -179,7 +210,7 @@ function (_React$Component) {
             transaction.commit(function (err) {
               if (result.recordset != undefined) {
                 if (result.recordset.length) {
-                  _this2.editarRiesgo(result.recordset[0].ID, result.recordset[0].nombre, result.recordset[0].peso, result.recordset[0].tolerancia, result.recordset[0].valorIdeal, result.recordset[0].idRiesgoPadre);
+                  _this3.editarRiesgo(result.recordset[0].ID, result.recordset[0].nombre, result.recordset[0].peso, result.recordset[0].tolerancia, result.recordset[0].valorIdeal, result.recordset[0].idRiesgoPadre);
                 }
               }
             });
@@ -195,7 +226,8 @@ function (_React$Component) {
           pool: this.props.pool,
           configuracionHome: this.props.configuracionHome,
           crearRiesgo: this.crearRiesgo,
-          editarRiesgo: this.editarRiesgo
+          editarRiesgo: this.editarRiesgo,
+          riesgos: this.state.riesgos
         }, " "));
       } else if (this.state.componenteActual.localeCompare("crearRiesgo") == 0) {
         return _react["default"].createElement("div", null, _react["default"].createElement(_CrearRiesgo["default"], {
@@ -208,8 +240,10 @@ function (_React$Component) {
           configuracionHome: this.props.configuracionHome,
           updateNavBar: this.props.updateNavBar,
           showUmbralHome: this.props.showUmbralHome,
-          riesgos: riesgos,
-          terminoCrearRiesgo: this.terminoCrearRiesgoPasarAEdit
+          riesgos: this.state.riesgos,
+          terminoCrearRiesgo: this.terminoCrearRiesgoPasarAEdit,
+          actualizarRiesgos: this.getRiesgos,
+          pesoMaximo: this.state.pesoDisponible
         }, " "));
       } else if (this.state.componenteActual.localeCompare("editarRiesgo") == 0) {
         return _react["default"].createElement("div", null, _react["default"].createElement(_EditarRiesgo["default"], {
@@ -222,7 +256,7 @@ function (_React$Component) {
           configuracionHome: this.props.configuracionHome,
           updateNavBar: this.props.updateNavBar,
           showUmbralHome: this.props.showUmbralHome,
-          riesgos: riesgos,
+          riesgos: this.state.riesgos,
           nombreRiesgo: this.state.nombreRiesgo,
           pesoRiesgo: this.state.pesoRiesgo,
           toleranciaRiesgo: this.state.toleranciaRiesgo,

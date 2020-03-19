@@ -37,50 +37,14 @@ function (_React$Component) {
   _inherits(SeleccionarRiesgo, _React$Component);
 
   function SeleccionarRiesgo(props) {
-    var _this;
-
     _classCallCheck(this, SeleccionarRiesgo);
 
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(SeleccionarRiesgo).call(this, props));
-    _this.state = {
-      riesgos: []
-    };
-    return _this;
+    return _possibleConstructorReturn(this, _getPrototypeOf(SeleccionarRiesgo).call(this, props));
   }
 
   _createClass(SeleccionarRiesgo, [{
-    key: "componentDidMount",
-    value: function componentDidMount() {
-      var _this2 = this;
-
-      var transaction = new _mssql["default"].Transaction(this.props.pool);
-      transaction.begin(function (err) {
-        var rolledBack = false;
-        transaction.on('rollback', function (aborted) {
-          rolledBack = true;
-        });
-        var request = new _mssql["default"].Request(transaction);
-        request.query("select * from Riesgos", function (err, result) {
-          if (err) {
-            if (!rolledBack) {
-              console.log(err);
-              transaction.rollback(function (err) {});
-            }
-          } else {
-            transaction.commit(function (err) {
-              _this2.setState({
-                riesgos: result.recordset
-              });
-            });
-          }
-        });
-      }); // fin transaction
-    }
-  }, {
     key: "render",
     value: function render() {
-      var _this3 = this;
-
       return _react["default"].createElement("div", null, _react["default"].createElement("div", {
         className: "row"
       }, _react["default"].createElement("div", {
@@ -117,29 +81,71 @@ function (_React$Component) {
         className: "row"
       }, _react["default"].createElement("div", {
         className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
-      }, _react["default"].createElement("div", {
-        className: "card influencer-profile-data"
-      }, _react["default"].createElement("div", {
-        className: "card-body"
-      }, _react["default"].createElement("div", {
-        className: "row border-top border-bottom addPaddingToConfig"
-      }, this.state.riesgos.map(function (riesgo, i) {
-        return _react["default"].createElement("a", {
-          onClick: function onClick() {
-            return _this3.props.editarRiesgo(riesgo.ID, riesgo.nombre);
-          },
-          style: {
-            color: "#fafafa"
-          },
-          className: "btn btn-" + (i <= colores.length - 1 ? colores[i] : colores[i % colores.length]) + ' btn-block btnWhiteColorHover font-bold font-20',
+      }, this.props.riesgos.map(function (riesgo, i) {
+        return _react["default"].createElement("div", {
           key: riesgo.ID
-        }, riesgo.nombre);
-      }), this.state.riesgos.length == 0 ? _react["default"].createElement("a", {
-        style: {
-          color: "#fafafa"
-        },
-        className: "btn btn-dark btn-block btnWhiteColorHover font-bold font-20"
-      }, "No existen riesgos creados") : null))))));
+        }, _react["default"].createElement("div", {
+          className: "card"
+        }, _react["default"].createElement("div", {
+          className: "card-body"
+        }, _react["default"].createElement("div", {
+          className: "row border-top border-bottom addPaddingToConfig"
+        }, _react["default"].createElement("div", {
+          style: {
+            height: "20px",
+            width: "100%"
+          }
+        }, " "), _react["default"].createElement("div", {
+          className: "row",
+          style: {
+            width: "100%"
+          }
+        }, _react["default"].createElement("div", {
+          className: "col-xl-8 col-lg-8 col-md-8 col-sm-8 col-8 font-bold font-24"
+        }, riesgo.nombre), _react["default"].createElement("div", {
+          className: "col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2"
+        }, _react["default"].createElement("a", {
+          className: "btn btn-success",
+          style: {
+            color: "white"
+          }
+        }, "Editar")), _react["default"].createElement("div", {
+          className: "col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2"
+        }, _react["default"].createElement("a", {
+          className: "btn btn-danger",
+          style: {
+            color: "white"
+          }
+        }, "Borrar"))), _react["default"].createElement("div", {
+          style: {
+            height: "10px",
+            width: "100%"
+          }
+        }, " "), _react["default"].createElement("div", {
+          className: "row",
+          style: {
+            width: "100%"
+          }
+        }, _react["default"].createElement("div", {
+          className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
+        }, _react["default"].createElement("div", {
+          style: {
+            width: "25%",
+            background: "#81d4fa"
+          }
+        }, _react["default"].createElement("label", {
+          style: {
+            color: "white"
+          }
+        }, riesgo.peso)))), _react["default"].createElement("div", {
+          style: {
+            height: "20px",
+            width: "100%"
+          }
+        }, " ")))), _react["default"].createElement("br", null));
+      }), this.props.riesgos.length == 0 ? _react["default"].createElement("div", {
+        className: "p-3 mb-2 bg-dark text-white font-bold font-20 text-center"
+      }, "No existen riesgos creados") : null)));
     }
   }]);
 

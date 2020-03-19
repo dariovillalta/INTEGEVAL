@@ -7330,3 +7330,9 @@ Media Query
     box-shadow: 0 0 15px 0 #d2d2e4;
     text-shadow: 1px 1px 1px #292826;
 }
+
+.textoRegla {
+    -webkit-text-fill-color: white; /* Will override color (regardless of order) */
+    -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: black;
+}

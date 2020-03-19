@@ -567,8 +567,6 @@ function (_React$Component) {
     value: function render() {
       var _this3 = this;
 
-      console.log("this.props.mostrarOpcionSino");
-      console.log(this.props.mostrarOpcionSino);
       return _react["default"].createElement("div", {
         style: {
           width: "100%"

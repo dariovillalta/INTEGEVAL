@@ -8,11 +8,12 @@ import ListasSeleVariableContenedorOperador from './ListasSeleVariableContenedor
 
 //const campos = [{valor: "idCLiente", tipo: "variable"}, {valor: "saldoTotal", tipo: "variable"}, {valor: "tipoPersona", tipo: "variable"}, {valor: "impuestosTotal", tipo: "variable"}, {valor: "nombreCliente", tipo: "variable"}, {valor: "diasMora", tipo: "variable"}, {valor: "mesMora", tipo: "variable"}];
 //var tablas = [], camposTablas = [];
-const operaciones = [{valor: "Asignar", tipo: "signo"}, {valor: "Contar", tipo: "signo"}];
-const operacionesNumero = [{valor: "Asignar", tipo: "signo"}, {valor: "Contar", tipo: "signo"}, {valor: "Calcular Promedio", tipo: "signo"}, {valor: "Máximo", tipo: "signo"}, {valor: "Mínimo", tipo: "signo"}, {valor: "+", tipo: "signo"}, {valor: "-", tipo: "signo"}, {valor: "*", tipo: "signo"}, {valor: "/", tipo: "signo"}];
-const operacionesFecha = [{valor: "Asignar", tipo: "signo"}, {valor: "Contar", tipo: "signo"}];
-const operacionesBoolean = [{valor: "Asignar", tipo: "signo"}, {valor: "Contar", tipo: "signo"}];
-const operacionesCadena = [{valor: "Asignar", tipo: "signo"}, {valor: "Contar", tipo: "signo"}, {valor: "+", tipo: "signo"}];
+const operaciones = [];
+//const operaciones = [{valor: "Asignar", tipo: "signo"}, {valor: "Contar", tipo: "signo"}];
+const operacionesNumero = [{valor: "+", tipo: "signo"}, {valor: "-", tipo: "signo"}, {valor: "*", tipo: "signo"}, {valor: "/", tipo: "signo"}, {valor: "Contar", tipo: "signo"}, {valor: "Calcular Promedio", tipo: "signo"}, {valor: "Máximo", tipo: "signo"}, {valor: "Mínimo", tipo: "signo"}, {valor: "Autosumar", tipo: "signo"}];
+const operacionesFecha = [{valor: "Contar", tipo: "signo"}, {valor: "Máximo", tipo: "signo"}, {valor: "Mínimo", tipo: "signo"}, {valor: "Día", tipo: "signo"}, {valor: "Mes", tipo: "signo"}, {valor: "Año", tipo: "signo"}];
+const operacionesBoolean = [{valor: "Contar", tipo: "signo"}];
+const operacionesCadena = [{valor: "Contar", tipo: "signo"}, {valor: "+", tipo: "signo"}];
 /*const operaciones = [{valor: "Asignar Valor Único", tipo: "signo"}, {valor: "Asignar Valor Único Si", tipo: "signo"}, {valor: "Asignar Valor Multiples", tipo: "signo"}, {valor: "Asignar Valor Multiples Si", tipo: "signo"}, {valor: "Contar", tipo: "signo"}, {valor: "Contar Si", tipo: "signo"}];
 const operacionesNumero = [{valor: "Asignar Valor Único", tipo: "signo"}, {valor: "Asignar Valor Único Si", tipo: "signo"}, {valor: "Asignar Valor Multiples", tipo: "signo"}, {valor: "Asignar Valor Multiples Si", tipo: "signo"}, {valor: "Contar", tipo: "signo"}, {valor: "Contar Si", tipo: "signo"}, {valor: "Calcular Promedio", tipo: "signo"}, {valor: "Máximo", tipo: "signo"}, {valor: "Mínimo", tipo: "signo"}, {valor: "+", tipo: "signo"}, {valor: "-", tipo: "signo"}, {valor: "*", tipo: "signo"}, {valor: "/", tipo: "signo"}];
 const operacionesFecha = [{valor: "Asignar Valor Único", tipo: "signo"}, {valor: "Asignar Valor Único Si", tipo: "signo"}, {valor: "Asignar Valor Multiples", tipo: "signo"}, {valor: "Asignar Valor Multiples Si", tipo: "signo"}, {valor: "Contar", tipo: "signo"}, {valor: "Contar Si", tipo: "signo"}];
@@ -23,6 +24,8 @@ const variablesEscalares = [];
 const objetos = [];
 const camposDeObjetos = [];
 const anchuraSeccionFormula = ["100%", "50", "33%", "25%", "25%", "17%", "15%", "13%", "11%", "10%", "9%"];
+
+var tablasOriginales = [], camposTablasOriginales = [], variablesEscalaresOriginales = [], variablesOriginales = [], camposVariablesOriginales = [];
 
 var variableSeleccionada = [], operacionSeleccionada = [], posicionDeIndicadorSeleccionadoEnFormula = '', posicionIndicador ='';
 
@@ -178,23 +181,28 @@ export default class Formula extends React.Component {
             console.log('variableSeleccionada');
             console.log(variableSeleccionada);
             var tipoVariable = '';
-            if(columnaSeleccionada.tipo.localeCompare("int") == 0 || columnaSeleccionada.tipo.localeCompare("decimal") == 0) {
-                tipoVariable = 'Número';
+            if(columnaSeleccionada.tipo.localeCompare("int") == 0) {
+                tipoVariable = 'int';
+                this.setState({
+                    operaciones: operacionesNumero
+                });
+            } else if(columnaSeleccionada.tipo.localeCompare("decimal") == 0) {
+                tipoVariable = 'decimal';
                 this.setState({
                     operaciones: operacionesNumero
                 });
             } else if(columnaSeleccionada.tipo.localeCompare("varchar") == 0) {
-                tipoVariable = 'Cadena';
+                tipoVariable = 'varchar';
                 this.setState({
                     operaciones: operacionesCadena
                 });
             } else if(columnaSeleccionada.tipo.localeCompare("date") == 0) {
-                tipoVariable = 'Fecha';
+                tipoVariable = 'date';
                 this.setState({
                     operaciones: operacionesFecha
                 });
             } else if(columnaSeleccionada.tipo.localeCompare("bit") == 0) {
-                tipoVariable = 'Booleano';
+                tipoVariable = 'bit';
                 this.setState({
                     operaciones: operacionesBoolean
                 });
@@ -256,24 +264,94 @@ export default class Formula extends React.Component {
             variableSeleccionada.texto = variableSeleccionada.valor;
             variableSeleccionada.operacion = '';
             //variableSeleccionada.tipoColumnaEnTabla = ;
-            console.log('variableSeleccionada');
-            console.log(variableSeleccionada);
             if(this.existeReglaAsignacion(operacionSeleccionada.valor)) {
                 variableSeleccionada.texto = this.retornarCodigoOperacion(operacionSeleccionada.valor) + "(" + variableSeleccionada.valor + ")";
                 variableSeleccionada.operacion = this.retornarCodigoOperacion(operacionSeleccionada.valor);
             }
+            if (operacionSeleccionada.valor == undefined) {
+                //cuando se agrega campo a formula para crear operacion ASIG
+                variableSeleccionada.operacion = 'ASIG';
+            }
             formulaTemp = formulaTemp.concat(variableSeleccionada);
             this.agregarFormulaAnchuraYAltura(formulaTemp, false);
+            /*this.setState({
+                formula: formulaTemp
+            }, this.iniciarGuardarFormula );*/
             this.setState({
                 formula: formulaTemp
-            }, this.iniciarGuardarFormula );
+            });
+            console.log('variableSeleccionada');
+            console.log(variableSeleccionada);
+            console.log('operacionSeleccionada');
+            console.log(operacionSeleccionada);
+            console.log('formulaTemp');
+            console.log(formulaTemp);
             var self = this;
             setTimeout(function(){
                 console.log(self.state.formula)
             }, 2000);
-        } else if(this.state.formula.length > 0 && $("div").hasClass("colorPunteroFormula")) {        //caso inicial, agregar primera variable
+
+            //actualizando campos de variables a mostrar segun el campo que se acaba de agregar
+            if(variableSeleccionada.esFuenteDato) {
+                //solo mostrar campos que sean de conexiones tabla
+                var arregloConexionesTemp = [], arregloCamposConexionesTemp = [];
+                for (var i = 0; i < tablasOriginales.length; i++) {
+                    if(tablasOriginales[i].ID == variableSeleccionada.idConexionTabla) {
+                        arregloConexionesTemp.push(tablasOriginales[i]);
+                        for (var j = 0; j < camposTablasOriginales[i].length; j++) {
+                            if(arregloCamposConexionesTemp[arregloConexionesTemp.length-1] == undefined)
+                                arregloCamposConexionesTemp[arregloConexionesTemp.length-1] = [];
+                            arregloCamposConexionesTemp[arregloConexionesTemp.length-1].push(camposTablasOriginales[i][j]);
+                        };
+                        break;
+                    }
+                };
+                this.setState({
+                    tablas: arregloConexionesTemp,
+                    camposTablas: arregloCamposConexionesTemp,
+                    variablesEscalares: [],
+                    variables: [],
+                    camposVariables: []
+                });
+            } else {
+                if(variableSeleccionada.esObjeto) {
+                    var arregloVariablesTemp = [], arregloCamposVariablesTemp = [];
+                    for (var i = 0; i < variablesOriginales.length; i++) {
+                        if(variablesOriginales[i].ID == variableSeleccionada.variableID) {
+                            arregloVariablesTemp.push(variablesOriginales[i]);
+                            for (var j = 0; j < camposVariablesOriginales[i].length; j++) {
+                                if(arregloCamposVariablesTemp[arregloVariablesTemp.length-1] == undefined)
+                                    arregloCamposVariablesTemp[arregloVariablesTemp.length-1] = [];
+                                arregloCamposVariablesTemp[arregloVariablesTemp.length-1].push(camposVariablesOriginales[i][j]);
+                            };
+                            break;
+                        }
+                    };
+                    this.setState({
+                        tablas: [],
+                        camposTablas: [],
+                        variablesEscalares: variablesEscalaresOriginales,
+                        variables: arregloVariablesTemp,
+                        camposVariables: arregloCamposVariablesTemp
+                    });
+                } else {
+                    this.setState({
+                        tablas: [],
+                        camposTablas: [],
+                        variablesEscalares: this.state.variablesEscalares,
+                        variables: this.state.variables,
+                        camposVariables: this.state.camposVariables
+                    });
+                }
+            }
+        } else if(this.state.formula.length > 0 && $("div").hasClass("colorPunteroFormula")) {
             var formulaTemp = [...this.state.formula];
             //var formulaTemp = this.state.formula.slice();
+            for (var i = 0; i < formulaTemp.length; i++) {
+                //if(formulaTemp[i].operacion.localeCompare("ASIG")) {
+                    formulaTemp[i].operacion = 'FORMULA';
+                //}
+            };
             variableSeleccionada.activa = false;
             variableSeleccionada.tipo = "variable";
             variableSeleccionada.texto = variableSeleccionada.valor;
@@ -281,6 +359,8 @@ export default class Formula extends React.Component {
             if(this.existeReglaAsignacion(operacionSeleccionada.valor)) {
                 variableSeleccionada.texto = this.retornarCodigoOperacion(operacionSeleccionada.valor) + "(" + variableSeleccionada.valor + ")";
                 variableSeleccionada.operacion = this.retornarCodigoOperacion(operacionSeleccionada.valor);
+            } else {
+                variableSeleccionada.operacion = 'FORMULA';
             }
             var posicionArreglo = '', ultimoIndice = '', noHaLeidoUltimoIndice = true;
             for (var i = posicionDeIndicadorSeleccionadoEnFormula.length - 1; i >= 0; i--) {
@@ -297,32 +377,42 @@ export default class Formula extends React.Component {
             };
             //var tempVar;
             //eval("tempVar = temp"+posicionArreglo);
+            operacionSeleccionada.operacion = operacionSeleccionada.valor;
+            if(operacionSeleccionada.valor.localeCompare("/") != 0) {
+                if(posicionIndicador.localeCompare("derecha") == 0) {
+                    if(posicionArreglo.length > 0) {
+                        formulaTemp[posicionArreglo].splice(parseInt(ultimoIndice)+1, 0, variableSeleccionada);
+                        formulaTemp[posicionArreglo].splice(parseInt(ultimoIndice)+1, 0, operacionSeleccionada);
+                    } else {
+                        formulaTemp.splice(parseInt(ultimoIndice)+1, 0, variableSeleccionada);
+                        formulaTemp.splice(parseInt(ultimoIndice)+1, 0, operacionSeleccionada);
+                    }
+                    //eval("formulaTemp[posicionArreglo].splice(parseInt(ultimoIndice)+1, 0, variableSeleccionada[0])");
+                } else {
+                    if(posicionArreglo.length > 0) {
+                        formulaTemp[posicionArreglo].splice(parseInt(ultimoIndice), 0, operacionSeleccionada);
+                        formulaTemp[posicionArreglo].splice(parseInt(ultimoIndice), 0, variableSeleccionada);
+                    } else {
+                        formulaTemp.splice(parseInt(ultimoIndice), 0, operacionSeleccionada);
+                        formulaTemp.splice(parseInt(ultimoIndice), 0, variableSeleccionada);
+                    }
+                }
+            } else {
+                //
+            }
             console.log('variableSeleccionada');
             console.log(variableSeleccionada);
             console.log('operacionSeleccionada');
             console.log(operacionSeleccionada);
-            if(posicionIndicador.localeCompare("derecha") == 0) {
-                if(posicionArreglo.length > 0) {
-                    formulaTemp[posicionArreglo].splice(parseInt(ultimoIndice)+1, 0, variableSeleccionada);
-                    formulaTemp[posicionArreglo].splice(parseInt(ultimoIndice)+1, 0, operacionSeleccionada);
-                } else {
-                    formulaTemp.splice(parseInt(ultimoIndice)+1, 0, variableSeleccionada);
-                    formulaTemp.splice(parseInt(ultimoIndice)+1, 0, operacionSeleccionada);
-                }
-                //eval("formulaTemp[posicionArreglo].splice(parseInt(ultimoIndice)+1, 0, variableSeleccionada[0])");
-            } else {
-                if(posicionArreglo.length > 0) {
-                    formulaTemp[posicionArreglo].splice(parseInt(ultimoIndice), 0, operacionSeleccionada);
-                    formulaTemp[posicionArreglo].splice(parseInt(ultimoIndice), 0, variableSeleccionada);
-                } else {
-                    formulaTemp.splice(parseInt(ultimoIndice), 0, operacionSeleccionada);
-                    formulaTemp.splice(parseInt(ultimoIndice), 0, variableSeleccionada);
-                }
-            }
+            console.log('formulaTemp');
+            console.log(formulaTemp);
             this.agregarFormulaAnchuraYAltura(formulaTemp, false);
+            /*this.setState({
+                formula: formulaTemp
+            }, this.iniciarGuardarFormula );*/
             this.setState({
                 formula: formulaTemp
-            }, this.iniciarGuardarFormula );
+            });
             var self = this;
             setTimeout(function(){
                 console.log(self.state.formula)
@@ -537,20 +627,41 @@ export default class Formula extends React.Component {
         var formula = '';
         console.log('this.state.formula')
         console.log(this.state.formula)
+        var operacion = '';
         for (var i = 0; i < this.state.formula.length; i++) {
             if(this.state.formula[i].operacion != undefined && this.state.formula[i].operacion.localeCompare("ASIG") == 0) {
                 formula += "ASIG("+this.state.formula[i].valor+")";
+                operacion = "ASIG";
+            } else if(this.state.formula[i].operacion != undefined && this.state.formula[i].operacion.localeCompare("COUNT") == 0) {
+                formula += this.state.formula[i].valor;
+                operacion = "COUNT";
+            } else if(this.state.formula[i].operacion != undefined && this.state.formula[i].operacion.localeCompare("PROM") == 0) {
+                formula += this.state.formula[i].valor;
+                operacion = "PROM";
+            } else if(this.state.formula[i].operacion != undefined && this.state.formula[i].operacion.localeCompare("MAX") == 0) {
+                formula += this.state.formula[i].valor;
+                operacion = "MAX";
+            } else if(this.state.formula[i].operacion != undefined && this.state.formula[i].operacion.localeCompare("MIN") == 0) {
+                formula += this.state.formula[i].valor;
+                operacion = "MIN";
+            } else if(this.state.formula[i].operacion != undefined && this.state.formula[i].operacion.localeCompare("SUM") == 0) {
+                formula += this.state.formula[i].valor;
+                operacion = "SUM";
             } else {
                 formula += this.state.formula[i].valor;
+                operacion = "FORMULA";
             }
         };
         console.log('formula');
         console.log(formula);
-        var objetoFormula = {variableID: -1, variableCampoID: -1, numeroDeFormulaDeVariable: -1, formula: formula};
+        var objetoFormula = {variableID: -1, variableCampoID: -1, numeroDeFormulaDeVariable: -1, formula: formula, operacion: operacion};
         /*console.log('formula');
         console.log(this.state.formula);*/
         //this.props.anadirFormula(formula, this.state.formula);
+        variableSeleccionada = {};
+        operacionSeleccionada = {};
         this.props.anadirFormula(objetoFormula, this.state.formula);
+        alert("Fórmula guardada.");
         //this.guardarVariable(formula);
     }
 
@@ -594,6 +705,9 @@ export default class Formula extends React.Component {
                     }
                 } else {
                     transaction.commit(err => {
+                        tablasOriginales = result.recordset;
+                        console.log('tablasOriginales');
+                        console.log(tablasOriginales);
                         this.setState({
                             tablas: result.recordset
                         }, this.initLoadTablasCampos );
@@ -629,12 +743,15 @@ export default class Formula extends React.Component {
                     transaction.commit(err => {
                         var nombreColumnas = [];
                         for (var i = 0; i < result.recordset.length; i++) {
-                            nombreColumnas.push({valor: result.recordset[i].COLUMN_NAME, tipo: result.recordset[i].DATA_TYPE, esFuenteDato: true, idConexionTabla: this.state.tablas[index].ID});
+                            nombreColumnas.push({valor: result.recordset[i].COLUMN_NAME,tipo: result.recordset[i].DATA_TYPE, esFuenteDato: true, idConexionTabla: this.state.tablas[index].ID});
                         };
                         if(array[index] == undefined) {
                             array[index] = [];
                         }
                         array[index] = $.merge(array[index], nombreColumnas);
+                        camposTablasOriginales = array;
+                        console.log('camposTablasOriginales');
+                        console.log(camposTablasOriginales);
                         this.setState({
                             camposTablas: array
                         });
@@ -689,8 +806,11 @@ export default class Formula extends React.Component {
                     transaction.commit(err => {
                         var temp = [...this.state.variablesEscalares];
                         for (var i = 0; i < result.recordset.length; i++) {
-                            temp.push({valor: result.recordset[i].nombre, tipo: result.recordset[i], esFuenteDato: false})
+                            temp.push({valor: result.recordset[i].nombre, tipo: result.recordset[i], esFuenteDato: false, variableID: variable.ID, variableCampoID: result.recordset[i].ID, esObjeto: variable.esObjeto})
                         };
+                        variablesEscalaresOriginales = temp;
+                        console.log('variablesEscalaresOriginales');
+                        console.log(variablesEscalaresOriginales);
                         this.setState({
                             variablesEscalares: temp
                         } );
@@ -717,6 +837,7 @@ export default class Formula extends React.Component {
                     }
                 } else {
                     transaction.commit(err => {
+                        variablesOriginales = result.recordset;
                         this.setState({
                             variables: result.recordset
                         }, this.initLoadVariablesCampos );
@@ -729,11 +850,11 @@ export default class Formula extends React.Component {
     initLoadVariablesCampos() {
         var arregloTemp = [];
         for (var i = 0; i < this.state.variables.length; i++) {
-            this.loadVariablesCampos(this.state.variables[i].ID, i, arregloTemp);
+            this.loadVariablesCampos(this.state.variables[i], i, arregloTemp);
         };
     }
 
-    loadVariablesCampos (variableID, index, array) {
+    loadVariablesCampos (variable, index, array) {
         const transaction = new sql.Transaction( this.props.pool );
         transaction.begin(err => {
             var rolledBack = false;
@@ -741,7 +862,7 @@ export default class Formula extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("select * from VariablesCampos where variableID = "+variableID, (err, result) => {
+            request.query("select * from VariablesCampos where variableID = "+variable.ID, (err, result) => {
                 if (err) {
                     if (!rolledBack) {
                         console.log(err);
@@ -752,12 +873,15 @@ export default class Formula extends React.Component {
                     transaction.commit(err => {
                         var nombreColumnas = [];
                         for (var i = 0; i < result.recordset.length; i++) {
-                            nombreColumnas.push({valor: result.recordset[i].nombre, tipo: result.recordset[i].tipo, esFuenteDato: false});
+                            nombreColumnas.push({valor: result.recordset[i].nombre, tipo: result.recordset[i].tipo, esFuenteDato: false, variableID: variable.ID, variableCampoID: result.recordset[i].ID, esObjeto: variable.esObjeto});
                         };
                         if(array[index] == undefined) {
                             array[index] = [];
                         }
                         array[index] = $.merge(array[index], nombreColumnas);
+                        camposVariablesOriginales = array;
+                        console.log('camposVariablesOriginales');
+                        console.log(camposVariablesOriginales);
                         this.setState({
                             camposVariables: array
                         });
@@ -806,6 +930,10 @@ export default class Formula extends React.Component {
                             </div>
                         </div>
                     </div>
+                </div>
+                <br/>
+                <div className={"row"}>
+                    <a className={"btn btn-success btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.iniciarGuardarFormula}>Guardar Fórmula</a>
                 </div>
                 <br/>
             </div>

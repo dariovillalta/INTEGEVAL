@@ -1,11 +1,15 @@
 import React from 'react';
 import sql from 'mssql';
+import Slider from 'react-input-slider';
 
 const tipoCampos = [ {nombre: "texto"}, {nombre: "booleano"}, {nombre: "fecha"}, {nombre: "número"}, {nombre: "arreglo"}];
 
 export default class CrearRiesgo extends React.Component {
     constructor(props) {
         super(props);
+        this.state = {
+            x: 0
+        }
         this.goCrearUmbral = this.goCrearUmbral.bind(this);
         this.crearRiesgo = this.crearRiesgo.bind(this);
     }
@@ -35,10 +39,9 @@ export default class CrearRiesgo extends React.Component {
     crearRiesgo () {
         var nombre = $("#nombreRiesgo").val();
         var formula = '';
-        var peso = parseInt($("#peso").val());
+        var peso = this.state.x;
         var tolerancia = parseInt($("#tolerancia").val());
         var valorIdeal = parseInt($("#valorIdeal").val());
-        var tipoValorIdeal = $("#tipoValorIdeal").val();
         var riesgoPadre = parseInt(this.props.riesgoPadre);
         var nivel = 0;
         if(this.props.riesgoPadre == undefined || this.props.riesgoPadre == -1) {
@@ -65,7 +68,7 @@ export default class CrearRiesgo extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("insert into Riesgos (nombre, formula, peso, tolerancia, valorIdeal, tipoValorIdeal, idRiesgoPadre, nivelRiesgoHijo) values ('"+nombre+"', '"+formula+"', "+peso+", "+tolerancia+", "+valorIdeal+", '"+tipoValorIdeal+"', "+riesgoPadre+", "+nivel+")", (err, result) => {
+            request.query("insert into Riesgos (nombre, formula, peso, tolerancia, valorIdeal, idRiesgoPadre, nivelRiesgoHijo) values ('"+nombre+"', '"+formula+"', "+peso+", "+tolerancia+", "+valorIdeal+", "+riesgoPadre+", "+nivel+")", (err, result) => {
                 if (err) {
                     if (!rolledBack) {
                         console.log(err);
@@ -74,7 +77,8 @@ export default class CrearRiesgo extends React.Component {
                     }
                 } else {
                     transaction.commit(err => {
-                        this.props.terminoCrearRiesgo(nombre);
+                        this.props.terminoCrearRiesgo();
+                        this.props.actualizarRiesgos();
                     });
                 }
             });
@@ -129,8 +133,18 @@ export default class CrearRiesgo extends React.Component {
                                         <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
                                             <label htmlFor="peso" className="col-form-label">Peso</label>
                                         </div>
-                                        <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"}>
-                                            <input id="peso" type="text" className="form-control form-control-sm"/>
+                                        <div className={"col-xl-8 col-lg-8 col-md-8 col-sm-8 col-8 form-group"}>
+                                            <Slider
+                                                axis="x"
+                                                xstep={1}
+                                                xmin={0}
+                                                xmax={this.props.pesoMaximo}
+                                                x={this.state.x}
+                                                onChange={({ x }) => this.setState({ x: x }) }
+                                                style={{width: "100%", marginTop: "10px"}}/>
+                                        </div>
+                                        <div className={"col-xl-1 col-lg-1 col-md-1 col-sm-1 col-1 form-group"}>
+                                            <label id="pesoLabel" className="col-form-label">{this.state.x}</label>
                                         </div>
                                     </div>
                                     <div className={"row"} style={{width: "100%"}}>
@@ -147,18 +161,6 @@ export default class CrearRiesgo extends React.Component {
                                         </div>
                                         <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"}>
                                             <input id="valorIdeal" type="text" className="form-control form-control-sm"/>
-                                        </div>
-                                    </div>
-                                    <div className={"row"} style={{width: "100%"}}>
-                                        <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
-                                            <label htmlFor="tipoValorIdeal" className="col-form-label">Tipo de Valor Ideal</label>
-                                        </div>
-                                        <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"}>
-                                            <select id="tipoValorIdeal" className="form-control">
-                                                {tipoCampos.map((tipo, i) =>
-                                                    <option value={tipo.nombre} key={tipo.nombre}>{tipo.nombre}</option>
-                                                )}
-                                            </select>
                                         </div>
                                     </div>
                                     <div className={"row"} style={{width: "100%"}}>

@@ -27,7 +27,7 @@ export default class ContenedorFormulas extends React.Component {
 
     verificarSeleccionFormula () {
         if(formulaSeleccionada != undefined && formulaSeleccionada != null) {
-            this.props.callbackCrearRegla(true);
+            this.props.callbackCrearRegla(true, formulaSeleccionada);
         } else {
             alert("Seleccione por lo menos una formula")
         }

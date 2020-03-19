@@ -425,8 +425,6 @@ export default class VariableCreation extends React.Component {
     }
 
     render() {
-        console.log("this.props.mostrarOpcionSino");
-        console.log(this.props.mostrarOpcionSino);
         return (
             <div style={{width: "100%"}}>
                 <h3 className={"card-header"}>Crear Condición (Instrucción)</h3>

@@ -306,14 +306,24 @@ function (_React$Component) {
     }
   }, {
     key: "retornarIndiceSeleccionadoParaMostrarCampoObjetivo",
-    value: function retornarIndiceSeleccionadoParaMostrarCampoObjetivo(reglaSeleccionada, tipoIndiceSeleccionado) {
+    value: function retornarIndiceSeleccionadoParaMostrarCampoObjetivo(reglaSeleccionada, tipoIndiceSeleccionado, indiceI, indiceJ) {
       console.log('reglaSeleccionada');
       console.log(reglaSeleccionada);
       console.log('tipoIndiceSeleccionado');
       console.log(tipoIndiceSeleccionado);
+      console.log('this.props.reglas');
+      console.log(this.props.reglas);
+      console.log('this.props.reglas.length');
+      console.log(this.props.reglas.length);
+      /*console.log('this.props.reglas[indiceI-1].length');
+      console.log(this.props.reglas[indiceI-1].length);*/
 
-      if (tipoIndiceSeleccionado.localeCompare("abajo") == 0) {
+      if (this.props.reglas.length - 1 == indiceI
+      /*&& this.props.reglas[indiceI-1].length == indiceJ*/
+      && tipoIndiceSeleccionado.localeCompare("abajo") == 0) {
+        //EL CASO CUANDO EL INDICE SELECCIONADO DE REGLAS ES EL ULTIMO Y SELECCIONO tipoIndiceSeleccionado = ABAJO
         //reset
+        console.log('1');
         this.setState({
           conexiones: conexionesOriginales,
           camposConexiones: camposConexionesOriginales,
@@ -321,14 +331,17 @@ function (_React$Component) {
           camposVariables: camposVariablesOriginales
         });
       } else {
-        //puede ser otra regla, una formula o el cursor de arriba
+        console.log('2'); //puede ser otra regla, una formula o el cursor de arriba
         //mostrar campos
+
         var tempCopyVariables = [];
         var tempCopyCampos = [];
 
-        if (reglaSeleccionada.esConexionTabla) {
+        if (reglaSeleccionada[0].esConexionTabla) {
+          console.log('2.1');
+
           for (var i = 0; i < conexionesOriginales.length; i++) {
-            if (reglaSeleccionada.conexionTablaID == conexionesOriginales[i].ID) {
+            if (reglaSeleccionada[0].conexionTablaID == conexionesOriginales[i].ID) {
               tempCopyVariables = conexionesOriginales[i];
               tempCopyCampos = camposConexionesOriginales[i];
               break;
@@ -336,14 +349,6 @@ function (_React$Component) {
           }
 
           ;
-          console.log('[tempCopyVariables]');
-          console.log([tempCopyVariables]);
-          console.log('[tempCopyCampos]');
-          console.log([tempCopyCampos]);
-          console.log('conexionesOriginales');
-          console.log(conexionesOriginales);
-          console.log('camposConexionesOriginales');
-          console.log(camposConexionesOriginales);
           this.setState({
             conexiones: [tempCopyVariables],
             camposConexiones: [tempCopyCampos],
@@ -351,8 +356,10 @@ function (_React$Component) {
             camposVariables: []
           });
         } else {
+          console.log('2.2');
+
           for (var i = 0; i < variablesOriginales.length; i++) {
-            if (reglaSeleccionada.variableID == variablesOriginales[i].ID) {
+            if (reglaSeleccionada[0].variableID == variablesOriginales[i].ID) {
               tempCopyVariables = jQuery.extend(true, {}, variablesOriginales[i]);
               tempCopyCampos = jQuery.extend(true, {}, camposVariablesOriginales[i]);
               break;
@@ -368,6 +375,60 @@ function (_React$Component) {
           });
         }
       }
+      /*if(tipoIndiceSeleccionado.localeCompare("abajo") == 0) {
+          console.log('1');
+          //reset
+          this.setState({
+              conexiones: conexionesOriginales,
+              camposConexiones: camposConexionesOriginales,
+              variables: variablesOriginales,
+              camposVariables: camposVariablesOriginales
+          });
+      }  else {
+          console.log('2');
+          //puede ser otra regla, una formula o el cursor de arriba
+          //mostrar campos
+          var tempCopyVariables = [];
+          var tempCopyCampos = [];
+          if(reglaSeleccionada.esConexionTabla) {
+              for (var i = 0; i < conexionesOriginales.length; i++) {
+                  if(reglaSeleccionada.conexionTablaID == conexionesOriginales[i].ID) {
+                      tempCopyVariables = conexionesOriginales[i];
+                      tempCopyCampos = camposConexionesOriginales[i];
+                      break;
+                  }
+              };
+              console.log('[tempCopyVariables]')
+              console.log([tempCopyVariables])
+              console.log('[tempCopyCampos]')
+              console.log([tempCopyCampos])
+              console.log('conexionesOriginales')
+              console.log(conexionesOriginales)
+              console.log('camposConexionesOriginales')
+              console.log(camposConexionesOriginales)
+              this.setState({
+                  conexiones: [tempCopyVariables],
+                  camposConexiones: [tempCopyCampos],
+                  variables: [],
+                  camposVariables: []
+              });
+          } else {
+              for (var i = 0; i < variablesOriginales.length; i++) {
+                  if(reglaSeleccionada.variableID == variablesOriginales[i].ID) {
+                      tempCopyVariables = jQuery.extend(true, {}, variablesOriginales[i]);
+                      tempCopyCampos = jQuery.extend(true, {}, camposVariablesOriginales[i]);
+                      break;
+                  }
+              };
+              this.setState({
+                  conexiones: [],
+                  camposConexiones: [],
+                  variables: [tempCopyVariables],
+                  camposVariables: [[tempCopyCampos]]
+              });
+          }
+      }*/
+
     }
   }, {
     key: "retornoCampo",

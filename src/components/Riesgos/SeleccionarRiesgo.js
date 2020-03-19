@@ -6,35 +6,6 @@ const colores = ["secondary", "success", "primary", "brand"];
 export default class SeleccionarRiesgo extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {
-            riesgos: []
-        }
-    }
-
-    componentDidMount() {
-        const transaction = new sql.Transaction( this.props.pool );
-        transaction.begin(err => {
-            var rolledBack = false;
-            transaction.on('rollback', aborted => {
-                rolledBack = true;
-            });
-            const request = new sql.Request(transaction);
-            request.query("select * from Riesgos", (err, result) => {
-                if (err) {
-                    if (!rolledBack) {
-                        console.log(err);
-                        transaction.rollback(err => {
-                        });
-                    }
-                } else {
-                    transaction.commit(err => {
-                        this.setState({
-                            riesgos: result.recordset
-                        });
-                    });
-                }
-            });
-        }); // fin transaction
     }
 
     render() {
@@ -61,20 +32,43 @@ export default class SeleccionarRiesgo extends React.Component {
                 <br/>
                 <div className={"row"}>
                     <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
-                        <div className={"card influencer-profile-data"}>
-                            <div className={"card-body"}>
-                                <div className={"row border-top border-bottom addPaddingToConfig"}>
-                                    {this.state.riesgos.map((riesgo, i) =>
-                                        <a onClick={() => this.props.editarRiesgo(riesgo.ID, riesgo.nombre)} style={{color: "#fafafa"}} className={"btn btn-" + (i <= colores.length-1 ? colores[i] : colores[i%colores.length]) + ' btn-block btnWhiteColorHover font-bold font-20'} key={riesgo.ID}>{riesgo.nombre}</a>
-                                    )}
-                                    {
-                                        this.state.riesgos.length == 0
-                                        ? <a style={{color: "#fafafa"}} className={"btn btn-dark btn-block btnWhiteColorHover font-bold font-20"}>No existen riesgos creados</a>
-                                        : null
-                                    }
+                        {this.props.riesgos.map((riesgo, i) =>
+                            <div key={riesgo.ID}>
+                                <div className={"card"}>
+                                    <div className={"card-body"}>
+                                        <div className={"row border-top border-bottom addPaddingToConfig"}>
+                                            <div style={{height: "20px", width: "100%"}}> </div>
+                                            <div className={"row"} style={{width: "100%"}}>
+                                                <div className={"col-xl-8 col-lg-8 col-md-8 col-sm-8 col-8 font-bold font-24"}>
+                                                    {riesgo.nombre}
+                                                </div>
+                                                <div className={"col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2"}>
+                                                    <a className="btn btn-success" style={{color: "white"}}>Editar</a>
+                                                </div>
+                                                <div className={"col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2"}>
+                                                    <a className="btn btn-danger" style={{color: "white"}}>Borrar</a>
+                                                </div>
+                                            </div>
+                                            <div style={{height: "10px", width: "100%"}}> </div>
+                                            <div className={"row"} style={{width: "100%"}}>
+                                                <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
+                                                    <div style={{width: "25%", background: "#81d4fa"}}>
+                                                        <label style={{color: "white"}}>{riesgo.peso}</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div style={{height: "20px", width: "100%"}}> </div>
+                                        </div>
+                                    </div>
                                 </div>
+                                <br/>
                             </div>
-                        </div>
+                        )}
+                        {
+                            this.props.riesgos.length == 0
+                            ? <div className="p-3 mb-2 bg-dark text-white font-bold font-20 text-center">No existen riesgos creados</div>
+                            : null
+                        }
                     </div>
                 </div>
             </div>

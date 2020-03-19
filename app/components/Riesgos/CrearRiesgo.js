@@ -9,6 +9,8 @@ var _react = _interopRequireDefault(require("react"));
 
 var _mssql = _interopRequireDefault(require("mssql"));
 
+var _reactInputSlider = _interopRequireDefault(require("react-input-slider"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -52,6 +54,9 @@ function (_React$Component) {
     _classCallCheck(this, CrearRiesgo);
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(CrearRiesgo).call(this, props));
+    _this.state = {
+      x: 0
+    };
     _this.goCrearUmbral = _this.goCrearUmbral.bind(_assertThisInitialized(_this));
     _this.crearRiesgo = _this.crearRiesgo.bind(_assertThisInitialized(_this));
     return _this;
@@ -110,10 +115,9 @@ function (_React$Component) {
 
       var nombre = $("#nombreRiesgo").val();
       var formula = '';
-      var peso = parseInt($("#peso").val());
+      var peso = this.state.x;
       var tolerancia = parseInt($("#tolerancia").val());
       var valorIdeal = parseInt($("#valorIdeal").val());
-      var tipoValorIdeal = $("#tipoValorIdeal").val();
       var riesgoPadre = parseInt(this.props.riesgoPadre);
       var nivel = 0;
 
@@ -142,7 +146,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("insert into Riesgos (nombre, formula, peso, tolerancia, valorIdeal, tipoValorIdeal, idRiesgoPadre, nivelRiesgoHijo) values ('" + nombre + "', '" + formula + "', " + peso + ", " + tolerancia + ", " + valorIdeal + ", '" + tipoValorIdeal + "', " + riesgoPadre + ", " + nivel + ")", function (err, result) {
+        request.query("insert into Riesgos (nombre, formula, peso, tolerancia, valorIdeal, idRiesgoPadre, nivelRiesgoHijo) values ('" + nombre + "', '" + formula + "', " + peso + ", " + tolerancia + ", " + valorIdeal + ", " + riesgoPadre + ", " + nivel + ")", function (err, result) {
           if (err) {
             if (!rolledBack) {
               console.log(err);
@@ -150,7 +154,9 @@ function (_React$Component) {
             }
           } else {
             transaction.commit(function (err) {
-              _this2.props.terminoCrearRiesgo(nombre);
+              _this2.props.terminoCrearRiesgo();
+
+              _this2.props.actualizarRiesgos();
             });
           }
         });
@@ -159,6 +165,8 @@ function (_React$Component) {
   }, {
     key: "render",
     value: function render() {
+      var _this3 = this;
+
       return _react["default"].createElement("div", null, _react["default"].createElement("div", {
         className: "row"
       }, _react["default"].createElement("div", {
@@ -251,12 +259,29 @@ function (_React$Component) {
         htmlFor: "peso",
         className: "col-form-label"
       }, "Peso")), _react["default"].createElement("div", {
-        className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
-      }, _react["default"].createElement("input", {
-        id: "peso",
-        type: "text",
-        className: "form-control form-control-sm"
-      }))), _react["default"].createElement("div", {
+        className: "col-xl-8 col-lg-8 col-md-8 col-sm-8 col-8 form-group"
+      }, _react["default"].createElement(_reactInputSlider["default"], {
+        axis: "x",
+        xstep: 1,
+        xmin: 0,
+        xmax: this.props.pesoMaximo,
+        x: this.state.x,
+        onChange: function onChange(_ref) {
+          var x = _ref.x;
+          return _this3.setState({
+            x: x
+          });
+        },
+        style: {
+          width: "100%",
+          marginTop: "10px"
+        }
+      })), _react["default"].createElement("div", {
+        className: "col-xl-1 col-lg-1 col-md-1 col-sm-1 col-1 form-group"
+      }, _react["default"].createElement("label", {
+        id: "pesoLabel",
+        className: "col-form-label"
+      }, this.state.x))), _react["default"].createElement("div", {
         className: "row",
         style: {
           width: "100%"
@@ -289,26 +314,6 @@ function (_React$Component) {
         type: "text",
         className: "form-control form-control-sm"
       }))), _react["default"].createElement("div", {
-        className: "row",
-        style: {
-          width: "100%"
-        }
-      }, _react["default"].createElement("div", {
-        className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
-      }, _react["default"].createElement("label", {
-        htmlFor: "tipoValorIdeal",
-        className: "col-form-label"
-      }, "Tipo de Valor Ideal")), _react["default"].createElement("div", {
-        className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
-      }, _react["default"].createElement("select", {
-        id: "tipoValorIdeal",
-        className: "form-control"
-      }, tipoCampos.map(function (tipo, i) {
-        return _react["default"].createElement("option", {
-          value: tipo.nombre,
-          key: tipo.nombre
-        }, tipo.nombre);
-      })))), _react["default"].createElement("div", {
         className: "row",
         style: {
           width: "100%"

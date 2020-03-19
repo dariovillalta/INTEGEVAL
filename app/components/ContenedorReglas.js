@@ -27,6 +27,8 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
+var colores = [["d50000", "d32f2f", "ff1744", "ef5350", "e57373", "ef9a9a", "ffcdd2"], ["ffd600", "fbc02d", "ffff00", "fdd835", "fff176", "fff59d", "fff9c4"], ["e65100", "ff6d00", "ef6c00", "ffa726", "ffb74d", "ffcc80", "ffe0b2"], ["880e4f", "c51162", "f50057", "ff4081", "ec407a", "f06292", "f48fb1"], ["1b5e20", "2e7d32", "388e3c", "4caf50", "81c784", "a5d6a7", "c8e6c9"], ["0d47a1", "1565c0", "1e88e5", "2196f3", "42a5f5", "64b5f6", "90caf9"], ["37474f", "546e7a", "607d8b", "78909c", "90a4ae", "b0bec5", "cfd8dc"], ["006064", "00838f", "0097a7", "00acc1", "4dd0e1", "80deea", "b2ebf2"], ["33691e", "558b2f", "689f38", "7cb342", "8bc34a", "aed581", "c5e1a5"]]; //  [rojo, amarillo, naranja, rosa, verde oscuro, azul, gris, cyan, verde claro]
+
 var ContenedorReglas =
 /*#__PURE__*/
 function (_React$Component) {
@@ -39,12 +41,13 @@ function (_React$Component) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(ContenedorReglas).call(this, props));
     _this.seleccionRegla = _this.seleccionRegla.bind(_assertThisInitialized(_this));
+    _this.getColor = _this.getColor.bind(_assertThisInitialized(_this));
     return _this;
   }
 
   _createClass(ContenedorReglas, [{
     key: "seleccionRegla",
-    value: function seleccionRegla(index, objeto) {
+    value: function seleccionRegla(indiceI, objeto, indiceJ) {
       $("#reglaInit").removeClass("colorPunteroFormula");
       $("#reglaInit").removeClass("blink");
       $("#reglaFin").removeClass("colorPunteroFormula");
@@ -92,20 +95,20 @@ function (_React$Component) {
             }
           }
         } else {
-          indexSeleccionado = index;
+          indexSeleccionado = indiceI;
 
           if (objeto.localeCompare("arriba") == 0) {
-            $("#reglaInit" + index).addClass("colorPunteroFormula");
-            $("#reglaInit" + index).addClass("blink");
+            $("#reglaInit" + indiceI).addClass("colorPunteroFormula");
+            $("#reglaInit" + indiceI).addClass("blink");
             tipoIndiceSeleccionado = 'arriba';
           } else if (objeto.localeCompare("abajo") == 0) {
-            $("#reglaFin" + index).addClass("colorPunteroFormula");
-            $("#reglaFin" + index).addClass("blink");
+            $("#reglaFin" + indiceI).addClass("colorPunteroFormula");
+            $("#reglaFin" + indiceI).addClass("blink");
             tipoIndiceSeleccionado = 'abajo';
           } else {
-            $("#regla" + index).css("border", "2px solid #F9D342");
+            $("#regla" + indiceI).css("border", "2px solid #F9D342");
 
-            if (this.props.reglas[index].esCondicion) {
+            if (this.props.reglas[indiceI].esCondicion) {
               tipoIndiceSeleccionado = 'esOtraRegla';
               this.props.actualizarEstadoSeleccionSinoNuevaRegla(true);
             } else {
@@ -115,7 +118,24 @@ function (_React$Component) {
         }
 
         this.props.retornarIndiceSeleccionado(indexSeleccionado, tipoIndiceSeleccionado);
-        this.props.retornarIndiceSeleccionadoParaMostrarCampoObjetivo(this.props.reglas[index], tipoIndiceSeleccionado);
+        this.props.retornarIndiceSeleccionadoParaMostrarCampoObjetivo(this.props.reglas[indiceI], tipoIndiceSeleccionado, indiceI, indiceJ);
+      }
+    }
+  }, {
+    key: "getColor",
+    value: function getColor(posicionSegmentoEnCampo, nivel) {
+      if (colores[posicionSegmentoEnCampo] != undefined) {
+        if (colores[posicionSegmentoEnCampo][nivel] != undefined) {
+          colores = colores[posicionSegmentoEnCampo][nivel];
+        } else {
+          colores = colores[posicionSegmentoEnCampo][nivel % colores.length];
+        }
+      } else {
+        if (colores[posicionSegmentoEnCampo][nivel] != undefined) {
+          colores = colores[posicionSegmentoEnCampo % colores.length][nivel];
+        } else {
+          colores = colores[posicionSegmentoEnCampo % colores.length][nivel % colores.length];
+        }
       }
     }
   }, {
@@ -123,8 +143,8 @@ function (_React$Component) {
     value: function render() {
       var _this2 = this;
 
-      console.log('this.props.reglas');
-      console.log(this.props.reglas);
+      /*console.log('this.props.reglas');
+      console.log(this.props.reglas);*/
       return _react["default"].createElement("div", null, this.props.reglas.length == 0 ? _react["default"].createElement("div", {
         style: {
           width: "100%",
@@ -146,7 +166,7 @@ function (_React$Component) {
       }, !this.props.reglas[0][0].esCondicion ? _react["default"].createElement("div", {
         id: "reglaInit",
         onClick: function onClick() {
-          return _this2.seleccionRegla(0, "arriba");
+          return _this2.seleccionRegla(0, "arriba", 0);
         },
         className: "highlightFormulaBackground addPointer",
         style: {
@@ -155,7 +175,7 @@ function (_React$Component) {
         }
       }) : null, _react["default"].createElement("div", {
         onClick: function onClick() {
-          return _this2.seleccionRegla(0, "reglaUnica");
+          return _this2.seleccionRegla(0, "reglaUnica", 0);
         },
         className: "row",
         style: {
@@ -164,9 +184,9 @@ function (_React$Component) {
         }
       }, _react["default"].createElement("div", {
         id: "unicaRegla",
-        className: "addPointer",
+        className: "addPointer font-20 textoRegla",
         style: {
-          backgroundColor: "white",
+          backgroundColor: "#" + this.getColor(regla.posicionSegmentoEnCampo, regla.nivel),
           borderRadius: "15px",
           padding: "0% 2%",
           width: "100%",
@@ -176,7 +196,7 @@ function (_React$Component) {
       }, this.props.reglas[0][0].esCondicion ? "SI " : "", this.props.reglas[0][0].texto)), _react["default"].createElement("div", {
         id: "reglaFin",
         onClick: function onClick() {
-          return _this2.seleccionRegla(0, "abajo");
+          return _this2.seleccionRegla(0, "abajo", 0);
         },
         className: "highlightFormulaBackground addPointer",
         style: {
@@ -195,21 +215,21 @@ function (_React$Component) {
             width: "100%",
             height: "100%"
           }
-        }, reglaSegmento.map(function (regla, i) {
+        }, reglaSegmento.map(function (regla, j) {
           return _react["default"].createElement("div", {
             style: {
               width: "100%",
               height: "100%"
             }
-          }, i == 0 ? _react["default"].createElement("div", {
+          }, j == 0 ? _react["default"].createElement("div", {
             style: {
               width: "100%",
               height: "100%"
             }
           }, !regla.esCondicion ? _react["default"].createElement("div", {
-            id: "reglaInit" + i,
+            id: "reglaInit" + i + "" + j,
             onClick: function onClick() {
-              return _this2.seleccionRegla(i, "arriba");
+              return _this2.seleccionRegla(i, "arriba", j);
             },
             className: "highlightFormulaBackground addPointer",
             style: {
@@ -218,7 +238,7 @@ function (_React$Component) {
             }
           }) : null, _react["default"].createElement("div", {
             onClick: function onClick() {
-              return _this2.seleccionRegla(i, "condicion");
+              return _this2.seleccionRegla(i, "condicion", j);
             },
             className: "row",
             style: {
@@ -226,10 +246,10 @@ function (_React$Component) {
               margin: "1% 0% 1% 0%"
             }
           }, _react["default"].createElement("div", {
-            id: "regla" + i,
-            className: "addPointer",
+            id: "regla" + i + "" + j,
+            className: "addPointer font-20 textoRegla",
             style: {
-              backgroundColor: "white",
+              backgroundColor: "#" + _this2.getColor(regla.posicionSegmentoEnCampo, regla.nivel),
               borderRadius: "15px",
               padding: "0% 2%",
               width: 100 - _this2.props.reglas[i].nivel * 10 + "%",
@@ -237,9 +257,9 @@ function (_React$Component) {
               marginRight: "0"
             }
           }, regla.esCondicion ? "SI " : "", _this2.props.reglas[i].texto)), regla.ultimoSiAnidado ? _react["default"].createElement("div", {
-            id: "reglaFin" + i,
+            id: "reglaFin" + i + "" + j,
             onClick: function onClick() {
-              return _this2.seleccionRegla(i, "abajo");
+              return _this2.seleccionRegla(i, "abajo", j);
             },
             className: "highlightFormulaBackground addPointer",
             style: {
@@ -252,9 +272,9 @@ function (_React$Component) {
               height: "100%"
             }
           }, !regla.esCondicion ? _react["default"].createElement("div", {
-            id: "reglaInit" + i,
+            id: "reglaInit" + i + "" + j,
             onClick: function onClick() {
-              return _this2.seleccionRegla(i, "arriba");
+              return _this2.seleccionRegla(i, "arriba", j);
             },
             className: "highlightFormulaBackground addPointer",
             style: {
@@ -271,10 +291,10 @@ function (_React$Component) {
               margin: "1% 0% 1% 0%"
             }
           }, _react["default"].createElement("div", {
-            id: "regla" + i,
-            className: "addPointer",
+            id: "regla" + i + "" + j,
+            className: "addPointer font-20 textoRegla",
             style: {
-              backgroundColor: "white",
+              backgroundColor: "#" + _this2.getColor(regla.posicionSegmentoEnCampo, regla.nivel),
               borderRadius: "15px",
               padding: "0% 2%",
               width: 100 - _this2.props.reglas[i].nivel * 10 + "%",
@@ -282,9 +302,9 @@ function (_React$Component) {
               marginRight: "0"
             }
           }, regla.esCondicion ? "SI " : "", _this2.props.reglas[i].texto)), regla.ultimoSiAnidado ? _react["default"].createElement("div", {
-            id: "reglaFin" + i,
+            id: "reglaFin" + i + "" + j,
             onClick: function onClick() {
-              return _this2.seleccionRegla(i, "abajo");
+              return _this2.seleccionRegla(i, "abajo", j);
             },
             className: "highlightFormulaBackground addPointer",
             style: {

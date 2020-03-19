@@ -161,7 +161,7 @@ export default class EditarRiesgo extends React.Component {
                                             <select id="riesgoPadre" className="form-control" defaultValue={this.props.padreRiesgo}>
                                                 <option value="-1">Ninguno</option>
                                                 {this.props.riesgos.map((riesgo, i) =>
-                                                    <option value={riesgo.ID}>{riesgo.nombre}</option>
+                                                    <option value={riesgo.ID} key={riesgo.ID}>{riesgo.nombre}</option>
                                                 )}
                                             </select>
                                         </div>
