@@ -35,7 +35,11 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
+var mostrarFuenteDatoVariableGlobal = false;
+var mostrarFuenteDatoFormaGlobal = false;
+var mostrarFuenteDatoExcelGlobal = true;
 /*COMPONENTE QUE CONTROLA TIPOS DE VARIABLES (EXCEL, FORMA, VARIABLE)*/
+
 var CrearVariable =
 /*#__PURE__*/
 function (_React$Component) {
@@ -48,9 +52,9 @@ function (_React$Component) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(CrearVariable).call(this, props));
     _this.state = {
-      mostrarFuenteDatoVariable: false,
-      mostrarFuenteDatoForma: false,
-      mostrarFuenteDatoExcel: true
+      mostrarFuenteDatoVariable: mostrarFuenteDatoVariableGlobal,
+      mostrarFuenteDatoForma: mostrarFuenteDatoFormaGlobal,
+      mostrarFuenteDatoExcel: mostrarFuenteDatoExcelGlobal
     };
     _this.mostrarFuenteDatoVariable = _this.mostrarFuenteDatoVariable.bind(_assertThisInitialized(_this));
     _this.mostrarFuenteDatoForma = _this.mostrarFuenteDatoForma.bind(_assertThisInitialized(_this));
@@ -61,6 +65,9 @@ function (_React$Component) {
   _createClass(CrearVariable, [{
     key: "mostrarFuenteDatoVariable",
     value: function mostrarFuenteDatoVariable() {
+      mostrarFuenteDatoVariableGlobal = true;
+      mostrarFuenteDatoFormaGlobal = false;
+      mostrarFuenteDatoExcelGlobal = false;
       this.setState({
         mostrarFuenteDatoVariable: true,
         mostrarFuenteDatoForma: false,
@@ -70,6 +77,9 @@ function (_React$Component) {
   }, {
     key: "mostrarFuenteDatoForma",
     value: function mostrarFuenteDatoForma() {
+      mostrarFuenteDatoVariableGlobal = false;
+      mostrarFuenteDatoFormaGlobal = true;
+      mostrarFuenteDatoExcelGlobal = false;
       this.setState({
         mostrarFuenteDatoVariable: false,
         mostrarFuenteDatoForma: true,
@@ -79,6 +89,9 @@ function (_React$Component) {
   }, {
     key: "mostrarFuenteDatoExcel",
     value: function mostrarFuenteDatoExcel() {
+      mostrarFuenteDatoVariableGlobal = false;
+      mostrarFuenteDatoFormaGlobal = false;
+      mostrarFuenteDatoExcelGlobal = true;
       this.setState({
         mostrarFuenteDatoVariable: false,
         mostrarFuenteDatoForma: false,
@@ -144,15 +157,21 @@ function (_React$Component) {
         guardarVariable: this.props.guardarVariable,
         crearAtributoVariable: this.props.crearAtributoVariable,
         cambioDeArreglosDeAtributos: this.props.cambioDeArreglosDeAtributos,
-        retornoTipoDeAsignacion: this.props.retornoTipoDeAsignacion,
         nombreVariable: this.props.nombreVariable,
         actualizarNombreVariable: this.props.actualizarNombreVariable,
+        actualizarEstadoSiEsObjeto: this.props.actualizarEstadoSiEsObjeto,
+        actualizarEstadoSiEsInstruccionSQL: this.props.actualizarEstadoSiEsInstruccionSQL,
         descripcionVariable: this.props.descripcionVariable,
         actualizarDescripcionVariable: this.props.actualizarDescripcionVariable,
         nombreCampoNuevoAtributosVario: this.props.nombreCampoNuevoAtributosVario,
+        tipoNuevaVariable: this.props.tipoNuevaVariable,
         actualizarNombreCampoNuevoAtributosVario: this.props.actualizarNombreCampoNuevoAtributosVario,
         atributos: this.props.atributos
-      }) : null, this.state.mostrarFuenteDatoForma ? _react["default"].createElement(_FuenteDatoForma["default"], null) : null, this.state.mostrarFuenteDatoExcel ? _react["default"].createElement(_FuenteDatoExcel["default"], null) : null), _react["default"].createElement("div", {
+      }) : null, this.state.mostrarFuenteDatoForma ? _react["default"].createElement(_FuenteDatoForma["default"], {
+        pool: this.props.pool
+      }) : null, this.state.mostrarFuenteDatoExcel ? _react["default"].createElement(_FuenteDatoExcel["default"], {
+        pool: this.props.pool
+      }) : null), _react["default"].createElement("div", {
         className: "border-bottom",
         style: {
           width: "100%",

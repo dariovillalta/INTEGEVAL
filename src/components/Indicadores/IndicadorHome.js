@@ -2,7 +2,7 @@ import React from 'react';
 import sql from 'mssql';
 
 import SeleccionarIndicador from './SeleccionarIndicador.js';
-import CrearIndicador from './CrearIndicador.js';
+import CrearIndicador from './CrearIndicador/CrearIndicador.js';
 import EditarIndicador from './EditarIndicador.js';
 
 export default class IndicadorHome extends React.Component {
@@ -74,7 +74,7 @@ export default class IndicadorHome extends React.Component {
         if(this.state.componenteAMostrar.localeCompare("selIndicador") == 0) {
             return (
                 <div>
-                    <SeleccionarIndicador pool={this.props.pool} configuracionHome={this.props.configuracionHome} terminoSeleccionIndicador={this.terminoSeleccionIndicador} goCrearIndicador={this.goCrearIndicador} showRiesgos={this.props.showRiesgos}> </SeleccionarIndicador>
+                    <SeleccionarIndicador pool={this.props.pool} configuracionHome={this.props.configuracionHome} terminoSeleccionIndicador={this.terminoSeleccionIndicador} goCrearIndicador={this.goCrearIndicador} showRiesgos={this.props.showRiesgos} showRiesgos={this.props.showRiesgos} updateBanderaCrearRiesgoTrue={this.props.updateBanderaCrearRiesgoTrue}> </SeleccionarIndicador>
                 </div>
             );
         } else if(this.state.componenteAMostrar.localeCompare("crearIndicador") == 0) {

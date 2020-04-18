@@ -12,6 +12,7 @@ export default class SeleccionarIndicador extends React.Component {
         }
         this.getIndicators = this.getIndicators.bind(this);
         this.insertIndicator = this.insertIndicator.bind(this);
+        this.irCrearRiesgos = this.irCrearRiesgos.bind(this);
     }
 
     componentDidMount() {
@@ -78,6 +79,11 @@ export default class SeleccionarIndicador extends React.Component {
         }); // fin transaction
     }
 
+    irCrearRiesgos () {
+        this.props.updateBanderaCrearRiesgoTrue();
+        this.props.showRiesgos();
+    }
+
     render() {
         return (
             <div>
@@ -121,7 +127,7 @@ export default class SeleccionarIndicador extends React.Component {
                             </div>
                         ))}
                         { this.state.riesgos.length == 0 ? (
-                            <a className={"btn btn-outline-dark btn-block btnWhiteColorHover fontSize1EM"}>No existen riesgos creados, presione para crear</a>
+                            <a className={"btn btn-outline-dark btn-block btnWhiteColorHover fontSize1EM"} onClick={this.irCrearRiesgos}>No existen riesgos creados, presione para crear</a>
                         ) : (
                             null
                         )}

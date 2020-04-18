@@ -63,63 +63,7 @@ function (_React$Component) {
       })), _react["default"].createElement("div", {
         className: "collapse navbar-collapse",
         id: "navbarNav"
-      }, _react["default"].createElement("ul", {
-        className: "navbar-nav flex-column"
-      }, _react["default"].createElement("li", {
-        className: "nav-divider"
-      }, _react["default"].createElement("h3", {
-        style: {
-          color: "#b0bec5"
-        }
-      }, "Menu")), _react["default"].createElement("li", {
-        className: "nav-item "
-      }, _react["default"].createElement("a", {
-        className: "nav-link",
-        onClick: this.props.showHome,
-        href: "#"
-      }, _react["default"].createElement("i", {
-        className: "fa fa-fw fa-user-circle"
-      }), _react["default"].createElement("h3", {
-        style: {
-          color: "white"
-        }
-      }, "Inicio"))), _react["default"].createElement("li", {
-        className: "nav-item "
-      }, _react["default"].createElement("a", {
-        className: "nav-link",
-        onClick: this.props.showCalulo,
-        href: "#"
-      }, _react["default"].createElement("i", {
-        className: "fa fa-fw fa-user-circle"
-      }), _react["default"].createElement("h3", {
-        style: {
-          color: "white"
-        }
-      }, "Iniciar C\xE1lculo"))), _react["default"].createElement("li", {
-        className: "nav-item "
-      }, _react["default"].createElement("a", {
-        className: "nav-link",
-        onClick: this.props.showChooseReports,
-        href: "#"
-      }, _react["default"].createElement("i", {
-        className: "fa fa-fw fa-user-circle"
-      }), _react["default"].createElement("h3", {
-        style: {
-          color: "white"
-        }
-      }, "Reporter\xEDa"))), _react["default"].createElement("li", {
-        className: "nav-item "
-      }, _react["default"].createElement("a", {
-        className: "nav-link",
-        onClick: this.props.showGraphics,
-        href: "#"
-      }, _react["default"].createElement("i", {
-        className: "fa fa-fw fa-user-circle"
-      }), _react["default"].createElement("h3", {
-        style: {
-          color: "white"
-        }
-      }, "Gr\xE1ficos")))))))));
+      }, this.props.navbar)))));
     }
   }]);
 

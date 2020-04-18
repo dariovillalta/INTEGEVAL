@@ -35,8 +35,6 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
-var isMounted = false;
-
 var RiesgoHome =
 /*#__PURE__*/
 function (_React$Component) {
@@ -48,28 +46,29 @@ function (_React$Component) {
     _classCallCheck(this, RiesgoHome);
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(RiesgoHome).call(this, props));
+    var componente = "selRiesgo";
+    if (_this.props.crearRiesgo) componente = "crearRiesgo";
     _this.state = {
       riesgos: [],
       pesoDisponible: 0,
       idRiesgoSeleccionado: -1,
-      componenteActual: "selRiesgo"
+      componenteActual: componente
     };
     _this.getRiesgos = _this.getRiesgos.bind(_assertThisInitialized(_this));
     _this.acutalizarPesoMaximoDisponible = _this.acutalizarPesoMaximoDisponible.bind(_assertThisInitialized(_this));
     _this.crearRiesgo = _this.crearRiesgo.bind(_assertThisInitialized(_this));
-    _this.retornoSeleccionRiesgoSameComponent = _this.retornoSeleccionRiesgoSameComponent.bind(_assertThisInitialized(_this));
-    _this.retornoSeleccionRiesgoDiffComponent = _this.retornoSeleccionRiesgoDiffComponent.bind(_assertThisInitialized(_this));
+    _this.retornoSeleccionRiesgo = _this.retornoSeleccionRiesgo.bind(_assertThisInitialized(_this));
     _this.editarRiesgo = _this.editarRiesgo.bind(_assertThisInitialized(_this));
-    _this.retornoEditarRiesgo = _this.retornoEditarRiesgo.bind(_assertThisInitialized(_this));
     _this.terminoCrearRiesgoPasarAEdit = _this.terminoCrearRiesgoPasarAEdit.bind(_assertThisInitialized(_this));
+    _this.deleteRiesgo = _this.deleteRiesgo.bind(_assertThisInitialized(_this));
     return _this;
   }
 
   _createClass(RiesgoHome, [{
     key: "componentDidMount",
     value: function componentDidMount() {
-      isMounted = true;
       this.getRiesgos();
+      this.props.updateBanderaCrearRiesgoFalse();
     }
   }, {
     key: "getRiesgos",
@@ -119,11 +118,6 @@ function (_React$Component) {
       });
     }
   }, {
-    key: "componentWillUnmount",
-    value: function componentWillUnmount() {
-      isMounted = false;
-    }
-  }, {
     key: "crearRiesgo",
     value: function crearRiesgo() {
       this.setState({
@@ -131,24 +125,12 @@ function (_React$Component) {
       });
     }
   }, {
-    key: "retornoSeleccionRiesgoSameComponent",
-    value: function retornoSeleccionRiesgoSameComponent() {
+    key: "retornoSeleccionRiesgo",
+    value: function retornoSeleccionRiesgo() {
       this.setState({
         idRiesgoSeleccionado: -1,
         componenteActual: "selRiesgo"
       });
-    }
-  }, {
-    key: "retornoSeleccionRiesgoDiffComponent",
-    value: function retornoSeleccionRiesgoDiffComponent() {
-      this.props.showRiesgos();
-      var self = this;
-      setTimeout(function () {
-        self.setState({
-          idRiesgoSeleccionado: -1,
-          componenteActual: "selRiesgo"
-        });
-      }, 500);
     }
   }, {
     key: "editarRiesgo",
@@ -161,32 +143,7 @@ function (_React$Component) {
         toleranciaRiesgo: toleranciaRiesgo,
         valorIdealRiesgo: valorIdealRiesgo,
         padreRiesgo: padreRiesgo
-      });
-    }
-  }, {
-    key: "retornoEditarRiesgo",
-    value: function retornoEditarRiesgo() {
-      this.props.showRiesgos();
-      var self = this;
-
-      if (isMounted) {
-        console.log("SI");
-      } else {
-        console.log("NO");
-      }
-
-      setTimeout(function () {
-        if (isMounted) {
-          console.log("SI");
-        } else {
-          console.log("NO");
-        }
-
-        console.log(self);
-        self.setState({
-          componenteActual: "editarRiesgo"
-        });
-      }, 3500);
+      }, console.log(this.state.idRiesgoSeleccionado));
     }
   }, {
     key: "terminoCrearRiesgoPasarAEdit",
@@ -219,11 +176,40 @@ function (_React$Component) {
       }); // fin transaction
     }
   }, {
+    key: "deleteRiesgo",
+    value: function deleteRiesgo(index) {
+      var _this4 = this;
+
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("delete from Riesgos where ID = " + index, function (err, result) {
+          if (err) {
+            if (!rolledBack) {
+              console.log(err);
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              alert("Riesgo Eliminado");
+
+              _this4.getRiesgos();
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
     key: "render",
     value: function render() {
       if (this.state.componenteActual.localeCompare("selRiesgo") == 0) {
         return _react["default"].createElement("div", null, _react["default"].createElement(_SeleccionarRiesgo["default"], {
           pool: this.props.pool,
+          deleteRiesgo: this.deleteRiesgo,
           configuracionHome: this.props.configuracionHome,
           crearRiesgo: this.crearRiesgo,
           editarRiesgo: this.editarRiesgo,
@@ -232,11 +218,9 @@ function (_React$Component) {
       } else if (this.state.componenteActual.localeCompare("crearRiesgo") == 0) {
         return _react["default"].createElement("div", null, _react["default"].createElement(_CrearRiesgo["default"], {
           pool: this.props.pool,
-          showFormula: this.props.showFormula,
           showCondicionVar: this.props.showCondicionVar,
           showRiesgos: this.props.showRiesgos,
-          retornoSeleccionRiesgo: this.retornoSeleccionRiesgoSameComponent,
-          retornoSeleccionRiesgoUmbral: this.retornoSeleccionRiesgoDiffComponent,
+          retornoSeleccionRiesgo: this.retornoSeleccionRiesgo,
           configuracionHome: this.props.configuracionHome,
           updateNavBar: this.props.updateNavBar,
           showUmbralHome: this.props.showUmbralHome,
@@ -248,11 +232,9 @@ function (_React$Component) {
       } else if (this.state.componenteActual.localeCompare("editarRiesgo") == 0) {
         return _react["default"].createElement("div", null, _react["default"].createElement(_EditarRiesgo["default"], {
           pool: this.props.pool,
-          showFormula: this.props.showFormula,
           showCondicionVar: this.props.showCondicionVar,
           showRiesgos: this.props.showRiesgos,
-          retornoSeleccionRiesgo: this.retornoSeleccionRiesgoSameComponent,
-          retornoSeleccionRiesgoUmbral: this.retornoSeleccionRiesgoDiffComponent,
+          retornoSeleccionRiesgo: this.retornoSeleccionRiesgo,
           configuracionHome: this.props.configuracionHome,
           updateNavBar: this.props.updateNavBar,
           showUmbralHome: this.props.showUmbralHome,

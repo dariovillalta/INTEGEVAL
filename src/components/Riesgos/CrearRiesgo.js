@@ -10,30 +10,7 @@ export default class CrearRiesgo extends React.Component {
         this.state = {
             x: 0
         }
-        this.goCrearUmbral = this.goCrearUmbral.bind(this);
         this.crearRiesgo = this.crearRiesgo.bind(this);
-    }
-
-    goCrearUmbral () {
-        var navbar = <div className={"row"}>
-            <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
-                <div className={"page-header"}>
-                    <h2 className={"pageheader-title"}>Configuraci&oacute;n</h2>
-                    <div className={"page-breadcrumb"}>
-                        <nav aria-label="breadcrumb">
-                            <ol className={"breadcrumb"}>
-                                <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.props.configuracionHome}><a href="#" className={"breadcrumb-link"}>Configuraci&oacute;n</a></li>
-                                <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.props.retornoSeleccionRiesgo}><a href="#" className={"breadcrumb-link"}>Riesgos</a></li>
-                                <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.props.showVariables}><a href="#" className={"breadcrumb-link"}>Editar Riesgo</a></li>
-                                <li className={"breadcrumb-item active font-16"} aria-current="page">Umbrales</li>
-                            </ol>
-                        </nav>
-                    </div>
-                </div>
-            </div>
-        </div>;
-        this.props.updateNavBar(navbar);
-        this.props.showUmbralHome();
     }
 
     crearRiesgo () {
@@ -171,7 +148,7 @@ export default class CrearRiesgo extends React.Component {
                                             <select id="riesgoPadre" className="form-control">
                                                 <option value="-1">Ninguno</option>
                                                 {this.props.riesgos.map((riesgo, i) =>
-                                                    <option value={riesgo.ID}>{riesgo.nombre}</option>
+                                                    <option value={riesgo.ID} key={riesgo.ID}>{riesgo.nombre}</option>
                                                 )}
                                             </select>
                                         </div>

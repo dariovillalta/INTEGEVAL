@@ -95,7 +95,19 @@ function (_React$Component) {
           borderRight: "1px solid #e6e6f2",
           borderBottom: "1px solid #e6e6f2"
         }
-      }, this.props.titulo)), _react["default"].createElement("br", null), !this.props.mostrarEsObjeto ? _react["default"].createElement("div", {
+      }, this.props.titulo)), _react["default"].createElement("br", null), !this.props.mostrarEsObjeto ? _react["default"].createElement("div", null, this.props.mostrarInstruccionSQL ? _react["default"].createElement("div", {
+        className: "row"
+      }, _react["default"].createElement("div", {
+        className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
+      }, _react["default"].createElement("br", null), _react["default"].createElement("a", {
+        className: "btn btn-success btn-block btnWhiteColorHover font-bold font-20",
+        style: {
+          color: "#fafafa"
+        },
+        onClick: function onClick() {
+          return _this2.props.goCreateVariableFieldSQL();
+        }
+      }, "Crear Instrucci\xF3n SQL "), _react["default"].createElement("br", null))) : _react["default"].createElement("div", {
         className: "row"
       }, _react["default"].createElement("div", {
         className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
@@ -119,7 +131,7 @@ function (_React$Component) {
       }, _react["default"].createElement("a", {
         className: "breadcrumb-item active font-20",
         "aria-current": "page"
-      }, this.props.tipoVariable))), _react["default"].createElement("br", null), _react["default"].createElement("a", {
+      }, this.props.tipoNuevaVariable))), _react["default"].createElement("br", null), _react["default"].createElement("a", {
         className: "btn btn-success btn-block btnWhiteColorHover font-bold font-20",
         style: {
           color: "#fafafa"
@@ -127,15 +139,26 @@ function (_React$Component) {
         onClick: function onClick() {
           return _this2.actualizarIndiceAtributoSeleccionado(-1);
         }
-      }, "(Condiciones | Instrucciones) para el C\xE1lculo "), _react["default"].createElement("br", null), _react["default"].createElement("a", {
+      }, "Crear Instrucci\xF3n Personalizada "), _react["default"].createElement("br", null)))) : _react["default"].createElement("div", null, this.props.mostrarInstruccionSQL ? _react["default"].createElement("div", {
+        className: "row"
+      }, _react["default"].createElement("div", {
+        className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
+      }, _react["default"].createElement("br", null), _react["default"].createElement("div", {
+        className: "row",
+        style: {
+          width: "100%"
+        }
+      }, _react["default"].createElement("div", {
+        className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
+      }, _react["default"].createElement("a", {
         className: "btn btn-success btn-block btnWhiteColorHover font-bold font-20",
         style: {
           color: "#fafafa"
         },
         onClick: function onClick() {
-          return _this2.goCreateVariableFieldSQLTemp();
+          return _this2.props.goCreateVariableFieldSQL();
         }
-      }, "Crear Instrucci\xF3n SQL "), _react["default"].createElement("br", null))) : _react["default"].createElement("div", {
+      }, "Crear Instrucci\xF3n SQL "))), _react["default"].createElement("br", null))) : _react["default"].createElement("div", {
         className: "row"
       }, _react["default"].createElement("div", {
         className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
@@ -186,7 +209,14 @@ function (_React$Component) {
       }, _react["default"].createElement("a", {
         className: "breadcrumb-item active font-20",
         "aria-current": "page"
-      }, this.props.tipoVariable))), _react["default"].createElement("br", null), _react["default"].createElement("a", {
+      }, this.props.tipoNuevaVariable))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
+        className: "row",
+        style: {
+          width: "100%"
+        }
+      }, _react["default"].createElement("div", {
+        className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
+      }, _react["default"].createElement("a", {
         className: "btn btn-success btn-block btnWhiteColorHover font-bold font-20",
         style: {
           color: "#fafafa"
@@ -194,15 +224,7 @@ function (_React$Component) {
         onClick: function onClick() {
           return _this2.actualizarIndiceAtributoSeleccionado(-1);
         }
-      }, "(Condiciones | Instrucciones) para el C\xE1lculo "), _react["default"].createElement("br", null), _react["default"].createElement("a", {
-        className: "btn btn-success btn-block btnWhiteColorHover font-bold font-20",
-        style: {
-          color: "#fafafa"
-        },
-        onClick: function onClick() {
-          return _this2.props.goCreateVariableFieldSQL();
-        }
-      }, "Crear Instrucci\xF3n SQL "), _react["default"].createElement("br", null), _react["default"].createElement("div", {
+      }, "Crear Instrucci\xF3n Personalizada "))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
         className: "row",
         style: {
           display: "flex",
@@ -275,21 +297,8 @@ function (_React$Component) {
           onClick: function onClick() {
             return _this2.actualizarIndiceAtributoSeleccionado(i);
           }
-        }, "(Condiciones | Instrucciones) para el C\xE1lculo "), _react["default"].createElement("br", null), _react["default"].createElement("div", {
-          className: "row",
-          style: {
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center"
-          }
-        }, _react["default"].createElement("a", {
-          className: "btn btn-primary btnWhiteColorHover font-bold font-20",
-          style: {
-            color: "#fafafa"
-          },
-          onClick: _this2.props.crearAtributoVariable
-        }, "Editar Atributo")), _react["default"].createElement("br", null));
-      }))));
+        }, "Editar Instrucci\xF3n Personalizada "), _react["default"].createElement("br", null));
+      })))));
     }
   }]);
 

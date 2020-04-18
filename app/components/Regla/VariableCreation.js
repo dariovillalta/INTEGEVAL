@@ -79,7 +79,10 @@ function (_React$Component) {
       textoValor: '{valor}',
       showModalCampo: false,
       showModalOperacion: false,
-      showModalValor: false
+      showModalValor: false,
+      crearSelected: true,
+      editarSelected: false,
+      eliminarSelected: false
     };
     _this.retornoSeleccionVariable = _this.retornoSeleccionVariable.bind(_assertThisInitialized(_this));
     _this.retornoSeleccionOperacion = _this.retornoSeleccionOperacion.bind(_assertThisInitialized(_this));
@@ -98,12 +101,24 @@ function (_React$Component) {
     _this.dismissReglaNewError = _this.dismissReglaNewError.bind(_assertThisInitialized(_this));
     _this.showSuccesMessage = _this.showSuccesMessage.bind(_assertThisInitialized(_this));
     _this.dismissMessageModal = _this.dismissMessageModal.bind(_assertThisInitialized(_this));
+    _this.handleMouseHoverAgregar = _this.handleMouseHoverAgregar.bind(_assertThisInitialized(_this));
+    _this.handleMouseHoverModificar = _this.handleMouseHoverModificar.bind(_assertThisInitialized(_this));
+    _this.handleMouseHoverEliminar = _this.handleMouseHoverEliminar.bind(_assertThisInitialized(_this));
+    _this.handleMouseHoverExit = _this.handleMouseHoverExit.bind(_assertThisInitialized(_this));
+    _this.verificarBotonSel = _this.verificarBotonSel.bind(_assertThisInitialized(_this));
+    _this.goCrear = _this.goCrear.bind(_assertThisInitialized(_this));
+    _this.goModificar = _this.goModificar.bind(_assertThisInitialized(_this));
+    _this.goEliminar = _this.goEliminar.bind(_assertThisInitialized(_this));
+    _this.verificarAccion = _this.verificarAccion.bind(_assertThisInitialized(_this));
+    _this.isValidDate = _this.isValidDate.bind(_assertThisInitialized(_this));
     return _this;
   }
 
   _createClass(VariableCreation, [{
     key: "componentDidMount",
-    value: function componentDidMount() {}
+    value: function componentDidMount() {
+      this.verificarBotonSel();
+    }
   }, {
     key: "retornoSeleccionVariable",
     value: function retornoSeleccionVariable(campoSeleccionadoInput) {
@@ -467,6 +482,141 @@ function (_React$Component) {
       this.setState({
         textoValor: valor
       });
+
+      if (this.state.tipoCampo.esNumero) {
+        var numero = parseFloat(valor);
+
+        if (!isNaN(numero)) {
+          var valorARetornar = "MANUAL=NUMERO[" + numero + "]";
+          this.props.retornarValor(valorARetornar, valor);
+        } else if (this.state.campoSeleccionadoNombre.localeCompare("{campo}") != 0) {
+          alert('Valor Ingresado no es un número válido');
+        }
+      } else if (this.state.tipoCampo.esBoolean) {
+        if (numero.localeCompare("true") == 0 || numero.localeCompare("false") == 0) {
+          var valorARetornar = "MANUAL=BOOL[" + valor + "]";
+          this.props.retornarValor(valorARetornar, valor);
+        } else if (this.state.campoSeleccionadoNombre.localeCompare("{campo}") != 0) {
+          alert('Valor Ingresado no es un valor booleano válido');
+        }
+      } else if (this.state.tipoCampo.esFecha) {
+        var fecha = null;
+
+        if (valor.indexOf("-") != -1 && valor.split("-").length > 2) {
+          fecha = new Date(valor.split("-")[0], valor.split("-")[1], valor.split("-")[2]);
+        } else if (valor.indexOf("/") != -1 && valor.split("/").length > 2) {
+          fecha = new Date(valor.split("/")[0], valor.split("/")[1], valor.split("/")[2]);
+        }
+
+        if (fecha != null && this.isValidDate(fecha)) {
+          var valorARetornar = "MANUAL=FECHA[";
+
+          if (valor.indexOf("-") != -1 && valor.split("-").length > 2) {
+            valorARetornar += valor.split("-")[0], valor.split("-")[1], valor.split("-")[2] + "]";
+          } else if (valor.indexOf("/") != -1 && valor.split("/").length > 2) {
+            valorARetornar += valor.split("/")[0], valor.split("/")[1], valor.split("/")[2] + "]";
+          }
+
+          this.props.retornarValor(valorARetornar, valor);
+        } else if (this.state.campoSeleccionadoNombre.localeCompare("{campo}") != 0) {
+          alert('Valor Ingresado no es una fecha válida');
+        }
+      } else if (this.state.tipoCampo.esTexto) {
+        if (valor.length > 0 || valor.length < 984) {
+          var valorARetornar = "MANUAL=VARCHAR[" + valor + "]";
+          this.props.retornarValor(valorARetornar, valor);
+        } else if (this.state.campoSeleccionadoNombre.localeCompare("{campo}") != 0) {
+          if (valor.length > 0) alert('Valor Ingresado debe tener una longitud mayor a 0');else alert('Valor Ingresado debe tener una longitud menor a 984');
+        }
+      }
+    }
+  }, {
+    key: "isValidDate",
+    value: function isValidDate(fecha) {
+      if (Object.prototype.toString.call(fecha) === "[object Date]") {
+        if (isNaN(fecha.getTime())) {
+          alert("Ingrese una fecha valida.");
+          return false;
+        } else {
+          return true;
+        }
+      } else {
+        alert("Ingrese una fecha valida.");
+        return false;
+      }
+    }
+  }, {
+    key: "handleMouseHoverAgregar",
+    value: function handleMouseHoverAgregar() {
+      $("#crearButton").addClass("onHoverOpcionUmbralSinCambioHeight");
+      $("#modificarButton").removeClass("onHoverOpcionUmbralSinCambioHeight");
+      $("#eliminarButton").removeClass("onHoverOpcionUmbralSinCambioHeight");
+    }
+  }, {
+    key: "handleMouseHoverModificar",
+    value: function handleMouseHoverModificar() {
+      $("#crearButton").removeClass("onHoverOpcionUmbralSinCambioHeight");
+      $("#modificarButton").addClass("onHoverOpcionUmbralSinCambioHeight");
+      $("#eliminarButton").removeClass("onHoverOpcionUmbralSinCambioHeight");
+    }
+  }, {
+    key: "handleMouseHoverEliminar",
+    value: function handleMouseHoverEliminar() {
+      $("#crearButton").removeClass("onHoverOpcionUmbralSinCambioHeight");
+      $("#modificarButton").removeClass("onHoverOpcionUmbralSinCambioHeight");
+      $("#eliminarButton").addClass("onHoverOpcionUmbralSinCambioHeight");
+    }
+  }, {
+    key: "handleMouseHoverExit",
+    value: function handleMouseHoverExit() {
+      $("#crearButton").removeClass("onHoverOpcionUmbralSinCambioHeight");
+      $("#modificarButton").removeClass("onHoverOpcionUmbralSinCambioHeight");
+      $("#eliminarButton").removeClass("onHoverOpcionUmbralSinCambioHeight");
+      this.verificarBotonSel();
+    }
+  }, {
+    key: "verificarBotonSel",
+    value: function verificarBotonSel() {
+      if (this.state.crearSelected) {
+        $("#crearButton").addClass("onHoverOpcionUmbralSinCambioHeight");
+        $("#modificarButton").removeClass("onHoverOpcionUmbralSinCambioHeight");
+        $("#eliminarButton").removeClass("onHoverOpcionUmbralSinCambioHeight");
+      } else if (this.state.editarSelected) {
+        $("#crearButton").removeClass("onHoverOpcionUmbralSinCambioHeight");
+        $("#modificarButton").addClass("onHoverOpcionUmbralSinCambioHeight");
+        $("#eliminarButton").removeClass("onHoverOpcionUmbralSinCambioHeight");
+      } else if (this.state.eliminarSelected) {
+        $("#crearButton").removeClass("onHoverOpcionUmbralSinCambioHeight");
+        $("#modificarButton").removeClass("onHoverOpcionUmbralSinCambioHeight");
+        $("#eliminarButton").addClass("onHoverOpcionUmbralSinCambioHeight");
+      }
+    }
+  }, {
+    key: "goCrear",
+    value: function goCrear() {
+      this.setState({
+        crearSelected: true,
+        editarSelected: false,
+        eliminarSelected: false
+      });
+    }
+  }, {
+    key: "goModificar",
+    value: function goModificar() {
+      this.setState({
+        crearSelected: false,
+        editarSelected: true,
+        eliminarSelected: false
+      });
+    }
+  }, {
+    key: "goEliminar",
+    value: function goEliminar() {
+      this.setState({
+        crearSelected: false,
+        editarSelected: false,
+        eliminarSelected: true
+      });
     }
   }, {
     key: "showCampoModal",
@@ -563,6 +713,11 @@ function (_React$Component) {
       });
     }
   }, {
+    key: "verificarAccion",
+    value: function verificarAccion() {
+      if (this.state.crearSelected) this.props.callbackCrearRegla(false);else if (this.state.editarSelected) this.props.callbackModificarRegla(false);else this.props.callbackEliminarRegla(false);
+    }
+  }, {
     key: "render",
     value: function render() {
       var _this3 = this;
@@ -576,7 +731,7 @@ function (_React$Component) {
       }, "Crear Condici\xF3n (Instrucci\xF3n)"), _react["default"].createElement("div", {
         className: "font-24",
         style: {
-          height: "50px",
+          minHeight: "50px",
           width: "100%",
           display: "flex",
           alignItems: "center",
@@ -602,10 +757,16 @@ function (_React$Component) {
         esBoolean: this.esBoolean,
         esFecha: this.esFecha,
         esTexto: this.esTexto,
-        conexiones: this.props.conexiones,
-        camposConexiones: this.props.camposConexiones,
-        variables: this.props.variables,
-        camposVariables: this.props.camposVariables,
+        tablas: this.props.tablas,
+        camposTablas: this.props.camposTablas,
+        variablesEscalares: this.props.variablesEscalares,
+        objetos: this.props.objetos,
+        camposDeObjetos: this.props.camposDeObjetos,
+        excel: this.props.excel,
+        camposDeExcel: this.props.camposDeExcel,
+        formas: this.props.formas,
+        variablesSQL: this.props.variablesSQL,
+        camposVariablesSQL: this.props.camposVariablesSQL,
         retornoSeleccionVariable: this.retornoSeleccionVariable
       })), _react["default"].createElement("div", {
         className: "font-18 addPointer abrirModalCrearCondicionOnHover",
@@ -627,16 +788,7 @@ function (_React$Component) {
         esFecha: this.state.tipoCampo.esFecha,
         esTexto: this.state.tipoCampo.esTexto,
         retornoSeleccionOperacion: this.retornoSeleccionOperacion
-      })), _react["default"].createElement(_Valor["default"], {
-        esNumero: this.state.tipoCampo.esNumero,
-        esBoolean: this.state.tipoCampo.esBoolean,
-        esFecha: this.state.tipoCampo.esFecha,
-        esTexto: this.state.tipoCampo.esTexto,
-        camposDropdown: this.props.camposDropdown,
-        valoresDropdown: this.props.valoresDropdown,
-        actualizarValor: this.actualizarValor,
-        pool: this.props.pool
-      }, " "), _react["default"].createElement("br", null), _react["default"].createElement(_Modal["default"], {
+      })), _react["default"].createElement(_Modal["default"], {
         show: this.state.showModalValor,
         titulo: "Seleccionar Valores a Comparar con el Campo",
         onClose: this.closeValorModal
@@ -645,11 +797,22 @@ function (_React$Component) {
         esBoolean: this.state.tipoCampo.esBoolean,
         esFecha: this.state.tipoCampo.esFecha,
         esTexto: this.state.tipoCampo.esTexto,
+        retornarValor: this.props.retornarValor,
         camposDropdown: this.props.camposDropdown,
         valoresDropdown: this.props.valoresDropdown,
         actualizarValor: this.actualizarValor,
         pool: this.props.pool
       })), _react["default"].createElement("div", {
+        className: "font-18 addPointer abrirModalCrearCondicionOnHover",
+        onClick: this.showValorModal,
+        style: {
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          borderBottom: "3px solid #d2d2e4"
+        }
+      }, _react["default"].createElement("h4", null, "Seleccionar Valor a Aplicar")), _react["default"].createElement("div", {
         className: "text-center",
         style: {
           display: this.props.mostrarOpcionSino ? "" : "none"
@@ -663,7 +826,7 @@ function (_React$Component) {
           alignItems: "center",
           justifyContent: "center"
         }
-      }, _react["default"].createElement("h4", null, "Seleccionar Estilo Condici\xF3n")), _react["default"].createElement("label", {
+      }, _react["default"].createElement("h4", null, "Seleccionar Tipo Condici\xF3n")), _react["default"].createElement("label", {
         className: "custom-control custom-radio custom-control-inline"
       }, _react["default"].createElement("input", {
         id: "siRADIO",
@@ -700,18 +863,73 @@ function (_React$Component) {
         titulo: this.state.mensajeModal.titulo,
         mensaje: this.state.mensajeModal.mensaje
       }, " ") : _react["default"].createElement("span", null), _react["default"].createElement("div", {
+        className: "row"
+      }, _react["default"].createElement("div", {
+        className: "col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2"
+      }, _react["default"].createElement("div", {
+        id: "crearButton",
+        onMouseEnter: this.handleMouseHoverAgregar,
+        onMouseLeave: this.handleMouseHoverExit,
+        onClick: this.goCrear,
+        className: "border text-center addPointer"
+      }, "Agregar"), _react["default"].createElement("div", {
+        id: "modificarButton",
+        onMouseEnter: this.handleMouseHoverModificar,
+        onMouseLeave: this.handleMouseHoverExit,
+        onClick: this.goModificar,
+        className: "border text-center addPointer"
+      }, "Modificar"), _react["default"].createElement("div", {
+        id: "eliminarButton",
+        onMouseEnter: this.handleMouseHoverEliminar,
+        onMouseLeave: this.handleMouseHoverExit,
+        onClick: this.goEliminar,
+        className: "border text-center addPointer"
+      }, "Eliminar")), _react["default"].createElement("div", {
+        className: "col-xl-10 col-lg-10 col-md-10 col-sm-10 col-10",
+        style: {
+          display: this.state.crearSelected ? "" : "none"
+        }
+      }, _react["default"].createElement("div", {
         className: "text-center"
       }, _react["default"].createElement("a", {
-        onClick: function onClick() {
-          return _this3.props.callbackCrearRegla(false);
-        },
+        onClick: this.verificarAccion,
         className: "btn btn-primary col-xs-6 col-6",
         style: {
           color: "white",
           fontSize: "1.2em",
           fontWeight: "bold"
         }
-      }, "Crear Condici\xF3n / Instrucci\xF3n")), _react["default"].createElement("br", null));
+      }, "Crear Condici\xF3n"))), _react["default"].createElement("div", {
+        className: "col-xl-10 col-lg-10 col-md-10 col-sm-10 col-10",
+        style: {
+          display: this.state.editarSelected ? "" : "none"
+        }
+      }, _react["default"].createElement("div", {
+        className: "text-center"
+      }, _react["default"].createElement("a", {
+        onClick: this.verificarAccion,
+        className: "btn btn-primary col-xs-6 col-6",
+        style: {
+          color: "white",
+          fontSize: "1.2em",
+          fontWeight: "bold"
+        }
+      }, "Modificar Condici\xF3n"))), _react["default"].createElement("div", {
+        className: "col-xl-10 col-lg-10 col-md-10 col-sm-10 col-10",
+        style: {
+          display: this.state.eliminarSelected ? "" : "none"
+        }
+      }, _react["default"].createElement("div", {
+        className: "text-center"
+      }, _react["default"].createElement("a", {
+        onClick: this.verificarAccion,
+        className: "btn btn-primary col-xs-6 col-6",
+        style: {
+          color: "white",
+          fontSize: "1.2em",
+          fontWeight: "bold"
+        }
+      }, "Eliminar")))), _react["default"].createElement("br", null));
     }
   }]);
 

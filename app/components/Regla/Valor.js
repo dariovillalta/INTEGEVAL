@@ -42,10 +42,20 @@ function (_React$Component) {
     _this = _possibleConstructorReturn(this, _getPrototypeOf(Valor).call(this, props));
     _this.state = {
       listas: [],
-      variablesDeLista: []
+      variablesDeLista: [],
+      radioManual: true,
+      radioListas: false,
+      radioFecha: false,
+      radioTiempo: false
     };
     _this.updateVariableList = _this.updateVariableList.bind(_assertThisInitialized(_this));
     _this.getLists = _this.getLists.bind(_assertThisInitialized(_this));
+    _this.mostrarManual = _this.mostrarManual.bind(_assertThisInitialized(_this));
+    _this.mostrarListas = _this.mostrarListas.bind(_assertThisInitialized(_this));
+    _this.mostrarFecha = _this.mostrarFecha.bind(_assertThisInitialized(_this));
+    _this.initFecha = _this.initFecha.bind(_assertThisInitialized(_this));
+    _this.mostrarTiempo = _this.mostrarTiempo.bind(_assertThisInitialized(_this));
+    _this.changeTime = _this.changeTime.bind(_assertThisInitialized(_this));
     return _this;
   }
 
@@ -150,8 +160,71 @@ function (_React$Component) {
       }
     }
   }, {
+    key: "mostrarManual",
+    value: function mostrarManual() {
+      this.setState({
+        radioManual: true,
+        radioListas: false,
+        radioFecha: false,
+        radioTiempo: false
+      });
+    }
+  }, {
+    key: "mostrarListas",
+    value: function mostrarListas() {
+      this.setState({
+        radioManual: false,
+        radioListas: true,
+        radioFecha: false,
+        radioTiempo: false
+      });
+    }
+  }, {
+    key: "mostrarFecha",
+    value: function mostrarFecha() {
+      this.setState({
+        radioManual: false,
+        radioListas: false,
+        radioFecha: true,
+        radioTiempo: false
+      }, this.initFecha);
+    }
+  }, {
+    key: "initFecha",
+    value: function initFecha() {
+      $('#fecha').datepicker({
+        format: "dd-mm-yyyy",
+        todayHighlight: true,
+        viewMode: "days",
+        minViewMode: "days",
+        language: 'es',
+        onSelect: function onSelect(date) {
+          var valorARetornar = "FECHA=(" + date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate() + ")";
+          this.props.retornarValor(valorARetornar, date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate());
+        }
+      });
+    }
+  }, {
+    key: "mostrarTiempo",
+    value: function mostrarTiempo() {
+      this.setState({
+        radioManual: false,
+        radioListas: false,
+        radioFecha: false,
+        radioTiempo: true
+      });
+    }
+  }, {
+    key: "changeTime",
+    value: function changeTime() {
+      var valorARetornar = "TIEMPO=[DIAS=" + $("#dias").val() + ",MES=" + $("#mes").val() + ",AÑOS=" + $("#anio").val() + "]";
+      this.props.retornarValor(valorARetornar, "DIAS=" + $("#dias").val() + ",MES=" + $("#mes").val() + ",AÑOS=" + $("#anio").val());
+    }
+  }, {
     key: "render",
     value: function render() {
+      var _this4 = this;
+
       /*if(this.props.esNumero) {
           return (
               <div className={"row"}>
@@ -250,8 +323,64 @@ function (_React$Component) {
       return _react["default"].createElement("div", {
         className: "row",
         style: {
-          width: "100%",
-          borderBottom: "3px solid #d2d2e4"
+          width: "100%"
+        }
+      }, _react["default"].createElement("div", {
+        className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 form-group",
+        style: {
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center"
+        }
+      }, _react["default"].createElement("label", {
+        className: "custom-control custom-radio custom-control-inline"
+      }, _react["default"].createElement("input", {
+        type: "radio",
+        name: "radio-inline",
+        defaultChecked: true,
+        className: "custom-control-input",
+        onClick: function onClick() {
+          return _this4.mostrarManual();
+        }
+      }), _react["default"].createElement("span", {
+        className: "custom-control-label"
+      }, "Manual")), _react["default"].createElement("label", {
+        className: "custom-control custom-radio custom-control-inline"
+      }, _react["default"].createElement("input", {
+        type: "radio",
+        name: "radio-inline",
+        className: "custom-control-input",
+        onClick: function onClick() {
+          return _this4.mostrarListas();
+        }
+      }), _react["default"].createElement("span", {
+        className: "custom-control-label"
+      }, "Listas")), _react["default"].createElement("label", {
+        className: "custom-control custom-radio custom-control-inline"
+      }, _react["default"].createElement("input", {
+        type: "radio",
+        name: "radio-inline",
+        className: "custom-control-input",
+        onClick: function onClick() {
+          return _this4.mostrarFecha();
+        }
+      }), _react["default"].createElement("span", {
+        className: "custom-control-label"
+      }, "Fecha")), _react["default"].createElement("label", {
+        className: "custom-control custom-radio custom-control-inline"
+      }, _react["default"].createElement("input", {
+        type: "radio",
+        name: "radio-inline",
+        className: "custom-control-input",
+        onClick: function onClick() {
+          return _this4.mostrarTiempo();
+        }
+      }), _react["default"].createElement("span", {
+        className: "custom-control-label"
+      }, "Tiempo"))), this.state.radioManual ? _react["default"].createElement("div", {
+        className: "row",
+        style: {
+          width: "100%"
         }
       }, _react["default"].createElement("div", {
         className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
@@ -270,7 +399,119 @@ function (_React$Component) {
         id: "valor",
         type: "text",
         className: "form-control form-control-sm"
-      })));
+      }))) : null, this.state.radioListas ? _react["default"].createElement("div", {
+        className: "row",
+        style: {
+          width: "100%"
+        }
+      }, _react["default"].createElement("div", {
+        className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
+      }, _react["default"].createElement("label", {
+        htmlFor: "valor",
+        className: "col-form-label"
+      }, "Lista:")), _react["default"].createElement("div", {
+        className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group",
+        style: {
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center"
+        }
+      }), _react["default"].createElement("div", {
+        className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
+      }, _react["default"].createElement("label", {
+        htmlFor: "valor",
+        className: "col-form-label"
+      }, "Valores Seleccionados:")), _react["default"].createElement("div", {
+        className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group",
+        style: {
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center"
+        }
+      })) : null, this.state.radioFecha ? _react["default"].createElement("div", {
+        className: "row",
+        style: {
+          width: "100%"
+        }
+      }, _react["default"].createElement("div", {
+        className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
+      }, _react["default"].createElement("label", {
+        htmlFor: "valor",
+        className: "col-form-label"
+      }, "Fecha:")), _react["default"].createElement("div", {
+        className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group",
+        style: {
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center"
+        }
+      }, _react["default"].createElement("div", {
+        id: "fecha",
+        className: "center-block"
+      }))) : null, this.state.radioTiempo ? _react["default"].createElement("div", {
+        className: "row",
+        style: {
+          width: "100%"
+        }
+      }, _react["default"].createElement("div", {
+        className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
+      }, _react["default"].createElement("label", {
+        htmlFor: "dias",
+        className: "col-form-label"
+      }, "D\xEDas:")), _react["default"].createElement("div", {
+        className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group",
+        style: {
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center"
+        }
+      }, _react["default"].createElement("input", {
+        type: "number",
+        defaultValue: "0",
+        onChange: this.changeTime,
+        id: "dias",
+        name: "dias",
+        step: "1",
+        min: "0"
+      })), _react["default"].createElement("div", {
+        className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
+      }, _react["default"].createElement("label", {
+        htmlFor: "mes",
+        className: "col-form-label"
+      }, "Meses:")), _react["default"].createElement("div", {
+        className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group",
+        style: {
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center"
+        }
+      }, _react["default"].createElement("input", {
+        type: "number",
+        defaultValue: "0",
+        id: "mes",
+        name: "mes",
+        step: "1",
+        min: "0"
+      })), _react["default"].createElement("div", {
+        className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
+      }, _react["default"].createElement("label", {
+        htmlFor: "anio",
+        className: "col-form-label"
+      }, "A\xF1os:")), _react["default"].createElement("div", {
+        className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group",
+        style: {
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center"
+        }
+      }, _react["default"].createElement("input", {
+        type: "number",
+        defaultValue: "0",
+        id: "anio",
+        name: "anio",
+        step: "1",
+        min: "0"
+      }))) : null);
     }
   }]);
 

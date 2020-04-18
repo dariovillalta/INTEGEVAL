@@ -77,7 +77,7 @@ function (_React$Component) {
         variable: this.props.variable,
         clickEnFormula: this.props.clickEnFormula,
         index: this.props.index
-      }) : null, this.props.variable.tipo.localeCompare("division\\") == 0 ? _react["default"].createElement(_DivisionCeldaEquacion["default"], {
+      }) : null, this.props.variable.tipo.localeCompare("division\\\\") == 0 ? _react["default"].createElement(_DivisionCeldaEquacion["default"], {
         variable: this.props.variable,
         clickEnFormula: this.props.clickEnFormula,
         index: this.props.index

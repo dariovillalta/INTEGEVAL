@@ -11,27 +11,16 @@ const camposDeObjetos = [];
 export default class OpcionesCrearRegla extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {
-            mostrarCrearCondicion: true
-        }
         this.mostrarCrearCondicion = this.mostrarCrearCondicion.bind(this);
         this.mostrarAsignarFormula = this.mostrarAsignarFormula.bind(this);
     }
 
     mostrarCrearCondicion () {
-        this.setState({
-            mostrarCrearCondicion: true
-        }, () => {
-            this.props.retornarEstadoVistaEsCondicion(this.state.mostrarCrearCondicion);
-        });
+        this.props.actualizarEstadoVistaEsCondicion(true);
     }
 
     mostrarAsignarFormula () {
-        this.setState({
-            mostrarCrearCondicion: false
-        }, () => {
-            this.props.retornarEstadoVistaEsCondicion(this.state.mostrarCrearCondicion);
-        });
+        this.props.actualizarEstadoVistaEsCondicion(false);
     }
     
     render() {
@@ -39,32 +28,43 @@ export default class OpcionesCrearRegla extends React.Component {
             <div style={{width: "100%"}}>
                 <div className={"row"} style={{width: "100%"}}>
                     <div style={{backgroundColor: "#f5f5f5", height: "40px", width: "100%", display: "flex", alignItems: "center", justifyContent: "center"}}>
-                        <div className={"border-right addPointer"} style={{backgroundColor: "white", height: "98%", width: "40%", display: "flex", alignItems: "center", justifyContent: "center", borderBottom: this.state.mostrarCrearCondicion ? "1px solid #304ffe" : ""}} onClick={this.mostrarCrearCondicion}>
-                            CONDICIONES / COMPARACIONES
+                        <div className={"border-right addPointer"} style={{backgroundColor: "white", height: "98%", width: "40%", display: "flex", alignItems: "center", justifyContent: "center", borderBottom: this.props.mostrarCrearCondicion ? "1px solid #304ffe" : ""}} onClick={this.mostrarCrearCondicion}>
+                            CONDICIONES
                         </div>
-                        <div className={"addPointer"} style={{backgroundColor: "white", height: "98%", width: "40%", display: "flex", alignItems: "center", justifyContent: "center", borderBottom: !this.state.mostrarCrearCondicion ? "1px solid #304ffe" : ""}} onClick={this.mostrarAsignarFormula}>
-                            ASIGNACIONES / FÓRMULAS
+                        <div className={"addPointer"} style={{backgroundColor: "white", height: "98%", width: "40%", display: "flex", alignItems: "center", justifyContent: "center", borderBottom: !this.props.mostrarCrearCondicion ? "1px solid #304ffe" : ""}} onClick={this.mostrarAsignarFormula}>
+                            ASIGNACIONES
                         </div>
                     </div>
                 </div>
                 <div className={"row"} style={{width: "100%"}}>
-                    {this.state.mostrarCrearCondicion
+                    {this.props.mostrarCrearCondicion
                         ?   <VariableCreation pool={this.props.pool} campos={this.props.campos}
                                         retornarCampo={this.props.retornarCampo}
+                                        retornarValor={this.props.retornarValor}
                                         camposDropdown={this.props.camposDropdown}
                                         valoresDropdown={this.props.valoresDropdown}
                                         mostrarOpcionSino={this.props.mostrarOpcionSino}
-                                        conexiones={this.props.conexiones}
-                                        camposConexiones={this.props.camposConexiones}
-                                        variables={this.props.variables}
-                                        camposVariables={this.props.camposVariables}
+                                        tablas={this.props.tablas}
+                                        camposTablas={this.props.camposTablas}
+                                        variablesEscalares={this.props.variablesEscalares}
+                                        objetos={this.props.objetos}
+                                        camposDeObjetos={this.props.camposDeObjetos}
+                                        excel={this.props.excel}
+                                        camposDeExcel={this.props.camposDeExcel}
+                                        formas={this.props.formas}
+                                        variablesSQL={this.props.variablesSQL}
+                                        camposVariablesSQL={this.props.camposVariablesSQL}
                                         retornoCampo={this.props.retornoCampo}
                                         retornoOperacion={this.props.retornoOperacion}
                                         actualizarNivelNuevaRegla={this.props.actualizarNivelNuevaRegla}
+                                        callbackModificarRegla={this.props.callbackModificarRegla}
+                                        callbackEliminarRegla={this.props.callbackEliminarRegla}
                                         callbackCrearRegla={this.props.callbackCrearRegla}>
                             </VariableCreation>
                         :   <ContenedorFormulas asignaciones={this.props.asignaciones}
                                                             callbackCrearRegla={this.props.callbackCrearRegla}
+                                                            callbackModificarRegla={this.props.callbackModificarRegla}
+                                                            callbackEliminarRegla={this.props.callbackEliminarRegla}
                                                             goToCreateFormula={this.props.goToCreateFormula}>
                             </ContenedorFormulas>
                     }

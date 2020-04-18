@@ -55,26 +55,31 @@ function (_React$Component) {
       $("#unicaRegla").css("border", "initial");
 
       for (var i = 0; i < this.props.reglas.length; i++) {
-        $("#regla" + i).css("border", "initial");
-
-        if (i == 0) {
+        if (this.props.reglas[0] != undefined && this.props.reglas[0].length == 1) {
           $("#reglaInit" + i).removeClass("colorPunteroFormula");
           $("#reglaInit" + i).removeClass("blink");
           $("#reglaFin" + i).removeClass("colorPunteroFormula");
           $("#reglaFin" + i).removeClass("blink");
         } else {
-          $("#reglaFin" + i).removeClass("colorPunteroFormula");
-          $("#reglaFin" + i).removeClass("blink");
+          for (var j = 0; j < this.props.reglas[i].length; j++) {
+            $("#regla" + i + j).css("border", "initial");
+            $("#regla" + i + j).removeClass("blink");
+            $("#reglaInit" + i + j).removeClass("colorPunteroFormula");
+            $("#reglaInit" + i + j).removeClass("blink");
+            $("#reglaFin" + i + j).removeClass("colorPunteroFormula");
+            $("#reglaFin" + i + j).removeClass("blink");
+          }
         }
       }
 
       ;
-      var indexSeleccionado, tipoIndiceSeleccionado;
+      var indexSeleccionadoSegmento, indexSeleccionadoRegla, tipoIndiceSeleccionado;
       this.props.actualizarEstadoSeleccionSinoNuevaRegla(false);
 
       if (this.props.reglas.length > 0) {
-        if (this.props.reglas.length == 1) {
-          indexSeleccionado = 0;
+        if (this.props.reglas[0] != undefined && this.props.reglas[0].length == 1) {
+          indexSeleccionadoSegmento = 0;
+          indexSeleccionadoRegla = 0;
 
           if (objeto.localeCompare("arriba") == 0) {
             $("#reglaInit").addClass("colorPunteroFormula");
@@ -86,8 +91,9 @@ function (_React$Component) {
             tipoIndiceSeleccionado = 'abajo';
           } else {
             $("#unicaRegla").css("border", "2px solid #F9D342");
+            $("#unicaRegla").addClass("blink");
 
-            if (this.props.reglas[0].esCondicion) {
+            if (this.props.reglas[0][0].esCondicion && this.props.reglas[0][0].operacion.localeCompare("ELSE") != 0) {
               tipoIndiceSeleccionado = 'esOtraRegla';
               this.props.actualizarEstadoSeleccionSinoNuevaRegla(true);
             } else {
@@ -95,20 +101,22 @@ function (_React$Component) {
             }
           }
         } else {
-          indexSeleccionado = indiceI;
+          indexSeleccionadoSegmento = indiceI;
+          indexSeleccionadoRegla = indiceJ;
 
           if (objeto.localeCompare("arriba") == 0) {
-            $("#reglaInit" + indiceI).addClass("colorPunteroFormula");
-            $("#reglaInit" + indiceI).addClass("blink");
+            $("#reglaInit" + indiceI + indiceJ).addClass("colorPunteroFormula");
+            $("#reglaInit" + indiceI + indiceJ).addClass("blink");
             tipoIndiceSeleccionado = 'arriba';
           } else if (objeto.localeCompare("abajo") == 0) {
-            $("#reglaFin" + indiceI).addClass("colorPunteroFormula");
-            $("#reglaFin" + indiceI).addClass("blink");
+            $("#reglaFin" + indiceI + indiceJ).addClass("colorPunteroFormula");
+            $("#reglaFin" + indiceI + indiceJ).addClass("blink");
             tipoIndiceSeleccionado = 'abajo';
           } else {
-            $("#regla" + indiceI).css("border", "2px solid #F9D342");
+            $("#regla" + indiceI + indiceJ).css("border", "2px solid #F9D342");
+            $("#regla" + indiceI + indiceJ).addClass("blink");
 
-            if (this.props.reglas[indiceI].esCondicion) {
+            if (this.props.reglas[indiceI][indiceJ].esCondicion && this.props.reglas[indiceI][indiceJ].operacion.localeCompare("ELSE") != 0) {
               tipoIndiceSeleccionado = 'esOtraRegla';
               this.props.actualizarEstadoSeleccionSinoNuevaRegla(true);
             } else {
@@ -117,24 +125,39 @@ function (_React$Component) {
           }
         }
 
-        this.props.retornarIndiceSeleccionado(indexSeleccionado, tipoIndiceSeleccionado);
+        this.props.retornarIndiceSeleccionado(indexSeleccionadoSegmento, indexSeleccionadoRegla, tipoIndiceSeleccionado);
         this.props.retornarIndiceSeleccionadoParaMostrarCampoObjetivo(this.props.reglas[indiceI], tipoIndiceSeleccionado, indiceI, indiceJ);
       }
     }
   }, {
     key: "getColor",
     value: function getColor(posicionSegmentoEnCampo, nivel) {
+      console.log('posicionSegmentoEnCampo');
+      console.log(posicionSegmentoEnCampo);
+      console.log('nivel');
+      console.log(nivel);
+
       if (colores[posicionSegmentoEnCampo] != undefined) {
         if (colores[posicionSegmentoEnCampo][nivel] != undefined) {
-          colores = colores[posicionSegmentoEnCampo][nivel];
+          return colores[posicionSegmentoEnCampo][nivel];
+          console.log('color');
+          console.log(colores[posicionSegmentoEnCampo][nivel]);
+          console.log(colores[posicionSegmentoEnCampo]);
+          console.log(colores);
         } else {
-          colores = colores[posicionSegmentoEnCampo][nivel % colores.length];
+          return colores[posicionSegmentoEnCampo][nivel % colores.length];
+          console.log('color');
+          console.log(colores[posicionSegmentoEnCampo][nivel % colores.length]);
         }
       } else {
         if (colores[posicionSegmentoEnCampo][nivel] != undefined) {
-          colores = colores[posicionSegmentoEnCampo % colores.length][nivel];
+          return colores[posicionSegmentoEnCampo % colores.length][nivel];
+          console.log('color');
+          console.log(colores[posicionSegmentoEnCampo % colores.length][nivel]);
         } else {
-          colores = colores[posicionSegmentoEnCampo % colores.length][nivel % colores.length];
+          return colores[posicionSegmentoEnCampo % colores.length][nivel % colores.length];
+          console.log('color');
+          console.log(colores[posicionSegmentoEnCampo % colores.length][nivel % colores.length]);
         }
       }
     }
@@ -143,8 +166,6 @@ function (_React$Component) {
     value: function render() {
       var _this2 = this;
 
-      /*console.log('this.props.reglas');
-      console.log(this.props.reglas);*/
       return _react["default"].createElement("div", null, this.props.reglas.length == 0 ? _react["default"].createElement("div", {
         style: {
           width: "100%",
@@ -186,12 +207,13 @@ function (_React$Component) {
         id: "unicaRegla",
         className: "addPointer font-20 textoRegla",
         style: {
-          backgroundColor: "#" + this.getColor(regla.posicionSegmentoEnCampo, regla.nivel),
+          backgroundColor: "#" + this.getColor(this.props.reglas[0][0].posicionSegmentoEnCampo, this.props.reglas[0][0].nivel),
           borderRadius: "15px",
           padding: "0% 2%",
           width: "100%",
           marginLeft: "auto",
-          marginRight: "0"
+          marginRight: "0",
+          fontFamily: "Arial Black, Gadget, sans-serif"
         }
       }, this.props.reglas[0][0].esCondicion ? "SI " : "", this.props.reglas[0][0].texto)), _react["default"].createElement("div", {
         id: "reglaFin",
@@ -203,7 +225,7 @@ function (_React$Component) {
           width: "100%",
           height: "10px"
         }
-      }), _react["default"].createElement("br", null)) : null, this.props.reglas.length > 1 ? _react["default"].createElement("div", {
+      }), _react["default"].createElement("br", null)) : null, this.props.reglas.length >= 1 && this.props.reglas[0].length > 1 || this.props.reglas.length > 1 ? _react["default"].createElement("div", {
         style: {
           width: "100%",
           height: "100%",
@@ -211,22 +233,24 @@ function (_React$Component) {
         }
       }, this.props.reglas.map(function (reglaSegmento, i) {
         return _react["default"].createElement("div", {
+          key: i,
           style: {
             width: "100%",
             height: "100%"
           }
         }, reglaSegmento.map(function (regla, j) {
           return _react["default"].createElement("div", {
+            key: i + "" + j,
             style: {
               width: "100%",
               height: "100%"
             }
-          }, j == 0 ? _react["default"].createElement("div", {
+          }, _react["default"].createElement("div", {
             style: {
               width: "100%",
               height: "100%"
             }
-          }, !regla.esCondicion ? _react["default"].createElement("div", {
+          }, !regla.esCondicion && j == 0 ? _react["default"].createElement("div", {
             id: "reglaInit" + i + "" + j,
             onClick: function onClick() {
               return _this2.seleccionRegla(i, "arriba", j);
@@ -252,56 +276,12 @@ function (_React$Component) {
               backgroundColor: "#" + _this2.getColor(regla.posicionSegmentoEnCampo, regla.nivel),
               borderRadius: "15px",
               padding: "0% 2%",
-              width: 100 - _this2.props.reglas[i].nivel * 10 + "%",
+              width: 100 - _this2.props.reglas[i][j].nivel * 10 + "%",
               marginLeft: "auto",
-              marginRight: "0"
+              marginRight: "0",
+              fontFamily: "Arial Black, Gadget, sans-serif"
             }
-          }, regla.esCondicion ? "SI " : "", _this2.props.reglas[i].texto)), regla.ultimoSiAnidado ? _react["default"].createElement("div", {
-            id: "reglaFin" + i + "" + j,
-            onClick: function onClick() {
-              return _this2.seleccionRegla(i, "abajo", j);
-            },
-            className: "highlightFormulaBackground addPointer",
-            style: {
-              width: "100%",
-              height: "10px"
-            }
-          }) : null) : _react["default"].createElement("div", {
-            style: {
-              width: "100%",
-              height: "100%"
-            }
-          }, !regla.esCondicion ? _react["default"].createElement("div", {
-            id: "reglaInit" + i + "" + j,
-            onClick: function onClick() {
-              return _this2.seleccionRegla(i, "arriba", j);
-            },
-            className: "highlightFormulaBackground addPointer",
-            style: {
-              width: "100%",
-              height: "10px"
-            }
-          }) : null, _react["default"].createElement("div", {
-            onClick: function onClick() {
-              return _this2.seleccionRegla(i, "condicion");
-            },
-            className: "row",
-            style: {
-              width: "100%",
-              margin: "1% 0% 1% 0%"
-            }
-          }, _react["default"].createElement("div", {
-            id: "regla" + i + "" + j,
-            className: "addPointer font-20 textoRegla",
-            style: {
-              backgroundColor: "#" + _this2.getColor(regla.posicionSegmentoEnCampo, regla.nivel),
-              borderRadius: "15px",
-              padding: "0% 2%",
-              width: 100 - _this2.props.reglas[i].nivel * 10 + "%",
-              marginLeft: "auto",
-              marginRight: "0"
-            }
-          }, regla.esCondicion ? "SI " : "", _this2.props.reglas[i].texto)), regla.ultimoSiAnidado ? _react["default"].createElement("div", {
+          }, regla.esCondicion ? "SI " : "", _this2.props.reglas[i][j].texto)), i == _this2.props.reglas.length - 1 && j == reglaSegmento.length - 1 ? _react["default"].createElement("div", {
             id: "reglaFin" + i + "" + j,
             onClick: function onClick() {
               return _this2.seleccionRegla(i, "abajo", j);

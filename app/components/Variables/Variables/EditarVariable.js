@@ -124,8 +124,9 @@ function (_React$Component) {
         var request = new _mssql["default"].Request(transaction);
         request.query("select * from VariablesCampos", function (err, result) {
           if (err) {
+            console.log(err);
+
             if (!rolledBack) {
-              console.log(err);
               transaction.rollback(function (err) {});
             }
           } else {
@@ -152,8 +153,9 @@ function (_React$Component) {
         var request = new _mssql["default"].Request(transaction);
         request.query("insert into VariablesCampos (nombre, formula) values ('" + nombre + "', '')", function (err, result) {
           if (err) {
+            console.log(err);
+
             if (!rolledBack) {
-              console.log(err);
               transaction.rollback(function (err) {});
             }
           } else {

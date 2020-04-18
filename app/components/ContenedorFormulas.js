@@ -35,7 +35,7 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 var variables = [];
 var objetos = [];
 var camposDeObjetos = [];
-var formulaSeleccionada;
+var formulaSeleccionada, posicionFormula;
 
 var ContenedorFormulas =
 /*#__PURE__*/
@@ -50,25 +50,129 @@ function (_React$Component) {
     _this = _possibleConstructorReturn(this, _getPrototypeOf(ContenedorFormulas).call(this, props));
     _this.state = {
       mostrarCrearCondicion: true,
-      asignaciones: []
+      asignaciones: [],
+      crearSelected: true,
+      editarSelected: false,
+      eliminarSelected: false
     };
     _this.actualizarSeleccionFormula = _this.actualizarSeleccionFormula.bind(_assertThisInitialized(_this));
     _this.verificarSeleccionFormula = _this.verificarSeleccionFormula.bind(_assertThisInitialized(_this));
+    _this.handleMouseHoverAgregar = _this.handleMouseHoverAgregar.bind(_assertThisInitialized(_this));
+    _this.handleMouseHoverModificar = _this.handleMouseHoverModificar.bind(_assertThisInitialized(_this));
+    _this.handleMouseHoverEliminar = _this.handleMouseHoverEliminar.bind(_assertThisInitialized(_this));
+    _this.handleMouseHoverExit = _this.handleMouseHoverExit.bind(_assertThisInitialized(_this));
+    _this.verificarBotonSel = _this.verificarBotonSel.bind(_assertThisInitialized(_this));
+    _this.goCrear = _this.goCrear.bind(_assertThisInitialized(_this));
+    _this.goModificar = _this.goModificar.bind(_assertThisInitialized(_this));
+    _this.goEliminar = _this.goEliminar.bind(_assertThisInitialized(_this));
+    _this.verificarAccion = _this.verificarAccion.bind(_assertThisInitialized(_this));
     return _this;
   }
 
   _createClass(ContenedorFormulas, [{
+    key: "componentDidMount",
+    value: function componentDidMount() {
+      this.verificarBotonSel();
+    }
+  }, {
     key: "actualizarSeleccionFormula",
-    value: function actualizarSeleccionFormula(asignacion) {
+    value: function actualizarSeleccionFormula(asignacion, posicionFormulaN) {
       formulaSeleccionada = asignacion;
+      posicionFormula = posicionFormulaN;
     }
   }, {
     key: "verificarSeleccionFormula",
     value: function verificarSeleccionFormula() {
       if (formulaSeleccionada != undefined && formulaSeleccionada != null) {
-        this.props.callbackCrearRegla(true, formulaSeleccionada);
+        this.props.callbackCrearRegla(true, formulaSeleccionada, posicionFormula);
       } else {
         alert("Seleccione por lo menos una formula");
+      }
+    }
+  }, {
+    key: "handleMouseHoverAgregar",
+    value: function handleMouseHoverAgregar() {
+      $("#crearButton").addClass("onHoverOpcionUmbralSinCambioHeight");
+      $("#modificarButton").removeClass("onHoverOpcionUmbralSinCambioHeight");
+      $("#eliminarButton").removeClass("onHoverOpcionUmbralSinCambioHeight");
+    }
+  }, {
+    key: "handleMouseHoverModificar",
+    value: function handleMouseHoverModificar() {
+      $("#crearButton").removeClass("onHoverOpcionUmbralSinCambioHeight");
+      $("#modificarButton").addClass("onHoverOpcionUmbralSinCambioHeight");
+      $("#eliminarButton").removeClass("onHoverOpcionUmbralSinCambioHeight");
+    }
+  }, {
+    key: "handleMouseHoverEliminar",
+    value: function handleMouseHoverEliminar() {
+      $("#crearButton").removeClass("onHoverOpcionUmbralSinCambioHeight");
+      $("#modificarButton").removeClass("onHoverOpcionUmbralSinCambioHeight");
+      $("#eliminarButton").addClass("onHoverOpcionUmbralSinCambioHeight");
+    }
+  }, {
+    key: "handleMouseHoverExit",
+    value: function handleMouseHoverExit() {
+      $("#crearButton").removeClass("onHoverOpcionUmbralSinCambioHeight");
+      $("#modificarButton").removeClass("onHoverOpcionUmbralSinCambioHeight");
+      $("#eliminarButton").removeClass("onHoverOpcionUmbralSinCambioHeight");
+      this.verificarBotonSel();
+    }
+  }, {
+    key: "verificarBotonSel",
+    value: function verificarBotonSel() {
+      if (this.state.crearSelected) {
+        $("#crearButton").addClass("onHoverOpcionUmbralSinCambioHeight");
+        $("#modificarButton").removeClass("onHoverOpcionUmbralSinCambioHeight");
+        $("#eliminarButton").removeClass("onHoverOpcionUmbralSinCambioHeight");
+      } else if (this.state.editarSelected) {
+        $("#crearButton").removeClass("onHoverOpcionUmbralSinCambioHeight");
+        $("#modificarButton").addClass("onHoverOpcionUmbralSinCambioHeight");
+        $("#eliminarButton").removeClass("onHoverOpcionUmbralSinCambioHeight");
+      } else if (this.state.eliminarSelected) {
+        $("#crearButton").removeClass("onHoverOpcionUmbralSinCambioHeight");
+        $("#modificarButton").removeClass("onHoverOpcionUmbralSinCambioHeight");
+        $("#eliminarButton").addClass("onHoverOpcionUmbralSinCambioHeight");
+      }
+    }
+  }, {
+    key: "goCrear",
+    value: function goCrear() {
+      this.setState({
+        crearSelected: true,
+        editarSelected: false,
+        eliminarSelected: false
+      });
+    }
+  }, {
+    key: "goModificar",
+    value: function goModificar() {
+      this.setState({
+        crearSelected: false,
+        editarSelected: true,
+        eliminarSelected: false
+      });
+    }
+  }, {
+    key: "goEliminar",
+    value: function goEliminar() {
+      this.setState({
+        crearSelected: false,
+        editarSelected: false,
+        eliminarSelected: true
+      });
+    }
+  }, {
+    key: "verificarAccion",
+    value: function verificarAccion() {
+      if (this.state.crearSelected) this.verificarSeleccionFormula();else if (this.state.editarSelected) {
+        if (formulaSeleccionada != undefined && formulaSeleccionada != null) {
+          this.props.callbackModificarRegla(true, formulaSeleccionada, posicionFormula);
+        } else {
+          alert("Seleccione por lo menos una formula");
+        }
+      } else {
+        this.props.callbackEliminarRegla(true);
       }
     }
   }, {
@@ -82,7 +186,7 @@ function (_React$Component) {
         }
       }, _react["default"].createElement("h3", {
         className: "card-header"
-      }, "Crear F\xF3rmula (Asignaci\xF3n)"), _react["default"].createElement("br", null), _react["default"].createElement("div", {
+      }, "Crear Asignaci\xF3n"), _react["default"].createElement("br", null), _react["default"].createElement("div", {
         className: "text-center"
       }, _react["default"].createElement("a", {
         className: "btn btn-success col-xs-10 col-10 btnWhiteColorHover font-bold font-20",
@@ -94,7 +198,7 @@ function (_React$Component) {
         }
       }, "Crear")), _react["default"].createElement("hr", null), _react["default"].createElement("h3", {
         className: "card-header"
-      }, "Editar F\xF3rmula (Asignaci\xF3n)"), _react["default"].createElement("br", null), _react["default"].createElement("div", null, this.props.asignaciones.map(function (asignacion, i) {
+      }, "Seleccionar Asignaci\xF3n"), _react["default"].createElement("br", null), _react["default"].createElement("div", null, this.props.asignaciones.map(function (asignacion, i) {
         return _react["default"].createElement("div", {
           key: i,
           style: {
@@ -108,7 +212,7 @@ function (_React$Component) {
           name: "formulasRadio",
           className: "custom-control-input",
           onClick: function onClick() {
-            return _this2.actualizarSeleccionFormula(asignacion);
+            return _this2.actualizarSeleccionFormula(asignacion, i);
           }
         }), _react["default"].createElement("span", {
           className: "custom-control-label"
@@ -121,16 +225,73 @@ function (_React$Component) {
         },
         className: "btn btn-dark col-xs-10 col-10 btnWhiteColorHover font-bold font-20"
       }, "No existen asignaciones / f\xF3rmulas creadas")) : null), _react["default"].createElement("hr", null), _react["default"].createElement("div", {
+        className: "row"
+      }, _react["default"].createElement("div", {
+        className: "col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2"
+      }, _react["default"].createElement("div", {
+        id: "crearButton",
+        onMouseEnter: this.handleMouseHoverAgregar,
+        onMouseLeave: this.handleMouseHoverExit,
+        onClick: this.goCrear,
+        className: "border text-center addPointer"
+      }, "Agregar"), _react["default"].createElement("div", {
+        id: "modificarButton",
+        onMouseEnter: this.handleMouseHoverModificar,
+        onMouseLeave: this.handleMouseHoverExit,
+        onClick: this.goModificar,
+        className: "border text-center addPointer"
+      }, "Modificar"), _react["default"].createElement("div", {
+        id: "eliminarButton",
+        onMouseEnter: this.handleMouseHoverEliminar,
+        onMouseLeave: this.handleMouseHoverExit,
+        onClick: this.goEliminar,
+        className: "border text-center addPointer"
+      }, "Eliminar")), _react["default"].createElement("div", {
+        className: "col-xl-10 col-lg-10 col-md-10 col-sm-10 col-10",
+        style: {
+          display: this.state.crearSelected ? "" : "none"
+        }
+      }, _react["default"].createElement("div", {
         className: "text-center"
       }, _react["default"].createElement("a", {
-        onClick: this.verificarSeleccionFormula,
+        onClick: this.verificarAccion,
         className: "btn btn-primary col-xs-6 col-6",
         style: {
           color: "white",
           fontSize: "1.2em",
           fontWeight: "bold"
         }
-      }, "Agregar Asignaci\xF3n / F\xF3rmula a Reglas")), _react["default"].createElement("br", null));
+      }, "Agregar Asignaci\xF3n"))), _react["default"].createElement("div", {
+        className: "col-xl-10 col-lg-10 col-md-10 col-sm-10 col-10",
+        style: {
+          display: this.state.editarSelected ? "" : "none"
+        }
+      }, _react["default"].createElement("div", {
+        className: "text-center"
+      }, _react["default"].createElement("a", {
+        onClick: this.verificarAccion,
+        className: "btn btn-primary col-xs-6 col-6",
+        style: {
+          color: "white",
+          fontSize: "1.2em",
+          fontWeight: "bold"
+        }
+      }, "Modificar Asignaci\xF3n"))), _react["default"].createElement("div", {
+        className: "col-xl-10 col-lg-10 col-md-10 col-sm-10 col-10",
+        style: {
+          display: this.state.eliminarSelected ? "" : "none"
+        }
+      }, _react["default"].createElement("div", {
+        className: "text-center"
+      }, _react["default"].createElement("a", {
+        onClick: this.verificarAccion,
+        className: "btn btn-primary col-xs-6 col-6",
+        style: {
+          color: "white",
+          fontSize: "1.2em",
+          fontWeight: "bold"
+        }
+      }, "Eliminar")))), _react["default"].createElement("br", null));
     }
   }]);
 

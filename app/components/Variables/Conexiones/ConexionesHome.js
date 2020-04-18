@@ -9,7 +9,7 @@ var _react = _interopRequireDefault(require("react"));
 
 var _ConfiguracionTablas = _interopRequireDefault(require("./ConfiguracionTablas.js"));
 
-var _CamposHome = _interopRequireDefault(require("./CamposHome.js"));
+var _EditarTabla = _interopRequireDefault(require("./EditarTabla.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
@@ -44,7 +44,12 @@ function (_React$Component) {
     _this = _possibleConstructorReturn(this, _getPrototypeOf(ConexionesHome).call(this, props));
     _this.state = {
       idTablaSeleccionada: -1,
-      nombreTablaSeleccionada: ""
+      nombreTablaSeleccionada: "",
+      usuarioTablaSeleccionada: "",
+      contrasenaTablaSeleccionada: "",
+      servidorTablaSeleccionada: "",
+      baseDatosTablaSeleccionada: "",
+      tablaTablaSeleccionada: ""
     };
     _this.terminoSeleccionTabla = _this.terminoSeleccionTabla.bind(_assertThisInitialized(_this));
     _this.retornoSeleccionTabla = _this.retornoSeleccionTabla.bind(_assertThisInitialized(_this));
@@ -53,10 +58,15 @@ function (_React$Component) {
 
   _createClass(ConexionesHome, [{
     key: "terminoSeleccionTabla",
-    value: function terminoSeleccionTabla(id, nombre) {
+    value: function terminoSeleccionTabla(id, nombre, usuario, contrasena, servidor, baseDatos, tabla) {
       this.setState({
         idTablaSeleccionada: id,
-        nombreTablaSeleccionada: nombre
+        nombreTablaSeleccionada: nombre,
+        usuarioTablaSeleccionada: usuario,
+        contrasenaTablaSeleccionada: contrasena,
+        servidorTablaSeleccionada: servidor,
+        baseDatosTablaSeleccionada: baseDatos,
+        tablaTablaSeleccionada: tabla
       });
     }
   }, {
@@ -78,14 +88,18 @@ function (_React$Component) {
           terminoSeleccionTabla: this.terminoSeleccionTabla
         }));
       } else {
-        return _react["default"].createElement("div", null, _react["default"].createElement(_CamposHome["default"], {
+        return _react["default"].createElement("div", null, _react["default"].createElement(_EditarTabla["default"], {
           pool: this.props.pool,
           retornoSeleccionTabla: this.retornoSeleccionTabla,
           configuracionHome: this.props.configuracionHome,
+          goOptions: this.props.goOptions,
           idTablaSeleccionada: this.state.idTablaSeleccionada,
           nombreTablaSeleccionada: this.state.nombreTablaSeleccionada,
-          goOptions: this.props.goOptions,
-          terminoSeleccionTabla: this.terminoSeleccionTabla
+          usuarioTablaSeleccionada: this.state.usuarioTablaSeleccionada,
+          contrasenaTablaSeleccionada: this.state.contrasenaTablaSeleccionada,
+          servidorTablaSeleccionada: this.state.servidorTablaSeleccionada,
+          baseDatosTablaSeleccionada: this.state.baseDatosTablaSeleccionada,
+          tablaTablaSeleccionada: this.state.tablaTablaSeleccionada
         }));
       }
     }

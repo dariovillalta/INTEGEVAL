@@ -17,6 +17,14 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "d
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
+
+function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -36,10 +44,7 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 var indiceSeleccionadoReglas = -1;
 var tipoElementoSeleccionadoRegla = '';
 var campo;
-var conexionesOriginales = [],
-    camposConexionesOriginales = [],
-    variablesOriginales = [],
-    camposVariablesOriginales = [];
+var mostrarCrearCondicion = true;
 
 var InstruccionVariable =
 /*#__PURE__*/
@@ -57,18 +62,35 @@ function (_React$Component) {
       mostrarOpcionSino: false,
       conexiones: [],
       camposConexiones: [],
+      variablesEscalares: [],
       variables: [],
-      camposVariables: []
+      camposVariables: [],
+      variablesSQL: [],
+      camposVariablesSQL: [],
+      excel: [],
+      camposDeExcel: [],
+      formas: [],
+      mostrarCrearCondicion: mostrarCrearCondicion
     };
     _this.actualizarEstadoSeleccionSinoNuevaRegla = _this.actualizarEstadoSeleccionSinoNuevaRegla.bind(_assertThisInitialized(_this));
     _this.getConections = _this.getConections.bind(_assertThisInitialized(_this));
     _this.getFieldsConections = _this.getFieldsConections.bind(_assertThisInitialized(_this));
     _this.getFieldConections = _this.getFieldConections.bind(_assertThisInitialized(_this));
+    _this.loadScalarVariables = _this.loadScalarVariables.bind(_assertThisInitialized(_this));
+    _this.loadScalarVariablesFields = _this.loadScalarVariablesFields.bind(_assertThisInitialized(_this));
     _this.getVariables = _this.getVariables.bind(_assertThisInitialized(_this));
     _this.getFieldsVariables = _this.getFieldsVariables.bind(_assertThisInitialized(_this));
     _this.getFieldVariables = _this.getFieldVariables.bind(_assertThisInitialized(_this));
+    _this.loadVariablesSQL = _this.loadVariablesSQL.bind(_assertThisInitialized(_this));
+    _this.initLoadVariablesCamposSQL = _this.initLoadVariablesCamposSQL.bind(_assertThisInitialized(_this));
+    _this.loadVariablesCamposSQL = _this.loadVariablesCamposSQL.bind(_assertThisInitialized(_this));
+    _this.loadExcel = _this.loadExcel.bind(_assertThisInitialized(_this));
+    _this.initLoadExcelCampos = _this.initLoadExcelCampos.bind(_assertThisInitialized(_this));
+    _this.loadExcelCampos = _this.loadExcelCampos.bind(_assertThisInitialized(_this));
+    _this.loadFormas = _this.loadFormas.bind(_assertThisInitialized(_this));
     _this.retornarIndiceSeleccionadoParaMostrarCampoObjetivo = _this.retornarIndiceSeleccionadoParaMostrarCampoObjetivo.bind(_assertThisInitialized(_this));
     _this.retornoCampo = _this.retornoCampo.bind(_assertThisInitialized(_this));
+    _this.actualizarEstadoVistaEsCondicion = _this.actualizarEstadoVistaEsCondicion.bind(_assertThisInitialized(_this));
     return _this;
   }
 
@@ -77,15 +99,17 @@ function (_React$Component) {
     value: function componentDidMount() {
       this.getConections();
       this.getVariables();
+      this.loadScalarVariables();
+      this.loadVariablesSQL();
+      this.loadExcel();
+      this.loadFormas();
     }
   }, {
     key: "actualizarEstadoSeleccionSinoNuevaRegla",
     value: function actualizarEstadoSeleccionSinoNuevaRegla(mostrar) {
-      console.log('mostrar');
-      console.log(mostrar);
-      this.setState({
-        mostrarOpcionSino: mostrar
-      });
+      /*this.setState({
+          mostrarOpcionSino: mostrar
+      });*/
     }
   }, {
     key: "getConections",
@@ -101,8 +125,9 @@ function (_React$Component) {
         var request = new _mssql["default"].Request(transaction);
         request.query("select * from Tablas", function (err, result) {
           if (err) {
+            console.log(err);
+
             if (!rolledBack) {
-              console.log(err);
               transaction.rollback(function (err) {});
               return [];
             }
@@ -124,11 +149,8 @@ function (_React$Component) {
 
               _this2.setState({
                 conexiones: temp
-              });
+              }, _this2.getFieldsConections); //this.getFieldsConections();
 
-              conexionesOriginales = temp;
-
-              _this2.getFieldsConections();
             });
           }
         });
@@ -139,8 +161,8 @@ function (_React$Component) {
     value: function getFieldsConections() {
       var arregloTemp = [];
 
-      for (var i = 0; i < conexionesOriginales.length; i++) {
-        this.getFieldConections(conexionesOriginales[i].valor, i, arregloTemp, conexionesOriginales[i].ID);
+      for (var i = 0; i < this.state.conexiones.length; i++) {
+        this.getFieldConections(this.state.conexiones[i].valor, i, arregloTemp, this.state.conexiones[i].ID);
       }
 
       ;
@@ -159,8 +181,9 @@ function (_React$Component) {
         var request = new _mssql["default"].Request(transaction);
         request.query("select * from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME = '" + nombreTabla + "'", function (err, result) {
           if (err) {
+            console.log(err);
+
             if (!rolledBack) {
-              console.log(err);
               transaction.rollback(function (err) {});
             }
           } else {
@@ -186,16 +209,14 @@ function (_React$Component) {
               _this3.setState({
                 camposConexiones: array
               });
-
-              camposConexionesOriginales = array;
             });
           }
         });
       }); // fin transaction
     }
   }, {
-    key: "getVariables",
-    value: function getVariables() {
+    key: "loadScalarVariables",
+    value: function loadScalarVariables() {
       var _this4 = this;
 
       var transaction = new _mssql["default"].Transaction(this.props.pool);
@@ -205,10 +226,88 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("select * from Variables", function (err, result) {
+        request.query("select * from Variables where esObjeto = 'false'", function (err, result) {
           if (err) {
+            console.log(err);
+
             if (!rolledBack) {
-              console.log(err);
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              for (var i = 0; i < result.recordset.length; i++) {
+                _this4.loadScalarVariablesFields(result.recordset[i]);
+              }
+
+              ;
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
+    key: "loadScalarVariablesFields",
+    value: function loadScalarVariablesFields(variable) {
+      var _this5 = this;
+
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("select * from VariablesCampos where variableID = " + variable.ID, function (err, result) {
+          if (err) {
+            console.log(err);
+
+            if (!rolledBack) {
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              var temp = _toConsumableArray(_this5.state.variablesEscalares);
+
+              for (var i = 0; i < result.recordset.length; i++) {
+                temp.push({
+                  valor: result.recordset[i].nombre,
+                  tipo: result.recordset[i].tipo,
+                  esFuenteDato: false,
+                  variableID: variable.ID,
+                  variableCampoID: result.recordset[i].ID,
+                  esObjeto: variable.esObjeto,
+                  esInstruccionSQL: false,
+                  nivel: result.recordset[i].nivel
+                });
+              }
+
+              ;
+
+              _this5.setState({
+                variablesEscalares: temp
+              });
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
+    key: "getVariables",
+    value: function getVariables() {
+      var _this6 = this;
+
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("select * from Variables where esObjeto = 'true'", function (err, result) {
+          if (err) {
+            console.log(err);
+
+            if (!rolledBack) {
               transaction.rollback(function (err) {});
               return [];
             }
@@ -228,13 +327,10 @@ function (_React$Component) {
                   variables: temp
               }, this.getFieldsVariables );*/
 
-              _this4.setState({
+              _this6.setState({
                 variables: temp
-              });
+              }, _this6.getFieldsVariables); //this.getFieldsVariables();
 
-              variablesOriginales = temp;
-
-              _this4.getFieldsVariables();
             });
           }
         });
@@ -245,8 +341,8 @@ function (_React$Component) {
     value: function getFieldsVariables() {
       var arregloTemp = [];
 
-      for (var i = 0; i < variablesOriginales.length; i++) {
-        this.getFieldVariables(variablesOriginales[i].ID, i, arregloTemp);
+      for (var i = 0; i < this.state.variables.length; i++) {
+        this.getFieldVariables(this.state.variables[i].ID, i, arregloTemp);
       }
 
       ;
@@ -254,7 +350,7 @@ function (_React$Component) {
   }, {
     key: "getFieldVariables",
     value: function getFieldVariables(variableID, index, array) {
-      var _this5 = this;
+      var _this7 = this;
 
       if (variableID != undefined) {
         var transaction = new _mssql["default"].Transaction(this.props.pool);
@@ -266,8 +362,9 @@ function (_React$Component) {
           var request = new _mssql["default"].Request(transaction);
           request.query("select * from VariablesCampos where variableID = " + variableID, function (err, result) {
             if (err) {
+              console.log(err);
+
               if (!rolledBack) {
-                console.log(err);
                 transaction.rollback(function (err) {});
               }
             } else {
@@ -291,18 +388,251 @@ function (_React$Component) {
 
                 array[index] = $.merge(array[index], nombreColumnas);
 
-                _this5.setState({
+                _this7.setState({
                   camposVariables: array
                 });
-
-                camposVariablesOriginales = array;
-                console.log('camposVariablesOriginales');
-                console.log(camposVariablesOriginales);
               });
             }
           });
         }); // fin transaction
       }
+    }
+  }, {
+    key: "loadVariablesSQL",
+    value: function loadVariablesSQL() {
+      var _this8 = this;
+
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("select * from Variables where esInstruccionSQL = 'true'", function (err, result) {
+          if (err) {
+            console.log(err);
+
+            if (!rolledBack) {
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              _this8.setState({
+                variablesSQL: result.recordset
+              }, _this8.initLoadVariablesCamposSQL);
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
+    key: "initLoadVariablesCamposSQL",
+    value: function initLoadVariablesCamposSQL() {
+      var arregloTemp = [];
+
+      for (var i = 0; i < this.state.variablesSQL.length; i++) {
+        this.loadVariablesCamposSQL(this.state.variablesSQL[i], i, arregloTemp);
+      }
+
+      ;
+    }
+  }, {
+    key: "loadVariablesCamposSQL",
+    value: function loadVariablesCamposSQL(variable, index, array) {
+      var _this9 = this;
+
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("select * from InstruccionSQLCampos where variableID = " + variable.ID, function (err, result) {
+          if (err) {
+            console.log(err);
+
+            if (!rolledBack) {
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              var nombreColumnas = [];
+
+              for (var i = 0; i < result.recordset.length; i++) {
+                nombreColumnas.push({
+                  valor: result.recordset[i].nombre,
+                  tipo: result.recordset[i].tipo,
+                  esFuenteDato: false,
+                  variableID: variable.ID,
+                  variableCampoID: result.recordset[i].ID,
+                  esObjeto: variable.esObjeto,
+                  esInstruccionSQL: true,
+                  nivel: 0
+                });
+              }
+
+              ;
+
+              if (array[index] == undefined) {
+                array[index] = [];
+              }
+
+              array[index] = $.merge(array[index], nombreColumnas);
+
+              _this9.setState({
+                camposVariablesSQL: array
+              });
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
+    key: "loadExcel",
+    value: function loadExcel() {
+      var _this10 = this;
+
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("select * from ExcelArchivos", function (err, result) {
+          if (err) {
+            console.log(err);
+
+            if (!rolledBack) {
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              _this10.setState({
+                excel: result.recordset
+              }, _this10.initLoadExcelCampos);
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
+    key: "initLoadExcelCampos",
+    value: function initLoadExcelCampos() {
+      var arregloTemp = [];
+
+      for (var i = 0; i < this.state.excel.length; i++) {
+        this.loadExcelCampos(this.state.excel[i], i, arregloTemp);
+      }
+
+      ;
+    }
+  }, {
+    key: "loadExcelCampos",
+    value: function loadExcelCampos(excel, index, array) {
+      var _this11 = this;
+
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("select * from ExcelVariables where excelArchivoID = " + excel.ID, function (err, result) {
+          if (err) {
+            console.log(err);
+
+            if (!rolledBack) {
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              var nombreColumnas = [];
+
+              for (var i = 0; i < result.recordset.length; i++) {
+                var tipo;
+
+                if (result.recordset[i].operacion.localeCompare("SUM") == 0 || result.recordset[i].operacion.localeCompare("PROM") == 0 || result.recordset[i].operacion.localeCompare("COUNT") == 0) {
+                  tipo = 'decimal';
+                } else if (result.recordset[i].operacion.localeCompare("MIN") == 0 || result.recordset[i].operacion.localeCompare("MAX") == 0 || result.recordset[i].operacion.localeCompare("ASIG") == 0) {
+                  if (result.recordset[i].tipo.localeCompare("numero") == 0) tipo = 'decimal';else tipo = result.recordset[i].tipo;
+                }
+
+                nombreColumnas.push({
+                  valor: result.recordset[i].nombre,
+                  tipo: tipo,
+                  esFuenteDato: false,
+                  excelArchivoID: excel.ID,
+                  excelVariableID: result.recordset[i].ID,
+                  esObjeto: false,
+                  esInstruccionSQL: false,
+                  nivel: 0
+                });
+              }
+
+              ;
+
+              if (array[index] == undefined) {
+                array[index] = [];
+              }
+
+              array[index] = $.merge(array[index], nombreColumnas);
+
+              _this11.setState({
+                camposDeExcel: array
+              });
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
+    key: "loadFormas",
+    value: function loadFormas() {
+      var _this12 = this;
+
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("select * from FormasVariables", function (err, result) {
+          if (err) {
+            console.log(err);
+
+            if (!rolledBack) {
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              var nombreColumnas = [];
+
+              for (var i = 0; i < result.recordset.length; i++) {
+                nombreColumnas.push({
+                  valor: result.recordset[i].nombre,
+                  tipo: result.recordset[i].tipo,
+                  esFuenteDato: false,
+                  formaVariableID: result.recordset[i].ID,
+                  esObjeto: false,
+                  esInstruccionSQL: false,
+                  nivel: 0
+                });
+              }
+
+              ;
+
+              _this12.setState({
+                formas: nombreColumnas
+              });
+            });
+          }
+        });
+      }); // fin transaction
     }
   }, {
     key: "retornarIndiceSeleccionadoParaMostrarCampoObjetivo",
@@ -318,123 +648,73 @@ function (_React$Component) {
       /*console.log('this.props.reglas[indiceI-1].length');
       console.log(this.props.reglas[indiceI-1].length);*/
 
-      if (this.props.reglas.length - 1 == indiceI
+      /*if(this.props.reglas.length-1 == indiceI*/
+
       /*&& this.props.reglas[indiceI-1].length == indiceJ*/
-      && tipoIndiceSeleccionado.localeCompare("abajo") == 0) {
-        //EL CASO CUANDO EL INDICE SELECCIONADO DE REGLAS ES EL ULTIMO Y SELECCIONO tipoIndiceSeleccionado = ABAJO
-        //reset
-        console.log('1');
-        this.setState({
-          conexiones: conexionesOriginales,
-          camposConexiones: camposConexionesOriginales,
-          variables: variablesOriginales,
-          camposVariables: camposVariablesOriginales
-        });
+
+      /*&& tipoIndiceSeleccionado.localeCompare("abajo") == 0) {
+      //EL CASO CUANDO EL INDICE SELECCIONADO DE REGLAS ES EL ULTIMO Y SELECCIONO tipoIndiceSeleccionado = ABAJO
+      //reset
+      console.log('1');
+      this.setState({
+      conexiones: conexionesOriginales,
+      camposConexiones: camposConexionesOriginales,
+      variables: variablesOriginales,
+      camposVariables: camposVariablesOriginales
+      });
       } else {
-        console.log('2'); //puede ser otra regla, una formula o el cursor de arriba
-        //mostrar campos
-
-        var tempCopyVariables = [];
-        var tempCopyCampos = [];
-
-        if (reglaSeleccionada[0].esConexionTabla) {
-          console.log('2.1');
-
-          for (var i = 0; i < conexionesOriginales.length; i++) {
-            if (reglaSeleccionada[0].conexionTablaID == conexionesOriginales[i].ID) {
-              tempCopyVariables = conexionesOriginales[i];
-              tempCopyCampos = camposConexionesOriginales[i];
-              break;
-            }
-          }
-
-          ;
-          this.setState({
-            conexiones: [tempCopyVariables],
-            camposConexiones: [tempCopyCampos],
-            variables: [],
-            camposVariables: []
-          });
-        } else {
-          console.log('2.2');
-
-          for (var i = 0; i < variablesOriginales.length; i++) {
-            if (reglaSeleccionada[0].variableID == variablesOriginales[i].ID) {
-              tempCopyVariables = jQuery.extend(true, {}, variablesOriginales[i]);
-              tempCopyCampos = jQuery.extend(true, {}, camposVariablesOriginales[i]);
-              break;
-            }
-          }
-
-          ;
-          this.setState({
-            conexiones: [],
-            camposConexiones: [],
-            variables: [tempCopyVariables],
-            camposVariables: [[tempCopyCampos]]
-          });
-        }
+      console.log('2');
+      //puede ser otra regla, una formula o el cursor de arriba
+      //mostrar campos
+      var tempCopyVariables = [];
+      var tempCopyCampos = [];
+      if(reglaSeleccionada[0].esConexionTabla) {
+      console.log('2.1');
+      for (var i = 0; i < conexionesOriginales.length; i++) {
+      if(reglaSeleccionada[0].conexionTablaID == conexionesOriginales[i].ID) {
+      tempCopyVariables = conexionesOriginales[i];
+      tempCopyCampos = camposConexionesOriginales[i];
+      break;
       }
-      /*if(tipoIndiceSeleccionado.localeCompare("abajo") == 0) {
-          console.log('1');
-          //reset
-          this.setState({
-              conexiones: conexionesOriginales,
-              camposConexiones: camposConexionesOriginales,
-              variables: variablesOriginales,
-              camposVariables: camposVariablesOriginales
-          });
-      }  else {
-          console.log('2');
-          //puede ser otra regla, una formula o el cursor de arriba
-          //mostrar campos
-          var tempCopyVariables = [];
-          var tempCopyCampos = [];
-          if(reglaSeleccionada.esConexionTabla) {
-              for (var i = 0; i < conexionesOriginales.length; i++) {
-                  if(reglaSeleccionada.conexionTablaID == conexionesOriginales[i].ID) {
-                      tempCopyVariables = conexionesOriginales[i];
-                      tempCopyCampos = camposConexionesOriginales[i];
-                      break;
-                  }
-              };
-              console.log('[tempCopyVariables]')
-              console.log([tempCopyVariables])
-              console.log('[tempCopyCampos]')
-              console.log([tempCopyCampos])
-              console.log('conexionesOriginales')
-              console.log(conexionesOriginales)
-              console.log('camposConexionesOriginales')
-              console.log(camposConexionesOriginales)
-              this.setState({
-                  conexiones: [tempCopyVariables],
-                  camposConexiones: [tempCopyCampos],
-                  variables: [],
-                  camposVariables: []
-              });
-          } else {
-              for (var i = 0; i < variablesOriginales.length; i++) {
-                  if(reglaSeleccionada.variableID == variablesOriginales[i].ID) {
-                      tempCopyVariables = jQuery.extend(true, {}, variablesOriginales[i]);
-                      tempCopyCampos = jQuery.extend(true, {}, camposVariablesOriginales[i]);
-                      break;
-                  }
-              };
-              this.setState({
-                  conexiones: [],
-                  camposConexiones: [],
-                  variables: [tempCopyVariables],
-                  camposVariables: [[tempCopyCampos]]
-              });
-          }
+      };
+      this.setState({
+      conexiones: [tempCopyVariables],
+      camposConexiones: [tempCopyCampos],
+      variables: [],
+      camposVariables: []
+      });
+      } else {
+      console.log('2.2');
+      for (var i = 0; i < variablesOriginales.length; i++) {
+      if(reglaSeleccionada[0].variableID == variablesOriginales[i].ID) {
+      tempCopyVariables = jQuery.extend(true, {}, variablesOriginales[i]);
+      tempCopyCampos = jQuery.extend(true, {}, camposVariablesOriginales[i]);
+      break;
+      }
+      };
+      this.setState({
+      conexiones: [],
+      camposConexiones: [],
+      variables: [tempCopyVariables],
+      camposVariables: [[tempCopyCampos]]
+      });
+      }
       }*/
-
     }
   }, {
     key: "retornoCampo",
     value: function retornoCampo(campo) {
       campo = campo;
       this.props.retornoCampo(campo);
+    }
+  }, {
+    key: "actualizarEstadoVistaEsCondicion",
+    value: function actualizarEstadoVistaEsCondicion(mostrarCrearCondicionN) {
+      mostrarCrearCondicion = mostrarCrearCondicionN;
+      this.setState({
+        mostrarCrearCondicion: mostrarCrearCondicionN
+      });
+      this.props.retornarEstadoVistaEsCondicion(mostrarCrearCondicionN);
     }
   }, {
     key: "render",
@@ -453,19 +733,29 @@ function (_React$Component) {
         pool: this.props.pool,
         campos: this.props.campos,
         asignaciones: this.props.asignaciones,
-        retornoCampo: this.retornoCampo,
+        retornarValor: this.props.retornarValor,
+        retornoCampo: this.props.retornoCampo,
         retornoOperacion: this.props.retornoOperacion,
         camposDropdown: this.props.camposDropdown,
         valoresDropdown: this.props.valoresDropdown,
         mostrarOpcionSino: this.state.mostrarOpcionSino,
         callbackCrearRegla: this.props.callbackCrearRegla,
         goToCreateFormula: this.props.goToCreateFormula,
-        conexiones: this.state.conexiones,
-        camposConexiones: this.state.camposConexiones,
-        variables: this.state.variables,
-        camposVariables: this.state.camposVariables,
+        tablas: this.state.conexiones,
+        camposTablas: this.state.camposConexiones,
+        variablesEscalares: this.state.variablesEscalares,
+        objetos: this.state.variables,
+        camposDeObjetos: this.state.camposVariables,
+        excel: this.state.excel,
+        camposDeExcel: this.state.camposDeExcel,
+        formas: this.state.formas,
+        variablesSQL: this.state.variablesSQL,
+        camposVariablesSQL: this.state.camposVariablesSQL,
+        mostrarCrearCondicion: this.state.mostrarCrearCondicion,
+        callbackModificarRegla: this.props.callbackModificarRegla,
+        callbackEliminarRegla: this.props.callbackEliminarRegla,
         actualizarNivelNuevaRegla: this.props.actualizarNivelNuevaRegla,
-        retornarEstadoVistaEsCondicion: this.props.retornarEstadoVistaEsCondicion
+        actualizarEstadoVistaEsCondicion: this.actualizarEstadoVistaEsCondicion
       }))), _react["default"].createElement("hr", null), _react["default"].createElement("div", {
         className: "row"
       }, _react["default"].createElement("div", {

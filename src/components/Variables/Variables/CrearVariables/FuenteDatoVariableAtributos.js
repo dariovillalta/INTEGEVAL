@@ -33,65 +33,57 @@ export default class FuenteDatoVariableAtributos extends React.Component {
                 </div>
                 <br/>
                 { !this.props.mostrarEsObjeto ? (
-                    <div className={"row"}>
-                        <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
-                            <div className={"row"} style={{width: "100%"}}>
-                                <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
-                                    <label htmlFor="tipoFuenteDato" className="col-form-label">Tipo de Variable</label>
-                                </div>
-                                <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
-                                    <a className={"breadcrumb-item active font-20"} aria-current="page">{this.props.tipoVariable}</a>
+                    <div>
+                        { this.props.mostrarInstruccionSQL ? (
+                            <div className={"row"}>
+                                <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
+                                    <br/>
+                                    <a className={"btn btn-success btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={() => this.props.goCreateVariableFieldSQL()}>Crear Instrucción SQL </a>
+                                    <br/>
                                 </div>
                             </div>
-                            <br/>
-                            <a className={"btn btn-success btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={() => this.actualizarIndiceAtributoSeleccionado(-1)}>(Condiciones | Instrucciones) para el Cálculo </a>
-                            <br/>
-                            <a className={"btn btn-success btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={() => this.goCreateVariableFieldSQLTemp()}>Crear Instrucción SQL </a>
-                            <br/>
-                        </div>
+                        ) : (
+                            <div className={"row"}>
+                                <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
+                                    <div className={"row"} style={{width: "100%"}}>
+                                        <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
+                                            <label htmlFor="tipoFuenteDato" className="col-form-label">Tipo de Variable</label>
+                                        </div>
+                                        <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
+                                            <a className={"breadcrumb-item active font-20"} aria-current="page">{this.props.tipoNuevaVariable}</a>
+                                        </div>
+                                    </div>
+                                    <br/>
+                                    <a className={"btn btn-success btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={() => this.actualizarIndiceAtributoSeleccionado(-1)}>Crear Instrucción Personalizada </a>
+                                    <br/>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 ) : (
-                    <div className={"row"}>
-                        <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
-                            <div style={{width: "100%"}}>
-                                <div className={"row"} style={{width: "100%"}}>
-                                    <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3"}>
-                                        <label htmlFor="nombreAtributoNuevoCampo" className="col-form-label">Nombre de Atributo:</label>
+                    <div>
+                        { this.props.mostrarInstruccionSQL ? (
+                            <div className={"row"}>
+                                <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
+                                    <br/>
+                                    <div className={"row"} style={{width: "100%"}}>
+                                        <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
+                                            <a className={"btn btn-success btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={() => this.props.goCreateVariableFieldSQL()}>Crear Instrucción SQL </a>
+                                        </div>
                                     </div>
-                                    <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
-                                        <input id="nombreAtributoNuevoCampo" defaultValue={this.props.nombreCampoNuevoAtributosVario} onKeyUp={this.props.actualizarNombreCampoNuevoAtributosVario} type="text" className="form-control form-control-sm"/>
-                                    </div>
+                                    <br/>
                                 </div>
                             </div>
-                            <br/>
-                            <div className={"row"} style={{width: "100%"}}>
-                                <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
-                                    <label htmlFor="tipoFuenteDato" className="col-form-label">Tipo de Variable</label>
-                                </div>
-                                <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
-                                    <a className={"breadcrumb-item active font-20"} aria-current="page">{this.props.tipoVariable}</a>
-                                </div>
-                            </div>
-                            <br/>
-                            <a className={"btn btn-success btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={() => this.actualizarIndiceAtributoSeleccionado(-1)}>(Condiciones | Instrucciones) para el Cálculo </a>
-                            <br/>
-                            <a className={"btn btn-success btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={() => this.props.goCreateVariableFieldSQL()}>Crear Instrucción SQL </a>
-                            <br/>
-                            <div className={"row"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
-                                <a className={"btn btn-primary btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.props.crearAtributoVariable}>Crear Atributo</a>
-                            </div>
-                            <br/>
-
-                            {this.props.atributos.map((atributo, i) => (
-                                <div style={{width: "100%"}} key={i}>
-                                    <hr/>
+                        ) : (
+                            <div className={"row"}>
+                                <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
                                     <div style={{width: "100%"}}>
                                         <div className={"row"} style={{width: "100%"}}>
                                             <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3"}>
-                                                <label htmlFor="nombreAtributo" className="col-form-label">Nombre de Atributo:</label>
+                                                <label htmlFor="nombreAtributoNuevoCampo" className="col-form-label">Nombre de Atributo:</label>
                                             </div>
                                             <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
-                                                <input id="nombreAtributo" type="text" defaultValue={atributo.nombre} className="form-control form-control-sm"/>
+                                                <input id="nombreAtributoNuevoCampo" defaultValue={this.props.nombreCampoNuevoAtributosVario} onKeyUp={this.props.actualizarNombreCampoNuevoAtributosVario} type="text" className="form-control form-control-sm"/>
                                             </div>
                                         </div>
                                     </div>
@@ -101,19 +93,51 @@ export default class FuenteDatoVariableAtributos extends React.Component {
                                             <label htmlFor="tipoFuenteDato" className="col-form-label">Tipo de Variable</label>
                                         </div>
                                         <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
-                                            <a className={"breadcrumb-item active font-20"} aria-current="page">{atributo.tipo}</a>
+                                            <a className={"breadcrumb-item active font-20"} aria-current="page">{this.props.tipoNuevaVariable}</a>
                                         </div>
                                     </div>
                                     <br/>
-                                    <a className={"btn btn-success btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={() => this.actualizarIndiceAtributoSeleccionado(i)}>(Condiciones | Instrucciones) para el Cálculo </a>
-                                    <br/>
-                                    <div className={"row"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
-                                        <a className={"btn btn-primary btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.props.crearAtributoVariable}>Editar Atributo</a>
+                                    <div className={"row"} style={{width: "100%"}}>
+                                        <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
+                                            <a className={"btn btn-success btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={() => this.actualizarIndiceAtributoSeleccionado(-1)}>Crear Instrucción Personalizada </a>
+                                        </div>
                                     </div>
                                     <br/>
+                                    <div className={"row"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
+                                        <a className={"btn btn-primary btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.props.crearAtributoVariable}>Crear Atributo</a>
+                                    </div>
+                                    <br/>
+
+                                    {this.props.atributos.map((atributo, i) => (
+                                        <div style={{width: "100%"}} key={i}>
+                                            <hr/>
+                                            <div style={{width: "100%"}}>
+                                                <div className={"row"} style={{width: "100%"}}>
+                                                    <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3"}>
+                                                        <label htmlFor="nombreAtributo" className="col-form-label">Nombre de Atributo:</label>
+                                                    </div>
+                                                    <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
+                                                        <input id="nombreAtributo" type="text" defaultValue={atributo.nombre} className="form-control form-control-sm"/>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <br/>
+                                            <div className={"row"} style={{width: "100%"}}>
+                                                <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
+                                                    <label htmlFor="tipoFuenteDato" className="col-form-label">Tipo de Variable</label>
+                                                </div>
+                                                <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
+                                                    <a className={"breadcrumb-item active font-20"} aria-current="page">{atributo.tipo}</a>
+                                                </div>
+                                            </div>
+                                            <br/>
+                                            <a className={"btn btn-success btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={() => this.actualizarIndiceAtributoSeleccionado(i)}>Editar Instrucción Personalizada </a>
+                                            <br/>
+                                        </div>
+                                    ))}
                                 </div>
-                            ))}
-                        </div>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>

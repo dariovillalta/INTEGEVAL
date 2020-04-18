@@ -80,13 +80,13 @@ export default class UmbralOpciones extends React.Component {
                                 { this.state.mostrarCrearUmbral ? (
                                     <div className={"row"}>
                                         <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
-                                            <CrearUmbral></CrearUmbral>
+                                            <CrearUmbral idVariable={this.props.idVariable} pool={this.props.pool}></CrearUmbral>
                                         </div>
                                     </div>
                                 ) : (
                                     <div className={"row"}>
                                         <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
-                                            <EditarUmbral></EditarUmbral>
+                                            <EditarUmbral idVariable={this.props.idVariable} pool={this.props.pool}></EditarUmbral>
                                         </div>
                                     </div>
                                 )}

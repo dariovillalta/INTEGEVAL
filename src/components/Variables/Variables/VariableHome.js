@@ -3,7 +3,7 @@ import sql from 'mssql';
 
 import SeleccionarVariables from './SeleccionarVariables.js';
 import CrearVariablesHome from './CrearVariables/CrearVariablesHome.js';
-import EditarVariable from './EditarVariable.js';
+import EditarVariablesHome from './EditarVariable/EditarVariablesHome.js';
 
 var isMounted = false;
 
@@ -13,17 +13,16 @@ export default class VariableHome extends React.Component {
         super(props);
         this.state = {
             componenteActual: "selVariables",
-            idFuenteDatos: -1,
-            nombreFuenteDatos: "",
-            descripcionFuenteDatos: "",
-            esObjetoFuenteDatos: "",
-            objetoPadreIDFuenteDatos: -1,
-            guardarFuenteDatos: ""
+            idVariable: -1,
+            tipoVariable: "",
+            esObjetoVariable: "",
+            esInstruccionSQLVariable: ""
         }
         this.crearVariables = this.crearVariables.bind(this);
         this.retornoSeleccionVariables = this.retornoSeleccionVariables.bind(this);
         this.editarVariables = this.editarVariables.bind(this);
         this.terminoCrearVariablesPasarAEdit = this.terminoCrearVariablesPasarAEdit.bind(this);
+        this.actualizarIDVariableModificada = this.actualizarIDVariableModificada.bind(this);
     }
 
     componentDidMount () {
@@ -39,24 +38,20 @@ export default class VariableHome extends React.Component {
     retornoSeleccionVariables () {
         this.setState({
             componenteActual: "selVariables",
-            idFuenteDatos: -1,
-            nombreFuenteDatos: "",
-            descripcionFuenteDatos: "",
-            esObjetoFuenteDatos: "",
-            objetoPadreIDFuenteDatos: -1,
-            guardarFuenteDatos: ""
+            idVariable: -1,
+            tipoVariable: "",
+            esObjetoVariable: "",
+            esInstruccionSQLVariable: ""
         });
     }
 
-    editarVariables (idFuenteDatos, nombreFuenteDatos, descripcionFuenteDatos, esObjetoFuenteDatos, objetoPadreIDFuenteDatos, guardarFuenteDatos) {
+    editarVariables (idVariable, esObjetoVariable, esInstruccionSQLVariable, tipoVariable) {
         this.setState({
-            idFuenteDatos: idFuenteDatos,
+            idVariable: idVariable,
             componenteActual: "editarVariables",
-            nombreFuenteDatos: nombreFuenteDatos,
-            descripcionFuenteDatos: descripcionFuenteDatos,
-            esObjetoFuenteDatos: esObjetoFuenteDatos,
-            objetoPadreIDFuenteDatos: objetoPadreIDFuenteDatos,
-            guardarFuenteDatos: guardarFuenteDatos
+            tipoVariable: tipoVariable,
+            esObjetoVariable: esObjetoVariable,
+            esInstruccionSQLVariable: esInstruccionSQLVariable
         });
     }
 
@@ -70,8 +65,8 @@ export default class VariableHome extends React.Component {
             const request = new sql.Request(transaction);
             request.query("select * from Campos where nombre = '"+nombreFuenteDatos+"'", (err, result) => {
                 if (err) {
+                    console.log(err);
                     if (!rolledBack) {
-                        console.log(err);
                         transaction.rollback(err => {
                         });
                     }
@@ -88,6 +83,82 @@ export default class VariableHome extends React.Component {
         }); // fin transaction
     }
 
+    actualizarIDVariableModificada (tablaDeVariableModificada) {
+        if(tablaDeVariableModificada.localeCompare("excel") == 0) {
+            const transaction = new sql.Transaction( this.props.pool );
+            transaction.begin(err => {
+                var rolledBack = false;
+                transaction.on('rollback', aborted => {
+                    rolledBack = true;
+                });
+                const request = new sql.Request(transaction);
+                request.query("select top 1 * from ExcelArchivos order by ID desc", (err, result) => {
+                    if (err) {
+                        console.log(err);
+                        if (!rolledBack) {
+                            transaction.rollback(err => {
+                            });
+                        }
+                    } else {
+                        transaction.commit(err => {
+                            if(result.recordset.length > 0) {
+                                this.editarVariables(result.recordset[0].ID, false, false, "excel");
+                            }
+                        });
+                    }
+                });
+            }); // fin transaction
+        } else if(tablaDeVariableModificada.localeCompare("forma") == 0) {
+            const transaction = new sql.Transaction( this.props.pool );
+            transaction.begin(err => {
+                var rolledBack = false;
+                transaction.on('rollback', aborted => {
+                    rolledBack = true;
+                });
+                const request = new sql.Request(transaction);
+                request.query("select top 1 * from FormasVariables order by ID desc", (err, result) => {
+                    if (err) {
+                        console.log(err);
+                        if (!rolledBack) {
+                            transaction.rollback(err => {
+                            });
+                        }
+                    } else {
+                        transaction.commit(err => {
+                            if(result.recordset.length > 0) {
+                                this.editarVariables(result.recordset[0].ID, false, false, "forma");
+                            }
+                        });
+                    }
+                });
+            }); // fin transaction
+        } else if(tablaDeVariableModificada.localeCompare("variable") == 0) {
+            const transaction = new sql.Transaction( this.props.pool );
+            transaction.begin(err => {
+                var rolledBack = false;
+                transaction.on('rollback', aborted => {
+                    rolledBack = true;
+                });
+                const request = new sql.Request(transaction);
+                request.query("select top 1 * from Variables order by ID desc", (err, result) => {
+                    if (err) {
+                        console.log(err);
+                        if (!rolledBack) {
+                            transaction.rollback(err => {
+                            });
+                        }
+                    } else {
+                        transaction.commit(err => {
+                            if(result.recordset.length > 0) {
+                                this.editarVariables(result.recordset[0].ID, result.recordset[0].esObjeto, result.recordset[0].esInstruccionSQL, "variable");
+                            }
+                        });
+                    }
+                });
+            }); // fin transaction
+        }
+    }
+
     render() {
         if(this.state.componenteActual.localeCompare("selVariables") == 0) {
             return (
@@ -96,7 +167,7 @@ export default class VariableHome extends React.Component {
                                             configuracionHome={this.props.configuracionHome}
                                             crearVariables={this.crearVariables}
                                             goOptions={this.props.goOptions}
-                                            editarFuenteDatos={this.editarFuenteDatos}>
+                                            editarVariable={this.editarVariables}>
                     </SeleccionarVariables>
                 </div>
             );
@@ -119,24 +190,13 @@ export default class VariableHome extends React.Component {
             return (
                 <div>
                     <EditarVariablesHome pool={this.props.pool}
-                                    showFormula={this.props.showFormula}
-                                    showCondicionVar={this.props.showCondicionVar}
-                                    showRiesgos={this.props.showRiesgos}
-                                    goOptions={this.props.goOptions}
-                                    retornoSeleccionTabla={this.props.retornoSeleccionTabla}
+                                    idVariable={this.state.idVariable}
+                                    tipoVariable={this.state.tipoVariable}
+                                    esObjetoVariable={this.state.esObjetoVariable}
+                                    esInstruccionSQLVariable={this.state.esInstruccionSQLVariable}
                                     retornoSeleccionVariables={this.retornoSeleccionVariables}
-                                    retornoSeleccionRiesgo={this.retornoSeleccionRiesgoSameComponent}
-                                    retornoSeleccionRiesgoUmbral={this.retornoSeleccionRiesgoDiffComponent}
                                     configuracionHome={this.props.configuracionHome}
-                                    updateNavBar={this.props.updateNavBar}
-                                    showUmbralHome={this.props.showUmbralHome}
-                                    idFuenteDatos={this.state.idFuenteDatos}
-                                    nombreFuenteDatos={this.state.nombreFuenteDatos}
-                                    descripcionFuenteDatos={this.state.descripcionFuenteDatos}
-                                    esObjetoFuenteDatos={this.state.esObjetoFuenteDatos}
-                                    objetoPadreIDFuenteDatos={this.state.objetoPadreIDFuenteDatos}
-                                    guardarFuenteDatos={this.state.guardarFuenteDatos}
-                                    updateFormula={this.props.updateFormula}>
+                                    actualizarIDVariableModificada={this.actualizarIDVariableModificada}>
                     </EditarVariablesHome>
                 </div>
             );

@@ -11,13 +11,15 @@ var _mssql = _interopRequireDefault(require("mssql"));
 
 var _SeleccionarIndicador = _interopRequireDefault(require("./SeleccionarIndicador.js"));
 
-var _CrearIndicador = _interopRequireDefault(require("./CrearIndicador.js"));
+var _CrearIndicador = _interopRequireDefault(require("./CrearIndicador/CrearIndicador.js"));
 
 var _EditarIndicador = _interopRequireDefault(require("./EditarIndicador.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -118,13 +120,15 @@ function (_React$Component) {
     key: "render",
     value: function render() {
       if (this.state.componenteAMostrar.localeCompare("selIndicador") == 0) {
-        return _react["default"].createElement("div", null, _react["default"].createElement(_SeleccionarIndicador["default"], {
+        var _React$createElement;
+
+        return _react["default"].createElement("div", null, _react["default"].createElement(_SeleccionarIndicador["default"], (_React$createElement = {
           pool: this.props.pool,
           configuracionHome: this.props.configuracionHome,
           terminoSeleccionIndicador: this.terminoSeleccionIndicador,
           goCrearIndicador: this.goCrearIndicador,
           showRiesgos: this.props.showRiesgos
-        }, " "));
+        }, _defineProperty(_React$createElement, "showRiesgos", this.props.showRiesgos), _defineProperty(_React$createElement, "updateBanderaCrearRiesgoTrue", this.props.updateBanderaCrearRiesgoTrue), _React$createElement), " "));
       } else if (this.state.componenteAMostrar.localeCompare("crearIndicador") == 0) {
         return _react["default"].createElement("div", null, _react["default"].createElement(_CrearIndicador["default"], {
           pool: this.props.pool,

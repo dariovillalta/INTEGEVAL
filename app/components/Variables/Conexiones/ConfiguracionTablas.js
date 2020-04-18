@@ -643,7 +643,7 @@ function (_React$Component) {
           }
         }, _react["default"].createElement("img", {
           onClick: function onClick() {
-            return _this5.props.terminoSeleccionTabla(tabla.ID, tabla.tabla);
+            return _this5.props.terminoSeleccionTabla(tabla.ID, tabla.tabla, tabla.usuario, tabla.contrasena, tabla.servidor, tabla.baseDatos, tabla.tabla);
           },
           src: "../assets/edit.png",
           style: {
@@ -651,7 +651,7 @@ function (_React$Component) {
             width: "20px"
           }
         })))));
-      }), this.state.mensajeModal.mostrarMensaje ? _react["default"].createElement(_MessageModal["default"], {
+      }), _react["default"].createElement("br", null), this.state.mensajeModal.mostrarMensaje ? _react["default"].createElement(_MessageModal["default"], {
         esError: this.state.mensajeModal.esError,
         esConfirmar: this.state.mensajeModal.esConfirmar,
         dismissMessage: this.dismissMessageModal,

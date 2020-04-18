@@ -21,9 +21,9 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
 
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
@@ -43,14 +43,26 @@ function (_React$Component) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(SeleccionarVariable).call(this, props));
     _this.state = {
-      variables: []
+      variables: [],
+      excel: [],
+      formas: []
     };
+    _this.getVariables = _this.getVariables.bind(_assertThisInitialized(_this));
+    _this.getExcel = _this.getExcel.bind(_assertThisInitialized(_this));
+    _this.getFormas = _this.getFormas.bind(_assertThisInitialized(_this));
     return _this;
   }
 
   _createClass(SeleccionarVariable, [{
     key: "componentDidMount",
     value: function componentDidMount() {
+      this.getVariables();
+      this.getExcel();
+      this.getFormas();
+    }
+  }, {
+    key: "getVariables",
+    value: function getVariables() {
       var _this2 = this;
 
       var transaction = new _mssql["default"].Transaction(this.props.pool);
@@ -62,14 +74,103 @@ function (_React$Component) {
         var request = new _mssql["default"].Request(transaction);
         request.query("select * from Variables", function (err, result) {
           if (err) {
+            console.log(err);
+
             if (!rolledBack) {
-              console.log(err);
               transaction.rollback(function (err) {});
             }
           } else {
             transaction.commit(function (err) {
+              var arreglo = [];
+
+              for (var i = 0; i < result.recordset.length; i++) {
+                var copyVar = jQuery.extend(true, {}, result.recordset[i]);
+                copyVar.tipo = 'variable';
+                arreglo.push(copyVar);
+              }
+
+              ;
+
               _this2.setState({
-                variables: result.recordset
+                variables: arreglo
+              });
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
+    key: "getExcel",
+    value: function getExcel() {
+      var _this3 = this;
+
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("select * from ExcelArchivos", function (err, result) {
+          if (err) {
+            console.log(err);
+
+            if (!rolledBack) {
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              var arreglo = [];
+
+              for (var i = 0; i < result.recordset.length; i++) {
+                var copyVar = jQuery.extend(true, {}, result.recordset[i]);
+                copyVar.tipo = 'excel';
+                arreglo.push(copyVar);
+              }
+
+              ;
+
+              _this3.setState({
+                excel: arreglo
+              });
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
+    key: "getFormas",
+    value: function getFormas() {
+      var _this4 = this;
+
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("select * from FormasVariables", function (err, result) {
+          if (err) {
+            console.log(err);
+
+            if (!rolledBack) {
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              var arreglo = [];
+
+              for (var i = 0; i < result.recordset.length; i++) {
+                var copyVar = jQuery.extend(true, {}, result.recordset[i]);
+                copyVar.tipo = 'forma';
+                arreglo.push(copyVar);
+              }
+
+              ;
+
+              _this4.setState({
+                formas: arreglo
               });
             });
           }
@@ -79,7 +180,7 @@ function (_React$Component) {
   }, {
     key: "render",
     value: function render() {
-      var _this3 = this;
+      var _this5 = this;
 
       return _react["default"].createElement("div", null, _react["default"].createElement("div", {
         className: "row"
@@ -133,7 +234,7 @@ function (_React$Component) {
       }, this.state.variables.map(function (variable, i) {
         return _react["default"].createElement("a", {
           onClick: function onClick() {
-            return _this3.props.editarVariable(variable.ID, variable.nombre, variable.descripcion, variable.esObjeto, variable.objetoPadreID);
+            return _this5.props.editarVariable(variable.ID, variable.esObjeto, variable.esInstruccionSQL, variable.tipo);
           },
           style: {
             color: "#fafafa"
@@ -141,11 +242,33 @@ function (_React$Component) {
           className: "btn btn-" + (i <= colores.length - 1 ? colores[i] : colores[i % colores.length]) + ' btn-block btnWhiteColorHover font-bold font-20',
           key: variable.ID
         }, variable.nombre);
-      }), this.state.variables.length == 0 ? _react["default"].createElement("a", {
+      }), this.state.excel.map(function (variable, i) {
+        return _react["default"].createElement("a", {
+          onClick: function onClick() {
+            return _this5.props.editarVariable(variable.ID, variable.esObjeto, variable.esInstruccionSQL, variable.tipo);
+          },
+          style: {
+            color: "#fafafa"
+          },
+          className: "btn btn-" + (i <= colores.length - 1 ? colores[i] : colores[i % colores.length]) + ' btn-block btnWhiteColorHover font-bold font-20',
+          key: variable.ID
+        }, variable.nombre);
+      }), this.state.formas.map(function (variable, i) {
+        return _react["default"].createElement("a", {
+          onClick: function onClick() {
+            return _this5.props.editarVariable(variable.ID, variable.esObjeto, variable.esInstruccionSQL, variable.tipo);
+          },
+          style: {
+            color: "#fafafa"
+          },
+          className: "btn btn-" + (i <= colores.length - 1 ? colores[i] : colores[i % colores.length]) + ' btn-block btnWhiteColorHover font-bold font-20',
+          key: variable.ID
+        }, variable.nombre);
+      }), this.state.variables.length == 0 && this.state.excel.length == 0 && this.state.formas.length == 0 ? _react["default"].createElement("div", {
+        className: "p-3 mb-2 bg-dark text-white font-bold font-20 text-center",
         style: {
-          color: "#fafafa"
-        },
-        className: "btn btn-info btn-block btnWhiteColorHover font-bold font-20"
+          width: "100%"
+        }
       }, "No existen variables creadas") : null))))));
     }
   }]);

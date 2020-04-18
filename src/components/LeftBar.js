@@ -12,23 +12,7 @@ export default class LeftBar extends React.Component {
                                 <span className={"navbar-toggler-icon"}></span>
                             </button>
                             <div className={"collapse navbar-collapse"} id="navbarNav">
-                                <ul className={"navbar-nav flex-column"}>
-                                    <li className={"nav-divider"}>
-                                        <h3 style={{color: "#b0bec5"}}>Menu</h3>
-                                    </li>
-                                    <li className={"nav-item "}>
-                                        <a className={"nav-link"} onClick={this.props.showHome} href="#"><i className={"fa fa-fw fa-user-circle"}></i><h3 style={{color: "white"}}>Inicio</h3></a>
-                                    </li>
-                                    <li className={"nav-item "}>
-                                        <a className={"nav-link"} onClick={this.props.showCalulo} href="#"><i className={"fa fa-fw fa-user-circle"}></i><h3 style={{color: "white"}}>Iniciar Cálculo</h3></a>
-                                    </li>
-                                    <li className={"nav-item "}>
-                                        <a className={"nav-link"} onClick={this.props.showChooseReports} href="#"><i className={"fa fa-fw fa-user-circle"}></i><h3 style={{color: "white"}}>Reporter&iacute;a</h3></a>
-                                    </li>
-                                    <li className={"nav-item "}>
-                                        <a className={"nav-link"} onClick={this.props.showGraphics} href="#"><i className={"fa fa-fw fa-user-circle"}></i><h3 style={{color: "white"}}>Gr&aacute;ficos</h3></a>
-                                    </li>
-                                </ul>
+                                {this.props.navbar}
                             </div>
                         </nav>
                     </div>

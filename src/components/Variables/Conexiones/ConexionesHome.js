@@ -1,23 +1,33 @@
 import React from 'react';
 
 import ConfiguracionTablas from './ConfiguracionTablas.js';
-import CamposHome from './CamposHome.js';
+import EditarTabla from './EditarTabla.js';
 
 export default class ConexionesHome extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             idTablaSeleccionada: -1,
-            nombreTablaSeleccionada: ""
+            nombreTablaSeleccionada: "",
+            usuarioTablaSeleccionada: "",
+            contrasenaTablaSeleccionada: "",
+            servidorTablaSeleccionada: "",
+            baseDatosTablaSeleccionada: "",
+            tablaTablaSeleccionada: ""
         }
         this.terminoSeleccionTabla = this.terminoSeleccionTabla.bind(this);
         this.retornoSeleccionTabla = this.retornoSeleccionTabla.bind(this);
     }
 
-    terminoSeleccionTabla (id, nombre) {
+    terminoSeleccionTabla (id, nombre, usuario, contrasena, servidor, baseDatos, tabla) {
         this.setState({
             idTablaSeleccionada: id,
-            nombreTablaSeleccionada: nombre
+            nombreTablaSeleccionada: nombre,
+            usuarioTablaSeleccionada: usuario,
+            contrasenaTablaSeleccionada: contrasena,
+            servidorTablaSeleccionada: servidor,
+            baseDatosTablaSeleccionada: baseDatos,
+            tablaTablaSeleccionada: tabla
         });
     }
 
@@ -42,14 +52,18 @@ export default class ConexionesHome extends React.Component {
         } else {
             return (
                 <div>
-                    <CamposHome pool={this.props.pool}
+                    <EditarTabla pool={this.props.pool}
                                 retornoSeleccionTabla={this.retornoSeleccionTabla}
                                 configuracionHome={this.props.configuracionHome}
+                                goOptions={this.props.goOptions}
                                 idTablaSeleccionada={this.state.idTablaSeleccionada}
                                 nombreTablaSeleccionada={this.state.nombreTablaSeleccionada}
-                                goOptions={this.props.goOptions}
-                                terminoSeleccionTabla={this.terminoSeleccionTabla}>
-                    </CamposHome>
+                                usuarioTablaSeleccionada={this.state.usuarioTablaSeleccionada}
+                                contrasenaTablaSeleccionada={this.state.contrasenaTablaSeleccionada}
+                                servidorTablaSeleccionada={this.state.servidorTablaSeleccionada}
+                                baseDatosTablaSeleccionada={this.state.baseDatosTablaSeleccionada}
+                                tablaTablaSeleccionada={this.state.tablaTablaSeleccionada}>
+                    </EditarTabla>
                 </div>
             );
         }

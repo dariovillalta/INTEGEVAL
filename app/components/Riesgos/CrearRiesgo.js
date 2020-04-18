@@ -57,58 +57,11 @@ function (_React$Component) {
     _this.state = {
       x: 0
     };
-    _this.goCrearUmbral = _this.goCrearUmbral.bind(_assertThisInitialized(_this));
     _this.crearRiesgo = _this.crearRiesgo.bind(_assertThisInitialized(_this));
     return _this;
   }
 
   _createClass(CrearRiesgo, [{
-    key: "goCrearUmbral",
-    value: function goCrearUmbral() {
-      var navbar = _react["default"].createElement("div", {
-        className: "row"
-      }, _react["default"].createElement("div", {
-        className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
-      }, _react["default"].createElement("div", {
-        className: "page-header"
-      }, _react["default"].createElement("h2", {
-        className: "pageheader-title"
-      }, "Configuraci\xF3n"), _react["default"].createElement("div", {
-        className: "page-breadcrumb"
-      }, _react["default"].createElement("nav", {
-        "aria-label": "breadcrumb"
-      }, _react["default"].createElement("ol", {
-        className: "breadcrumb"
-      }, _react["default"].createElement("li", {
-        className: "breadcrumb-item font-16",
-        "aria-current": "page",
-        onClick: this.props.configuracionHome
-      }, _react["default"].createElement("a", {
-        href: "#",
-        className: "breadcrumb-link"
-      }, "Configuraci\xF3n")), _react["default"].createElement("li", {
-        className: "breadcrumb-item font-16",
-        "aria-current": "page",
-        onClick: this.props.retornoSeleccionRiesgo
-      }, _react["default"].createElement("a", {
-        href: "#",
-        className: "breadcrumb-link"
-      }, "Riesgos")), _react["default"].createElement("li", {
-        className: "breadcrumb-item font-16",
-        "aria-current": "page",
-        onClick: this.props.showVariables
-      }, _react["default"].createElement("a", {
-        href: "#",
-        className: "breadcrumb-link"
-      }, "Editar Riesgo")), _react["default"].createElement("li", {
-        className: "breadcrumb-item active font-16",
-        "aria-current": "page"
-      }, "Umbrales")))))));
-
-      this.props.updateNavBar(navbar);
-      this.props.showUmbralHome();
-    }
-  }, {
     key: "crearRiesgo",
     value: function crearRiesgo() {
       var _this2 = this;
@@ -332,7 +285,8 @@ function (_React$Component) {
         value: "-1"
       }, "Ninguno"), this.props.riesgos.map(function (riesgo, i) {
         return _react["default"].createElement("option", {
-          value: riesgo.ID
+          value: riesgo.ID,
+          key: riesgo.ID
         }, riesgo.nombre);
       })))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
         className: "row",

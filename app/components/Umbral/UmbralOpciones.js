@@ -154,11 +154,17 @@ function (_React$Component) {
         className: "row"
       }, _react["default"].createElement("div", {
         className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
-      }, _react["default"].createElement(_CrearUmbral["default"], null))) : _react["default"].createElement("div", {
+      }, _react["default"].createElement(_CrearUmbral["default"], {
+        idVariable: this.props.idVariable,
+        pool: this.props.pool
+      }))) : _react["default"].createElement("div", {
         className: "row"
       }, _react["default"].createElement("div", {
         className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
-      }, _react["default"].createElement(_EditarUmbral["default"], null))))))));
+      }, _react["default"].createElement(_EditarUmbral["default"], {
+        idVariable: this.props.idVariable,
+        pool: this.props.pool
+      }))))))));
     }
   }]);
 

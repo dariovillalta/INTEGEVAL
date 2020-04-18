@@ -76,7 +76,7 @@ function (_React$Component) {
           return _react["default"].createElement("div", {
             className: "sliderInicio " + umbral.nombre.replace(/ /g, '') + "Slider",
             style: {
-              width: umbral.width,
+              width: umbral.width + "%",
               background: umbral.color
             },
             key: i
@@ -85,7 +85,7 @@ function (_React$Component) {
           return _react["default"].createElement("div", {
             className: "sliderItemEnmedio " + umbral.nombre.replace(/ /g, '') + "Slider",
             style: {
-              width: umbral.width,
+              width: umbral.width + "%",
               background: umbral.color
             },
             key: i
@@ -94,7 +94,7 @@ function (_React$Component) {
           return _react["default"].createElement("div", {
             className: "sliderFin " + umbral.nombre.replace(/ /g, '') + "Slider",
             style: {
-              width: umbral.width,
+              width: umbral.width + "%",
               background: umbral.color
             },
             key: i

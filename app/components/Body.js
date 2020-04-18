@@ -9,8 +9,6 @@ var _react = _interopRequireDefault(require("react"));
 
 var _ConfiguracionRiesgos = _interopRequireDefault(require("./ConfiguracionRiesgos.js"));
 
-var _Umbral = _interopRequireDefault(require("./Umbral/Umbral.js"));
-
 var _ConfigVariablesContenedor = _interopRequireDefault(require("./Variables/ConfigVariablesContenedor.js"));
 
 var _Formula = _interopRequireDefault(require("./Formula.js"));
@@ -22,6 +20,10 @@ var _IndicadorHome = _interopRequireDefault(require("./Indicadores/IndicadorHome
 var _RiesgoHome = _interopRequireDefault(require("./Riesgos/RiesgoHome.js"));
 
 var _Calculo = _interopRequireDefault(require("./Calculo.js"));
+
+var _Dashboard = _interopRequireDefault(require("./Dashboard.js"));
+
+var _ReporteriaHome = _interopRequireDefault(require("./Reporteria/ReporteriaHome.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
@@ -59,12 +61,15 @@ function (_React$Component) {
       mensajeLoadingScreen: '',
       navbar: '',
       idVarEditarFormula: -1,
-      tablaVarEditarFormula: ""
+      tablaVarEditarFormula: "",
+      crearRiesgo: false
     };
     _this.showLoadingScreen = _this.showLoadingScreen.bind(_assertThisInitialized(_this));
     _this.hideLoadingScreen = _this.hideLoadingScreen.bind(_assertThisInitialized(_this));
     _this.updateNavBar = _this.updateNavBar.bind(_assertThisInitialized(_this));
     _this.updateFormula = _this.updateFormula.bind(_assertThisInitialized(_this));
+    _this.updateBanderaCrearRiesgoTrue = _this.updateBanderaCrearRiesgoTrue.bind(_assertThisInitialized(_this));
+    _this.updateBanderaCrearRiesgoFalse = _this.updateBanderaCrearRiesgoFalse.bind(_assertThisInitialized(_this));
     return _this;
   }
 
@@ -103,30 +108,36 @@ function (_React$Component) {
       });
     }
   }, {
+    key: "updateBanderaCrearRiesgoTrue",
+    value: function updateBanderaCrearRiesgoTrue() {
+      this.setState({
+        crearRiesgo: true
+      });
+    }
+  }, {
+    key: "updateBanderaCrearRiesgoFalse",
+    value: function updateBanderaCrearRiesgoFalse() {
+      this.setState({
+        crearRiesgo: false
+      });
+    }
+  }, {
     key: "render",
     value: function render() {
       if (this.props.router.showRiskControlHome) {
         return _react["default"].createElement("div", null, _react["default"].createElement(_ConfiguracionRiesgos["default"], {
-          showUmbralHome: this.props.showUmbralHome,
           showVariables: this.props.showVariables,
           showIndicador: this.props.showIndicador,
           showRiesgos: this.props.showRiesgos,
           pool: this.props.pool
         }, " "));
       } else if (this.props.router.showRiskMonitorHome) {
-        return _react["default"].createElement("div", null, _react["default"].createElement(ConeccionTablas, {
-          configuracionHome: this.props.showRiskControlHome,
-          pool: this.props.pool
-        }, " "));
-      } else if (this.props.router.showUmbralHome) {
-        return _react["default"].createElement("div", null, _react["default"].createElement(_Umbral["default"], {
-          navbar: this.state.navbar,
+        return _react["default"].createElement("div", null, _react["default"].createElement(_Dashboard["default"], {
           pool: this.props.pool
         }, " "));
       } else if (this.props.router.showVariables) {
         return _react["default"].createElement("div", null, _react["default"].createElement(_ConfigVariablesContenedor["default"], {
           updateNavBar: this.updateNavBar,
-          showUmbralHome: this.props.showUmbralHome,
           showVariables: this.props.showVariables,
           configuracionHome: this.props.showRiskControlHome,
           pool: this.props.pool,
@@ -154,21 +165,27 @@ function (_React$Component) {
           pool: this.props.pool,
           showFormula: this.props.showFormula,
           showCondicionVar: this.props.showCondicionVar,
-          showRiesgos: this.props.showRiesgos
+          showRiesgos: this.props.showRiesgos,
+          updateBanderaCrearRiesgoTrue: this.updateBanderaCrearRiesgoTrue
         }, " "));
       } else if (this.props.router.showRiesgos) {
         return _react["default"].createElement("div", null, _react["default"].createElement(_RiesgoHome["default"], {
           updateNavBar: this.updateNavBar,
-          showUmbralHome: this.props.showUmbralHome,
           showRiesgos: this.props.showRiesgos,
           configuracionHome: this.props.showRiskControlHome,
           pool: this.props.pool,
           showFormula: this.props.showFormula,
           showCondicionVar: this.props.showCondicionVar,
-          updateFormula: this.updateFormula
+          crearRiesgo: this.state.crearRiesgo,
+          updateFormula: this.updateFormula,
+          updateBanderaCrearRiesgoFalse: this.updateBanderaCrearRiesgoFalse
         }, " "));
       } else if (this.props.router.showCalulo) {
         return _react["default"].createElement("div", null, _react["default"].createElement(_Calculo["default"], {
+          pool: this.props.pool
+        }, " "));
+      } else if (this.props.router.showReporteria) {
+        return _react["default"].createElement("div", null, _react["default"].createElement(_ReporteriaHome["default"], {
           pool: this.props.pool
         }, " "));
       } else {

@@ -48,6 +48,7 @@ function (_React$Component) {
     };
     _this.getIndicators = _this.getIndicators.bind(_assertThisInitialized(_this));
     _this.insertIndicator = _this.insertIndicator.bind(_assertThisInitialized(_this));
+    _this.irCrearRiesgos = _this.irCrearRiesgos.bind(_assertThisInitialized(_this));
     return _this;
   }
 
@@ -127,6 +128,12 @@ function (_React$Component) {
       }); // fin transaction
     }
   }, {
+    key: "irCrearRiesgos",
+    value: function irCrearRiesgos() {
+      this.props.updateBanderaCrearRiesgoTrue();
+      this.props.showRiesgos();
+    }
+  }, {
     key: "render",
     value: function render() {
       var _this4 = this;
@@ -186,7 +193,8 @@ function (_React$Component) {
           }
         }, "Crear Indicador"))) : null)), _react["default"].createElement("br", null));
       }), this.state.riesgos.length == 0 ? _react["default"].createElement("a", {
-        className: "btn btn-outline-dark btn-block btnWhiteColorHover fontSize1EM"
+        className: "btn btn-outline-dark btn-block btnWhiteColorHover fontSize1EM",
+        onClick: this.irCrearRiesgos
       }, "No existen riesgos creados, presione para crear") : null)));
     }
   }]);

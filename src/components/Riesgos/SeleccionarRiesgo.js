@@ -43,18 +43,22 @@ export default class SeleccionarRiesgo extends React.Component {
                                                     {riesgo.nombre}
                                                 </div>
                                                 <div className={"col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2"}>
-                                                    <a className="btn btn-success" style={{color: "white"}}>Editar</a>
+                                                    <a onClick={() => this.props.editarRiesgo(riesgo.ID, riesgo.nombre, riesgo.peso, riesgo.tolerancia, riesgo.valorIdeal, riesgo.padreRiesgo)}className="btn btn-success" style={{color: "white"}}>Editar</a>
                                                 </div>
                                                 <div className={"col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2"}>
-                                                    <a className="btn btn-danger" style={{color: "white"}}>Borrar</a>
+                                                    <a onClick={() => this.props.deleteRiesgo(riesgo.ID)} className="btn btn-danger" style={{color: "white"}}>Borrar</a>
                                                 </div>
                                             </div>
                                             <div style={{height: "10px", width: "100%"}}> </div>
                                             <div className={"row"} style={{width: "100%"}}>
                                                 <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
-                                                    <div style={{width: "25%", background: "#81d4fa"}}>
-                                                        <label style={{color: "white"}}>{riesgo.peso}</label>
+                                                    <div style={{height: "30px", width: riesgo.peso+"%", background: "#81d4fa"}}>
                                                     </div>
+                                                </div>
+                                            </div>
+                                            <div className={"row"} style={{width: "100%"}}>
+                                                <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 text-center"}>
+                                                    <label className="col-form-label">Peso: {riesgo.peso}</label>
                                                 </div>
                                             </div>
                                             <div style={{height: "20px", width: "100%"}}> </div>

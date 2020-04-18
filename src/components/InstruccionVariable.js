@@ -8,7 +8,8 @@ var indiceSeleccionadoReglas = -1;
 var tipoElementoSeleccionadoRegla = '';
 var campo;
 
-var conexionesOriginales = [], camposConexionesOriginales = [], variablesOriginales = [], camposVariablesOriginales = [];
+var mostrarCrearCondicion = true;
+
 export default class InstruccionVariable extends React.Component {
     constructor(props) {
         super(props);
@@ -17,31 +18,50 @@ export default class InstruccionVariable extends React.Component {
             mostrarOpcionSino: false,
             conexiones: [],
             camposConexiones: [],
+            variablesEscalares: [],
             variables: [],
-            camposVariables: []
+            camposVariables: [],
+            variablesSQL: [],
+            camposVariablesSQL: [],
+            excel: [],
+            camposDeExcel: [],
+            formas: [],
+            mostrarCrearCondicion: mostrarCrearCondicion
         }
         this.actualizarEstadoSeleccionSinoNuevaRegla = this.actualizarEstadoSeleccionSinoNuevaRegla.bind(this);
         this.getConections = this.getConections.bind(this);
         this.getFieldsConections = this.getFieldsConections.bind(this);
         this.getFieldConections = this.getFieldConections.bind(this);
+        this.loadScalarVariables = this.loadScalarVariables.bind(this);
+        this.loadScalarVariablesFields = this.loadScalarVariablesFields.bind(this);
         this.getVariables = this.getVariables.bind(this);
         this.getFieldsVariables = this.getFieldsVariables.bind(this);
         this.getFieldVariables = this.getFieldVariables.bind(this);
+        this.loadVariablesSQL = this.loadVariablesSQL.bind(this);
+        this.initLoadVariablesCamposSQL = this.initLoadVariablesCamposSQL.bind(this);
+        this.loadVariablesCamposSQL = this.loadVariablesCamposSQL.bind(this);
+        this.loadExcel = this.loadExcel.bind(this);
+        this.initLoadExcelCampos = this.initLoadExcelCampos.bind(this);
+        this.loadExcelCampos = this.loadExcelCampos.bind(this);
+        this.loadFormas = this.loadFormas.bind(this);
         this.retornarIndiceSeleccionadoParaMostrarCampoObjetivo = this.retornarIndiceSeleccionadoParaMostrarCampoObjetivo.bind(this);
         this.retornoCampo = this.retornoCampo.bind(this);
+        this.actualizarEstadoVistaEsCondicion = this.actualizarEstadoVistaEsCondicion.bind(this);
     }
 
     componentDidMount() {
         this.getConections();
         this.getVariables();
+        this.loadScalarVariables();
+        this.loadVariablesSQL();
+        this.loadExcel();
+        this.loadFormas();
     }
 
     actualizarEstadoSeleccionSinoNuevaRegla (mostrar) {
-        console.log('mostrar');
-        console.log(mostrar);
-        this.setState({
+        /*this.setState({
             mostrarOpcionSino: mostrar
-        });
+        });*/
     }
 
     getConections () {
@@ -54,8 +74,8 @@ export default class InstruccionVariable extends React.Component {
             const request = new sql.Request(transaction);
             request.query("select * from Tablas", (err, result) => {
                 if (err) {
+                    console.log(err);
                     if (!rolledBack) {
-                        console.log(err);
                         transaction.rollback(err => {
                         });
                         return [];
@@ -71,9 +91,8 @@ export default class InstruccionVariable extends React.Component {
                         }, this.getFieldsConections );*/
                         this.setState({
                             conexiones: temp
-                        });
-                        conexionesOriginales = temp;
-                        this.getFieldsConections();
+                        }, this.getFieldsConections );
+                        //this.getFieldsConections();
                     });
                 }
             });
@@ -82,8 +101,8 @@ export default class InstruccionVariable extends React.Component {
 
     getFieldsConections () {
         var arregloTemp = [];
-        for (var i = 0; i < conexionesOriginales.length; i++) {
-            this.getFieldConections(conexionesOriginales[i].valor, i, arregloTemp, conexionesOriginales[i].ID);
+        for (var i = 0; i < this.state.conexiones.length; i++) {
+            this.getFieldConections(this.state.conexiones[i].valor, i, arregloTemp, this.state.conexiones[i].ID);
         };
     }
 
@@ -97,8 +116,8 @@ export default class InstruccionVariable extends React.Component {
             const request = new sql.Request(transaction);
             request.query("select * from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME = '"+nombreTabla+"'", (err, result) => {
                 if (err) {
+                    console.log(err);
                     if (!rolledBack) {
-                        console.log(err);
                         transaction.rollback(err => {
                         });
                     }
@@ -115,7 +134,62 @@ export default class InstruccionVariable extends React.Component {
                         this.setState({
                             camposConexiones: array
                         });
-                        camposConexionesOriginales = array;
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    loadScalarVariables () {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("select * from Variables where esObjeto = 'false'", (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        for (var i = 0; i < result.recordset.length; i++) {
+                            this.loadScalarVariablesFields(result.recordset[i]);
+                        };
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    loadScalarVariablesFields (variable) {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("select * from VariablesCampos where variableID = "+variable.ID, (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        var temp = [...this.state.variablesEscalares];
+                        for (var i = 0; i < result.recordset.length; i++) {
+                            temp.push({valor: result.recordset[i].nombre, tipo: result.recordset[i].tipo, esFuenteDato: false, variableID: variable.ID, variableCampoID: result.recordset[i].ID, esObjeto: variable.esObjeto, esInstruccionSQL: false, nivel: result.recordset[i].nivel})
+                        };
+                        this.setState({
+                            variablesEscalares: temp
+                        } );
                     });
                 }
             });
@@ -130,10 +204,10 @@ export default class InstruccionVariable extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("select * from Variables", (err, result) => {
+            request.query("select * from Variables where esObjeto = 'true'", (err, result) => {
                 if (err) {
+                    console.log(err);
                     if (!rolledBack) {
-                        console.log(err);
                         transaction.rollback(err => {
                         });
                         return [];
@@ -149,9 +223,8 @@ export default class InstruccionVariable extends React.Component {
                         }, this.getFieldsVariables );*/
                         this.setState({
                             variables: temp
-                        });
-                        variablesOriginales = temp;
-                        this.getFieldsVariables();
+                        }, this.getFieldsVariables );
+                        //this.getFieldsVariables();
                     });
                 }
             });
@@ -160,8 +233,8 @@ export default class InstruccionVariable extends React.Component {
 
     getFieldsVariables () {
         var arregloTemp = [];
-        for (var i = 0; i < variablesOriginales.length; i++) {
-            this.getFieldVariables(variablesOriginales[i].ID, i, arregloTemp);
+        for (var i = 0; i < this.state.variables.length; i++) {
+            this.getFieldVariables(this.state.variables[i].ID, i, arregloTemp);
         };
     }
 
@@ -176,8 +249,8 @@ export default class InstruccionVariable extends React.Component {
                 const request = new sql.Request(transaction);
                 request.query("select * from VariablesCampos where variableID = "+variableID, (err, result) => {
                     if (err) {
+                        console.log(err);
                         if (!rolledBack) {
-                            console.log(err);
                             transaction.rollback(err => {
                             });
                         }
@@ -194,14 +267,183 @@ export default class InstruccionVariable extends React.Component {
                             this.setState({
                                 camposVariables: array
                             });
-                            camposVariablesOriginales = array;
-                            console.log('camposVariablesOriginales');
-                            console.log(camposVariablesOriginales);
                         });
                     }
                 });
             }); // fin transaction
         }
+    }
+
+    loadVariablesSQL () {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("select * from Variables where esInstruccionSQL = 'true'", (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        this.setState({
+                            variablesSQL: result.recordset
+                        }, this.initLoadVariablesCamposSQL );
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    initLoadVariablesCamposSQL() {
+        var arregloTemp = [];
+        for (var i = 0; i < this.state.variablesSQL.length; i++) {
+            this.loadVariablesCamposSQL(this.state.variablesSQL[i], i, arregloTemp);
+        };
+    }
+
+    loadVariablesCamposSQL (variable, index, array) {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("select * from InstruccionSQLCampos where variableID = "+variable.ID, (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        var nombreColumnas = [];
+                        for (var i = 0; i < result.recordset.length; i++) {
+                            nombreColumnas.push({valor: result.recordset[i].nombre, tipo: result.recordset[i].tipo, esFuenteDato: false, variableID: variable.ID, variableCampoID: result.recordset[i].ID, esObjeto: variable.esObjeto, esInstruccionSQL: true,  nivel: 0});
+                        };
+                        if(array[index] == undefined) {
+                            array[index] = [];
+                        }
+                        array[index] = $.merge(array[index], nombreColumnas);
+                        this.setState({
+                            camposVariablesSQL: array
+                        });
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    loadExcel () {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("select * from ExcelArchivos", (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        this.setState({
+                            excel: result.recordset
+                        }, this.initLoadExcelCampos );
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+    initLoadExcelCampos () {
+        var arregloTemp = [];
+        for (var i = 0; i < this.state.excel.length; i++) {
+            this.loadExcelCampos(this.state.excel[i], i, arregloTemp);
+        };
+    }
+
+    loadExcelCampos (excel, index, array) {
+         const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("select * from ExcelVariables where excelArchivoID = "+excel.ID, (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        var nombreColumnas = [];
+                        for (var i = 0; i < result.recordset.length; i++) {
+                            var tipo;
+                            if(result.recordset[i].operacion.localeCompare("SUM") == 0 || result.recordset[i].operacion.localeCompare("PROM") == 0 || result.recordset[i].operacion.localeCompare("COUNT") == 0) {
+                                tipo = 'decimal';
+                            } else if(result.recordset[i].operacion.localeCompare("MIN") == 0 || result.recordset[i].operacion.localeCompare("MAX") == 0 || result.recordset[i].operacion.localeCompare("ASIG") == 0) {
+                                if(result.recordset[i].tipo.localeCompare("numero") == 0)
+                                    tipo = 'decimal';
+                                else
+                                    tipo = result.recordset[i].tipo;
+                            }
+                            nombreColumnas.push({valor: result.recordset[i].nombre, tipo: tipo, esFuenteDato: false, excelArchivoID: excel.ID, excelVariableID: result.recordset[i].ID, esObjeto: false, esInstruccionSQL: false, nivel: 0});
+                        };
+                        if(array[index] == undefined) {
+                            array[index] = [];
+                        }
+                        array[index] = $.merge(array[index], nombreColumnas);
+                        this.setState({
+                            camposDeExcel: array
+                        });
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    loadFormas () {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("select * from FormasVariables", (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        var nombreColumnas = [];
+                        for (var i = 0; i < result.recordset.length; i++) {
+                            nombreColumnas.push({valor: result.recordset[i].nombre, tipo: result.recordset[i].tipo, esFuenteDato: false, formaVariableID: result.recordset[i].ID, esObjeto: false, esInstruccionSQL: false, nivel: 0});
+                        };
+                        this.setState({
+                            formas: nombreColumnas
+                        });
+                    });
+                }
+            });
+        }); // fin transaction
     }
 
     retornarIndiceSeleccionadoParaMostrarCampoObjetivo (reglaSeleccionada, tipoIndiceSeleccionado, indiceI, indiceJ) {
@@ -215,7 +457,7 @@ export default class InstruccionVariable extends React.Component {
         console.log(this.props.reglas.length);
         /*console.log('this.props.reglas[indiceI-1].length');
         console.log(this.props.reglas[indiceI-1].length);*/
-        if(this.props.reglas.length-1 == indiceI /*&& this.props.reglas[indiceI-1].length == indiceJ*/ && tipoIndiceSeleccionado.localeCompare("abajo") == 0) {
+        /*if(this.props.reglas.length-1 == indiceI*/ /*&& this.props.reglas[indiceI-1].length == indiceJ*/ /*&& tipoIndiceSeleccionado.localeCompare("abajo") == 0) {
             //EL CASO CUANDO EL INDICE SELECCIONADO DE REGLAS ES EL ULTIMO Y SELECCIONO tipoIndiceSeleccionado = ABAJO
             //reset
             console.log('1');
@@ -262,65 +504,20 @@ export default class InstruccionVariable extends React.Component {
                     camposVariables: [[tempCopyCampos]]
                 });
             }
-        }
-        /*if(tipoIndiceSeleccionado.localeCompare("abajo") == 0) {
-            console.log('1');
-            //reset
-            this.setState({
-                conexiones: conexionesOriginales,
-                camposConexiones: camposConexionesOriginales,
-                variables: variablesOriginales,
-                camposVariables: camposVariablesOriginales
-            });
-        }  else {
-            console.log('2');
-            //puede ser otra regla, una formula o el cursor de arriba
-            //mostrar campos
-            var tempCopyVariables = [];
-            var tempCopyCampos = [];
-            if(reglaSeleccionada.esConexionTabla) {
-                for (var i = 0; i < conexionesOriginales.length; i++) {
-                    if(reglaSeleccionada.conexionTablaID == conexionesOriginales[i].ID) {
-                        tempCopyVariables = conexionesOriginales[i];
-                        tempCopyCampos = camposConexionesOriginales[i];
-                        break;
-                    }
-                };
-                console.log('[tempCopyVariables]')
-                console.log([tempCopyVariables])
-                console.log('[tempCopyCampos]')
-                console.log([tempCopyCampos])
-                console.log('conexionesOriginales')
-                console.log(conexionesOriginales)
-                console.log('camposConexionesOriginales')
-                console.log(camposConexionesOriginales)
-                this.setState({
-                    conexiones: [tempCopyVariables],
-                    camposConexiones: [tempCopyCampos],
-                    variables: [],
-                    camposVariables: []
-                });
-            } else {
-                for (var i = 0; i < variablesOriginales.length; i++) {
-                    if(reglaSeleccionada.variableID == variablesOriginales[i].ID) {
-                        tempCopyVariables = jQuery.extend(true, {}, variablesOriginales[i]);
-                        tempCopyCampos = jQuery.extend(true, {}, camposVariablesOriginales[i]);
-                        break;
-                    }
-                };
-                this.setState({
-                    conexiones: [],
-                    camposConexiones: [],
-                    variables: [tempCopyVariables],
-                    camposVariables: [[tempCopyCampos]]
-                });
-            }
         }*/
     }
 
     retornoCampo (campo) {
         campo = campo;
         this.props.retornoCampo(campo);
+    }
+
+    actualizarEstadoVistaEsCondicion (mostrarCrearCondicionN) {
+        mostrarCrearCondicion = mostrarCrearCondicionN;
+        this.setState({
+            mostrarCrearCondicion: mostrarCrearCondicionN
+        });
+        this.props.retornarEstadoVistaEsCondicion(mostrarCrearCondicionN);
     }
     
     render() {
@@ -331,19 +528,29 @@ export default class InstruccionVariable extends React.Component {
                     <div className={"card"} style={{width: "100%"}}>
                         <OpcionesCrearRegla pool={this.props.pool} campos={this.props.campos}
                                             asignaciones={this.props.asignaciones}
-                                            retornoCampo={this.retornoCampo}
+                                            retornarValor={this.props.retornarValor}
+                                            retornoCampo={this.props.retornoCampo}
                                             retornoOperacion={this.props.retornoOperacion}
                                             camposDropdown={this.props.camposDropdown}
                                             valoresDropdown={this.props.valoresDropdown}
                                             mostrarOpcionSino={this.state.mostrarOpcionSino}
                                             callbackCrearRegla={this.props.callbackCrearRegla}
                                             goToCreateFormula={this.props.goToCreateFormula}
-                                            conexiones={this.state.conexiones}
-                                            camposConexiones={this.state.camposConexiones}
-                                            variables={this.state.variables}
-                                            camposVariables={this.state.camposVariables}
+                                            tablas={this.state.conexiones}
+                                            camposTablas={this.state.camposConexiones}
+                                            variablesEscalares={this.state.variablesEscalares}
+                                            objetos={this.state.variables}
+                                            camposDeObjetos={this.state.camposVariables}
+                                            excel={this.state.excel}
+                                            camposDeExcel={this.state.camposDeExcel}
+                                            formas={this.state.formas}
+                                            variablesSQL={this.state.variablesSQL}
+                                            camposVariablesSQL={this.state.camposVariablesSQL}
+                                            mostrarCrearCondicion={this.state.mostrarCrearCondicion}
+                                            callbackModificarRegla={this.props.callbackModificarRegla}
+                                            callbackEliminarRegla={this.props.callbackEliminarRegla}
                                             actualizarNivelNuevaRegla={this.props.actualizarNivelNuevaRegla}
-                                            retornarEstadoVistaEsCondicion={this.props.retornarEstadoVistaEsCondicion}>
+                                            actualizarEstadoVistaEsCondicion={this.actualizarEstadoVistaEsCondicion}>
                         </OpcionesCrearRegla>
                     </div>
                 </div>

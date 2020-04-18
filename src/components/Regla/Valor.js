@@ -6,13 +6,23 @@ export default class Valor extends React.Component {
         super(props);
         this.state = {
             listas: [],
-            variablesDeLista: []
+            variablesDeLista: [],
+            radioManual: true,
+            radioListas: false,
+            radioFecha: false,
+            radioTiempo: false
         }
         this.updateVariableList = this.updateVariableList.bind(this);
         this.getLists = this.getLists.bind(this);
+        this.mostrarManual = this.mostrarManual.bind(this);
+        this.mostrarListas = this.mostrarListas.bind(this);
+        this.mostrarFecha = this.mostrarFecha.bind(this);
+        this.initFecha = this.initFecha.bind(this);
+        this.mostrarTiempo = this.mostrarTiempo.bind(this);
+        this.changeTime = this.changeTime.bind(this);
     }
 
-    componentDidMount() {
+    componentDidMount () {
         //this.getLists();
     }
 
@@ -89,6 +99,61 @@ export default class Valor extends React.Component {
                 variablesDeLista: []
             });
         }
+    }
+
+    mostrarManual () {
+        this.setState({
+            radioManual: true,
+            radioListas: false,
+            radioFecha: false,
+            radioTiempo: false
+        });
+    }
+
+    mostrarListas () {
+        this.setState({
+            radioManual: false,
+            radioListas: true,
+            radioFecha: false,
+            radioTiempo: false
+        });
+    }
+
+    mostrarFecha () {
+        this.setState({
+            radioManual: false,
+            radioListas: false,
+            radioFecha: true,
+            radioTiempo: false
+        }, this.initFecha );
+    }
+
+    initFecha () {
+        $('#fecha').datepicker({
+            format: "dd-mm-yyyy",
+            todayHighlight: true,
+            viewMode: "days", 
+            minViewMode: "days",
+            language: 'es',
+            onSelect: function (date) {
+                var valorARetornar = "FECHA=("+date.getFullYear()+"-"+date.getMonth()+"-"+date.getDate()+")";
+                this.props.retornarValor(valorARetornar, date.getFullYear()+"-"+date.getMonth()+"-"+date.getDate());
+            }
+        });
+    }
+
+    mostrarTiempo () {
+        this.setState({
+            radioManual: false,
+            radioListas: false,
+            radioFecha: false,
+            radioTiempo: true
+        });
+    }
+
+    changeTime() {
+        var valorARetornar = "TIEMPO=[DIAS="+$("#dias").val()+",MES="+$("#mes").val()+",AÑOS="+$("#anio").val()+"]";
+        this.props.retornarValor(valorARetornar, "DIAS="+$("#dias").val()+",MES="+$("#mes").val()+",AÑOS="+$("#anio").val());
     }
 
     render() {
@@ -190,13 +255,85 @@ export default class Valor extends React.Component {
             );
         }*/
         return (
-            <div className={"row"} style={{width: "100%", borderBottom: "3px solid #d2d2e4"}}>
-                <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
-                    <label htmlFor="valor" className="col-form-label">Valor:</label>
+            <div className={"row"} style={{width: "100%"}}>
+                <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 form-group"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
+                    <label className="custom-control custom-radio custom-control-inline">
+                        <input type="radio" name="radio-inline" defaultChecked className="custom-control-input" onClick={() => this.mostrarManual()}/><span className="custom-control-label">Manual</span>
+                    </label>
+                    <label className="custom-control custom-radio custom-control-inline">
+                        <input type="radio" name="radio-inline" className="custom-control-input" onClick={() => this.mostrarListas()}/><span className="custom-control-label">Listas</span>
+                    </label>
+                    <label className="custom-control custom-radio custom-control-inline">
+                        <input type="radio" name="radio-inline" className="custom-control-input" onClick={() => this.mostrarFecha()}/><span className="custom-control-label">Fecha</span>
+                    </label>
+                    <label className="custom-control custom-radio custom-control-inline">
+                        <input type="radio" name="radio-inline" className="custom-control-input" onClick={() => this.mostrarTiempo()}/><span className="custom-control-label">Tiempo</span>
+                    </label>
                 </div>
-                <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
-                    <input onKeyUp={this.props.actualizarValor} id="valor" type="text" className="form-control form-control-sm"/>
-                </div>
+                {
+                    this.state.radioManual
+                    ?   <div className={"row"} style={{width: "100%"}}>
+                            <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
+                                <label htmlFor="valor" className="col-form-label">Valor:</label>
+                            </div>
+                            <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
+                                <input onKeyUp={this.props.actualizarValor} id="valor" type="text" className="form-control form-control-sm"/>
+                            </div>
+                        </div>
+                    : null
+                }
+                {
+                    this.state.radioListas
+                    ?   <div className={"row"} style={{width: "100%"}}>
+                            <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
+                                <label htmlFor="valor" className="col-form-label">Lista:</label>
+                            </div>
+                            <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
+                            </div>
+                            <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
+                                <label htmlFor="valor" className="col-form-label">Valores Seleccionados:</label>
+                            </div>
+                            <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
+                            </div>
+                        </div>
+                    : null
+                }
+                {
+                    this.state.radioFecha
+                    ?   <div className={"row"} style={{width: "100%"}}>
+                            <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
+                                <label htmlFor="valor" className="col-form-label">Fecha:</label>
+                            </div>
+                            <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
+                                <div id="fecha" className="center-block"></div>
+                            </div>
+                        </div>
+                    : null
+                }
+                {
+                    this.state.radioTiempo
+                    ?   <div className={"row"} style={{width: "100%"}}>
+                            <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
+                                <label htmlFor="dias" className="col-form-label">Días:</label>
+                            </div>
+                            <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
+                                <input type="number" defaultValue="0" onChange={this.changeTime} id="dias" name="dias" step="1" min="0"/>
+                            </div>
+                            <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
+                                <label htmlFor="mes" className="col-form-label">Meses:</label>
+                            </div>
+                            <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
+                                <input type="number" defaultValue="0" id="mes" name="mes" step="1" min="0"/>
+                            </div>
+                            <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
+                                <label htmlFor="anio" className="col-form-label">Años:</label>
+                            </div>
+                            <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
+                                <input type="number" defaultValue="0" id="anio" name="anio" step="1" min="0"/>
+                            </div>
+                        </div>
+                    : null
+                }
             </div>
         );
     }

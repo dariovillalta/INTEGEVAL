@@ -12,27 +12,28 @@ export default class Layout extends React.Component {
             router: {
                 showRiskControlHome: false,         //vista casa de controlar riesgo
                 showRiskMonitorHome: false,         //vista casa de monitoreo riesgo
-                showUmbralHome: false,              //vista casa/inical de umbrales,
                 showVariables: false,               //vista de casa de crear variables
                 showFormula: false,                 //vista para crear formula fuente de datos de variable
                 showCondicionVar: false,            //vista para crear condiiones de variable
                 showIndicador: false,               //vista home para el mantenimiento de indicadores
                 showRiesgos: false,                 //vista home para el mantenimiento de riesgos
-                showCalulo: false                   //vista para iniciar el calculo de las variables
+                showCalulo: false,                  //vista para iniciar el calculo de las variables
+                showReporteria: false               //vista home para hacer reporteria
             },
-            showChooseMode: true                   //vista para elegir entre modo control riesgos y monitoreo riesgos
+            showChooseMode: true,                   //vista para elegir entre modo control riesgos y monitoreo riesgos
+            navbar: ""
         }
         this.showChooseMode = this.showChooseMode.bind(this);
         this.finishChooseMode = this.finishChooseMode.bind(this);
         this.showRiskControlHome = this.showRiskControlHome.bind(this);
         this.showRiskMonitorHome = this.showRiskMonitorHome.bind(this);
-        this.showUmbralHome = this.showUmbralHome.bind(this);
         this.showVariables = this.showVariables.bind(this);
         this.showFormula = this.showFormula.bind(this);
         this.showCondicionVar = this.showCondicionVar.bind(this);
         this.showIndicador = this.showIndicador.bind(this);
         this.showRiesgos = this.showRiesgos.bind(this);
         this.showCalulo = this.showCalulo.bind(this);
+        this.showReporteria = this.showReporteria.bind(this);
     }
 
     showChooseMode() {
@@ -48,6 +49,20 @@ export default class Layout extends React.Component {
     }
 
     showRiskControlHome() {
+        var navbar = <ul className={"navbar-nav flex-column"}>
+                        <li className={"nav-divider"}>
+                            <h3 style={{color: "#b0bec5"}}>Menu</h3>
+                        </li>
+                        <li className={"nav-item "}>
+                            <a className={"nav-link"} onClick={this.showRiskControlHome} href="#"><i className={"fa fa-fw fa-user-circle"}></i><h3 style={{color: "white"}}>Identificar Riesgos</h3></a>
+                        </li>
+                        <li className={"nav-item "}>
+                            <a className={"nav-link"} /*onClick={this.showGraphics}*/ href="#"><i className={"fa fa-fw fa-user-circle"}></i><h3 style={{color: "white"}}>Tratar Riesgos</h3></a>
+                        </li>
+                        <li className={"nav-item "}>
+                            <a className={"nav-link"} onClick={this.showCalulo} href="#"><i className={"fa fa-fw fa-user-circle"}></i><h3 style={{color: "white"}}>Cálculo</h3></a>
+                        </li>
+                    </ul>;
         this.setState({
             router: {
                 showRiskControlHome: true,
@@ -58,43 +73,46 @@ export default class Layout extends React.Component {
                 showCondicionVar: false,
                 showIndicador: false,
                 showRiesgos: false,
-                showCalulo: false
+                showCalulo: false,
+                showReporteria: false
             },
-            showChooseMode: false
+            showChooseMode: false,
+            navbar: navbar
         });
     }
 
     showRiskMonitorHome() {
+        var navbar = <ul className={"navbar-nav flex-column"}>
+                        <li className={"nav-divider"}>
+                            <h3 style={{color: "#b0bec5"}}>Menu</h3>
+                        </li>
+                        <li className={"nav-item "}>
+                            <a className={"nav-link"} onClick={this.showRiskMonitorHome} href="#"><i className={"fa fa-fw fa-user-circle"}></i><h3 style={{color: "white"}}>Dashboard</h3></a>
+                        </li>
+                        <li className={"nav-item "}>
+                            <a className={"nav-link"} /*onClick={this.showCalulo}*/ href="#"><i className={"fa fa-fw fa-user-circle"}></i><h3 style={{color: "white"}}>Alertas</h3></a>
+                        </li>
+                        <li className={"nav-item "}>
+                            <a className={"nav-link"} onClick={this.showReporteria} href="#"><i className={"fa fa-fw fa-user-circle"}></i><h3 style={{color: "white"}}>Reporter&iacute;a</h3></a>
+                        </li>
+                        <li className={"nav-item "}>
+                            <a className={"nav-link"} /*onClick={this.showGraphics}*/ href="#"><i className={"fa fa-fw fa-user-circle"}></i><h3 style={{color: "white"}}>Gr&aacute;ficos</h3></a>
+                        </li>
+                    </ul>;
         this.setState({
             router: {
                 showRiskControlHome: false,
                 showRiskMonitorHome: true,
-                showUmbralHome: false,
                 showVariables: false,
                 showFormula: false,
                 showCondicionVar: false,
                 showIndicador: false,
                 showRiesgos: false,
-                showCalulo: false
+                showCalulo: false,
+                showReporteria: false
             },
-            showChooseMode: false
-        });
-    }
-
-    showUmbralHome() {
-        this.setState({
-            router: {
-                showRiskControlHome: false,
-                showRiskMonitorHome: false,
-                showUmbralHome: true,
-                showVariables: false,
-                showFormula: false,
-                showCondicionVar: false,
-                showIndicador: false,
-                showRiesgos: false,
-                showCalulo: false
-            },
-            showChooseMode: false
+            showChooseMode: false,
+            navbar: navbar
         });
     }
 
@@ -103,13 +121,13 @@ export default class Layout extends React.Component {
             router: {
                 showRiskControlHome: false,
                 showRiskMonitorHome: false,
-                showUmbralHome: false,
                 showVariables: true,
                 showFormula: false,
                 showCondicionVar: false,
                 showIndicador: false,
                 showRiesgos: false,
-                showCalulo: false
+                showCalulo: false,
+                showReporteria: false
             },
             showChooseMode: false
         });
@@ -120,13 +138,13 @@ export default class Layout extends React.Component {
             router: {
                 showRiskControlHome: false,
                 showRiskMonitorHome: false,
-                showUmbralHome: false,
                 showVariables: false,
                 showFormula: true,
                 showCondicionVar: false,
                 showIndicador: false,
                 showRiesgos: false,
-                showCalulo: false
+                showCalulo: false,
+                showReporteria: false
             },
             showChooseMode: false
         });
@@ -137,13 +155,13 @@ export default class Layout extends React.Component {
             router: {
                 showRiskControlHome: false,
                 showRiskMonitorHome: false,
-                showUmbralHome: false,
                 showVariables: false,
                 showFormula: false,
                 showCondicionVar: true,
                 showIndicador: false,
                 showRiesgos: false,
-                showCalulo: false
+                showCalulo: false,
+                showReporteria: false
             },
             showChooseMode: false
         });
@@ -154,13 +172,13 @@ export default class Layout extends React.Component {
             router: {
                 showRiskControlHome: false,
                 showRiskMonitorHome: false,
-                showUmbralHome: false,
                 showVariables: false,
                 showFormula: false,
                 showCondicionVar: false,
                 showIndicador: true,
                 showRiesgos: false,
-                showCalulo: false
+                showCalulo: false,
+                showReporteria: false
             },
             showChooseMode: false
         });
@@ -171,13 +189,13 @@ export default class Layout extends React.Component {
             router: {
                 showRiskControlHome: false,
                 showRiskMonitorHome: false,
-                showUmbralHome: false,
                 showVariables: false,
                 showFormula: false,
                 showCondicionVar: false,
                 showIndicador: false,
                 showRiesgos: true,
-                showCalulo: false
+                showCalulo: false,
+                showReporteria: false
             },
             showChooseMode: false
         });
@@ -188,13 +206,30 @@ export default class Layout extends React.Component {
             router: {
                 showRiskControlHome: false,
                 showRiskMonitorHome: false,
-                showUmbralHome: false,
                 showVariables: false,
                 showFormula: false,
                 showCondicionVar: false,
                 showIndicador: false,
                 showRiesgos: false,
-                showCalulo: true
+                showCalulo: true,
+                showReporteria: false
+            },
+            showChooseMode: false
+        });
+    }
+
+    showReporteria() {
+        this.setState({
+            router: {
+                showRiskControlHome: false,
+                showRiskMonitorHome: false,
+                showVariables: false,
+                showFormula: false,
+                showCondicionVar: false,
+                showIndicador: false,
+                showRiesgos: false,
+                showCalulo: false,
+                showReporteria: true
             },
             showChooseMode: false
         });
@@ -211,7 +246,7 @@ export default class Layout extends React.Component {
             return (
                 <div className={"dashboard-main-wrapper"}>
                     <NavBar logOff={this.props.logOff} userName={this.props.userName} permision={this.props.permision} showConfigurationComponent={this.showConfigurationComponent}> </NavBar>
-                    <LeftBar showCalulo={this.showCalulo}> </LeftBar>
+                    <LeftBar navbar={this.state.navbar}> </LeftBar>
                     <div className={"dashboard-wrapper"}>
                         <div className={"container-fluid dashboard-content"}>
                             <Body router={this.state.router} pool={this.props.pool}

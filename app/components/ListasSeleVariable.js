@@ -51,29 +51,48 @@ function (_React$Component) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(ListasSeleVariable).call(this, props));
     _this.state = {
-      mostrarCrearUmbral: true,
-      indicesVarSeleccionados: []
+      mostrarCrearUmbral: true
+      /*,
+      indicesVarSeleccionados: this.props.indicesVarSeleccionados*/
+
     };
     _this.clickEnListaCelda = _this.clickEnListaCelda.bind(_assertThisInitialized(_this));
     _this.seleccionarIndice = _this.seleccionarIndice.bind(_assertThisInitialized(_this));
     _this.deseleccionarIndice = _this.deseleccionarIndice.bind(_assertThisInitialized(_this));
     return _this;
   }
+  /*componentDidUpdate (prevProps, prevState, snapshot) {
+      var cambio = false;
+      for (var i = 0; i < this.props.indicesVarSeleccionados.length; i++) {
+          if(this.props.indicesVarSeleccionados[i] != this.state.indicesVarSeleccionados[i]) {
+              cambio = true;
+              break;
+          }
+      };
+      if(cambio) {
+          this.setState({
+              indicesVarSeleccionados: this.props.indicesVarSeleccionados
+          });
+      }
+  }*/
+
 
   _createClass(ListasSeleVariable, [{
     key: "clickEnListaCelda",
     value: function clickEnListaCelda(variable, indice) {
       if (!this.props.seleccionarMultiple) {
         arregloCeldasSeleccionadas = [];
-
-        for (var i = 0; i < this.state.indicesVarSeleccionados.length; i++) {
-          this.state.indicesVarSeleccionados[i] = false;
-        }
-
-        ;
+        /*var nuevoArr = [...this.props.indicesVarSeleccionados];
+        for (var i = 0; i < nuevoArr.length; i++) {
+            if(i != indice)
+                nuevoArr[i] = false;
+        };*/
       }
 
-      if (this.state.indicesVarSeleccionados[indice]) {
+      console.log('this.props.indicesVarSeleccionados');
+      console.log(this.props.indicesVarSeleccionados);
+
+      if (this.props.indicesVarSeleccionados[indice]) {
         this.deseleccionarIndice(variable, indice);
       } else {
         this.seleccionarIndice(variable, indice);
@@ -98,13 +117,26 @@ function (_React$Component) {
       } //this.props.retornoSeleccion(arregloVariableSeleccionada);
 
 
-      var nuevoArr = _toConsumableArray(this.state.indicesVarSeleccionados);
+      var nuevoArr = _toConsumableArray(this.props.indicesVarSeleccionados);
 
+      console.log('nuevoArr ANTES');
+      console.log(nuevoArr);
+      console.log('this.props.indicesVarSeleccionados');
+      console.log(this.props.indicesVarSeleccionados);
+
+      for (var i = 0; i < nuevoArr.length; i++) {
+        if (i != indice) nuevoArr[i] = false;
+      }
+
+      ;
       nuevoArr[indice] = true;
-      this.setState({
-        indicesVarSeleccionados: nuevoArr
-      });
-      this.props.retornoSeleccion(arregloCeldasSeleccionadas, this.props.indiceTabla);
+      /*this.setState({
+          indicesVarSeleccionados: nuevoArr
+      });*/
+
+      console.log('nuevoArr DESPUES');
+      console.log(nuevoArr);
+      this.props.retornoSeleccion(arregloCeldasSeleccionadas, this.props.indiceTabla, nuevoArr);
     }
   }, {
     key: "deseleccionarIndice",
@@ -117,13 +149,26 @@ function (_React$Component) {
 
       ; //this.props.retornoSeleccion(arregloVariableSeleccionada);
 
-      var nuevoArr = _toConsumableArray(this.state.indicesVarSeleccionados);
+      var nuevoArr = _toConsumableArray(this.props.indicesVarSeleccionados);
 
+      console.log('nuevoArr ANTES');
+      console.log(nuevoArr);
+      console.log('this.props.indicesVarSeleccionados');
+      console.log(this.props.indicesVarSeleccionados);
+
+      for (var i = 0; i < nuevoArr.length; i++) {
+        if (i != indice) nuevoArr[i] = false;
+      }
+
+      ;
       nuevoArr[indice] = false;
-      this.setState({
-        indicesVarSeleccionados: nuevoArr
-      });
-      this.props.retornoSeleccion(arregloCeldasSeleccionadas, this.props.indiceTabla);
+      /*this.setState({
+          indicesVarSeleccionados: nuevoArr
+      });*/
+
+      console.log('nuevoArr DESPUES');
+      console.log(nuevoArr);
+      if (arregloCeldasSeleccionadas.length > 0) this.props.retornoSeleccion(arregloCeldasSeleccionadas, this.props.indiceTabla, nuevoArr);
     }
   }, {
     key: "render",
@@ -168,11 +213,13 @@ function (_React$Component) {
           flexWrap: "nowrap"
         }
       }, this.props.variables.map(function (variable, i) {
+        var _ref;
+
         return _react["default"].createElement("div", {
           onClick: function onClick() {
             return _this2.clickEnListaCelda(variable, i);
           },
-          style: _defineProperty({
+          style: (_ref = {
             flex: "0 0 auto",
             width: "33%",
             height: "100%",
@@ -182,8 +229,8 @@ function (_React$Component) {
             overflowWrap: "break-word",
             wordWrap: "break-word",
             whiteSpace: "-moz-pre-wrap"
-          }, "whiteSpace", "pre-wrap"),
-          className: clase + (_this2.state.indicesVarSeleccionados[i] ? _this2.props.mostrarRosa ? ' outline-secondary-selected' : ' outline-primary-selected' : ''),
+          }, _defineProperty(_ref, "whiteSpace", "pre-wrap"), _defineProperty(_ref, "wordBreak", "break-all"), _ref),
+          className: clase + (_this2.props.indicesVarSeleccionados != undefined ? _this2.props.indicesVarSeleccionados[i] ? _this2.props.mostrarRosa ? ' outline-secondary-selected' : ' outline-primary-selected' : '' : ''),
           key: i
         }, variable.valor);
       }))));

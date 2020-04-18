@@ -5,15 +5,19 @@ import FuenteDatoVariable from './FuenteDatoVariable.js';
 import FuenteDatoForma from './FuenteDatoForma.js';
 import FuenteDatoExcel from './FuenteDatoExcel.js';
 
+var mostrarFuenteDatoVariableGlobal = false;
+var mostrarFuenteDatoFormaGlobal = false;
+var mostrarFuenteDatoExcelGlobal = true;
+
 /*COMPONENTE QUE CONTROLA TIPOS DE VARIABLES (EXCEL, FORMA, VARIABLE)*/
 
 export default class CrearVariable extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            mostrarFuenteDatoVariable: false,
-            mostrarFuenteDatoForma: false,
-            mostrarFuenteDatoExcel: true
+            mostrarFuenteDatoVariable: mostrarFuenteDatoVariableGlobal,
+            mostrarFuenteDatoForma: mostrarFuenteDatoFormaGlobal,
+            mostrarFuenteDatoExcel: mostrarFuenteDatoExcelGlobal
         }
         this.mostrarFuenteDatoVariable = this.mostrarFuenteDatoVariable.bind(this);
         this.mostrarFuenteDatoForma = this.mostrarFuenteDatoForma.bind(this);
@@ -21,6 +25,9 @@ export default class CrearVariable extends React.Component {
     }
 
     mostrarFuenteDatoVariable () {
+        mostrarFuenteDatoVariableGlobal = true;
+        mostrarFuenteDatoFormaGlobal = false;
+        mostrarFuenteDatoExcelGlobal = false;
         this.setState({
             mostrarFuenteDatoVariable: true,
             mostrarFuenteDatoForma: false,
@@ -29,6 +36,9 @@ export default class CrearVariable extends React.Component {
     }
 
     mostrarFuenteDatoForma () {
+        mostrarFuenteDatoVariableGlobal = false;
+        mostrarFuenteDatoFormaGlobal = true;
+        mostrarFuenteDatoExcelGlobal = false;
         this.setState({
             mostrarFuenteDatoVariable: false,
             mostrarFuenteDatoForma: true,
@@ -37,6 +47,9 @@ export default class CrearVariable extends React.Component {
     }
 
     mostrarFuenteDatoExcel () {
+        mostrarFuenteDatoVariableGlobal = false;
+        mostrarFuenteDatoFormaGlobal = false;
+        mostrarFuenteDatoExcelGlobal = true;
         this.setState({
             mostrarFuenteDatoVariable: false,
             mostrarFuenteDatoForma: false,
@@ -77,12 +90,14 @@ export default class CrearVariable extends React.Component {
                                                                 guardarVariable={this.props.guardarVariable}
                                                                 crearAtributoVariable={this.props.crearAtributoVariable}
                                                                 cambioDeArreglosDeAtributos={this.props.cambioDeArreglosDeAtributos}
-                                                                retornoTipoDeAsignacion={this.props.retornoTipoDeAsignacion}
                                                                 nombreVariable={this.props.nombreVariable}
                                                                 actualizarNombreVariable={this.props.actualizarNombreVariable}
+                                                                actualizarEstadoSiEsObjeto={this.props.actualizarEstadoSiEsObjeto}
+                                                                actualizarEstadoSiEsInstruccionSQL={this.props.actualizarEstadoSiEsInstruccionSQL}
                                                                 descripcionVariable={this.props.descripcionVariable}
                                                                 actualizarDescripcionVariable={this.props.actualizarDescripcionVariable}
                                                                 nombreCampoNuevoAtributosVario={this.props.nombreCampoNuevoAtributosVario}
+                                                                tipoNuevaVariable={this.props.tipoNuevaVariable}
                                                                 actualizarNombreCampoNuevoAtributosVario={this.props.actualizarNombreCampoNuevoAtributosVario}
                                                                 atributos={this.props.atributos}>
                                             </FuenteDatoVariable>
@@ -91,14 +106,14 @@ export default class CrearVariable extends React.Component {
                                     {
                                         this.state.mostrarFuenteDatoForma
                                         ?
-                                            <FuenteDatoForma>
+                                            <FuenteDatoForma pool={this.props.pool}>
                                             </FuenteDatoForma>
                                         : null
                                     }
                                     {
                                         this.state.mostrarFuenteDatoExcel
                                         ?
-                                            <FuenteDatoExcel>
+                                            <FuenteDatoExcel pool={this.props.pool}>
                                             </FuenteDatoExcel>
                                         : null
                                     }

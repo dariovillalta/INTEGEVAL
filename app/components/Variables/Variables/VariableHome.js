@@ -13,7 +13,7 @@ var _SeleccionarVariables = _interopRequireDefault(require("./SeleccionarVariabl
 
 var _CrearVariablesHome = _interopRequireDefault(require("./CrearVariables/CrearVariablesHome.js"));
 
-var _EditarVariable = _interopRequireDefault(require("./EditarVariable.js"));
+var _EditarVariablesHome = _interopRequireDefault(require("./EditarVariable/EditarVariablesHome.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
@@ -50,12 +50,10 @@ function (_React$Component) {
     _this = _possibleConstructorReturn(this, _getPrototypeOf(VariableHome).call(this, props));
     _this.state = {
       componenteActual: "selVariables",
-      idFuenteDatos: -1,
-      nombreFuenteDatos: "",
-      descripcionFuenteDatos: "",
-      esObjetoFuenteDatos: "",
-      objetoPadreIDFuenteDatos: -1,
-      guardarFuenteDatos: ""
+      idVariable: -1,
+      tipoVariable: "",
+      esObjetoVariable: "",
+      esInstruccionSQLVariable: ""
     };
     _this.crearVariables = _this.crearVariables.bind(_assertThisInitialized(_this));
     _this.retornoSeleccionVariables = _this.retornoSeleccionVariables.bind(_assertThisInitialized(_this));
@@ -80,25 +78,21 @@ function (_React$Component) {
     value: function retornoSeleccionVariables() {
       this.setState({
         componenteActual: "selVariables",
-        idFuenteDatos: -1,
-        nombreFuenteDatos: "",
-        descripcionFuenteDatos: "",
-        esObjetoFuenteDatos: "",
-        objetoPadreIDFuenteDatos: -1,
-        guardarFuenteDatos: ""
+        idVariable: -1,
+        tipoVariable: "",
+        esObjetoVariable: "",
+        esInstruccionSQLVariable: ""
       });
     }
   }, {
     key: "editarVariables",
-    value: function editarVariables(idFuenteDatos, nombreFuenteDatos, descripcionFuenteDatos, esObjetoFuenteDatos, objetoPadreIDFuenteDatos, guardarFuenteDatos) {
+    value: function editarVariables(idVariable, esObjetoVariable, esInstruccionSQLVariable, tipoVariable) {
       this.setState({
-        idFuenteDatos: idFuenteDatos,
+        idVariable: idVariable,
         componenteActual: "editarVariables",
-        nombreFuenteDatos: nombreFuenteDatos,
-        descripcionFuenteDatos: descripcionFuenteDatos,
-        esObjetoFuenteDatos: esObjetoFuenteDatos,
-        objetoPadreIDFuenteDatos: objetoPadreIDFuenteDatos,
-        guardarFuenteDatos: guardarFuenteDatos
+        tipoVariable: tipoVariable,
+        esObjetoVariable: esObjetoVariable,
+        esInstruccionSQLVariable: esInstruccionSQLVariable
       });
     }
   }, {
@@ -115,8 +109,9 @@ function (_React$Component) {
         var request = new _mssql["default"].Request(transaction);
         request.query("select * from Campos where nombre = '" + nombreFuenteDatos + "'", function (err, result) {
           if (err) {
+            console.log(err);
+
             if (!rolledBack) {
-              console.log(err);
               transaction.rollback(function (err) {});
             }
           } else {
@@ -140,7 +135,7 @@ function (_React$Component) {
           configuracionHome: this.props.configuracionHome,
           crearVariables: this.crearVariables,
           goOptions: this.props.goOptions,
-          editarFuenteDatos: this.editarFuenteDatos
+          editarVariable: this.editarVariables
         }));
       } else if (this.state.componenteActual.localeCompare("crearVariables") == 0) {
         return _react["default"].createElement("div", null, _react["default"].createElement(_CrearVariablesHome["default"], {
@@ -155,26 +150,14 @@ function (_React$Component) {
           configuracionHome: this.props.configuracionHome
         }));
       } else if (this.state.componenteActual.localeCompare("editarVariables") == 0) {
-        return _react["default"].createElement("div", null, _react["default"].createElement(EditarVariablesHome, {
+        return _react["default"].createElement("div", null, _react["default"].createElement(_EditarVariablesHome["default"], {
           pool: this.props.pool,
-          showFormula: this.props.showFormula,
-          showCondicionVar: this.props.showCondicionVar,
-          showRiesgos: this.props.showRiesgos,
-          goOptions: this.props.goOptions,
-          retornoSeleccionTabla: this.props.retornoSeleccionTabla,
+          idVariable: this.state.idVariable,
+          tipoVariable: this.state.tipoVariable,
+          esObjetoVariable: this.state.esObjetoVariable,
+          esInstruccionSQLVariable: this.state.esInstruccionSQLVariable,
           retornoSeleccionVariables: this.retornoSeleccionVariables,
-          retornoSeleccionRiesgo: this.retornoSeleccionRiesgoSameComponent,
-          retornoSeleccionRiesgoUmbral: this.retornoSeleccionRiesgoDiffComponent,
-          configuracionHome: this.props.configuracionHome,
-          updateNavBar: this.props.updateNavBar,
-          showUmbralHome: this.props.showUmbralHome,
-          idFuenteDatos: this.state.idFuenteDatos,
-          nombreFuenteDatos: this.state.nombreFuenteDatos,
-          descripcionFuenteDatos: this.state.descripcionFuenteDatos,
-          esObjetoFuenteDatos: this.state.esObjetoFuenteDatos,
-          objetoPadreIDFuenteDatos: this.state.objetoPadreIDFuenteDatos,
-          guardarFuenteDatos: this.state.guardarFuenteDatos,
-          updateFormula: this.props.updateFormula
+          configuracionHome: this.props.configuracionHome
         }));
       }
     }

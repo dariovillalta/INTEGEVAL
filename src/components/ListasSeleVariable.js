@@ -6,22 +6,41 @@ export default class ListasSeleVariable extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            mostrarCrearUmbral: true,
-            indicesVarSeleccionados: []
+            mostrarCrearUmbral: true/*,
+            indicesVarSeleccionados: this.props.indicesVarSeleccionados*/
         }
         this.clickEnListaCelda = this.clickEnListaCelda.bind(this);
         this.seleccionarIndice = this.seleccionarIndice.bind(this);
         this.deseleccionarIndice = this.deseleccionarIndice.bind(this);
     }
 
+    /*componentDidUpdate (prevProps, prevState, snapshot) {
+        var cambio = false;
+        for (var i = 0; i < this.props.indicesVarSeleccionados.length; i++) {
+            if(this.props.indicesVarSeleccionados[i] != this.state.indicesVarSeleccionados[i]) {
+                cambio = true;
+                break;
+            }
+        };
+        if(cambio) {
+            this.setState({
+                indicesVarSeleccionados: this.props.indicesVarSeleccionados
+            });
+        }
+    }*/
+
     clickEnListaCelda (variable, indice) {
         if(!this.props.seleccionarMultiple) {
             arregloCeldasSeleccionadas = [];
-            for (var i = 0; i < this.state.indicesVarSeleccionados.length; i++) {
-                this.state.indicesVarSeleccionados[i] = false;
-            };
+            /*var nuevoArr = [...this.props.indicesVarSeleccionados];
+            for (var i = 0; i < nuevoArr.length; i++) {
+                if(i != indice)
+                    nuevoArr[i] = false;
+            };*/
         }
-        if(this.state.indicesVarSeleccionados[indice]) {
+        console.log('this.props.indicesVarSeleccionados')
+        console.log(this.props.indicesVarSeleccionados)
+        if(this.props.indicesVarSeleccionados[indice]) {
             this.deseleccionarIndice(variable, indice);
         } else {
             this.seleccionarIndice(variable, indice);
@@ -40,12 +59,22 @@ export default class ListasSeleVariable extends React.Component {
             arregloCeldasSeleccionadas.push(variable);
         }
         //this.props.retornoSeleccion(arregloVariableSeleccionada);
-        var nuevoArr = [...this.state.indicesVarSeleccionados];
+        var nuevoArr = [...this.props.indicesVarSeleccionados];
+        console.log('nuevoArr ANTES')
+        console.log(nuevoArr)
+        console.log('this.props.indicesVarSeleccionados')
+        console.log(this.props.indicesVarSeleccionados)
+        for (var i = 0; i < nuevoArr.length; i++) {
+            if(i != indice)
+                nuevoArr[i] = false;
+        };
         nuevoArr[indice] = true;
-        this.setState({
+        /*this.setState({
             indicesVarSeleccionados: nuevoArr
-        });
-        this.props.retornoSeleccion(arregloCeldasSeleccionadas, this.props.indiceTabla);
+        });*/
+console.log('nuevoArr DESPUES')
+        console.log(nuevoArr)
+        this.props.retornoSeleccion(arregloCeldasSeleccionadas, this.props.indiceTabla, nuevoArr);
     }
 
     deseleccionarIndice (variable, indice) {
@@ -55,12 +84,23 @@ export default class ListasSeleVariable extends React.Component {
             }
         };
         //this.props.retornoSeleccion(arregloVariableSeleccionada);
-        var nuevoArr = [...this.state.indicesVarSeleccionados];
+        var nuevoArr = [...this.props.indicesVarSeleccionados];
+        console.log('nuevoArr ANTES')
+        console.log(nuevoArr)
+        console.log('this.props.indicesVarSeleccionados')
+        console.log(this.props.indicesVarSeleccionados)
+        for (var i = 0; i < nuevoArr.length; i++) {
+            if(i != indice)
+                nuevoArr[i] = false;
+        };
         nuevoArr[indice] = false;
-        this.setState({
+        /*this.setState({
             indicesVarSeleccionados: nuevoArr
-        });
-        this.props.retornoSeleccion(arregloCeldasSeleccionadas, this.props.indiceTabla);
+        });*/
+        console.log('nuevoArr DESPUES')
+        console.log(nuevoArr)
+        if(arregloCeldasSeleccionadas.length > 0)
+            this.props.retornoSeleccion(arregloCeldasSeleccionadas, this.props.indiceTabla, nuevoArr);
     }
     
     render() {
@@ -76,7 +116,7 @@ export default class ListasSeleVariable extends React.Component {
                     </div>
                     <div className={"row"} style={{width: "100%", height: "80%", overflowX: "auto", display: "flex", flexWrap: "nowrap"}}>
                         {this.props.variables.map((variable, i) =>
-                            <div onClick={() => this.clickEnListaCelda(variable, i)} style={{flex: "0 0 auto", width: "33%",height: "100%", display: "flex", alignItems: "center", justifyContent: "center", overflowWrap: "break-word", wordWrap: "break-word", whiteSpace: "-moz-pre-wrap", whiteSpace: "pre-wrap"}} className={clase + (this.state.indicesVarSeleccionados[i] ? (this.props.mostrarRosa ? ' outline-secondary-selected' : ' outline-primary-selected') : '')} key={i}>{variable.valor}</div>
+                            <div onClick={() => this.clickEnListaCelda(variable, i)} style={{flex: "0 0 auto", width: "33%",height: "100%", display: "flex", alignItems: "center", justifyContent: "center", overflowWrap: "break-word", wordWrap: "break-word", whiteSpace: "-moz-pre-wrap", whiteSpace: "pre-wrap", wordBreak: "break-all"}} className={clase + (this.props.indicesVarSeleccionados != undefined ? (this.props.indicesVarSeleccionados[i] ? (this.props.mostrarRosa ? ' outline-secondary-selected' : ' outline-primary-selected') : '') : '')} key={i}>{variable.valor}</div>
                         )}
                     </div>
                 </div>

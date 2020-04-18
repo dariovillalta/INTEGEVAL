@@ -47,9 +47,6 @@ function (_React$Component) {
     _classCallCheck(this, OpcionesCrearRegla);
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(OpcionesCrearRegla).call(this, props));
-    _this.state = {
-      mostrarCrearCondicion: true
-    };
     _this.mostrarCrearCondicion = _this.mostrarCrearCondicion.bind(_assertThisInitialized(_this));
     _this.mostrarAsignarFormula = _this.mostrarAsignarFormula.bind(_assertThisInitialized(_this));
     return _this;
@@ -58,24 +55,12 @@ function (_React$Component) {
   _createClass(OpcionesCrearRegla, [{
     key: "mostrarCrearCondicion",
     value: function mostrarCrearCondicion() {
-      var _this2 = this;
-
-      this.setState({
-        mostrarCrearCondicion: true
-      }, function () {
-        _this2.props.retornarEstadoVistaEsCondicion(_this2.state.mostrarCrearCondicion);
-      });
+      this.props.actualizarEstadoVistaEsCondicion(true);
     }
   }, {
     key: "mostrarAsignarFormula",
     value: function mostrarAsignarFormula() {
-      var _this3 = this;
-
-      this.setState({
-        mostrarCrearCondicion: false
-      }, function () {
-        _this3.props.retornarEstadoVistaEsCondicion(_this3.state.mostrarCrearCondicion);
-      });
+      this.props.actualizarEstadoVistaEsCondicion(false);
     }
   }, {
     key: "render",
@@ -107,10 +92,10 @@ function (_React$Component) {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          borderBottom: this.state.mostrarCrearCondicion ? "1px solid #304ffe" : ""
+          borderBottom: this.props.mostrarCrearCondicion ? "1px solid #304ffe" : ""
         },
         onClick: this.mostrarCrearCondicion
-      }, "CONDICIONES / COMPARACIONES"), _react["default"].createElement("div", {
+      }, "CONDICIONES"), _react["default"].createElement("div", {
         className: "addPointer",
         style: {
           backgroundColor: "white",
@@ -119,32 +104,43 @@ function (_React$Component) {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          borderBottom: !this.state.mostrarCrearCondicion ? "1px solid #304ffe" : ""
+          borderBottom: !this.props.mostrarCrearCondicion ? "1px solid #304ffe" : ""
         },
         onClick: this.mostrarAsignarFormula
-      }, "ASIGNACIONES / F\xD3RMULAS"))), _react["default"].createElement("div", {
+      }, "ASIGNACIONES"))), _react["default"].createElement("div", {
         className: "row",
         style: {
           width: "100%"
         }
-      }, this.state.mostrarCrearCondicion ? _react["default"].createElement(_VariableCreation["default"], {
+      }, this.props.mostrarCrearCondicion ? _react["default"].createElement(_VariableCreation["default"], {
         pool: this.props.pool,
         campos: this.props.campos,
         retornarCampo: this.props.retornarCampo,
+        retornarValor: this.props.retornarValor,
         camposDropdown: this.props.camposDropdown,
         valoresDropdown: this.props.valoresDropdown,
         mostrarOpcionSino: this.props.mostrarOpcionSino,
-        conexiones: this.props.conexiones,
-        camposConexiones: this.props.camposConexiones,
-        variables: this.props.variables,
-        camposVariables: this.props.camposVariables,
+        tablas: this.props.tablas,
+        camposTablas: this.props.camposTablas,
+        variablesEscalares: this.props.variablesEscalares,
+        objetos: this.props.objetos,
+        camposDeObjetos: this.props.camposDeObjetos,
+        excel: this.props.excel,
+        camposDeExcel: this.props.camposDeExcel,
+        formas: this.props.formas,
+        variablesSQL: this.props.variablesSQL,
+        camposVariablesSQL: this.props.camposVariablesSQL,
         retornoCampo: this.props.retornoCampo,
         retornoOperacion: this.props.retornoOperacion,
         actualizarNivelNuevaRegla: this.props.actualizarNivelNuevaRegla,
+        callbackModificarRegla: this.props.callbackModificarRegla,
+        callbackEliminarRegla: this.props.callbackEliminarRegla,
         callbackCrearRegla: this.props.callbackCrearRegla
       }) : _react["default"].createElement(_ContenedorFormulas["default"], {
         asignaciones: this.props.asignaciones,
         callbackCrearRegla: this.props.callbackCrearRegla,
+        callbackModificarRegla: this.props.callbackModificarRegla,
+        callbackEliminarRegla: this.props.callbackEliminarRegla,
         goToCreateFormula: this.props.goToCreateFormula
       })));
     }

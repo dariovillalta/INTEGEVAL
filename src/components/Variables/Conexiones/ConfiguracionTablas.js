@@ -371,12 +371,13 @@ export default class ConfiguracionTablas extends React.Component {
                                     <img onClick={() => this.deleteTableConfirmation(tabla.ID, i)} src={"../assets/trash.png"} style={{height: "20px", width: "20px"}}></img>
                                 </div>
                                 <div style={{float: "right", border: "2px solid #000", marginRight: "10px", cursor: "pointer"}}>
-                                    <img onClick={() => this.props.terminoSeleccionTabla(tabla.ID, tabla.tabla)} src={"../assets/edit.png"} style={{height: "20px", width: "20px"}}></img>
+                                    <img onClick={() => this.props.terminoSeleccionTabla(tabla.ID, tabla.tabla, tabla.usuario, tabla.contrasena, tabla.servidor, tabla.baseDatos, tabla.tabla)} src={"../assets/edit.png"} style={{height: "20px", width: "20px"}}></img>
                                 </div>
                             </div>
                         </div>
                     </div>
                 ))}
+                <br/>
 
                 { this.state.mensajeModal.mostrarMensaje ? (
                     <MessageModal esError={this.state.mensajeModal.esError} esConfirmar={this.state.mensajeModal.esConfirmar} dismissMessage={this.dismissMessageModal} confirmFunction={this.confirmMessageModal} titulo={this.state.mensajeModal.titulo} mensaje={this.state.mensajeModal.mensaje}> </MessageModal>

@@ -56,14 +56,9 @@ function (_React$Component) {
           alignItems: "center",
           justifyContent: "center",
           "float": "left"
-        },
-        onClick: function onClick(e) {
-          e.persist();
-
-          _this.props.clickEnFormula(e, _this.props.variable.posicion, _this.props.variable.valor, _this.props.index);
         }
       }, _react["default"].createElement("div", {
-        id: (this.props.variable.posicion.localeCompare("izquierda") == 0 ? "indicadorIzquierda" : "indicadorDerecha") + this.props.variable.valor,
+        id: (this.props.variable.posicion.localeCompare("izquierda") == 0 ? "indicadorIzquierdaDiv" : "indicadorDerechaDiv") + this.props.variable.identificadorIndicador,
         className: "highlightFormulaBackground",
         style: {
           height: "80%",
@@ -72,7 +67,7 @@ function (_React$Component) {
         onClick: function onClick(e) {
           e.persist();
 
-          _this.props.clickEnFormula(e, _this.props.variable.posicion, _this.props.variable.valor, _this.props.index);
+          _this.props.clickEnFormula(e, _this.props.variable.posicion.localeCompare("izquierda") == 0 ? "indicadorIzq" : "indicadorDer", _this.props.variable.identificadorIndicador, _this.props.index);
         }
       })));
     }

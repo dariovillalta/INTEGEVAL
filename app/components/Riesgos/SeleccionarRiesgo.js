@@ -45,6 +45,8 @@ function (_React$Component) {
   _createClass(SeleccionarRiesgo, [{
     key: "render",
     value: function render() {
+      var _this = this;
+
       return _react["default"].createElement("div", null, _react["default"].createElement("div", {
         className: "row"
       }, _react["default"].createElement("div", {
@@ -105,6 +107,9 @@ function (_React$Component) {
         }, riesgo.nombre), _react["default"].createElement("div", {
           className: "col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2"
         }, _react["default"].createElement("a", {
+          onClick: function onClick() {
+            return _this.props.editarRiesgo(riesgo.ID, riesgo.nombre, riesgo.peso, riesgo.tolerancia, riesgo.valorIdeal, riesgo.padreRiesgo);
+          },
           className: "btn btn-success",
           style: {
             color: "white"
@@ -112,6 +117,9 @@ function (_React$Component) {
         }, "Editar")), _react["default"].createElement("div", {
           className: "col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2"
         }, _react["default"].createElement("a", {
+          onClick: function onClick() {
+            return _this.props.deleteRiesgo(riesgo.ID);
+          },
           className: "btn btn-danger",
           style: {
             color: "white"
@@ -130,14 +138,20 @@ function (_React$Component) {
           className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
         }, _react["default"].createElement("div", {
           style: {
-            width: "25%",
+            height: "30px",
+            width: riesgo.peso + "%",
             background: "#81d4fa"
           }
-        }, _react["default"].createElement("label", {
+        }))), _react["default"].createElement("div", {
+          className: "row",
           style: {
-            color: "white"
+            width: "100%"
           }
-        }, riesgo.peso)))), _react["default"].createElement("div", {
+        }, _react["default"].createElement("div", {
+          className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 text-center"
+        }, _react["default"].createElement("label", {
+          className: "col-form-label"
+        }, "Peso: ", riesgo.peso))), _react["default"].createElement("div", {
           style: {
             height: "20px",
             width: "100%"

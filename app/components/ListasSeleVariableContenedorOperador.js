@@ -29,6 +29,11 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
+var operacionesEliminar = [{
+  valor: "Borrar",
+  tipo: "operacion"
+}];
+
 var ListasSeleVariableContenedorOperador =
 /*#__PURE__*/
 function (_React$Component) {
@@ -40,13 +45,31 @@ function (_React$Component) {
     _classCallCheck(this, ListasSeleVariableContenedorOperador);
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(ListasSeleVariableContenedorOperador).call(this, props));
-    _this.retornoSeleccionVariable = _this.retornoSeleccionVariable.bind(_assertThisInitialized(_this));
+    _this.state = {
+      indicesVarSeleccionadosOperaciones: [],
+      indicesVarSeleccionadosBorrar: []
+    };
+    _this.retornoSeleccionVariableOperacion = _this.retornoSeleccionVariableOperacion.bind(_assertThisInitialized(_this));
+    _this.retornoSeleccionVariableBorrar = _this.retornoSeleccionVariableBorrar.bind(_assertThisInitialized(_this));
     return _this;
   }
 
   _createClass(ListasSeleVariableContenedorOperador, [{
-    key: "retornoSeleccionVariable",
-    value: function retornoSeleccionVariable(variable) {
+    key: "retornoSeleccionVariableOperacion",
+    value: function retornoSeleccionVariableOperacion(variable, posicion, arreglo) {
+      this.setState({
+        indicesVarSeleccionadosOperaciones: arreglo,
+        indicesVarSeleccionadosBorrar: []
+      });
+      this.props.retornoSeleccionVariable(this.props.esOperacion, variable);
+    }
+  }, {
+    key: "retornoSeleccionVariableBorrar",
+    value: function retornoSeleccionVariableBorrar(variable, posicion, arreglo) {
+      this.setState({
+        indicesVarSeleccionadosOperaciones: [],
+        indicesVarSeleccionadosBorrar: arreglo
+      });
       this.props.retornoSeleccionVariable(this.props.esOperacion, variable);
     }
   }, {
@@ -67,9 +90,18 @@ function (_React$Component) {
         mostrarRosa: this.props.mostrarRosa,
         variables: this.props.operaciones,
         seleccionarMultiple: this.props.seleccionarMultiple,
-        retornoSeleccion: this.retornoSeleccionVariable,
+        retornoSeleccion: this.retornoSeleccionVariableOperacion,
         titulo: "Algebraicas",
-        indiceTabla: false
+        indiceTabla: false,
+        indicesVarSeleccionados: this.state.indicesVarSeleccionadosOperaciones
+      }), _react["default"].createElement(_ListasSeleVariable["default"], {
+        mostrarRosa: this.props.mostrarRosa,
+        variables: operacionesEliminar,
+        seleccionarMultiple: this.props.seleccionarMultiple,
+        retornoSeleccion: this.retornoSeleccionVariableBorrar,
+        titulo: "Eliminar",
+        indiceTabla: false,
+        indicesVarSeleccionados: this.state.indicesVarSeleccionadosBorrar
       })));
     }
   }]);

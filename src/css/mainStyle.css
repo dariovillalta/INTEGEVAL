@@ -7126,6 +7126,13 @@ Media Query
     cursor: pointer;
 }
 
+.onHoverOpcionUmbralSinCambioHeight {
+    background-color: #2204cc;
+    color: white;
+    font-size: 1.1em;
+    cursor: pointer;
+}
+
 .highlightSeccionUmbralSlider {
     transition: all .2s ease-in-out;
     transform: scale(1.2) !important;
@@ -7335,4 +7342,246 @@ Media Query
     -webkit-text-fill-color: white; /* Will override color (regardless of order) */
     -webkit-text-stroke-width: 1px;
     -webkit-text-stroke-color: black;
+}
+
+
+/*switch button instruccion SQL*/
+.switch-button-sql.switch-button-xs {
+    height: 20px;
+    line-height: 16px;
+    width: 50px;
+}
+
+.switch-button-sql {
+    display: inline-block;
+    border-radius: 50px;
+    background-color: #9e9eaf;
+    width: 230px;
+    height: 27px;
+    padding: 4px;
+    position: relative;
+    overflow: hidden;
+    vertical-align: middle;
+}
+
+.switch-button-sql input[type=checkbox] {
+    display: none;
+}
+
+.switch-button-sql input[type=checkbox]:checked+span label {
+    float: right;
+    border-color: #2a75f3;
+}
+
+.switch-button-variable.switch-button-xs label {
+    height: 12px;
+    width: 12px;
+}
+
+.switch-button-sql input[type=checkbox]:checked+span label:before {
+    position: absolute;
+    font-size: 12px;
+    font-weight: 600;
+    z-index: 0;
+    content: "INSTRUCCIÓN SQL";
+    color: #FFF;
+    left: 0;
+    text-align: left;
+    padding-left: 10px;
+}
+
+.switch-button-sql.switch-button-xs label:before {
+    line-height: 21px;
+}
+
+.switch-button-sql label:before {
+    position: absolute;
+    font-size: 12px;
+    font-weight: 600;
+    z-index: 0;
+    content: "INSTRUCCIÓN PERSONALIZADA";
+    right: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    line-height: 27px;
+    top: 0;
+    text-align: right;
+    padding-right: 10px;
+    color: #FFF;
+}
+
+.switch-button-sql input[type=checkbox]:checked+span {
+    background-color: #5969ff;
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 4px;
+}
+
+.switch-button-sql.switch-button-sm label {
+    height: 16px;
+    width: 16px;
+}
+
+.switch-button-sql label {
+    border-radius: 50%;
+    box-shadow: 0 0 1px 1px #FFF inset;
+    background-color: #FFF;
+    margin: 0;
+    height: 19px;
+    width: 19px;
+    z-index: 1;
+    display: inline-block;
+    cursor: pointer;
+    background-clip: padding-box;
+}
+
+.switch-button-sql.switch-button-sm {
+    height: 24px;
+    width: 57px;
+    line-height: 20px;
+}
+
+.switch-button-sql.switch-button-lg {
+    height: 30px;
+    line-height: 32px;
+    width: 64px;
+}
+
+.switch-button-sql.switch-button-success input[type=checkbox]:checked+span {
+    background-color: #2ec551;
+}
+
+.switch-button-sql.switch-button-warning input[type=checkbox]:checked+span {
+    background-color: #ffc750;
+}
+
+.switch-button-sql.switch-button-danger input[type=checkbox]:checked+span {
+    background-color: #ef172c;
+}
+
+
+
+
+/*switch button booleano*/
+.switch-button-bool.switch-button-xs {
+    height: 20px;
+    line-height: 16px;
+    width: 50px;
+}
+
+.switch-button-bool {
+    display: inline-block;
+    border-radius: 50px;
+    background-color: #9e9eaf;
+    width: 160px;
+    height: 27px;
+    padding: 4px;
+    position: relative;
+    overflow: hidden;
+    vertical-align: middle;
+}
+
+.switch-button-bool input[type=checkbox] {
+    display: none;
+}
+
+.switch-button-bool input[type=checkbox]:checked+span label {
+    float: right;
+    border-color: #2a75f3;
+}
+
+.switch-button-bool.switch-button-xs label {
+    height: 12px;
+    width: 12px;
+}
+
+.switch-button-bool input[type=checkbox]:checked+span label:before {
+    position: absolute;
+    font-size: 12px;
+    font-weight: 600;
+    z-index: 0;
+    content: "VERDADERO";
+    color: #FFF;
+    left: 0;
+    text-align: left;
+    padding-left: 10px;
+}
+
+.switch-button-bool.switch-button-xs label:before {
+    line-height: 21px;
+}
+
+.switch-button-bool label:before {
+    position: absolute;
+    font-size: 12px;
+    font-weight: 600;
+    z-index: 0;
+    content: "FALSO";
+    right: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    line-height: 27px;
+    top: 0;
+    text-align: right;
+    padding-right: 10px;
+    color: #FFF;
+}
+
+.switch-button-bool input[type=checkbox]:checked+span {
+    background-color: #5969ff;
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 4px;
+}
+
+.switch-button-bool.switch-button-sm label {
+    height: 16px;
+    width: 16px;
+}
+
+.switch-button-bool label {
+    border-radius: 50%;
+    box-shadow: 0 0 1px 1px #FFF inset;
+    background-color: #FFF;
+    margin: 0;
+    height: 19px;
+    width: 19px;
+    z-index: 1;
+    display: inline-block;
+    cursor: pointer;
+    background-clip: padding-box;
+}
+
+.switch-button-bool.switch-button-sm {
+    height: 24px;
+    width: 57px;
+    line-height: 20px;
+}
+
+.switch-button-bool.switch-button-lg {
+    height: 30px;
+    line-height: 32px;
+    width: 64px;
+}
+
+.switch-button-bool.switch-button-success input[type=checkbox]:checked+span {
+    background-color: #2ec551;
+}
+
+.switch-button-bool.switch-button-warning input[type=checkbox]:checked+span {
+    background-color: #ffc750;
+}
+
+.switch-button-bool.switch-button-danger input[type=checkbox]:checked+span {
+    background-color: #ef172c;
 }

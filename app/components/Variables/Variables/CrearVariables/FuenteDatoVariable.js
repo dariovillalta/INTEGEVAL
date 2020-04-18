@@ -38,6 +38,10 @@ const operacionesNumero = [{valor: "Asignar Valor Único"}, {valor: "Asignar Val
 const operacionesFecha = [{valor: "Asignar Valor Único"}, {valor: "Asignar Valor Único Si"}, {valor: "Asignar Valor Multiples"}, {valor: "Asignar Valor Multiples Si"}, {valor: "Contar"}, {valor: "Contar Si"}];
 const operacionesBoolean = [{valor: "Asignar Valor Único"}, {valor: "Asignar Valor Único Si"}, {valor: "Asignar Valor Multiples"}, {valor: "Asignar Valor Multiples Si"}, {valor: "Contar"}, {valor: "Contar Si"}];
 const operacionesCadena = [{valor: "Asignar Valor Único"}, {valor: "Asignar Valor Único Si"}, {valor: "Asignar Valor Multiples"}, {valor: "Asignar Valor Multiples Si"}, {valor: "Contar"}, {valor: "Contar Si"}, {valor: "Sumar"}];*/
+var mostrarEsObjetoGlobal = true;
+var mostrarInstruccionSQLGlobal = true;
+var tituloGlobal = "Instrucción SQL";
+
 var FuenteDatoVariable =
 /*#__PURE__*/
 function (_React$Component) {
@@ -51,8 +55,9 @@ function (_React$Component) {
     _this = _possibleConstructorReturn(this, _getPrototypeOf(FuenteDatoVariable).call(this, props));
     _this.state = {
       //atributos: this.props.atributos,
-      mostrarEsObjeto: true,
-      titulo: "Valores Multiples"
+      mostrarEsObjeto: mostrarEsObjetoGlobal,
+      titulo: tituloGlobal,
+      mostrarInstruccionSQL: mostrarInstruccionSQLGlobal
       /*tipoVariable: '',
       operaciones: operacionesCadena,
       reglas: []*/
@@ -65,6 +70,7 @@ function (_React$Component) {
       this.retornoSeleccionOperacion = this.retornoSeleccionOperacion.bind(this);*/
 
     };
+    _this.cambioInstruccionSQL = _this.cambioInstruccionSQL.bind(_assertThisInitialized(_this));
     _this.cambioAObjeto = _this.cambioAObjeto.bind(_assertThisInitialized(_this));
     _this.cambiarTitulo = _this.cambiarTitulo.bind(_assertThisInitialized(_this));
     return _this;
@@ -233,8 +239,19 @@ function (_React$Component) {
 
 
   _createClass(FuenteDatoVariable, [{
+    key: "cambioInstruccionSQL",
+    value: function cambioInstruccionSQL() {
+      mostrarInstruccionSQLGlobal = !this.state.mostrarInstruccionSQL;
+      mostrarEsObjetoGlobal = true;
+      this.setState({
+        mostrarInstruccionSQL: !this.state.mostrarInstruccionSQL,
+        mostrarEsObjeto: true
+      }, this.cambiarTitulo);
+    }
+  }, {
     key: "cambioAObjeto",
     value: function cambioAObjeto() {
+      mostrarEsObjetoGlobal = !this.state.mostrarEsObjeto;
       this.setState({
         mostrarEsObjeto: !this.state.mostrarEsObjeto,
         tipoVariable: ''
@@ -245,16 +262,25 @@ function (_React$Component) {
     value: function cambiarTitulo() {
       this.props.cambioDeArreglosDeAtributos();
 
-      if (this.state.mostrarEsObjeto) {
+      if (this.state.mostrarInstruccionSQL) {
+        tituloGlobal = "Instrucción SQL";
+        this.setState({
+          titulo: "Instrucción SQL"
+        });
+      } else if (this.state.mostrarEsObjeto) {
+        tituloGlobal = "Valores Multiples";
         this.setState({
           titulo: "Valores Multiples"
         });
       } else {
+        tituloGlobal = "Valor Único";
         this.setState({
           titulo: "Valor Único"
         });
-      } //this.props.actualizarEstadoSiEsObjeto(this.state.mostrarEsObjeto);
+      }
 
+      this.props.actualizarEstadoSiEsObjeto(this.state.mostrarEsObjeto);
+      this.props.actualizarEstadoSiEsInstruccionSQL(this.state.mostrarInstruccionSQL);
     }
   }, {
     key: "render",
@@ -308,9 +334,35 @@ function (_React$Component) {
       }, _react["default"].createElement("div", {
         className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
       }, _react["default"].createElement("label", {
+        htmlFor: "esInstruccionSQL",
+        className: "col-form-label"
+      }, "Tipo de C\xE1lculo:")), _react["default"].createElement("div", {
+        className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
+      }, _react["default"].createElement("br", null), _react["default"].createElement("div", {
+        className: "switch-button-sql switch-button-yesno",
+        style: {
+          margin: "0 auto",
+          display: "block"
+        }
+      }, _react["default"].createElement("input", {
+        type: "checkbox",
+        defaultChecked: this.state.mostrarInstruccionSQL,
+        name: "esInstruccionSQL",
+        id: "esInstruccionSQL",
+        onClick: this.cambioInstruccionSQL
+      }), _react["default"].createElement("span", null, _react["default"].createElement("label", {
+        htmlFor: "esInstruccionSQL"
+      }))))), !this.state.mostrarInstruccionSQL ? _react["default"].createElement("div", {
+        className: "row",
+        style: {
+          width: "100%"
+        }
+      }, _react["default"].createElement("div", {
+        className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
+      }, _react["default"].createElement("label", {
         htmlFor: "esObjetoFuenteDato",
         className: "col-form-label"
-      }, "Tiene m\xE1s de un atributo / propiedad / campo:")), _react["default"].createElement("div", {
+      }, "Tiene m\xE1s de un campo:")), _react["default"].createElement("div", {
         className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
       }, _react["default"].createElement("br", null), _react["default"].createElement("div", {
         className: "switch-button-variable switch-button-yesno",
@@ -320,13 +372,13 @@ function (_React$Component) {
         }
       }, _react["default"].createElement("input", {
         type: "checkbox",
-        defaultChecked: true,
+        defaultChecked: this.state.mostrarEsObjeto,
         name: "esObjetoFuenteDato",
         id: "esObjetoFuenteDato",
         onClick: this.cambioAObjeto
       }), _react["default"].createElement("span", null, _react["default"].createElement("label", {
         htmlFor: "esObjetoFuenteDato"
-      }))))), _react["default"].createElement("div", {
+      }))))) : null, _react["default"].createElement("div", {
         className: "row",
         style: {
           width: "100%"
@@ -336,7 +388,7 @@ function (_React$Component) {
       }, _react["default"].createElement("label", {
         htmlFor: "guardarFuenteDato",
         className: "col-form-label"
-      }, "Guardar Valores Obtenidos en Base de Datos")), _react["default"].createElement("div", {
+      }, "Guardar Valores Obtenidos en Base de Datos:")), _react["default"].createElement("div", {
         className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
       }, _react["default"].createElement("br", null), _react["default"].createElement("div", {
         className: "switch-button switch-button-yesno",
@@ -378,11 +430,12 @@ function (_React$Component) {
       }, _react["default"].createElement(_FuenteDatoVariableAtributos["default"], {
         atributos: this.props.atributos,
         titulo: this.state.titulo,
+        mostrarInstruccionSQL: this.state.mostrarInstruccionSQL,
         nombreCampoNuevoAtributosVario: this.props.nombreCampoNuevoAtributosVario,
+        tipoNuevaVariable: this.props.tipoNuevaVariable,
         actualizarNombreCampoNuevoAtributosVario: this.props.actualizarNombreCampoNuevoAtributosVario,
         crearAtributoVariable: this.props.crearAtributoVariable,
         mostrarEsObjeto: this.state.mostrarEsObjeto,
-        retornoTipoDeAsignacion: this.props.retornoTipoDeAsignacion,
         goToCreateConditions: this.props.goToCreateConditions,
         goCreateVariableFieldSQL: this.props.goCreateVariableFieldSQL
       })), _react["default"].createElement("br", null), _react["default"].createElement("div", {

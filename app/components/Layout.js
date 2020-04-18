@@ -52,8 +52,6 @@ function (_React$Component) {
         //vista casa de controlar riesgo
         showRiskMonitorHome: false,
         //vista casa de monitoreo riesgo
-        showUmbralHome: false,
-        //vista casa/inical de umbrales,
         showVariables: false,
         //vista de casa de crear variables
         showFormula: false,
@@ -64,23 +62,26 @@ function (_React$Component) {
         //vista home para el mantenimiento de indicadores
         showRiesgos: false,
         //vista home para el mantenimiento de riesgos
-        showCalulo: false //vista para iniciar el calculo de las variables
+        showCalulo: false,
+        //vista para iniciar el calculo de las variables
+        showReporteria: false //vista home para hacer reporteria
 
       },
-      showChooseMode: true //vista para elegir entre modo control riesgos y monitoreo riesgos
-
+      showChooseMode: true,
+      //vista para elegir entre modo control riesgos y monitoreo riesgos
+      navbar: ""
     };
     _this.showChooseMode = _this.showChooseMode.bind(_assertThisInitialized(_this));
     _this.finishChooseMode = _this.finishChooseMode.bind(_assertThisInitialized(_this));
     _this.showRiskControlHome = _this.showRiskControlHome.bind(_assertThisInitialized(_this));
     _this.showRiskMonitorHome = _this.showRiskMonitorHome.bind(_assertThisInitialized(_this));
-    _this.showUmbralHome = _this.showUmbralHome.bind(_assertThisInitialized(_this));
     _this.showVariables = _this.showVariables.bind(_assertThisInitialized(_this));
     _this.showFormula = _this.showFormula.bind(_assertThisInitialized(_this));
     _this.showCondicionVar = _this.showCondicionVar.bind(_assertThisInitialized(_this));
     _this.showIndicador = _this.showIndicador.bind(_assertThisInitialized(_this));
     _this.showRiesgos = _this.showRiesgos.bind(_assertThisInitialized(_this));
     _this.showCalulo = _this.showCalulo.bind(_assertThisInitialized(_this));
+    _this.showReporteria = _this.showReporteria.bind(_assertThisInitialized(_this));
     return _this;
   }
 
@@ -101,6 +102,53 @@ function (_React$Component) {
   }, {
     key: "showRiskControlHome",
     value: function showRiskControlHome() {
+      var navbar = _react["default"].createElement("ul", {
+        className: "navbar-nav flex-column"
+      }, _react["default"].createElement("li", {
+        className: "nav-divider"
+      }, _react["default"].createElement("h3", {
+        style: {
+          color: "#b0bec5"
+        }
+      }, "Menu")), _react["default"].createElement("li", {
+        className: "nav-item "
+      }, _react["default"].createElement("a", {
+        className: "nav-link",
+        onClick: this.showRiskControlHome,
+        href: "#"
+      }, _react["default"].createElement("i", {
+        className: "fa fa-fw fa-user-circle"
+      }), _react["default"].createElement("h3", {
+        style: {
+          color: "white"
+        }
+      }, "Identificar Riesgos"))), _react["default"].createElement("li", {
+        className: "nav-item "
+      }, _react["default"].createElement("a", {
+        className: "nav-link"
+        /*onClick={this.showGraphics}*/
+        ,
+        href: "#"
+      }, _react["default"].createElement("i", {
+        className: "fa fa-fw fa-user-circle"
+      }), _react["default"].createElement("h3", {
+        style: {
+          color: "white"
+        }
+      }, "Tratar Riesgos"))), _react["default"].createElement("li", {
+        className: "nav-item "
+      }, _react["default"].createElement("a", {
+        className: "nav-link",
+        onClick: this.showCalulo,
+        href: "#"
+      }, _react["default"].createElement("i", {
+        className: "fa fa-fw fa-user-circle"
+      }), _react["default"].createElement("h3", {
+        style: {
+          color: "white"
+        }
+      }, "C\xE1lculo"))));
+
       this.setState({
         router: {
           showRiskControlHome: true,
@@ -111,45 +159,90 @@ function (_React$Component) {
           showCondicionVar: false,
           showIndicador: false,
           showRiesgos: false,
-          showCalulo: false
+          showCalulo: false,
+          showReporteria: false
         },
-        showChooseMode: false
+        showChooseMode: false,
+        navbar: navbar
       });
     }
   }, {
     key: "showRiskMonitorHome",
     value: function showRiskMonitorHome() {
+      var navbar = _react["default"].createElement("ul", {
+        className: "navbar-nav flex-column"
+      }, _react["default"].createElement("li", {
+        className: "nav-divider"
+      }, _react["default"].createElement("h3", {
+        style: {
+          color: "#b0bec5"
+        }
+      }, "Menu")), _react["default"].createElement("li", {
+        className: "nav-item "
+      }, _react["default"].createElement("a", {
+        className: "nav-link",
+        onClick: this.showRiskMonitorHome,
+        href: "#"
+      }, _react["default"].createElement("i", {
+        className: "fa fa-fw fa-user-circle"
+      }), _react["default"].createElement("h3", {
+        style: {
+          color: "white"
+        }
+      }, "Dashboard"))), _react["default"].createElement("li", {
+        className: "nav-item "
+      }, _react["default"].createElement("a", {
+        className: "nav-link"
+        /*onClick={this.showCalulo}*/
+        ,
+        href: "#"
+      }, _react["default"].createElement("i", {
+        className: "fa fa-fw fa-user-circle"
+      }), _react["default"].createElement("h3", {
+        style: {
+          color: "white"
+        }
+      }, "Alertas"))), _react["default"].createElement("li", {
+        className: "nav-item "
+      }, _react["default"].createElement("a", {
+        className: "nav-link",
+        onClick: this.showReporteria,
+        href: "#"
+      }, _react["default"].createElement("i", {
+        className: "fa fa-fw fa-user-circle"
+      }), _react["default"].createElement("h3", {
+        style: {
+          color: "white"
+        }
+      }, "Reporter\xEDa"))), _react["default"].createElement("li", {
+        className: "nav-item "
+      }, _react["default"].createElement("a", {
+        className: "nav-link"
+        /*onClick={this.showGraphics}*/
+        ,
+        href: "#"
+      }, _react["default"].createElement("i", {
+        className: "fa fa-fw fa-user-circle"
+      }), _react["default"].createElement("h3", {
+        style: {
+          color: "white"
+        }
+      }, "Gr\xE1ficos"))));
+
       this.setState({
         router: {
           showRiskControlHome: false,
           showRiskMonitorHome: true,
-          showUmbralHome: false,
           showVariables: false,
           showFormula: false,
           showCondicionVar: false,
           showIndicador: false,
           showRiesgos: false,
-          showCalulo: false
+          showCalulo: false,
+          showReporteria: false
         },
-        showChooseMode: false
-      });
-    }
-  }, {
-    key: "showUmbralHome",
-    value: function showUmbralHome() {
-      this.setState({
-        router: {
-          showRiskControlHome: false,
-          showRiskMonitorHome: false,
-          showUmbralHome: true,
-          showVariables: false,
-          showFormula: false,
-          showCondicionVar: false,
-          showIndicador: false,
-          showRiesgos: false,
-          showCalulo: false
-        },
-        showChooseMode: false
+        showChooseMode: false,
+        navbar: navbar
       });
     }
   }, {
@@ -159,13 +252,13 @@ function (_React$Component) {
         router: {
           showRiskControlHome: false,
           showRiskMonitorHome: false,
-          showUmbralHome: false,
           showVariables: true,
           showFormula: false,
           showCondicionVar: false,
           showIndicador: false,
           showRiesgos: false,
-          showCalulo: false
+          showCalulo: false,
+          showReporteria: false
         },
         showChooseMode: false
       });
@@ -177,13 +270,13 @@ function (_React$Component) {
         router: {
           showRiskControlHome: false,
           showRiskMonitorHome: false,
-          showUmbralHome: false,
           showVariables: false,
           showFormula: true,
           showCondicionVar: false,
           showIndicador: false,
           showRiesgos: false,
-          showCalulo: false
+          showCalulo: false,
+          showReporteria: false
         },
         showChooseMode: false
       });
@@ -195,13 +288,13 @@ function (_React$Component) {
         router: {
           showRiskControlHome: false,
           showRiskMonitorHome: false,
-          showUmbralHome: false,
           showVariables: false,
           showFormula: false,
           showCondicionVar: true,
           showIndicador: false,
           showRiesgos: false,
-          showCalulo: false
+          showCalulo: false,
+          showReporteria: false
         },
         showChooseMode: false
       });
@@ -213,13 +306,13 @@ function (_React$Component) {
         router: {
           showRiskControlHome: false,
           showRiskMonitorHome: false,
-          showUmbralHome: false,
           showVariables: false,
           showFormula: false,
           showCondicionVar: false,
           showIndicador: true,
           showRiesgos: false,
-          showCalulo: false
+          showCalulo: false,
+          showReporteria: false
         },
         showChooseMode: false
       });
@@ -231,13 +324,13 @@ function (_React$Component) {
         router: {
           showRiskControlHome: false,
           showRiskMonitorHome: false,
-          showUmbralHome: false,
           showVariables: false,
           showFormula: false,
           showCondicionVar: false,
           showIndicador: false,
           showRiesgos: true,
-          showCalulo: false
+          showCalulo: false,
+          showReporteria: false
         },
         showChooseMode: false
       });
@@ -249,13 +342,31 @@ function (_React$Component) {
         router: {
           showRiskControlHome: false,
           showRiskMonitorHome: false,
-          showUmbralHome: false,
           showVariables: false,
           showFormula: false,
           showCondicionVar: false,
           showIndicador: false,
           showRiesgos: false,
-          showCalulo: true
+          showCalulo: true,
+          showReporteria: false
+        },
+        showChooseMode: false
+      });
+    }
+  }, {
+    key: "showReporteria",
+    value: function showReporteria() {
+      this.setState({
+        router: {
+          showRiskControlHome: false,
+          showRiskMonitorHome: false,
+          showVariables: false,
+          showFormula: false,
+          showCondicionVar: false,
+          showIndicador: false,
+          showRiesgos: false,
+          showCalulo: false,
+          showReporteria: true
         },
         showChooseMode: false
       });
@@ -277,7 +388,7 @@ function (_React$Component) {
           permision: this.props.permision,
           showConfigurationComponent: this.showConfigurationComponent
         }, " "), _react["default"].createElement(_LeftBar["default"], {
-          showCalulo: this.showCalulo
+          navbar: this.state.navbar
         }, " "), _react["default"].createElement("div", {
           className: "dashboard-wrapper"
         }, _react["default"].createElement("div", {

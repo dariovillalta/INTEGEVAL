@@ -79,7 +79,7 @@ function (_React$Component) {
           fontSize: "100%",
           "float": "left",
           color: "white",
-          padding: "5%"
+          padding: "5px"
         }
       }, _react["default"].createElement("div", {
         className: "highlightFormulaBackground" + (this.props.variable.activa ? ' formulaActive' : ''),
@@ -99,7 +99,7 @@ function (_React$Component) {
         }
       }, _react["default"].createElement("p", {
         className: "highlightFormulaText"
-      }, this.props.variable.texto))), _react["default"].createElement("div", {
+      }, this.props.variable.valor))), _react["default"].createElement("div", {
         style: {
           height: "100%",
           width: "5%",

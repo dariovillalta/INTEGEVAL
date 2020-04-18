@@ -25,7 +25,7 @@ export default class CeldaEquacion extends React.Component {
                             : null
                         }
                         {
-                            this.props.variable.tipo.localeCompare("division\\") == 0
+                            this.props.variable.tipo.localeCompare("division\\\\") == 0
                             ? <DivisionCeldaEquacion variable={this.props.variable} clickEnFormula={this.props.clickEnFormula} index={this.props.index}></DivisionCeldaEquacion>
                             : null
                         }

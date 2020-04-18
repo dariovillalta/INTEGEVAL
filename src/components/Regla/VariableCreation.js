@@ -18,7 +18,7 @@ export default class VariableCreation extends React.Component {
                 esNumero: true,
                 esBoolean: false,
                 esFecha: false,
-                esTexto: false,
+                esTexto: false
             },
             errorCreacionRegla: {campo: "", descripcion: "", mostrar: false},
             mensajeModal: {mostrarMensaje: false, mensajeConfirmado: false, esError: false, esConfirmar: false, titulo: "", mensaje: ""},
@@ -27,7 +27,10 @@ export default class VariableCreation extends React.Component {
             textoValor: '{valor}',
             showModalCampo: false,
             showModalOperacion: false,
-            showModalValor: false
+            showModalValor: false,
+            crearSelected: true,
+            editarSelected: false,
+            eliminarSelected: false
         }
         this.retornoSeleccionVariable = this.retornoSeleccionVariable.bind(this);
         this.retornoSeleccionOperacion = this.retornoSeleccionOperacion.bind(this);
@@ -46,9 +49,21 @@ export default class VariableCreation extends React.Component {
         this.dismissReglaNewError = this.dismissReglaNewError.bind(this);
         this.showSuccesMessage = this.showSuccesMessage.bind(this);
         this.dismissMessageModal = this.dismissMessageModal.bind(this);
+
+        this.handleMouseHoverAgregar = this.handleMouseHoverAgregar.bind(this);
+        this.handleMouseHoverModificar = this.handleMouseHoverModificar.bind(this);
+        this.handleMouseHoverEliminar = this.handleMouseHoverEliminar.bind(this);
+        this.handleMouseHoverExit = this.handleMouseHoverExit.bind(this);
+        this.verificarBotonSel = this.verificarBotonSel.bind(this);
+        this.goCrear = this.goCrear.bind(this);
+        this.goModificar = this.goModificar.bind(this);
+        this.goEliminar = this.goEliminar.bind(this);
+        this.verificarAccion = this.verificarAccion.bind(this);
+        this.isValidDate = this.isValidDate.bind(this);
     }
 
     componentDidMount() {
+        this.verificarBotonSel();
     }
 
     retornoSeleccionVariable(campoSeleccionadoInput) {
@@ -362,6 +377,129 @@ export default class VariableCreation extends React.Component {
         this.setState({
             textoValor: valor
         });
+        if(this.state.tipoCampo.esNumero) {
+            var numero = parseFloat(valor);
+            if(!isNaN(numero)) {
+                var valorARetornar = "MANUAL=NUMERO["+numero+"]";
+                this.props.retornarValor(valorARetornar, valor);
+            } else if(this.state.campoSeleccionadoNombre.localeCompare("{campo}") != 0) {
+                alert('Valor Ingresado no es un número válido')
+            }
+        } else if(this.state.tipoCampo.esBoolean) {
+            if(numero.localeCompare("true") == 0 || numero.localeCompare("false") == 0 ) {
+                var valorARetornar = "MANUAL=BOOL["+valor+"]";
+                this.props.retornarValor(valorARetornar, valor);
+            } else if(this.state.campoSeleccionadoNombre.localeCompare("{campo}") != 0) {
+                alert('Valor Ingresado no es un valor booleano válido')
+            }
+        } else if(this.state.tipoCampo.esFecha) {
+            var fecha = null;
+            if(valor.indexOf("-") != -1 && valor.split("-").length > 2) {
+                fecha = new Date(valor.split("-")[0], valor.split("-")[1], valor.split("-")[2]);
+            } else if(valor.indexOf("/") != -1 && valor.split("/").length > 2) {
+                fecha = new Date(valor.split("/")[0], valor.split("/")[1], valor.split("/")[2]);
+            }
+            if(fecha != null && this.isValidDate(fecha)) {
+                var valorARetornar = "MANUAL=FECHA[";
+                if(valor.indexOf("-") != -1 && valor.split("-").length > 2) {
+                    valorARetornar += valor.split("-")[0]+","+valor.split("-")[1]+","+valor.split("-")[2]+"]";
+                } else if(valor.indexOf("/") != -1 && valor.split("/").length > 2) {
+                    valorARetornar += valor.split("/")[0]+","+valor.split("/")[1]+","+valor.split("/")[2]+"]";
+                }
+                this.props.retornarValor(valorARetornar, valor);
+            } else if(this.state.campoSeleccionadoNombre.localeCompare("{campo}") != 0) {
+                alert('Valor Ingresado no es una fecha válida')
+            }
+        } else if(this.state.tipoCampo.esTexto) {
+            if(valor.length > 0 || valor.length < 984 ) {
+                var valorARetornar = "MANUAL=VARCHAR["+valor+"]";
+                this.props.retornarValor(valorARetornar, valor);
+            } else if(this.state.campoSeleccionadoNombre.localeCompare("{campo}") != 0) {
+                if(valor.length > 0)
+                    alert('Valor Ingresado debe tener una longitud mayor a 0')
+                else
+                    alert('Valor Ingresado debe tener una longitud menor a 984')
+            }
+        }
+    }
+
+    isValidDate (fecha) {
+        if (Object.prototype.toString.call(fecha) === "[object Date]") {
+            if (isNaN(fecha.getTime())) {
+                alert("Ingrese una fecha valida.");
+                return false;
+            } else {
+                return true;
+            }
+        } else {
+            alert("Ingrese una fecha valida.");
+            return false;
+        }
+    }
+
+    handleMouseHoverAgregar() {
+        $("#crearButton").addClass("onHoverOpcionUmbralSinCambioHeight");
+        $("#modificarButton").removeClass("onHoverOpcionUmbralSinCambioHeight");
+        $("#eliminarButton").removeClass("onHoverOpcionUmbralSinCambioHeight");
+    }
+
+    handleMouseHoverModificar() {
+        $("#crearButton").removeClass("onHoverOpcionUmbralSinCambioHeight");
+        $("#modificarButton").addClass("onHoverOpcionUmbralSinCambioHeight");
+        $("#eliminarButton").removeClass("onHoverOpcionUmbralSinCambioHeight");
+    }
+
+    handleMouseHoverEliminar() {
+        $("#crearButton").removeClass("onHoverOpcionUmbralSinCambioHeight");
+        $("#modificarButton").removeClass("onHoverOpcionUmbralSinCambioHeight");
+        $("#eliminarButton").addClass("onHoverOpcionUmbralSinCambioHeight");
+    }
+
+    handleMouseHoverExit() {
+        $("#crearButton").removeClass("onHoverOpcionUmbralSinCambioHeight");
+        $("#modificarButton").removeClass("onHoverOpcionUmbralSinCambioHeight");
+        $("#eliminarButton").removeClass("onHoverOpcionUmbralSinCambioHeight");
+        this.verificarBotonSel();
+    }
+
+    verificarBotonSel () {
+        if(this.state.crearSelected) {
+            $("#crearButton").addClass("onHoverOpcionUmbralSinCambioHeight");
+            $("#modificarButton").removeClass("onHoverOpcionUmbralSinCambioHeight");
+            $("#eliminarButton").removeClass("onHoverOpcionUmbralSinCambioHeight");
+        } else if(this.state.editarSelected) {
+            $("#crearButton").removeClass("onHoverOpcionUmbralSinCambioHeight");
+            $("#modificarButton").addClass("onHoverOpcionUmbralSinCambioHeight");
+            $("#eliminarButton").removeClass("onHoverOpcionUmbralSinCambioHeight");
+        } else if (this.state.eliminarSelected) {
+            $("#crearButton").removeClass("onHoverOpcionUmbralSinCambioHeight");
+            $("#modificarButton").removeClass("onHoverOpcionUmbralSinCambioHeight");
+            $("#eliminarButton").addClass("onHoverOpcionUmbralSinCambioHeight");
+        }
+    }
+
+    goCrear() {
+        this.setState({
+            crearSelected: true,
+            editarSelected: false,
+            eliminarSelected: false
+        });
+    }
+
+    goModificar() {
+        this.setState({
+            crearSelected: false,
+            editarSelected: true,
+            eliminarSelected: false
+        });
+    }
+
+    goEliminar() {
+        this.setState({
+            crearSelected: false,
+            editarSelected: false,
+            eliminarSelected: true
+        });
     }
 
     showCampoModal () {
@@ -424,11 +562,20 @@ export default class VariableCreation extends React.Component {
         });
     }
 
+    verificarAccion () {
+        if(this.state.crearSelected)
+            this.props.callbackCrearRegla(false);
+        else if(this.state.editarSelected)
+            this.props.callbackModificarRegla(false);
+        else
+            this.props.callbackEliminarRegla(false);
+    }
+
     render() {
         return (
             <div style={{width: "100%"}}>
                 <h3 className={"card-header"}>Crear Condición (Instrucción)</h3>
-                <div className={"font-24"} style={{height: "50px", width: "100%", display: "flex", alignItems: "center", justifyContent: "center", borderBottom: "3px solid #d2d2e4"}}>
+                <div className={"font-24"} style={{minHeight: "50px", width: "100%", display: "flex", alignItems: "center", justifyContent: "center", borderBottom: "3px solid #d2d2e4"}}>
                     SI {this.state.campoSeleccionadoNombre} {this.state.textoOperacion} {this.state.textoValor}
                 </div>
                 <div className={"font-18 addPointer abrirModalCrearCondicionOnHover"} onClick={this.showCampoModal} style={{width: "100%",display: "flex", alignItems: "center", justifyContent: "center", borderBottom: "3px solid #d2d2e4"}}>
@@ -441,10 +588,16 @@ export default class VariableCreation extends React.Component {
                             esBoolean={this.esBoolean}
                             esFecha={this.esFecha}
                             esTexto={this.esTexto}
-                            conexiones={this.props.conexiones}
-                            camposConexiones={this.props.camposConexiones}
-                            variables={this.props.variables}
-                            camposVariables={this.props.camposVariables}
+                            tablas={this.props.tablas}
+                            camposTablas={this.props.camposTablas}
+                            variablesEscalares={this.props.variablesEscalares}
+                            objetos={this.props.objetos}
+                            camposDeObjetos={this.props.camposDeObjetos}
+                            excel={this.props.excel}
+                            camposDeExcel={this.props.camposDeExcel}
+                            formas={this.props.formas}
+                            variablesSQL={this.props.variablesSQL}
+                            camposVariablesSQL={this.props.camposVariablesSQL}
                             retornoSeleccionVariable={this.retornoSeleccionVariable}>
                         </Campo>
                 </Modal>
@@ -461,15 +614,6 @@ export default class VariableCreation extends React.Component {
                             retornoSeleccionOperacion={this.retornoSeleccionOperacion}>
                         </Operacion>
                 </Modal>
-                <Valor esNumero={this.state.tipoCampo.esNumero}
-                    esBoolean={this.state.tipoCampo.esBoolean}
-                    esFecha={this.state.tipoCampo.esFecha}
-                    esTexto={this.state.tipoCampo.esTexto}
-                    camposDropdown={this.props.camposDropdown}
-                    valoresDropdown={this.props.valoresDropdown}
-                    actualizarValor={this.actualizarValor}
-                    pool={this.props.pool}> </Valor>
-                <br/>
                 <Modal show={this.state.showModalValor}
                     titulo={"Seleccionar Valores a Comparar con el Campo"}
                     onClose={this.closeValorModal}>
@@ -477,15 +621,19 @@ export default class VariableCreation extends React.Component {
                             esBoolean={this.state.tipoCampo.esBoolean}
                             esFecha={this.state.tipoCampo.esFecha}
                             esTexto={this.state.tipoCampo.esTexto}
+                            retornarValor={this.props.retornarValor}
                             camposDropdown={this.props.camposDropdown}
                             valoresDropdown={this.props.valoresDropdown}
                             actualizarValor={this.actualizarValor}
                             pool={this.props.pool}>
                         </Valor>
                 </Modal>
+                <div className={"font-18 addPointer abrirModalCrearCondicionOnHover"} onClick={this.showValorModal} style={{width: "100%",display: "flex", alignItems: "center", justifyContent: "center", borderBottom: "3px solid #d2d2e4"}}>
+                    <h4>Seleccionar Valor a Aplicar</h4>
+                </div>
                 <div className={"text-center"} style={{display: (this.props.mostrarOpcionSino ? "" : "none" ) }}>
                     <div className={"font-18"} style={{width: "100%", height: "20px", display: "flex", alignItems: "center", justifyContent: "center"}}>
-                        <h4>Seleccionar Estilo Condición</h4>
+                        <h4>Seleccionar Tipo Condición</h4>
                     </div>
                     <label className="custom-control custom-radio custom-control-inline">
                         <input id="siRADIO" type="radio" name="sinoRadio" defaultChecked className="custom-control-input" onClick={() => this.props.actualizarEstadoSeleccionSinoNuevaRegla(false)}/><span className="custom-control-label">SI</span>
@@ -505,8 +653,27 @@ export default class VariableCreation extends React.Component {
                 ) : (
                     <span></span>
                 )}
-                <div className={"text-center"}>
-                    <a onClick={() => this.props.callbackCrearRegla(false)} className={"btn btn-primary col-xs-6 col-6"} style={{color: "white", fontSize: "1.2em", fontWeight: "bold"}}>Crear Condición / Instrucción</a>
+                <div className={"row"}>
+                    <div className={"col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2"}>
+                        <div id="crearButton" onMouseEnter={this.handleMouseHoverAgregar} onMouseLeave={this.handleMouseHoverExit} onClick={this.goCrear} className="border text-center addPointer">Agregar</div>
+                        <div id="modificarButton" onMouseEnter={this.handleMouseHoverModificar} onMouseLeave={this.handleMouseHoverExit} onClick={this.goModificar} className="border text-center addPointer">Modificar</div>
+                        <div id="eliminarButton" onMouseEnter={this.handleMouseHoverEliminar} onMouseLeave={this.handleMouseHoverExit} onClick={this.goEliminar} className="border text-center addPointer">Eliminar</div>
+                    </div>
+                    <div className={"col-xl-10 col-lg-10 col-md-10 col-sm-10 col-10"} style={{display: this.state.crearSelected ?  "" : "none"}}>
+                        <div className={"text-center"}>
+                            <a onClick={this.verificarAccion} className={"btn btn-primary col-xs-6 col-6"} style={{color: "white", fontSize: "1.2em", fontWeight: "bold"}}>Crear Condición</a>
+                        </div>
+                    </div>
+                    <div className={"col-xl-10 col-lg-10 col-md-10 col-sm-10 col-10"} style={{display: this.state.editarSelected ? "" : "none"}}>
+                        <div className={"text-center"}>
+                            <a onClick={this.verificarAccion} className={"btn btn-primary col-xs-6 col-6"} style={{color: "white", fontSize: "1.2em", fontWeight: "bold"}}>Modificar Condición</a>
+                        </div>
+                    </div>
+                    <div className={"col-xl-10 col-lg-10 col-md-10 col-sm-10 col-10"} style={{display: this.state.eliminarSelected ? "" : "none"}}>
+                        <div className={"text-center"}>
+                            <a onClick={this.verificarAccion} className={"btn btn-primary col-xs-6 col-6"} style={{color: "white", fontSize: "1.2em", fontWeight: "bold"}}>Eliminar</a>
+                        </div>
+                    </div>
                 </div>
                 <br/>
             </div>
