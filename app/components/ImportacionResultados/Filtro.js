@@ -9,6 +9,10 @@ var _react = _interopRequireDefault(require("react"));
 
 var _mssql = _interopRequireDefault(require("mssql"));
 
+var _Operacion = _interopRequireDefault(require("../Regla/Operacion.js"));
+
+var _Valor = _interopRequireDefault(require("../Regla/Valor.js"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -43,7 +47,15 @@ function (_React$Component) {
     _this.state = {
       variables: [],
       indicadores: [],
-      riesgos: []
+      riesgos: [],
+      variableSeleccionada: null,
+      campoSeleccionado: null,
+      tipoCampo: {
+        esNumero: true,
+        esBoolean: false,
+        esFecha: false,
+        esTexto: false
+      }
     };
     _this.agregarFiltro = _this.agregarFiltro.bind(_assertThisInitialized(_this));
     _this.getResultsVariables = _this.getResultsVariables.bind(_assertThisInitialized(_this));
@@ -58,6 +70,13 @@ function (_React$Component) {
     _this.getResultsRisksFieldsInit = _this.getResultsRisksFieldsInit.bind(_assertThisInitialized(_this));
     _this.getFieldAttributesRisks = _this.getFieldAttributesRisks.bind(_assertThisInitialized(_this));
     _this.getFieldResultsRisks = _this.getFieldResultsRisks.bind(_assertThisInitialized(_this));
+    _this.selVar = _this.selVar.bind(_assertThisInitialized(_this));
+    _this.selCampo = _this.selCampo.bind(_assertThisInitialized(_this));
+    _this.retornoSeleccionOperacion = _this.retornoSeleccionOperacion.bind(_assertThisInitialized(_this));
+    _this.actualizarValor = _this.actualizarValor.bind(_assertThisInitialized(_this));
+    _this.retornarValorFecha = _this.retornarValorFecha.bind(_assertThisInitialized(_this));
+    _this.retornarValorTime = _this.retornarValorTime.bind(_assertThisInitialized(_this));
+    _this.isValidDate = _this.isValidDate.bind(_assertThisInitialized(_this));
     return _this;
   }
 
@@ -127,8 +146,9 @@ function (_React$Component) {
         var request = new _mssql["default"].Request(transaction);
         request.query("select * from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME = '" + resultado.nombreVariable + '_' + resultado.inicioVigencia.getFullYear() + '_' + (resultado.inicioVigencia.getMonth() + 1) + '_' + resultado.inicioVigencia.getDate() + '_' + resultado.inicioVigencia.getHours() + '_' + resultado.inicioVigencia.getMinutes() + '_' + resultado.inicioVigencia.getSeconds() + "'", function (err, result) {
           if (err) {
+            console.log(err);
+
             if (!rolledBack) {
-              console.log(err);
               transaction.rollback(function (err) {});
             }
           } else {
@@ -167,8 +187,9 @@ function (_React$Component) {
         var request = new _mssql["default"].Request(transaction);
         request.query("select * from " + resultado.nombreVariable + '_' + resultado.inicioVigencia.getFullYear() + '_' + (resultado.inicioVigencia.getMonth() + 1) + '_' + resultado.inicioVigencia.getDate() + '_' + resultado.inicioVigencia.getHours() + '_' + resultado.inicioVigencia.getMinutes() + '_' + resultado.inicioVigencia.getSeconds(), function (err, result) {
           if (err) {
+            console.log(err);
+
             if (!rolledBack) {
-              console.log(err);
               transaction.rollback(function (err) {});
             }
           } else {
@@ -198,8 +219,9 @@ function (_React$Component) {
         var request = new _mssql["default"].Request(transaction);
         request.query("select * from ResultadosNombreIndicadores", function (err, result) {
           if (err) {
+            console.log(err);
+
             if (!rolledBack) {
-              console.log(err);
               transaction.rollback(function (err) {});
               return [];
             }
@@ -238,8 +260,9 @@ function (_React$Component) {
         var request = new _mssql["default"].Request(transaction);
         request.query("select * from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME = '" + resultado.nombreIndicador + '_' + resultado.inicioVigencia.getFullYear() + '_' + (resultado.inicioVigencia.getMonth() + 1) + '_' + resultado.inicioVigencia.getDate() + '_' + resultado.inicioVigencia.getHours() + '_' + resultado.inicioVigencia.getMinutes() + '_' + resultado.inicioVigencia.getSeconds() + "'", function (err, result) {
           if (err) {
+            console.log(err);
+
             if (!rolledBack) {
-              console.log(err);
               transaction.rollback(function (err) {});
             }
           } else {
@@ -278,8 +301,9 @@ function (_React$Component) {
         var request = new _mssql["default"].Request(transaction);
         request.query("select * from " + resultado.nombreIndicador + '_' + resultado.inicioVigencia.getFullYear() + '_' + (resultado.inicioVigencia.getMonth() + 1) + '_' + resultado.inicioVigencia.getDate() + '_' + resultado.inicioVigencia.getHours() + '_' + resultado.inicioVigencia.getMinutes() + '_' + resultado.inicioVigencia.getSeconds(), function (err, result) {
           if (err) {
+            console.log(err);
+
             if (!rolledBack) {
-              console.log(err);
               transaction.rollback(function (err) {});
             }
           } else {
@@ -309,8 +333,9 @@ function (_React$Component) {
         var request = new _mssql["default"].Request(transaction);
         request.query("select * from ResultadosNombreRiesgos", function (err, result) {
           if (err) {
+            console.log(err);
+
             if (!rolledBack) {
-              console.log(err);
               transaction.rollback(function (err) {});
               return [];
             }
@@ -349,8 +374,9 @@ function (_React$Component) {
         var request = new _mssql["default"].Request(transaction);
         request.query("select * from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME = '" + resultado.nombreRiesgo + '_' + resultado.inicioVigencia.getFullYear() + '_' + (resultado.inicioVigencia.getMonth() + 1) + '_' + resultado.inicioVigencia.getDate() + '_' + resultado.inicioVigencia.getHours() + '_' + resultado.inicioVigencia.getMinutes() + '_' + resultado.inicioVigencia.getSeconds() + "'", function (err, result) {
           if (err) {
+            console.log(err);
+
             if (!rolledBack) {
-              console.log(err);
               transaction.rollback(function (err) {});
             }
           } else {
@@ -389,8 +415,9 @@ function (_React$Component) {
         var request = new _mssql["default"].Request(transaction);
         request.query("select * from " + resultado.nombreRiesgo + '_' + resultado.inicioVigencia.getFullYear() + '_' + (resultado.inicioVigencia.getMonth() + 1) + '_' + resultado.inicioVigencia.getDate() + '_' + resultado.inicioVigencia.getHours() + '_' + resultado.inicioVigencia.getMinutes() + '_' + resultado.inicioVigencia.getSeconds(), function (err, result) {
           if (err) {
+            console.log(err);
+
             if (!rolledBack) {
-              console.log(err);
               transaction.rollback(function (err) {});
             }
           } else {
@@ -404,6 +431,161 @@ function (_React$Component) {
           }
         });
       }); // fin transaction
+    }
+  }, {
+    key: "selVar",
+    value: function selVar(index, arreglo) {
+      var ref;
+
+      if (arreglo.localeCompare("variable") == 0) {
+        ref = this.state.variables[index];
+      } else if (arreglo.localeCompare("indicador") == 0) {
+        ref = this.state.indicadores[index];
+      } else if (arreglo.localeCompare("riesgo") == 0) {
+        ref = this.state.riesgos[index];
+      }
+
+      this.setState({
+        variableSeleccionada: ref,
+        campoSeleccionado: null
+      });
+    }
+  }, {
+    key: "selCampo",
+    value: function selCampo(index) {
+      var copy = jQuery.extend(true, {}, this.state.variableSeleccionada);
+
+      for (var i = 0; i < copy.atributos.length; i++) {
+        if (i == index) copy.atributos[i].activa = true;else copy.atributos[i].activa = false;
+      }
+
+      ;
+      var tipoCampo;
+
+      if (copy.atributos[index].tipo.localeCompare("int") == 0 || copy.atributos[index].tipo.localeCompare("decimal") == 0) {
+        tipoCampo = {
+          esNumero: true,
+          esBoolean: false,
+          esFecha: false,
+          esTexto: false
+        };
+      } else if (copy.atributos[index].tipo.localeCompare("bool") == 0) {
+        tipoCampo = {
+          esNumero: false,
+          esBoolean: true,
+          esFecha: false,
+          esTexto: false
+        };
+      } else if (copy.atributos[index].tipo.localeCompare("date") == 0) {
+        tipoCampo = {
+          esNumero: false,
+          esBoolean: false,
+          esFecha: true,
+          esTexto: false
+        };
+      } else if (copy.atributos[index].tipo.localeCompare("varchar") == 0) {
+        tipoCampo = {
+          esNumero: false,
+          esBoolean: false,
+          esFecha: false,
+          esTexto: true
+        };
+      }
+
+      console.log('copy.atributos[index]');
+      console.log(copy.atributos[index]);
+      this.setState({
+        campoSeleccionado: copy,
+        tipoCampo: tipoCampo
+      }, console.log(this.state.tipoCampo));
+    }
+  }, {
+    key: "retornoSeleccionOperacion",
+    value: function retornoSeleccionOperacion() {//
+    }
+  }, {
+    key: "actualizarValor",
+    value: function actualizarValor(e) {
+      var valor = $("#valor").val();
+      this.setState({
+        textoValor: valor
+      });
+
+      if (this.state.tipoCampo.esNumero) {
+        var numero = parseFloat(valor);
+
+        if (!isNaN(numero)) {
+          var valorARetornar = "MANUAL=NUMERO[" + numero + "]";
+          this.props.retornarValor(valorARetornar, valor);
+        } else if (this.state.campoSeleccionadoNombre.localeCompare("{campo}") != 0) {
+          alert('Valor Ingresado no es un número válido');
+        }
+      } else if (this.state.tipoCampo.esBoolean) {
+        if (numero.localeCompare("true") == 0 || numero.localeCompare("false") == 0) {
+          var valorARetornar = "MANUAL=BOOL[" + valor + "]";
+          this.props.retornarValor(valorARetornar, valor);
+        } else if (this.state.campoSeleccionadoNombre.localeCompare("{campo}") != 0) {
+          alert('Valor Ingresado no es un valor booleano válido');
+        }
+      } else if (this.state.tipoCampo.esFecha) {
+        var fecha = null;
+
+        if (valor.indexOf("-") != -1 && valor.split("-").length > 2) {
+          fecha = new Date(valor.split("-")[0], valor.split("-")[1], valor.split("-")[2]);
+        } else if (valor.indexOf("/") != -1 && valor.split("/").length > 2) {
+          fecha = new Date(valor.split("/")[0], valor.split("/")[1], valor.split("/")[2]);
+        }
+
+        if (fecha != null && this.isValidDate(fecha)) {
+          var valorARetornar = "MANUAL=FECHA[";
+
+          if (valor.indexOf("-") != -1 && valor.split("-").length > 2) {
+            valorARetornar += valor.split("-")[0] + "," + valor.split("-")[1] + "," + valor.split("-")[2] + "]";
+          } else if (valor.indexOf("/") != -1 && valor.split("/").length > 2) {
+            valorARetornar += valor.split("/")[0] + "," + valor.split("/")[1] + "," + valor.split("/")[2] + "]";
+          }
+
+          this.props.retornarValor(valorARetornar, valor);
+        } else if (this.state.campoSeleccionadoNombre.localeCompare("{campo}") != 0) {
+          alert('Valor Ingresado no es una fecha válida');
+        }
+      } else if (this.state.tipoCampo.esTexto) {
+        if (valor.length > 0 || valor.length < 984) {
+          var valorARetornar = "MANUAL=VARCHAR[" + valor + "]";
+          this.props.retornarValor(valorARetornar, valor);
+        } else if (this.state.campoSeleccionadoNombre.localeCompare("{campo}") != 0) {
+          if (valor.length > 0) alert('Valor Ingresado debe tener una longitud mayor a 0');else alert('Valor Ingresado debe tener una longitud menor a 984');
+        }
+      }
+    }
+  }, {
+    key: "retornarValorFecha",
+    value: function retornarValorFecha(valorRegla, valorTexto) {
+      this.setState({
+        textoValor: valorTexto
+      });
+    }
+  }, {
+    key: "retornarValorTime",
+    value: function retornarValorTime(valorRegla, valorTexto) {
+      this.setState({
+        textoValor: valorTexto
+      });
+    }
+  }, {
+    key: "isValidDate",
+    value: function isValidDate(fecha) {
+      if (Object.prototype.toString.call(fecha) === "[object Date]") {
+        if (isNaN(fecha.getTime())) {
+          alert("Ingrese una fecha valida.");
+          return false;
+        } else {
+          return true;
+        }
+      } else {
+        alert("Ingrese una fecha valida.");
+        return false;
+      }
     }
   }, {
     key: "render",
@@ -427,7 +609,7 @@ function (_React$Component) {
       }, _react["default"].createElement("li", {
         className: "breadcrumb-item font-16",
         "aria-current": "page",
-        onClick: this.props.configuracionHome
+        onClick: this.props.returnChooseDates
       }, _react["default"].createElement("a", {
         href: "#",
         className: "breadcrumb-link"
@@ -435,31 +617,121 @@ function (_React$Component) {
         className: "breadcrumb-item active font-16",
         "aria-current": "page"
       }, "Crear Filtros"))))))), _react["default"].createElement("div", {
-        className: "row"
+        className: "row",
+        style: {
+          maxHeight: "60vh"
+        }
       }, _react["default"].createElement("div", {
-        className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
+        className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12",
+        style: {
+          height: "100%"
+        }
       }, _react["default"].createElement("div", {
-        className: "card"
+        className: "card",
+        style: {
+          height: "100%"
+        }
       }, _react["default"].createElement("div", {
-        className: "row"
+        className: "row",
+        style: {
+          borderBottom: "5px solid #d2d2e4",
+          height: "90%"
+        }
       }, _react["default"].createElement("div", {
-        className: "col-xl-4 col-lg-4 col-md-4 col-sm-4 col-4"
+        className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3",
+        style: {
+          borderRight: "5px solid #d2d2e4",
+          height: "100%"
+        }
+      }, _react["default"].createElement("div", {
+        style: {
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "8%",
+          width: "100%",
+          paddingTop: "5px"
+        }
+      }, _react["default"].createElement("h2", null, "Variables")), _react["default"].createElement("hr", null), _react["default"].createElement("div", {
+        style: {
+          paddingLeft: "5px"
+        }
       }, this.state.variables.map(function (variable, i) {
         return _react["default"].createElement("label", {
           key: variable.ID,
-          className: "custom-control custom-radio custom-control-inline"
+          className: "custom-control custom-radio"
         }, _react["default"].createElement("input", {
           id: "varRad" + variable.ID,
+          onClick: function onClick() {
+            return _this11.selVar(i, "variable");
+          },
           type: "radio",
           name: "sinoRadio",
-          defaultChecked: true,
           className: "custom-control-input"
         }), _react["default"].createElement("span", {
           className: "custom-control-label"
         }, variable.nombreVariable));
+      }))), _react["default"].createElement("div", {
+        className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9",
+        style: {
+          height: "100%"
+        }
+      }, _react["default"].createElement("div", {
+        className: "row",
+        style: {
+          display: this.state.variableSeleccionada != null ? "" : "none",
+          borderBottom: "3px solid #d2d2e4",
+          height: "30%",
+          width: "100%"
+        }
+      }, this.state.variableSeleccionada != null ? _react["default"].createElement("div", {
+        className: "text-center",
+        style: {
+          height: "100%",
+          width: "100%",
+          overflowX: "scroll"
+        }
+      }, this.state.variableSeleccionada.atributos.map(function (atributo, i) {
+        return _react["default"].createElement("a", {
+          key: _this11.state.variableSeleccionada.nombre + atributo.nombre + atributo.ID,
+          href: "#",
+          onClick: function onClick() {
+            return _this11.selCampo(i);
+          },
+          className: "btn " + (atributo.activa ? "" : "btn-outline-secondary"),
+          style: {
+            margin: "1% 3%"
+          }
+        }, atributo.nombre);
+      })) : null), _react["default"].createElement("div", {
+        className: "row",
+        style: {
+          display: this.state.campoSeleccionado != null ? "" : "none",
+          borderBottom: "3px solid #d2d2e4",
+          height: "40%"
+        }
+      }, _react["default"].createElement(_Operacion["default"], {
+        esNumero: this.state.tipoCampo.esNumero,
+        esBoolean: this.state.tipoCampo.esBoolean,
+        esFecha: this.state.tipoCampo.esFecha,
+        esTexto: this.state.tipoCampo.esTexto,
+        retornoSeleccionOperacion: this.retornoSeleccionOperacion
       })), _react["default"].createElement("div", {
-        className: "col-xl-8 col-lg-8 col-md-8 col-sm-8 col-8"
-      })), _react["default"].createElement("br", null), _react["default"].createElement("div", {
+        className: "row",
+        style: {
+          display: this.state.campoSeleccionado != null ? "" : "none",
+          height: "30%"
+        }
+      }, _react["default"].createElement(_Valor["default"], {
+        esNumero: this.state.tipoCampo.esNumero,
+        esBoolean: this.state.tipoCampo.esBoolean,
+        esFecha: this.state.tipoCampo.esFecha,
+        esTexto: this.state.tipoCampo.esTexto,
+        retornarValorFecha: this.retornarValorFecha,
+        retornarValorTime: this.retornarValorTime,
+        actualizarValor: this.actualizarValor,
+        pool: this.props.pool
+      })))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
         className: "text-center",
         style: {
           width: "100%"

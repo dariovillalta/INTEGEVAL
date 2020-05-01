@@ -527,6 +527,7 @@ export default class InstruccionVariable extends React.Component {
                 <div className={"row"} style={{width: "100%"}}>
                     <div className={"card"} style={{width: "100%"}}>
                         <OpcionesCrearRegla pool={this.props.pool} campos={this.props.campos}
+                                            reglas={this.state.reglas}
                                             asignaciones={this.props.asignaciones}
                                             retornarValor={this.props.retornarValor}
                                             retornoCampo={this.props.retornoCampo}

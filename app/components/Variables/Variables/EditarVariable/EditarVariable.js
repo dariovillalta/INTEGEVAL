@@ -38,6 +38,7 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 var mostrarFuenteDatoVariableGlobal = false;
 var mostrarFuenteDatoFormaGlobal = false;
 var mostrarFuenteDatoExcelGlobal = true;
+var esPrimeraVez = true;
 /*COMPONENTE QUE CONTROLA TIPOS DE VARIABLES (EXCEL, FORMA, VARIABLE)*/
 
 var EditarVariable =
@@ -65,37 +66,29 @@ function (_React$Component) {
   _createClass(EditarVariable, [{
     key: "componentDidMount",
     value: function componentDidMount() {
-      console.log('this.props.tipoVariableOriginal');
-      console.log(this.props.tipoVariableOriginal);
-
-      if (this.props.tipoVariableOriginal.localeCompare("excel") == 0) {
+      if (this.props.tipoVariableOriginal.localeCompare("excel") == 0 && this.props.esPrimeraVez) {
         mostrarFuenteDatoVariableGlobal = false;
         mostrarFuenteDatoFormaGlobal = false;
         mostrarFuenteDatoExcelGlobal = true;
-        this.setState({
-          mostrarFuenteDatoVariable: false,
-          mostrarFuenteDatoForma: false,
-          mostrarFuenteDatoExcel: true
-        });
-      } else if (this.props.tipoVariableOriginal.localeCompare("forma") == 0) {
+        esPrimeraVez = false;
+      } else if (this.props.tipoVariableOriginal.localeCompare("forma") == 0 && this.props.esPrimeraVez) {
         mostrarFuenteDatoVariableGlobal = false;
         mostrarFuenteDatoFormaGlobal = true;
         mostrarFuenteDatoExcelGlobal = false;
-        this.setState({
-          mostrarFuenteDatoVariable: false,
-          mostrarFuenteDatoForma: true,
-          mostrarFuenteDatoExcel: false
-        });
-      } else if (this.props.tipoVariableOriginal.localeCompare("variable") == 0) {
+        esPrimeraVez = false;
+      } else if (this.props.tipoVariableOriginal.localeCompare("variable") == 0 && this.props.esPrimeraVez) {
         mostrarFuenteDatoVariableGlobal = true;
         mostrarFuenteDatoFormaGlobal = false;
         mostrarFuenteDatoExcelGlobal = false;
-        this.setState({
-          mostrarFuenteDatoVariable: true,
-          mostrarFuenteDatoForma: false,
-          mostrarFuenteDatoExcel: false
-        });
+        esPrimeraVez = false;
       }
+
+      this.setState({
+        mostrarFuenteDatoVariable: mostrarFuenteDatoVariableGlobal,
+        mostrarFuenteDatoForma: mostrarFuenteDatoFormaGlobal,
+        mostrarFuenteDatoExcel: mostrarFuenteDatoExcelGlobal
+      });
+      this.props.changeStateFirstTimeToFalse();
     }
   }, {
     key: "mostrarFuenteDatoVariable",
@@ -186,6 +179,7 @@ function (_React$Component) {
           width: "100%"
         }
       }, this.state.mostrarFuenteDatoVariable ? _react["default"].createElement(_FuenteDatoVariable["default"], {
+        pool: this.props.pool,
         campos: this.props.columnas,
         esObjetoVariable: this.props.esObjetoVariable,
         esInstruccionSQLVariable: this.props.esInstruccionSQLVariable,
@@ -203,19 +197,32 @@ function (_React$Component) {
         nombreCampoNuevoAtributosVario: this.props.nombreCampoNuevoAtributosVario,
         tipoNuevaVariable: this.props.tipoNuevaVariable,
         actualizarNombreCampoNuevoAtributosVario: this.props.actualizarNombreCampoNuevoAtributosVario,
-        atributos: this.props.atributos
+        atributos: this.props.atributos,
+        tipoVariableOriginal: this.props.tipoVariableOriginal,
+        idVariable: this.props.idVariable,
+        eliminarVariable: this.props.eliminarVariable,
+        actualizarFechaInicio: this.props.actualizarFechaInicio,
+        actualizarPeriodicidad: this.props.actualizarPeriodicidad,
+        actualizarNombreEncargado: this.props.actualizarNombreEncargado,
+        fechaInicioVariable: this.props.fechaInicioVariable,
+        periodicidadVariable: this.props.periodicidadVariable,
+        analistaVariable: this.props.analistaVariable
       }) : null, this.state.mostrarFuenteDatoForma ? _react["default"].createElement(_FuenteDatoForma["default"], {
         pool: this.props.pool,
         esObjetoVariable: this.props.esObjetoVariable,
         esInstruccionSQLVariable: this.props.esInstruccionSQLVariable,
         idVariable: this.props.idVariable,
-        tipoVariableOriginal: this.props.tipoVariableOriginal
+        tipoVariableOriginal: this.props.tipoVariableOriginal,
+        actualizarIDVariableModificada: this.props.actualizarIDVariableModificada,
+        eliminarVarForma: this.props.eliminarVarForma
       }) : null, this.state.mostrarFuenteDatoExcel ? _react["default"].createElement(_FuenteDatoExcel["default"], {
         pool: this.props.pool,
         esObjetoVariable: this.props.esObjetoVariable,
         esInstruccionSQLVariable: this.props.esInstruccionSQLVariable,
         idVariable: this.props.idVariable,
-        tipoVariableOriginal: this.props.tipoVariableOriginal
+        tipoVariableOriginal: this.props.tipoVariableOriginal,
+        actualizarIDVariableModificada: this.props.actualizarIDVariableModificada,
+        eliminarVarExcel: this.props.eliminarVarExcel
       }) : null), _react["default"].createElement("div", {
         className: "border-bottom",
         style: {

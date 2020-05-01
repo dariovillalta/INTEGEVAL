@@ -9,6 +9,8 @@ var mostrarFuenteDatoVariableGlobal = false;
 var mostrarFuenteDatoFormaGlobal = false;
 var mostrarFuenteDatoExcelGlobal = true;
 
+var esPrimeraVez = true;
+
 /*COMPONENTE QUE CONTROLA TIPOS DE VARIABLES (EXCEL, FORMA, VARIABLE)*/
 
 export default class EditarVariable extends React.Component {
@@ -25,36 +27,28 @@ export default class EditarVariable extends React.Component {
     }
 
     componentDidMount() {
-        console.log('this.props.tipoVariableOriginal');
-        console.log(this.props.tipoVariableOriginal);
-        if (this.props.tipoVariableOriginal.localeCompare("excel") == 0) {
+        if (this.props.tipoVariableOriginal.localeCompare("excel") == 0 && this.props.esPrimeraVez) {
             mostrarFuenteDatoVariableGlobal = false;
             mostrarFuenteDatoFormaGlobal = false;
             mostrarFuenteDatoExcelGlobal = true;
-            this.setState({
-                mostrarFuenteDatoVariable: false,
-                mostrarFuenteDatoForma: false,
-                mostrarFuenteDatoExcel: true
-            });
-        } else if (this.props.tipoVariableOriginal.localeCompare("forma") == 0) {
+            esPrimeraVez = false;
+        } else if (this.props.tipoVariableOriginal.localeCompare("forma") == 0 && this.props.esPrimeraVez) {
             mostrarFuenteDatoVariableGlobal = false;
             mostrarFuenteDatoFormaGlobal = true;
             mostrarFuenteDatoExcelGlobal = false;
-            this.setState({
-                mostrarFuenteDatoVariable: false,
-                mostrarFuenteDatoForma: true,
-                mostrarFuenteDatoExcel: false
-            });
-        } else if (this.props.tipoVariableOriginal.localeCompare("variable") == 0) {
+            esPrimeraVez = false;
+        } else if (this.props.tipoVariableOriginal.localeCompare("variable") == 0 && this.props.esPrimeraVez) {
             mostrarFuenteDatoVariableGlobal = true;
             mostrarFuenteDatoFormaGlobal = false;
             mostrarFuenteDatoExcelGlobal = false;
-            this.setState({
-                mostrarFuenteDatoVariable: true,
-                mostrarFuenteDatoForma: false,
-                mostrarFuenteDatoExcel: false
-            });
+            esPrimeraVez = false;
         }
+        this.setState({
+            mostrarFuenteDatoVariable: mostrarFuenteDatoVariableGlobal,
+            mostrarFuenteDatoForma: mostrarFuenteDatoFormaGlobal,
+            mostrarFuenteDatoExcel: mostrarFuenteDatoExcelGlobal
+        });
+        this.props.changeStateFirstTimeToFalse();
     }
 
     mostrarFuenteDatoVariable () {
@@ -117,7 +111,7 @@ export default class EditarVariable extends React.Component {
                                     {
                                         this.state.mostrarFuenteDatoVariable
                                         ?
-                                            <FuenteDatoVariable campos={this.props.columnas}
+                                            <FuenteDatoVariable pool={this.props.pool} campos={this.props.columnas}
                                                                 esObjetoVariable={this.props.esObjetoVariable}
                                                                 esInstruccionSQLVariable={this.props.esInstruccionSQLVariable}
                                                                 goToCreateConditions={this.props.goToCreateConditions}
@@ -134,7 +128,16 @@ export default class EditarVariable extends React.Component {
                                                                 nombreCampoNuevoAtributosVario={this.props.nombreCampoNuevoAtributosVario}
                                                                 tipoNuevaVariable={this.props.tipoNuevaVariable}
                                                                 actualizarNombreCampoNuevoAtributosVario={this.props.actualizarNombreCampoNuevoAtributosVario}
-                                                                atributos={this.props.atributos}>
+                                                                atributos={this.props.atributos}
+                                                                tipoVariableOriginal={this.props.tipoVariableOriginal}
+                                                                idVariable={this.props.idVariable}
+                                                                eliminarVariable={this.props.eliminarVariable}
+                                                                actualizarFechaInicio={this.props.actualizarFechaInicio}
+                                                                actualizarPeriodicidad={this.props.actualizarPeriodicidad}
+                                                                actualizarNombreEncargado={this.props.actualizarNombreEncargado}
+                                                                fechaInicioVariable={this.props.fechaInicioVariable}
+                                                                periodicidadVariable={this.props.periodicidadVariable}
+                                                                analistaVariable={this.props.analistaVariable}>
                                             </FuenteDatoVariable>
                                         : null
                                     }
@@ -146,7 +149,8 @@ export default class EditarVariable extends React.Component {
                                                                 esInstruccionSQLVariable={this.props.esInstruccionSQLVariable}
                                                                 idVariable={this.props.idVariable}
                                                                 tipoVariableOriginal={this.props.tipoVariableOriginal}
-                                                                actualizarIDVariableModificada={this.props.actualizarIDVariableModificada}>
+                                                                actualizarIDVariableModificada={this.props.actualizarIDVariableModificada}
+                                                                eliminarVarForma={this.props.eliminarVarForma}>
                                             </FuenteDatoForma>
                                         : null
                                     }
@@ -158,7 +162,8 @@ export default class EditarVariable extends React.Component {
                                                                 esInstruccionSQLVariable={this.props.esInstruccionSQLVariable}
                                                                 idVariable={this.props.idVariable}
                                                                 tipoVariableOriginal={this.props.tipoVariableOriginal}
-                                                                actualizarIDVariableModificada={this.props.actualizarIDVariableModificada}>
+                                                                actualizarIDVariableModificada={this.props.actualizarIDVariableModificada}
+                                                                eliminarVarExcel={this.props.eliminarVarExcel}>
                                             </FuenteDatoExcel>
                                         : null
                                     }

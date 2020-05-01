@@ -28,6 +28,7 @@ export default class Reporteria extends React.Component {
                             <div className={"page-breadcrumb"}>
                                 <nav aria-label="breadcrumb">
                                     <ol className={"breadcrumb"}>
+                                        <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.props.returnImportResults}><a href="#" className={"breadcrumb-link"}>Crear Filtro</a></li>
                                         <li className={"breadcrumb-item active font-16"} aria-current="page">Visualizar Variables</li>
                                     </ol>
                                 </nav>
@@ -38,12 +39,12 @@ export default class Reporteria extends React.Component {
                 {this.props.variables.map((variable, i) => (
                     <div key={variable.ID} className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12" style={{overflowX: "auto"}}>
                         <div className="card" style={{display: "inline-block", minWidth: "100%"}}>
+                            <h5 style={{display: "inline", marginTop: "20px", marginLeft: "10px"}}>{variable.nombreVariable}</h5>
                             <div style={{float: "right"}}>
-                                <h5 className="card-header" style={{display: "inline", left: "10px"}}>{variable.nombreVariable}</h5>
                                 <a href="#" className="btn btn-outline-light" style={{width: "80px", float: "right", display: "inline"}}>Excel</a>
                                 <a href="#" className="btn btn-outline-light" style={{width: "80px", float: "right", display: "inline"}}>PDF</a>
                             </div>
-                            <table className="table table-striped">
+                            <table className="table table-striped table-bordered">
                                 <thead>
                                     <tr>
                                         <th scope="col">#</th>
@@ -76,12 +77,12 @@ export default class Reporteria extends React.Component {
                 {this.props.indicadores.map((indicador, i) => (
                     <div key={indicador.ID} className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12" style={{overflowX: "auto"}}>
                         <div className="card" style={{display: "inline-block", minWidth: "100%"}}>
+                            <h5 style={{display: "inline", marginTop: "20px", marginLeft: "10px"}}>{indicador.nombreIndicador}</h5>
                             <div style={{float: "right"}}>
-                                <h5 className="card-header" style={{display: "inline", left: "10px"}}>{indicador.nombreIndicador}</h5>
                                 <a href="#" className="btn btn-outline-light" style={{width: "80px", float: "right", display: "inline"}}>Excel</a>
                                 <a href="#" className="btn btn-outline-light" style={{width: "80px", float: "right", display: "inline"}}>PDF</a>
                             </div>
-                            <table className="table table-striped">
+                            <table className="table table-striped table-bordered">
                                 <thead>
                                     <tr>
                                         <th scope="col">#</th>
@@ -114,12 +115,12 @@ export default class Reporteria extends React.Component {
                 {this.props.riesgos.map((riesgo, i) => (
                     <div key={riesgo.ID} className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12" style={{overflowX: "auto"}}>
                         <div className="card" style={{display: "inline-block", minWidth: "100%"}}>
+                            <h5 style={{display: "inline", marginTop: "20px", marginLeft: "10px"}}>{riesgo.nombreRiesgo}</h5>
                             <div style={{float: "right"}}>
-                                <h5 className="card-header" style={{display: "inline", left: "10px"}}>{riesgo.nombreRiesgo}</h5>
                                 <a href="#" className="btn btn-outline-light" style={{width: "80px", float: "right", display: "inline"}}>Excel</a>
                                 <a href="#" className="btn btn-outline-light" style={{width: "80px", float: "right", display: "inline"}}>PDF</a>
                             </div>
-                            <table className="table table-striped">
+                            <table className="table table-striped table-bordered">
                                 <thead>
                                     <tr>
                                         <th scope="col">#</th>

@@ -108,7 +108,7 @@ function (_React$Component) {
           className: "col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2"
         }, _react["default"].createElement("a", {
           onClick: function onClick() {
-            return _this.props.editarRiesgo(riesgo.ID, riesgo.nombre, riesgo.peso, riesgo.tolerancia, riesgo.valorIdeal, riesgo.padreRiesgo);
+            return _this.props.editarRiesgo(riesgo.ID, riesgo.nombre, riesgo.peso, riesgo.formula);
           },
           className: "btn btn-success",
           style: {

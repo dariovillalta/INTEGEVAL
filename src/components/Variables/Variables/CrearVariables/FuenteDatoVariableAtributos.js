@@ -38,7 +38,7 @@ export default class FuenteDatoVariableAtributos extends React.Component {
                             <div className={"row"}>
                                 <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
                                     <br/>
-                                    <a className={"btn btn-success btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={() => this.props.goCreateVariableFieldSQL()}>Crear Instrucción SQL </a>
+                                    <a href="#" className="btn btn-success active font-20" style={{width: "100%"}} onClick={() => this.props.goCreateVariableFieldSQL()}>Crear Instrucción SQL</a>
                                     <br/>
                                 </div>
                             </div>
@@ -54,7 +54,7 @@ export default class FuenteDatoVariableAtributos extends React.Component {
                                         </div>
                                     </div>
                                     <br/>
-                                    <a className={"btn btn-success btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={() => this.actualizarIndiceAtributoSeleccionado(-1)}>Crear Instrucción Personalizada </a>
+                                    <a href="#" className="btn btn-success active font-20" style={{width: "100%"}} onClick={() => this.actualizarIndiceAtributoSeleccionado(-1)}>Crear Instrucción Personalizada </a>
                                     <br/>
                                 </div>
                             </div>
@@ -67,8 +67,8 @@ export default class FuenteDatoVariableAtributos extends React.Component {
                                 <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
                                     <br/>
                                     <div className={"row"} style={{width: "100%"}}>
-                                        <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
-                                            <a className={"btn btn-success btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={() => this.props.goCreateVariableFieldSQL()}>Crear Instrucción SQL </a>
+                                        <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
+                                            <a href="#" className="btn btn-success active font-20" style={{width: "100%"}} onClick={() => this.props.goCreateVariableFieldSQL()}>Crear Instrucción SQL </a>
                                         </div>
                                     </div>
                                     <br/>
@@ -99,12 +99,12 @@ export default class FuenteDatoVariableAtributos extends React.Component {
                                     <br/>
                                     <div className={"row"} style={{width: "100%"}}>
                                         <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
-                                            <a className={"btn btn-success btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={() => this.actualizarIndiceAtributoSeleccionado(-1)}>Crear Instrucción Personalizada </a>
+                                            <a href="#" className="btn btn-success active font-20" style={{width: "100%"}} onClick={() => this.actualizarIndiceAtributoSeleccionado(-1)}>Crear Instrucción Personalizada </a>
                                         </div>
                                     </div>
                                     <br/>
                                     <div className={"row"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
-                                        <a className={"btn btn-primary btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.props.crearAtributoVariable}>Crear Atributo</a>
+                                        <a href="#" className="btn btn-primary active" onClick={this.props.crearAtributoVariable}>Crear Atributo</a>
                                     </div>
                                     <br/>
 
@@ -131,7 +131,7 @@ export default class FuenteDatoVariableAtributos extends React.Component {
                                                 </div>
                                             </div>
                                             <br/>
-                                            <a className={"btn btn-success btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={() => this.actualizarIndiceAtributoSeleccionado(i)}>Editar Instrucción Personalizada </a>
+                                            <a href="#" className="btn btn-success active font-20" style={{width: "100%"}} onClick={() => this.actualizarIndiceAtributoSeleccionado(i)}>Editar Instrucción Personalizada </a>
                                             <br/>
                                         </div>
                                     ))}

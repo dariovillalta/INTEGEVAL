@@ -38,8 +38,6 @@ export default class ListasSeleVariable extends React.Component {
                     nuevoArr[i] = false;
             };*/
         }
-        console.log('this.props.indicesVarSeleccionados')
-        console.log(this.props.indicesVarSeleccionados)
         if(this.props.indicesVarSeleccionados[indice]) {
             this.deseleccionarIndice(variable, indice);
         } else {
@@ -60,10 +58,6 @@ export default class ListasSeleVariable extends React.Component {
         }
         //this.props.retornoSeleccion(arregloVariableSeleccionada);
         var nuevoArr = [...this.props.indicesVarSeleccionados];
-        console.log('nuevoArr ANTES')
-        console.log(nuevoArr)
-        console.log('this.props.indicesVarSeleccionados')
-        console.log(this.props.indicesVarSeleccionados)
         for (var i = 0; i < nuevoArr.length; i++) {
             if(i != indice)
                 nuevoArr[i] = false;
@@ -72,7 +66,6 @@ export default class ListasSeleVariable extends React.Component {
         /*this.setState({
             indicesVarSeleccionados: nuevoArr
         });*/
-console.log('nuevoArr DESPUES')
         console.log(nuevoArr)
         this.props.retornoSeleccion(arregloCeldasSeleccionadas, this.props.indiceTabla, nuevoArr);
     }
@@ -85,10 +78,6 @@ console.log('nuevoArr DESPUES')
         };
         //this.props.retornoSeleccion(arregloVariableSeleccionada);
         var nuevoArr = [...this.props.indicesVarSeleccionados];
-        console.log('nuevoArr ANTES')
-        console.log(nuevoArr)
-        console.log('this.props.indicesVarSeleccionados')
-        console.log(this.props.indicesVarSeleccionados)
         for (var i = 0; i < nuevoArr.length; i++) {
             if(i != indice)
                 nuevoArr[i] = false;
@@ -97,8 +86,6 @@ console.log('nuevoArr DESPUES')
         /*this.setState({
             indicesVarSeleccionados: nuevoArr
         });*/
-        console.log('nuevoArr DESPUES')
-        console.log(nuevoArr)
         if(arregloCeldasSeleccionadas.length > 0)
             this.props.retornoSeleccion(arregloCeldasSeleccionadas, this.props.indiceTabla, nuevoArr);
     }

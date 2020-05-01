@@ -76,13 +76,14 @@ export default class ConfiguracionTablas extends React.Component {
         let basedatosTabla = $("#basedatosTablaNuevo").val();
         let tablaTabla = $("#tablaTablaNuevo").val();
         let funcionTabla = $("#funcionTabla").val();
+        let tipoConexion = $("#tipoConexion").val();
         if(nombreTabla.length > 0 && nombreTabla.length < 71) {
             if(usuarioTabla.length > 0 && usuarioTabla.length < 51) {
                 if(contrasenaTabla.length > 0 && contrasenaTabla.length < 201) {
                     if(servidorTabla.length > 0 && servidorTabla.length < 51) {
                         if(basedatosTabla.length > 0 && basedatosTabla.length < 51) {
                             if(tablaTabla.length > 0 && tablaTabla.length < 71) {
-                                if(tablaTabla.length > 0 && tablaTabla.length < 71) {
+                                if(tipoConexion.length > 0 && tipoConexion.length < 31) {
                                     this.setState({
                                         errorCreacionTabla: {campo: "", descripcion: "", mostrar: false}
                                     });
@@ -93,7 +94,7 @@ export default class ConfiguracionTablas extends React.Component {
                                             rolledBack = true;
                                         });
                                         const request = new sql.Request(transaction);
-                                        request.query("insert into Tablas (Nombre, Usuario, Contrasena, Servidor, BaseDatos, Tabla, Funcion) values ('"+nombreTabla+"','"+usuarioTabla+"','"+contrasenaTabla+"','"+servidorTabla+"','"+basedatosTabla+"','"+tablaTabla+"','"+funcionTabla+"')", (err, result) => {
+                                        request.query("insert into Tablas (Nombre, Usuario, Contrasena, Servidor, BaseDatos, Tabla, tipoConexion) values ('"+nombreTabla+"','"+usuarioTabla+"','"+contrasenaTabla+"','"+servidorTabla+"','"+basedatosTabla+"','"+tablaTabla+"','"+tipoConexion+"')", (err, result) => {
                                             if (err) {
                                                 if (!rolledBack) {
                                                     console.log(err);
@@ -109,9 +110,9 @@ export default class ConfiguracionTablas extends React.Component {
                                         });
                                     }); // fin transaction
                                 } else {
-                                    let campo = "Función de la Tabla";
+                                    let campo = "Tipo de Conexión";
                                     let descripcion;
-                                    if(funcionTabla.length == 0)
+                                    if(tipoConexion.length == 0)
                                         descripcion = "El campo debe tener una longitud mayor a 0.";
                                     else
                                         descripcion = "El campo debe tener una longitud menor a 31.";
@@ -175,7 +176,7 @@ export default class ConfiguracionTablas extends React.Component {
                 });
             }
         } else {
-            let campo = "Nombre de la Conección";
+            let campo = "Nombre de la Conexión";
             let descripcion;
             if(nombreTabla.length == 0)
                 descripcion = "El campo debe tener una longitud mayor a 0.";
@@ -313,7 +314,21 @@ export default class ConfiguracionTablas extends React.Component {
                         </div>
                     </div>
                 </div>
-
+                <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                    <h2>Descripción</h2>
+                    <p className="lead">
+                        Esta sección consiste en administrar las configuraciones necesarias para que el programa pueda conectarse con las tablas internas, para seleccionar los campos bases de los cuales se crearán las variables y consecuentemente los cálculos de indicadores y riesgos.
+                    </p>
+                    <ul className="list-unstyled arrow">
+                        <li>Nombre de la Conecci&oacute;n: Nombre de referencia dentro del programa para refererse a la tabla de la institución</li>
+                        <li>Usuario de la Tabla: Usuario para acceder a la base de Datos</li>
+                        <li>Contrase&ntilde;a de la Tabla: Contraseña para acceder a la base de Datos</li>
+                        <li>Servidor de la Tabla: Servidor donde se encuentra la base de Datos</li>
+                        <li>Base de Datos de la Tabla: Nombre de la base de Datos donde se encuentra la tabla</li>
+                        <li>Nombre de la Tabla: Nombre de la tabla a acceder a la base de Datos</li>
+                        <li>Tipo de Conexi&oacute;n: Tipo de conexión de la base de datos</li>
+                    </ul>
+                </div>
                 <div className={"row"}>
                     <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
                         <div className={"card influencer-profile-data"}>
@@ -349,11 +364,17 @@ export default class ConfiguracionTablas extends React.Component {
                                         <input id="tablaTablaNuevo" type="text" className={"form-control"}/>
                                     </div>
                                 </div>
+                                <div className={"row"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
+                                    <select id="tipoConexion" className="form-control">
+                                        <option value="sql">Transact-SQL</option>
+                                    </select>
+                                </div>
                                 { this.state.errorCreacionTabla.mostrar ? (
                                     <ErrorMessage campo={this.state.errorCreacionTabla.campo} descripcion={this.state.errorCreacionTabla.descripcion} dismissTableError={this.dismissTableNewError}> </ErrorMessage>
                                 ) : (
                                     <span></span>
                                 )}
+                                <br/>
                                 <div className={"row"}>
                                     <button onClick={this.insertTable} className={"btn btn-success btn-block col-xl-10 col-10 font-bold font-20"} style={{margin: "0 auto", display: "block"}}>Crear</button>
                                 </div>
@@ -371,7 +392,7 @@ export default class ConfiguracionTablas extends React.Component {
                                     <img onClick={() => this.deleteTableConfirmation(tabla.ID, i)} src={"../assets/trash.png"} style={{height: "20px", width: "20px"}}></img>
                                 </div>
                                 <div style={{float: "right", border: "2px solid #000", marginRight: "10px", cursor: "pointer"}}>
-                                    <img onClick={() => this.props.terminoSeleccionTabla(tabla.ID, tabla.tabla, tabla.usuario, tabla.contrasena, tabla.servidor, tabla.baseDatos, tabla.tabla)} src={"../assets/edit.png"} style={{height: "20px", width: "20px"}}></img>
+                                    <img onClick={() => this.props.terminoSeleccionTabla(tabla.ID, tabla.tabla, tabla.usuario, tabla.contrasena, tabla.servidor, tabla.baseDatos, tabla.tabla, tabla.tipoConexion)} src={"../assets/edit.png"} style={{height: "20px", width: "20px"}}></img>
                                 </div>
                             </div>
                         </div>

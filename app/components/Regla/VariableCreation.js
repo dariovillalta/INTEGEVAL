@@ -110,6 +110,8 @@ function (_React$Component) {
     _this.goModificar = _this.goModificar.bind(_assertThisInitialized(_this));
     _this.goEliminar = _this.goEliminar.bind(_assertThisInitialized(_this));
     _this.verificarAccion = _this.verificarAccion.bind(_assertThisInitialized(_this));
+    _this.retornarValorFecha = _this.retornarValorFecha.bind(_assertThisInitialized(_this));
+    _this.retornarValorTime = _this.retornarValorTime.bind(_assertThisInitialized(_this));
     _this.isValidDate = _this.isValidDate.bind(_assertThisInitialized(_this));
     return _this;
   }
@@ -512,9 +514,9 @@ function (_React$Component) {
           var valorARetornar = "MANUAL=FECHA[";
 
           if (valor.indexOf("-") != -1 && valor.split("-").length > 2) {
-            valorARetornar += valor.split("-")[0], valor.split("-")[1], valor.split("-")[2] + "]";
+            valorARetornar += valor.split("-")[0] + "," + valor.split("-")[1] + "," + valor.split("-")[2] + "]";
           } else if (valor.indexOf("/") != -1 && valor.split("/").length > 2) {
-            valorARetornar += valor.split("/")[0], valor.split("/")[1], valor.split("/")[2] + "]";
+            valorARetornar += valor.split("/")[0] + "," + valor.split("/")[1] + "," + valor.split("/")[2] + "]";
           }
 
           this.props.retornarValor(valorARetornar, valor);
@@ -529,6 +531,22 @@ function (_React$Component) {
           if (valor.length > 0) alert('Valor Ingresado debe tener una longitud mayor a 0');else alert('Valor Ingresado debe tener una longitud menor a 984');
         }
       }
+    }
+  }, {
+    key: "retornarValorFecha",
+    value: function retornarValorFecha(valorRegla, valorTexto) {
+      this.setState({
+        textoValor: valorTexto
+      });
+      this.props.retornarValor(valorRegla, valorTexto);
+    }
+  }, {
+    key: "retornarValorTime",
+    value: function retornarValorTime(valorRegla, valorTexto) {
+      this.setState({
+        textoValor: valorTexto
+      });
+      this.props.retornarValor(valorRegla, valorTexto);
     }
   }, {
     key: "isValidDate",
@@ -715,6 +733,41 @@ function (_React$Component) {
   }, {
     key: "verificarAccion",
     value: function verificarAccion() {
+      this.setState({
+        campoSeleccionadoNombre: '{campo}',
+        textoOperacion: '{operación}',
+        textoValor: '{valor}'
+      });
+      $("#reglaInit").removeClass("colorPunteroFormula");
+      $("#reglaInit").removeClass("blink");
+      $("#reglaFin").removeClass("colorPunteroFormula");
+      $("#reglaFin").removeClass("blink");
+      $("#unicaRegla").css("border", "initial");
+      $("#unicaRegla").removeClass("blink");
+
+      for (var i = 0; i < this.props.reglas.length; i++) {
+        if (this.props.reglas.length == 1 && this.props.reglas[0] != undefined && this.props.reglas[0].length == 1) {
+          console.log('YEAH1');
+          $("#reglaInit" + i).removeClass("colorPunteroFormula");
+          $("#reglaInit" + i).removeClass("blink");
+          $("#reglaFin" + i).removeClass("colorPunteroFormula");
+          $("#reglaFin" + i).removeClass("blink");
+        } else {
+          console.log('YEAH2');
+
+          for (var j = 0; j < this.props.reglas[i].length; j++) {
+            console.log('j = ' + j);
+            $("#regla" + i + j).css("border", "initial");
+            $("#regla" + i + j).removeClass("blink");
+            $("#reglaInit" + i + j).removeClass("colorPunteroFormula");
+            $("#reglaInit" + i + j).removeClass("blink");
+            $("#reglaFin" + i + j).removeClass("colorPunteroFormula");
+            $("#reglaFin" + i + j).removeClass("blink");
+          }
+        }
+      }
+
+      ;
       if (this.state.crearSelected) this.props.callbackCrearRegla(false);else if (this.state.editarSelected) this.props.callbackModificarRegla(false);else this.props.callbackEliminarRegla(false);
     }
   }, {
@@ -797,7 +850,8 @@ function (_React$Component) {
         esBoolean: this.state.tipoCampo.esBoolean,
         esFecha: this.state.tipoCampo.esFecha,
         esTexto: this.state.tipoCampo.esTexto,
-        retornarValor: this.props.retornarValor,
+        retornarValorFecha: this.retornarValorFecha,
+        retornarValorTime: this.retornarValorTime,
         camposDropdown: this.props.camposDropdown,
         valoresDropdown: this.props.valoresDropdown,
         actualizarValor: this.actualizarValor,

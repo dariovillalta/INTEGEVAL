@@ -52,7 +52,18 @@ function (_React$Component) {
       componenteAMostrar: "selIndicador",
       idIndicadorSeleccionado: -1,
       nombreIndicadorSeleccionada: "",
-      idRiesgoPadreSeleccionado: -1
+      codigoIndicadorSeleccionada: "",
+      formulaIndicadorSeleccionada: "",
+      pesoIndicadorSeleccionada: "",
+      toleranciaIndicadorSeleccionada: "",
+      tipoToleranciaIndicadorSeleccionada: "",
+      valorIdealIndicadorSeleccionada: "",
+      periodicidadIndicadorSeleccionada: "",
+      tipoIndicadorIndicadorSeleccionada: "",
+      analistaIndicadorSeleccionada: "",
+      idRiesgoPadreSeleccionado: -1,
+      formulaRiesgo: "",
+      pesoDisponibleRiesgo: 0
     };
     _this.terminoSeleccionIndicador = _this.terminoSeleccionIndicador.bind(_assertThisInitialized(_this));
     _this.retornoSeleccionIndicador = _this.retornoSeleccionIndicador.bind(_assertThisInitialized(_this));
@@ -63,11 +74,11 @@ function (_React$Component) {
 
   _createClass(IndicadorHome, [{
     key: "terminoSeleccionIndicador",
-    value: function terminoSeleccionIndicador(id, nombre) {
+    value: function terminoSeleccionIndicador(id, formula) {
       this.setState({
         componenteAMostrar: "editIndicador",
         idIndicadorSeleccionado: id,
-        nombreTablaSeleccionada: nombre
+        formulaRiesgo: formula
       });
     }
   }, {
@@ -76,16 +87,38 @@ function (_React$Component) {
       this.setState({
         componenteAMostrar: "selIndicador",
         idIndicadorSeleccionado: -1,
-        nombreTablaSeleccionada: "",
         idRiesgoPadreSeleccionado: -1
       });
     }
   }, {
     key: "goCrearIndicador",
-    value: function goCrearIndicador(idRiesgo) {
+    value: function goCrearIndicador(idRiesgo, formula, pesoDisponible) {
       this.setState({
         componenteAMostrar: "crearIndicador",
-        idRiesgoPadreSeleccionado: idRiesgo
+        idRiesgoPadreSeleccionado: idRiesgo,
+        formulaRiesgo: formula,
+        pesoDisponibleRiesgo: pesoDisponible
+      });
+    }
+  }, {
+    key: "goEditarIndicador",
+    value: function goEditarIndicador(idRiesgo, formula, pesoDisponible, idIndicador, nombreIndicador, codigoIndicador, formulaIndicador, pesoIndicador, toleranciaIndicador, tipoToleranciaIndicador, valorIdealIndicador, periodicidadIndicador, tipoIndicadorIndicador, analistaIndicador) {
+      this.setState({
+        componenteAMostrar: "editIndicador",
+        idRiesgoPadreSeleccionado: idRiesgo,
+        formulaRiesgo: formula,
+        pesoDisponibleRiesgo: pesoDisponible,
+        idIndicadorSeleccionado: idIndicador,
+        nombreIndicadorSeleccionada: nombreIndicador,
+        codigoIndicadorSeleccionada: codigoIndicador,
+        formulaIndicadorSeleccionada: formulaIndicador,
+        pesoIndicadorSeleccionada: pesoIndicador,
+        toleranciaIndicadorSeleccionada: toleranciaIndicador,
+        tipoToleranciaIndicadorSeleccionada: tipoToleranciaIndicador,
+        valorIdealIndicadorSeleccionada: valorIdealIndicador,
+        periodicidadIndicadorSeleccionada: periodicidadIndicador,
+        tipoIndicadorIndicadorSeleccionada: tipoIndicadorIndicador,
+        analistaIndicadorSeleccionada: analistaIndicador
       });
     }
   }, {
@@ -128,7 +161,7 @@ function (_React$Component) {
           terminoSeleccionIndicador: this.terminoSeleccionIndicador,
           goCrearIndicador: this.goCrearIndicador,
           showRiesgos: this.props.showRiesgos
-        }, _defineProperty(_React$createElement, "showRiesgos", this.props.showRiesgos), _defineProperty(_React$createElement, "updateBanderaCrearRiesgoTrue", this.props.updateBanderaCrearRiesgoTrue), _React$createElement), " "));
+        }, _defineProperty(_React$createElement, "showRiesgos", this.props.showRiesgos), _defineProperty(_React$createElement, "updateBanderaCrearRiesgoTrue", this.props.updateBanderaCrearRiesgoTrue), _React$createElement)));
       } else if (this.state.componenteAMostrar.localeCompare("crearIndicador") == 0) {
         return _react["default"].createElement("div", null, _react["default"].createElement(_CrearIndicador["default"], {
           pool: this.props.pool,
@@ -136,7 +169,9 @@ function (_React$Component) {
           retornoSeleccionIndicador: this.retornoSeleccionIndicador,
           configuracionHome: this.props.configuracionHome,
           terminoCrearIndicadorPasarAEdit: this.terminoCrearIndicadorPasarAEdit,
-          riesgoPadre: this.state.idRiesgoPadreSeleccionado
+          riesgoPadre: this.state.idRiesgoPadreSeleccionado,
+          formulaRiesgo: this.state.formulaRiesgo,
+          pesoDisponibleRiesgo: this.state.pesoDisponibleRiesgo
         }, " "));
       } else if (this.state.componenteAMostrar.localeCompare("editIndicador") == 0) {
         return _react["default"].createElement("div", null, _react["default"].createElement(_EditarIndicador["default"], {
@@ -145,9 +180,20 @@ function (_React$Component) {
           showCondicionVar: this.props.showCondicionVar,
           retornoSeleccionIndicador: this.retornoSeleccionIndicador,
           configuracionHome: this.props.configuracionHome,
+          riesgoPadre: this.state.idRiesgoPadreSeleccionado,
+          formulaRiesgo: this.state.formulaRiesgo,
+          pesoDisponibleRiesgo: this.state.pesoDisponibleRiesgo,
           idIndicadorSeleccionado: this.state.idIndicadorSeleccionado,
           nombreIndicadorSeleccionada: this.state.nombreIndicadorSeleccionada,
-          riesgoPadre: this.state.idRiesgoPadreSeleccionado
+          codigoIndicadorSeleccionada: this.state.codigoIndicadorSeleccionada,
+          formulaIndicadorSeleccionada: this.state.formulaIndicadorSeleccionada,
+          pesoIndicadorSeleccionada: this.state.pesoIndicadorSeleccionada,
+          toleranciaIndicadorSeleccionada: this.state.toleranciaIndicadorSeleccionada,
+          tipoToleranciaIndicadorSeleccionada: this.state.tipoToleranciaIndicadorSeleccionada,
+          valorIdealIndicadorSeleccionada: this.state.valorIdealIndicadorSeleccionada,
+          periodicidadIndicadorSeleccionada: this.state.periodicidadIndicadorSeleccionada,
+          tipoIndicadorIndicadorSeleccionada: this.state.tipoIndicadorIndicadorSeleccionada,
+          analistaIndicadorSeleccionada: this.state.analistaIndicadorSeleccionada
         }, " "));
       }
     }

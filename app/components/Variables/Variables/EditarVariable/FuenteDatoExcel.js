@@ -39,6 +39,23 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
+var variables = [];
+var excel = [];
+var formas = [];
+var periodicidad = [{
+  nombre: "diario"
+}, {
+  nombre: "semanal"
+}, {
+  nombre: "mensual"
+}, {
+  nombre: "trimestral"
+}, {
+  nombre: "bi-anual"
+}, {
+  nombre: "anual"
+}];
+
 var FuenteDatoExcel =
 /*#__PURE__*/
 function (_React$Component) {
@@ -52,17 +69,30 @@ function (_React$Component) {
     _this = _possibleConstructorReturn(this, _getPrototypeOf(FuenteDatoExcel).call(this, props));
     _this.state = {
       ubicacionArchivo: '',
-      variables: []
+      variables: [],
+      valorPeriodicidad: '-1',
+      valoresPeriodicidad: []
     };
     _this.seleccionarArchivo = _this.seleccionarArchivo.bind(_assertThisInitialized(_this));
     _this.guardarUbicacionArchivo = _this.guardarUbicacionArchivo.bind(_assertThisInitialized(_this));
-    _this.guardarVariables = _this.guardarVariables.bind(_assertThisInitialized(_this));
+    _this.guardarVariablesModificar = _this.guardarVariablesModificar.bind(_assertThisInitialized(_this));
+    _this.traerArchivoID = _this.traerArchivoID.bind(_assertThisInitialized(_this));
+    _this.guardarVariablesNuevas = _this.guardarVariablesNuevas.bind(_assertThisInitialized(_this));
     _this.crearVariable = _this.crearVariable.bind(_assertThisInitialized(_this));
     _this.traerArchivo = _this.traerArchivo.bind(_assertThisInitialized(_this));
     _this.traerVariables = _this.traerVariables.bind(_assertThisInitialized(_this));
     _this.updateVariable = _this.updateVariable.bind(_assertThisInitialized(_this));
     _this.deleteVariable = _this.deleteVariable.bind(_assertThisInitialized(_this));
     _this.eliminarVarForma = _this.eliminarVarForma.bind(_assertThisInitialized(_this));
+    _this.eliminarVariable = _this.eliminarVariable.bind(_assertThisInitialized(_this));
+    _this.getVariables = _this.getVariables.bind(_assertThisInitialized(_this));
+    _this.getExcel = _this.getExcel.bind(_assertThisInitialized(_this));
+    _this.getFormas = _this.getFormas.bind(_assertThisInitialized(_this));
+    _this.verificarNoExisteNombreVar = _this.verificarNoExisteNombreVar.bind(_assertThisInitialized(_this));
+    _this.actualizarPeriodicidad = _this.actualizarPeriodicidad.bind(_assertThisInitialized(_this));
+    _this.cargarDatePicker = _this.cargarDatePicker.bind(_assertThisInitialized(_this));
+    _this.inicializarFecha = _this.inicializarFecha.bind(_assertThisInitialized(_this));
+    _this.isValidDate = _this.isValidDate.bind(_assertThisInitialized(_this));
     return _this;
   }
 
@@ -72,6 +102,10 @@ function (_React$Component) {
       if (this.props.tipoVariableOriginal.localeCompare("excel") == 0) {
         this.traerArchivo();
       }
+
+      this.getVariables();
+      this.getExcel();
+      this.getFormas();
     }
   }, {
     key: "traerArchivo",
@@ -166,42 +200,44 @@ function (_React$Component) {
 
       if (nombre.length > 0 && nombre.length < 101) {
         if (this.state.ubicacionArchivo.length > 0 && this.state.ubicacionArchivo.length < 1001) {
-          var guardar = true;
-
+          /*var guardar = true;
           for (var i = 0; i < this.state.variables.length; i++) {
-            if (this.state.variables[i].nombre.length > 0 && this.state.variables[i].nombre.length < 101) {
-              if (this.state.variables[i].operacion.length > 0 && this.state.variables[i].operacion.length < 31) {
-                if (this.state.variables[i].celdas.length > 0 && this.state.variables[i].celdas.length < 101) {
-                  if (this.state.variables[i].nombreHoja.length > 0 && this.state.variables[i].nombreHoja.length < 201) {
-                    if (this.state.variables[i].tipo.length > 0 && this.state.variables[i].tipo.length < 31) {} else {
-                      guardar = false;
-                      alert('Ingrese un valor para el valor de tipo de variable que debe ser menor a 31 caracteres');
-                    }
+              if(this.state.variables[i].nombre.length > 0 && this.state.variables[i].nombre.length < 101) {
+                  if(this.state.variables[i].operacion.length > 0 && this.state.variables[i].operacion.length < 31) {
+                      if(this.state.variables[i].celdas.length > 0 && this.state.variables[i].celdas.length < 101) {
+                          if(this.state.variables[i].nombreHoja.length > 0 && this.state.variables[i].nombreHoja.length < 201) {
+                              if(this.state.variables[i].tipo.length > 0 && this.state.variables[i].tipo.length < 31) {
+                              } else {
+                                  guardar = false;
+                                  alert('Ingrese un valor para el valor de tipo de variable que debe ser menor a 31 caracteres');
+                              }
+                          } else {
+                              guardar = false;
+                              alert('Ingrese un valor para el valor de hoja de excel que debe ser menor a 201 caracteres');
+                          }
+                      } else {
+                          guardar = false;
+                          alert('Ingrese un valor para el valor de celdas que debe ser menor a 101 caracteres');
+                      }
                   } else {
-                    guardar = false;
-                    alert('Ingrese un valor para el valor de hoja de excel que debe ser menor a 201 caracteres');
+                      guardar = false;
+                      alert('Ingrese un valor para el valor de operación que debe ser menor a 31 caracteres');
                   }
-                } else {
-                  guardar = false;
-                  alert('Ingrese un valor para el valor de celdas que debe ser menor a 101 caracteres');
-                }
               } else {
-                guardar = false;
-                alert('Ingrese un valor para el valor de operación que debe ser menor a 31 caracteres');
+                  guardar = false;
+                  alert('Ingrese un valor para la ubicación del archivo que debe ser menor a 1001 caracteres');
               }
-            } else {
-              guardar = false;
-              alert('Ingrese un valor para la ubicación del archivo que debe ser menor a 1001 caracteres');
-            }
+          };
+          if(guardar) {*/
+          if (this.props.tipoVariableOriginal.localeCompare("forma") == 0) {
+            this.eliminarVarForma();
           }
 
-          ;
+          if (this.props.tipoVariableOriginal.localeCompare("variable") == 0) {
+            this.eliminarVariable();
+          }
 
-          if (guardar) {
-            if (this.props.tipoVariableOriginal.localeCompare("forma") == 0) {
-              this.eliminarVarForma();
-            }
-
+          if (this.props.tipoVariableOriginal.localeCompare("excel") != 0) {
             var transaction = new _mssql["default"].Transaction(this.props.pool);
             transaction.begin(function (err) {
               var rolledBack = false;
@@ -209,7 +245,7 @@ function (_React$Component) {
                 rolledBack = true;
               });
               var request = new _mssql["default"].Request(transaction);
-              request.query("update ExcelArchivos set ubicacionArchivo = '" + _this4.state.ubicacionArchivo + "', nombre = '" + nombre + "' where ID = " + _this4.props.idVariable, function (err, result) {
+              request.query("insert into ExcelArchivos (ubicacionArchivo, nombre) values ('" + _this4.state.ubicacionArchivo + "', '" + nombre + "')", function (err, result) {
                 if (err) {
                   console.log(err);
 
@@ -218,18 +254,51 @@ function (_React$Component) {
                   }
                 } else {
                   transaction.commit(function (err) {
+                    alert('Variable Creada');
+                    /*$("#nombreArchivo").val("");
+                    this.setState({
+                        ubicacionArchivo: ""
+                    });*/
+
+                    _this4.traerArchivoID();
+                  });
+                }
+              });
+            }); // fin transaction
+          } else {
+            var _transaction = new _mssql["default"].Transaction(this.props.pool);
+
+            _transaction.begin(function (err) {
+              var rolledBack = false;
+
+              _transaction.on('rollback', function (aborted) {
+                rolledBack = true;
+              });
+
+              var request = new _mssql["default"].Request(_transaction);
+              request.query("update ExcelArchivos set ubicacionArchivo = '" + _this4.state.ubicacionArchivo + "', nombre = '" + nombre + "' where ID = " + _this4.props.idVariable, function (err, result) {
+                if (err) {
+                  console.log(err);
+
+                  if (!rolledBack) {
+                    _transaction.rollback(function (err) {});
+                  }
+                } else {
+                  _transaction.commit(function (err) {
                     alert('Variable Modificada');
                     /*$("#nombreArchivo").val("");
                     this.setState({
                         ubicacionArchivo: ""
                     });*/
 
-                    _this4.guardarVariables();
+                    _this4.guardarVariablesModificar();
                   });
                 }
               });
             }); // fin transaction
-          }
+
+          } //}
+
         } else {
           alert('Ingrese un valor para la ubicación del archivo que debe ser menor a 1001 caracteres');
         }
@@ -238,8 +307,8 @@ function (_React$Component) {
       }
     }
   }, {
-    key: "guardarVariables",
-    value: function guardarVariables() {
+    key: "guardarVariablesModificar",
+    value: function guardarVariablesModificar() {
       var _this5 = this;
 
       var transaction1 = new _mssql["default"].Transaction(this.props.pool);
@@ -268,6 +337,9 @@ function (_React$Component) {
         var operacion = _this5.state.variables[i].operacion;
         var celdas = _this5.state.variables[i].celdas;
         var tipo = _this5.state.variables[i].tipo;
+        var periodicidad = _this5.state.variables[i].periodicidad;
+        var fechaInicioCalculo = _this5.state.variables[i].fechaInicioCalculo;
+        var analista = _this5.state.variables[i].analista;
         var guardarVariable = _this5.state.variables[i].guardar;
         var transaction = new _mssql["default"].Transaction(_this5.props.pool);
         transaction.begin(function (err) {
@@ -276,7 +348,7 @@ function (_React$Component) {
             rolledBack = true;
           });
           var request = new _mssql["default"].Request(transaction);
-          request.query("insert into ExcelVariables (excelArchivoID, nombreHoja, nombre, operacion, celdas, tipo, guardar) values (" + _this5.props.idVariable + ", '" + nombreHoja + "','" + nombre + "', '" + operacion + "', '" + celdas + "', '" + tipo + "', '" + guardarVariable + "')", function (err, result) {
+          request.query("insert into ExcelVariables (excelArchivoID, nombreHoja, nombre, operacion, celdas, tipo, periodicidad, fechaInicioCalculo, analista, guardar) values (" + _this5.props.idVariable + ", '" + nombreHoja + "','" + nombre + "', '" + operacion + "', '" + celdas + "', '" + tipo + "', '" + periodicidad + "', '" + fechaInicioCalculo + "', '" + analista + "', '" + guardarVariable + "')", function (err, result) {
             if (err) {
               console.log(err);
 
@@ -287,6 +359,8 @@ function (_React$Component) {
               transaction.commit(function (err) {
                 if (i == _this5.state.variables.length - 1) {
                   _this5.traerArchivo();
+
+                  _this5.getExcel();
                 }
               });
             }
@@ -301,6 +375,81 @@ function (_React$Component) {
       ;
     }
   }, {
+    key: "traerArchivoID",
+    value: function traerArchivoID() {
+      var _this6 = this;
+
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("select top 1 * from ExcelArchivos order by ID desc", function (err, result) {
+          if (err) {
+            console.log(err);
+
+            if (!rolledBack) {
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              _this6.guardarVariablesNuevas(result.recordset[0].ID);
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
+    key: "guardarVariablesNuevas",
+    value: function guardarVariablesNuevas(archivoExcelID) {
+      var _this7 = this;
+
+      var _loop2 = function _loop2(i) {
+        var nombreHoja = _this7.state.variables[i].nombreHoja;
+        var nombre = _this7.state.variables[i].nombre;
+        var operacion = _this7.state.variables[i].operacion;
+        var celdas = _this7.state.variables[i].celdas;
+        var tipo = _this7.state.variables[i].tipo;
+        var periodicidad = _this7.state.variables[i].periodicidad;
+        var fechaInicioCalculo = _this7.state.variables[i].fechaInicioCalculo;
+        var analista = _this7.state.variables[i].analista;
+        var guardarVariable = _this7.state.variables[i].guardar;
+        var transaction = new _mssql["default"].Transaction(_this7.props.pool);
+        transaction.begin(function (err) {
+          var rolledBack = false;
+          transaction.on('rollback', function (aborted) {
+            rolledBack = true;
+          });
+          var request = new _mssql["default"].Request(transaction);
+          request.query("insert into ExcelVariables (excelArchivoID, nombreHoja, nombre, operacion, celdas, tipo, periodicidad, fechaInicioCalculo, analista, guardar) values (" + archivoExcelID + ", '" + nombreHoja + "', '" + nombre + "', '" + operacion + "', '" + celdas + "', '" + tipo + "', '" + periodicidad + "', '" + fechaInicioCalculo + "', '" + analista + "', '" + guardarVariable + "')", function (err, result) {
+            if (err) {
+              console.log(err);
+
+              if (!rolledBack) {
+                transaction.rollback(function (err) {});
+              }
+            } else {
+              transaction.commit(function (err) {
+                if (i == _this7.state.variables.length - 1) {
+                  _this7.props.actualizarIDVariableModificada("excel");
+
+                  _this7.getExcel();
+                }
+              });
+            }
+          });
+        }); // fin transaction
+      };
+
+      for (var i = 0; i < this.state.variables.length; i++) {
+        _loop2(i);
+      }
+
+      ;
+    }
+  }, {
     key: "crearVariable",
     value: function crearVariable() {
       var nombre = $("#nombreVariable").val();
@@ -310,31 +459,125 @@ function (_React$Component) {
       var tipo = $("#tipoVariable").val();
       var guardarVariable;
       if ($("#guardarVariable").is(':checked')) guardarVariable = true;else guardarVariable = false;
+      var periodicidad = $("#periodicidad").val();
+      var fecha;
+      if (periodicidad.localeCompare("-1") == 0) fecha = new Date(1964, 4, 28);else fecha = $("#fecha").datepicker('getDate');
+      var analista = $("#analista").val();
 
       if (nombre.length > 0 && nombre.length < 101) {
-        if (operacion.length > 0 && operacion.length < 31) {
-          if (celdas.length > 0 && celdas.length < 101) {
-            if (hoja.length > 0 && hoja.length < 201) {
-              if (tipo.length > 0 && tipo.length < 31) {
-                var copyTemp = _toConsumableArray(this.state.variables);
+        if (this.verificarNoExisteNombreVar(nombre)) {
+          if (operacion.length > 0 && operacion.length < 31) {
+            if (celdas.length > 0 && celdas.length < 101) {
+              if (hoja.length > 0 && hoja.length < 201) {
+                if (tipo.length > 0 && tipo.length < 31) {
+                  if (periodicidad.length > 0 && periodicidad.length < 51) {
+                    if (this.isValidDate(fecha)) {
+                      if (analista.length > 0 && analista.length < 101) {
+                        var copyTemp = _toConsumableArray(this.state.variables);
 
-                var nuevaVar = {
-                  nombreHoja: hoja,
-                  nombre: nombre,
-                  operacion: operacion,
-                  celdas: celdas,
-                  tipo: tipo,
-                  guardar: guardarVariable
-                };
-                copyTemp.push(nuevaVar);
-                this.setState({
-                  variables: copyTemp
-                });
-                $("#nombreVariable").val("");
-                $("#operacion").val("ASIG");
-                $("#hojaExcelVariable").val("");
-                $("#tipoVariable").val("numero");
-                $("#celdasVariable").val("");
+                        var nuevaVar = {
+                          nombreHoja: hoja,
+                          nombre: nombre,
+                          operacion: operacion,
+                          celdas: celdas,
+                          tipo: tipo,
+                          periodicidad: periodicidad,
+                          fechaInicioCalculo: fecha,
+                          analista: analista,
+                          guardar: guardarVariable
+                        };
+                        copyTemp.push(nuevaVar);
+
+                        var copyTempPeriodicidad = _toConsumableArray(this.state.valoresPeriodicidad);
+
+                        copyTempPeriodicidad.push(periodicidad);
+                        this.setState({
+                          variables: copyTemp,
+                          valoresPeriodicidad: copyTempPeriodicidad
+                        });
+                        $("#nombreVariable").val("");
+                        $("#operacion").val("ASIG");
+                        $("#hojaExcelVariable").val("");
+                        $("#tipoVariable").val("numero");
+                        $("#celdasVariable").val("");
+                        $("#periodicidad").val("");
+                        $("#analista").val("");
+                      } else {
+                        alert('Ingrese un valor para el valor de analista que debe ser menor a 101 caracteres');
+                      }
+                    } else {
+                      alert('Ingrese un valor para el valor de inicio de cálculo.');
+                    }
+                  } else {
+                    alert('Ingrese un valor para el valor de periodicidad que debe ser menor a 51 caracteres');
+                  }
+                } else {
+                  alert('Ingrese un valor para el valor de tipo de variable que debe ser menor a 31 caracteres');
+                }
+              } else {
+                alert('Ingrese un valor para el valor de hoja de excel que debe ser menor a 201 caracteres');
+              }
+            } else {
+              alert('Ingrese un valor para el valor de celdas que debe ser menor a 101 caracteres');
+            }
+          } else {
+            alert('Ingrese un valor para el valor de operación que debe ser menor a 31 caracteres');
+          }
+        } else {
+          alert('El nombre de la variable debe ser único.');
+        }
+      } else {
+        alert('Ingrese un valor para la ubicación del archivo que debe ser menor a 1001 caracteres');
+      }
+    }
+  }, {
+    key: "updateVariable",
+    value: function updateVariable(index) {
+      if ($("#nombreVariable" + index).length > 0 && $("#nombreVariable" + index).length < 101) {
+        if ($("#operacion" + index).val().length > 0 && $("#operacion" + index).val().length < 31) {
+          if ($("#celdasVariable" + index).length > 0 && $("#celdasVariable" + index).length < 101) {
+            if ($("#hojaExcelVariable" + index).length > 0 && $("#hojaExcelVariable" + index).length < 201) {
+              if ($("#tipoVariable" + index).val().length > 0 && $("#tipoVariable" + index).val().length < 31) {
+                if ($("#periodicidad" + index).val().length > 0 && $("#periodicidad" + index).val().length < 51) {
+                  var fecha;
+                  if ($("#periodicidad" + index).val().localeCompare("-1") == 0) fecha = new Date(1964, 4, 28);else fecha = $("#fecha").datepicker('getDate');
+
+                  if (this.isValidDate(fecha)) {
+                    if ($("#analista" + index).val().length > 0 && $("#analista" + index).val().length < 101) {
+                      if (this.verificarNoExisteNombreVar($("#nombreVariable" + index).val())) {
+                        var copyTemp = _toConsumableArray(this.state.variables);
+
+                        copyTemp[index].nombre = $("#nombreVariable" + index).val();
+                        copyTemp[index].operacion = $("#operacion" + index).val();
+                        copyTemp[index].celdas = $("#celdasVariable" + index).val();
+                        copyTemp[index].nombreHoja = $("#hojaExcelVariable" + index).val();
+                        copyTemp[index].tipo = $("#tipoVariable" + index).val();
+                        copyTemp[index].periodicidad = $("#periodicidad" + index).val();
+                        copyTemp[index].fechaInicioCalculo = fecha;
+                        copyTemp[index].analista = $("#analista" + index).val();
+                        var guardarVariable;
+                        if ($("#guardarVariable" + index).is(':checked')) guardarVariable = true;else guardarVariable = false;
+
+                        var copyTempPeriodicidad = _toConsumableArray(this.state.valoresPeriodicidad);
+
+                        copyTempPeriodicidad[index] = periodicidad;
+                        copyTemp[index].guardar = guardarVariable;
+                        this.setState({
+                          variables: copyTemp,
+                          valoresPeriodicidad: copyTempPeriodicidad
+                        });
+                      } else {
+                        alert('El nombre de la variable debe ser único.');
+                      }
+                    } else {
+                      alert('Ingrese un valor para el valor de analista que debe ser menor a 101 caracteres');
+                    }
+                  } else {
+                    alert('Ingrese un valor para el valor de inicio de cálculo.');
+                  }
+                } else {
+                  alert('Ingrese un valor para el valor de periodicidad que debe ser menor a 51 caracteres');
+                }
               } else {
                 alert('Ingrese un valor para el valor de tipo de variable que debe ser menor a 31 caracteres');
               }
@@ -352,22 +595,6 @@ function (_React$Component) {
       }
     }
   }, {
-    key: "updateVariable",
-    value: function updateVariable(index) {
-      var copyTemp = _toConsumableArray(this.state.variables);
-
-      copyTemp[index].nombre = $("#nombreVariable" + index).val();
-      copyTemp[index].operacion = $("#operacion" + index).val();
-      copyTemp[index].celdas = $("#celdasVariable" + index).val();
-      copyTemp[index].nombreHoja = $("#hojaExcelVariable" + index).val();
-      var guardarVariable;
-      if ($("#guardarVariable" + index).is(':checked')) guardarVariable = true;else guardarVariable = false;
-      copyTemp[index].guardar = guardarVariable;
-      this.setState({
-        variables: copyTemp
-      });
-    }
-  }, {
     key: "deleteVariable",
     value: function deleteVariable(index) {
       var copyTemp = _toConsumableArray(this.state.variables);
@@ -380,7 +607,7 @@ function (_React$Component) {
   }, {
     key: "eliminarVarForma",
     value: function eliminarVarForma() {
-      var _this6 = this;
+      var _this8 = this;
 
       var transaction = new _mssql["default"].Transaction(this.props.pool);
       transaction.begin(function (err) {
@@ -389,7 +616,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("DELETE FROM FormasVariables WHERE ID = " + _this6.props.idVariable, function (err, result) {
+        request.query("DELETE FROM FormasVariables WHERE ID = " + _this8.props.idVariable, function (err, result) {
           if (err) {
             console.log(err);
 
@@ -397,11 +624,7 @@ function (_React$Component) {
               transaction.rollback(function (err) {});
             }
           } else {
-            transaction.commit(function (err) {
-              if (i == _this6.state.variables.length - 1) {
-                _this6.traerArchivo();
-              }
-            });
+            transaction.commit(function (err) {});
           }
         });
       }); // fin transaction
@@ -409,7 +632,7 @@ function (_React$Component) {
   }, {
     key: "eliminarVariable",
     value: function eliminarVariable() {
-      var _this7 = this;
+      var _this9 = this;
 
       var transaction1 = new _mssql["default"].Transaction(this.props.pool);
       transaction1.begin(function (err) {
@@ -418,7 +641,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request1 = new _mssql["default"].Request(transaction1);
-        request1.query("DELETE FROM Variables WHERE ID = " + _this7.props.idVariable, function (err, result) {
+        request1.query("DELETE FROM Variables WHERE ID = " + _this9.props.idVariable, function (err, result) {
           if (err) {
             console.log(err);
 
@@ -426,11 +649,7 @@ function (_React$Component) {
               transaction1.rollback(function (err) {});
             }
           } else {
-            transaction1.commit(function (err) {
-              if (i == _this7.state.variables.length - 1) {
-                _this7.traerArchivo();
-              }
-            });
+            transaction1.commit(function (err) {});
           }
         });
       }); // fin transaction1
@@ -441,8 +660,8 @@ function (_React$Component) {
         transaction2.on('rollback', function (aborted) {
           rolledBack = true;
         });
-        var request1 = new _mssql["default"].Request(transaction2);
-        request1.query("DELETE FROM VariablesCampos WHERE variableID = " + _this7.props.idVariable, function (err, result) {
+        var request2 = new _mssql["default"].Request(transaction2);
+        request2.query("DELETE FROM VariablesCampos WHERE variableID = " + _this9.props.idVariable, function (err, result) {
           if (err) {
             console.log(err);
 
@@ -450,19 +669,305 @@ function (_React$Component) {
               transaction2.rollback(function (err) {});
             }
           } else {
-            transaction2.commit(function (err) {
-              if (i == _this7.state.variables.length - 1) {
-                _this7.traerArchivo();
-              }
-            });
+            transaction2.commit(function (err) {});
           }
         });
       }); // fin transaction2
+
+      var transaction3 = new _mssql["default"].Transaction(this.props.pool);
+      transaction3.begin(function (err) {
+        var rolledBack = false;
+        transaction3.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request3 = new _mssql["default"].Request(transaction3);
+        request3.query("DELETE FROM FormulasVariablesCampos WHERE variableID = " + _this9.props.idVariable, function (err, result) {
+          if (err) {
+            console.log(err);
+
+            if (!rolledBack) {
+              transaction3.rollback(function (err) {});
+            }
+          } else {
+            transaction3.commit(function (err) {});
+          }
+        });
+      }); // fin transaction3
+
+      var transaction4 = new _mssql["default"].Transaction(this.props.pool);
+      transaction4.begin(function (err) {
+        var rolledBack = false;
+        transaction4.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request4 = new _mssql["default"].Request(transaction4);
+        request4.query("DELETE FROM ElementoFormulasVariablesCampos WHERE variableID = " + _this9.props.idVariable, function (err, result) {
+          if (err) {
+            console.log(err);
+
+            if (!rolledBack) {
+              transaction4.rollback(function (err) {});
+            }
+          } else {
+            transaction4.commit(function (err) {});
+          }
+        });
+      }); // fin transaction4
+
+      var transaction5 = new _mssql["default"].Transaction(this.props.pool);
+      transaction5.begin(function (err) {
+        var rolledBack = false;
+        transaction5.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request5 = new _mssql["default"].Request(transaction5);
+        request5.query("DELETE FROM SegmentoReglasVariables WHERE variableID = " + _this9.props.idVariable, function (err, result) {
+          if (err) {
+            console.log(err);
+
+            if (!rolledBack) {
+              transaction5.rollback(function (err) {});
+            }
+          } else {
+            transaction5.commit(function (err) {});
+          }
+        });
+      }); // fin transaction5
+
+      var transaction6 = new _mssql["default"].Transaction(this.props.pool);
+      transaction6.begin(function (err) {
+        var rolledBack = false;
+        transaction6.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request6 = new _mssql["default"].Request(transaction6);
+        request6.query("DELETE FROM ReglasVariables WHERE variableID = " + _this9.props.idVariable, function (err, result) {
+          if (err) {
+            console.log(err);
+
+            if (!rolledBack) {
+              transaction6.rollback(function (err) {});
+            }
+          } else {
+            transaction6.commit(function (err) {});
+          }
+        });
+      }); // fin transaction6
+
+      var transaction7 = new _mssql["default"].Transaction(this.props.pool);
+      transaction7.begin(function (err) {
+        var rolledBack = false;
+        transaction7.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request7 = new _mssql["default"].Request(transaction7);
+        request7.query("delete from InstruccionSQL WHERE variableID = " + _this9.props.idVariable, function (err, result) {
+          if (err) {
+            console.log(err);
+
+            if (!rolledBack) {
+              transaction7.rollback(function (err) {});
+            }
+          } else {
+            transaction7.commit(function (err) {
+              _this9.limpiarArreglos();
+            });
+          }
+        });
+      }); // fin transaction7
+
+      var transaction8 = new _mssql["default"].Transaction(this.props.pool);
+      transaction8.begin(function (err) {
+        var rolledBack = false;
+        transaction8.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request8 = new _mssql["default"].Request(transaction8);
+        request8.query("delete from InstruccionSQLCampos where variableID = " + _this9.props.idVariable, function (err, result) {
+          if (err) {
+            console.log(err);
+
+            if (!rolledBack) {
+              contadorObjetosGuardados++;
+              transaction8.rollback(function (err) {});
+            }
+          } else {
+            transaction8.commit(function (err) {//this.props.terminoCrearCampo(variable, variableCampo);
+            });
+          }
+        });
+      }); // fin transaction8
+    }
+  }, {
+    key: "getVariables",
+    value: function getVariables() {
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("select * from Variables", function (err, result) {
+          if (err) {
+            console.log(err);
+
+            if (!rolledBack) {
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              variables = result.recordset;
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
+    key: "getExcel",
+    value: function getExcel() {
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("select * from ExcelVariables", function (err, result) {
+          if (err) {
+            console.log(err);
+
+            if (!rolledBack) {
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              excel = result.recordset;
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
+    key: "getFormas",
+    value: function getFormas() {
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("select * from FormasVariables", function (err, result) {
+          if (err) {
+            console.log(err);
+
+            if (!rolledBack) {
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              formas = result.recordset;
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
+    key: "verificarNoExisteNombreVar",
+    value: function verificarNoExisteNombreVar(nombre) {
+      var noExiste = true;
+
+      for (var i = 0; i < variables.length; i++) {
+        if (variables[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
+          noExiste = false;
+          break;
+        }
+      }
+
+      ;
+
+      if (noExiste) {
+        for (var i = 0; i < excel.length; i++) {
+          if (excel[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
+            noExiste = false;
+            break;
+          }
+        }
+
+        ;
+      }
+
+      if (noExiste) {
+        for (var i = 0; i < formas.length; i++) {
+          if (formas[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
+            noExiste = false;
+            break;
+          }
+        }
+
+        ;
+      }
+
+      return noExiste;
+    }
+  }, {
+    key: "actualizarPeriodicidad",
+    value: function actualizarPeriodicidad() {
+      var periodicidad = $("#periodicidad").val();
+      this.setState({
+        valorPeriodicidad: periodicidad
+      }, this.cargarDatePicker);
+    }
+  }, {
+    key: "cargarDatePicker",
+    value: function cargarDatePicker() {
+      $('#fecha').datepicker({
+        format: "dd-mm-yyyy",
+        todayHighlight: true,
+        viewMode: "days",
+        minViewMode: "days",
+        language: 'es'
+      });
+    }
+  }, {
+    key: "inicializarFecha",
+    value: function inicializarFecha(periodicidad, index, fecha) {
+      if (periodicidad.localeCompare("-1") != 0) {
+        setTimeout(function () {
+          $('#fecha' + index).datepicker({
+            format: "dd-mm-yyyy",
+            todayHighlight: true,
+            viewMode: "days",
+            minViewMode: "days",
+            language: 'es'
+          });
+          $("#fecha" + index).datepicker("setDate", fecha);
+        }, 500);
+        return true;
+      }
+
+      return false;
+    }
+  }, {
+    key: "isValidDate",
+    value: function isValidDate(fecha) {
+      if (Object.prototype.toString.call(fecha) === "[object Date]") {
+        if (isNaN(fecha.getTime())) {
+          alert("Ingrese una fecha valida.");
+          return false;
+        } else {
+          return true;
+        }
+      } else {
+        alert("Ingrese una fecha valida.");
+        return false;
+      }
     }
   }, {
     key: "render",
     value: function render() {
-      var _this8 = this;
+      var _this10 = this;
 
       return _react["default"].createElement("div", null, _react["default"].createElement("br", null), _react["default"].createElement("div", {
         className: "row",
@@ -648,6 +1153,64 @@ function (_React$Component) {
       }, _react["default"].createElement("div", {
         className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
       }, _react["default"].createElement("label", {
+        htmlFor: "periodicidad",
+        className: "col-form-label"
+      }, "Periodicidad")), _react["default"].createElement("div", {
+        className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
+      }, _react["default"].createElement("select", {
+        id: "periodicidad",
+        defaultValue: this.props.periodicidadVariable,
+        onChange: this.actualizarPeriodicidad,
+        className: "form-control"
+      }, _react["default"].createElement("option", {
+        value: "-1"
+      }, "Ninguno"), periodicidad.map(function (periodicidad, i) {
+        return _react["default"].createElement("option", {
+          value: periodicidad.nombre,
+          key: periodicidad.nombre
+        }, periodicidad.nombre);
+      })))), this.state.valorPeriodicidad.localeCompare("-1") != 0 ? _react["default"].createElement("div", {
+        className: "row",
+        style: {
+          width: "100%"
+        }
+      }, _react["default"].createElement("div", {
+        className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
+      }, _react["default"].createElement("label", {
+        htmlFor: "fecha",
+        className: "col-form-label"
+      }, "Fecha de Inicio de C\xE1lculo:")), _react["default"].createElement("div", {
+        className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
+      }, _react["default"].createElement("input", {
+        type: "text",
+        className: "form-control",
+        id: "fecha"
+      }))) : null, _react["default"].createElement("div", {
+        className: "row",
+        style: {
+          width: "100%"
+        }
+      }, _react["default"].createElement("div", {
+        className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
+      }, _react["default"].createElement("label", {
+        htmlFor: "analista",
+        className: "col-form-label"
+      }, "Nombre Encargado")), _react["default"].createElement("div", {
+        className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
+      }, _react["default"].createElement("input", {
+        id: "analista",
+        defaultValue: this.props.analistaVariable,
+        onKeyUp: this.props.actualizarNombreEncargado,
+        type: "text",
+        className: "form-control form-control-sm"
+      }))), _react["default"].createElement("div", {
+        className: "row",
+        style: {
+          width: "100%"
+        }
+      }, _react["default"].createElement("div", {
+        className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
+      }, _react["default"].createElement("label", {
         htmlFor: "guardarVariable",
         className: "col-form-label"
       }, "Guardar Valores Obtenidos en Base de Datos")), _react["default"].createElement("div", {
@@ -672,7 +1235,7 @@ function (_React$Component) {
         }
       }, _react["default"].createElement("a", {
         href: "#",
-        className: "btn btn-brand active",
+        className: "btn btn-success active",
         onClick: this.crearVariable
       }, "Crear Variable")), _react["default"].createElement("br", null)), this.state.variables.map(function (variable, i) {
         return _react["default"].createElement("div", {
@@ -816,6 +1379,65 @@ function (_React$Component) {
         }, _react["default"].createElement("div", {
           className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
         }, _react["default"].createElement("label", {
+          htmlFor: "periodicidad" + i,
+          className: "col-form-label"
+        }, "Periodicidad")), _react["default"].createElement("div", {
+          className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
+        }, _react["default"].createElement("select", {
+          id: "periodicidad" + i,
+          defaultValue: variable.periodicidad,
+          onChange: function onChange() {
+            return _this10.actualizarPeriodicidadUpdate(i);
+          },
+          className: "form-control"
+        }, _react["default"].createElement("option", {
+          value: "-1"
+        }, "Ninguno"), periodicidad.map(function (periodicidad, i) {
+          return _react["default"].createElement("option", {
+            value: periodicidad.nombre,
+            key: periodicidad.nombre
+          }, periodicidad.nombre);
+        })))), _this10.state.valoresPeriodicidad[i].localeCompare("-1") != 0 && _this10.inicializarFecha(variable.periodicidad, i, variable.fechaInicioCalculo) ? _react["default"].createElement("div", {
+          className: "row",
+          style: {
+            width: "100%"
+          }
+        }, _react["default"].createElement("div", {
+          className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
+        }, _react["default"].createElement("label", {
+          htmlFor: "fecha" + i,
+          className: "col-form-label"
+        }, "Fecha de Inicio de C\xE1lculo:")), _react["default"].createElement("div", {
+          className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
+        }, _react["default"].createElement("input", {
+          type: "text",
+          className: "form-control",
+          id: "fecha" + i
+        }))) : null, _react["default"].createElement("div", {
+          className: "row",
+          style: {
+            width: "100%"
+          }
+        }, _react["default"].createElement("div", {
+          className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
+        }, _react["default"].createElement("label", {
+          htmlFor: "analista" + i,
+          className: "col-form-label"
+        }, "Nombre Encargado")), _react["default"].createElement("div", {
+          className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
+        }, _react["default"].createElement("input", {
+          id: "analista" + i,
+          defaultValue: variable.analista,
+          type: "text",
+          className: "form-control form-control-sm"
+        }))), _react["default"].createElement("div", {
+          className: "row",
+          style: {
+            width: "100%"
+          }
+        }, _react["default"].createElement("div", {
+          className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
+        }, _react["default"].createElement("label", {
           htmlFor: "guardarVariable" + i,
           className: "col-form-label"
         }, "Guardar Valores Obtenidos en Base de Datos")), _react["default"].createElement("div", {
@@ -840,15 +1462,15 @@ function (_React$Component) {
           }
         }, _react["default"].createElement("a", {
           href: "#",
-          className: "btn btn-brand active",
+          className: "btn btn-success active",
           onClick: function onClick() {
-            return _this8.updateVariable(i);
+            return _this10.updateVariable(i);
           }
         }, "Modificar Variable"), _react["default"].createElement("a", {
           href: "#",
           className: "btn btn-danger active",
           onClick: function onClick() {
-            return _this8.deleteVariable(i);
+            return _this10.deleteVariable(i);
           },
           style: {
             marginLeft: "10px"
@@ -862,13 +1484,24 @@ function (_React$Component) {
           justifyContent: "center"
         }
       }, _react["default"].createElement("a", {
-        className: "btn btn-success btn-block btnWhiteColorHover font-bold font-20",
-        style: {
-          color: "#fafafa",
-          width: "80%"
-        },
+        href: "#",
+        className: "btn btn-brand active",
         onClick: this.guardarUbicacionArchivo
-      }, "Guardar Configuraci\xF3n de Archivo de Excel")), _react["default"].createElement("br", null));
+      }, "Modificar Configuraci\xF3n de Archivo de Excel"), this.props.tipoVariableOriginal.localeCompare("excel") == 0 ? _react["default"].createElement("a", {
+        href: "#",
+        className: "btn btn-secondary active",
+        style: {
+          marginLeft: "10px"
+        },
+        onClick: this.props.eliminarVarExcel
+      }, "Eliminar Variable") : null, this.props.tipoVariableOriginal.localeCompare("excel") == 0 ? _react["default"].createElement("a", {
+        href: "#",
+        className: "btn btn-primary active",
+        style: {
+          marginLeft: "10px"
+        },
+        onClick: this.calculoVariable
+      }, "Realizar C\xE1lculo") : null), _react["default"].createElement("br", null));
     }
   }]);
 

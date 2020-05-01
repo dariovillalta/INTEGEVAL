@@ -1,4 +1,5 @@
 import React from 'react';
+import sql from 'mssql';
 
 import FuenteDatoVariableAtributos from './FuenteDatoVariableAtributos.js';
 
@@ -16,202 +17,76 @@ var mostrarEsObjetoGlobal = true;
 var mostrarInstruccionSQLGlobal = true;
 var tituloGlobal = "Instrucción SQL";
 
+const periodicidad = [ {nombre: "diario"}, {nombre: "semanal"}, {nombre: "mensual"}, {nombre: "trimestral"}, {nombre: "bi-anual"}, {nombre: "anual"} ];
+
 export default class FuenteDatoVariable extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            //atributos: this.props.atributos,
             mostrarEsObjeto: mostrarEsObjetoGlobal,
             titulo: tituloGlobal,
-            mostrarInstruccionSQL: mostrarInstruccionSQLGlobal
-            /*tipoVariable: '',
-            operaciones: operacionesCadena,
-            reglas: []*/
+            mostrarInstruccionSQL: mostrarInstruccionSQLGlobal,
+            valorPeriodicidad: "-1"
         }
-        /*this.crearAtributoFuenteDatos = this.crearAtributoFuenteDatos.bind(this);
-        this.crearFuenteDato = this.crearFuenteDato.bind(this);
-        this.existeReglaAsignacion = this.existeReglaAsignacion.bind(this);
-        this.retornarCodigoOperacion = this.retornarCodigoOperacion.bind(this);
-        this.retornoSeleccionCampo = this.retornoSeleccionCampo.bind(this);
-        this.retornoSeleccionOperacion = this.retornoSeleccionOperacion.bind(this);*/
         this.cambioInstruccionSQL = this.cambioInstruccionSQL.bind(this);
         this.cambioAObjeto = this.cambioAObjeto.bind(this);
         this.cambiarTitulo = this.cambiarTitulo.bind(this);
+        this.actualizarPeriodicidad = this.actualizarPeriodicidad.bind(this);
+        this.cargarDatePicker = this.cargarDatePicker.bind(this);
     }
 
     componentDidMount () {
-        this.setState({
-            mostrarEsObjeto: this.props.esObjetoVariable,
-            mostrarInstruccionSQL: this.props.esInstruccionSQLVariable
-        })
-    }
-
-    /*crearAtributoFuenteDatos () {
-        var nombre = $("#nombreFuenteDato").val();
-        var esObjeto;
-        if ($("#esObjetoFuenteDato").is(':checked'))
-            esObjeto = true;
-        else
-            esObjeto = false;
-        var nombreAtributo = nombre;
-        if(esObjeto) {
-            nombreAtributo = $("#nombreAtributo").val();
-        }
-        var formula = this.retornarCodigoOperacion(operacionSeleccionada.valor) + "(" + columnaSeleccionada.valor + ")";
-        if(nombreAtributo.length > 0) {
-            if(formula.length > 0) {
-            } else {
-                alert("Ingrese un valor para el nombre del atributo.");
-            }
-        } else {
-            alert("Ingrese un valor para el nombre del atributo.");
-        }
-        var fuenteDatoAtributo = {nombre: nombreAtributo, tipo: this.state.tipoVariable, formula: formula};
-        var copiaAntigua = [...this.state.atributos];
-        copiaAntigua.push(fuenteDatoAtributo);
-        this.setState({
-            atributos: copiaAntigua
-        }, console.log(this.state.atributos));
-    }
-
-    crearFuenteDato () {
-        if(columnaSeleccionada.valor != undefined) {            //if(columnaSeleccionada.valor != undefined) {
-            if(operacionSeleccionada.valor != undefined) {      //if(operacionSeleccionada.valor != undefined) {
-                if(operacionSeleccionada.valor.localeCompare("Asignar Valor Único Si") != 0 && operacionSeleccionada.valor.localeCompare("Asignar Valor Multiples Si") != 0 && operacionSeleccionada.valor.localeCompare("Contar Si") != 0) {
-                    if(this.state.reglas.length > 0) {  //no existe ninguna regla
-                        if(this.existeReglaAsignacion()) {       //no existe ni regla de asignacion
-                            var nombre = $("#nombreFuenteDato").val();
-                            var descripcion = $("#descripcionFuenteDato").val();
-                            var esObjeto;
-                            if ($("#esObjetoFuenteDato").is(':checked'))
-                                esObjeto = true;
-                            else
-                                esObjeto = false;
-                            var objetoPadreID = -1;
-                            if(!this.state.mostrarEsObjeto)
-                                objetoPadreID = $("#objetoPadreID").val();
-                            var guardar;
-                            if ($("#guardarFuenteDato").is(':checked'))
-                                guardar = true;
-                            else
-                                guardar = false;
-                            //var formula = this.retornarCodigoOperacion(operacionSeleccionada.valor) + "(" + columnaSeleccionada.valor + ")";
-                            var fuenteDato = {nombre: nombre, descripcion: descripcion, esObjeto: esObjeto, objetoPadreID: objetoPadreID, guardar: guardar};
-                            var regla = {reglaPadreID: -1, variablePadreID: -1, esFuenteDato: true, operacion: operacionSeleccionada.valor, valor: '', nivel: 0, orden: 0};
-                        } else {
-                            alert("Tiene que crear por lo menos una regla de asignacion.");
+        $('#fecha').datepicker({
+            format: "dd-mm-yyyy",
+            todayHighlight: true,
+            viewMode: "days", 
+            minViewMode: "days",
+            language: 'es'
+        });
+        $("#fecha").datepicker("setDate", this.props.fechaInicioVariable);
+        var self = this;
+        $('#fecha').datepicker().on('changeDate', function () {
+            var fecha = $("#fecha").datepicker('getDate');
+            self.props.actualizarFechaInicio(fecha);
+        });
+        if(this.props.tipoVariableOriginal.localeCompare("variable") == 0) {
+            const transaction = new sql.Transaction( this.props.pool );
+            transaction.begin(err => {
+                var rolledBack = false;
+                transaction.on('rollback', aborted => {
+                    rolledBack = true;
+                });
+                const request = new sql.Request(transaction);
+                request.query("select * from Variables where ID = "+this.props.idVariable, (err, result) => {
+                    if (err) {
+                        console.log(err);
+                        if (!rolledBack) {
+                            transaction.rollback(err => {
+                            });
                         }
                     } else {
-                        alert("Tiene que crear por lo menos una regla.");
+                        transaction.commit(err => {
+                            if(result.recordset.length > 0) {
+                                var titulo = "Instrucción SQL";
+                                if(!result.recordset[0].esInstruccionSQL) {
+                                    if(result.recordset[0].esObjeto)
+                                        titulo = "Valores Multiples";
+                                    else
+                                        titulo = "Valor Único";
+                                }
+                                this.setState({
+                                    titulo: titulo,
+                                    mostrarEsObjeto: result.recordset[0].esObjeto,
+                                    mostrarInstruccionSQL: result.recordset[0].esInstruccionSQL,
+                                    valorPeriodicidad: result.recordset[0].periodicidad
+                                });
+                            }
+                        });
                     }
-                } else if(operacionSeleccionada.valor.localeCompare("Asignar Si Único Si") == 0) {
-                    //
-                }
-            } else {
-                alert("Seleccione una operación de la tabla.");
-            }
-        } else {
-            alert("Seleccione una columna de la tabla.");
+                });
+            }); // fin transaction
         }
     }
-
-    existeReglaAsignacion () {
-        for (var i = 0; i < this.state.reglas.length; i++) {
-            if(this.state.reglas[i].operacion.localeCompare("Asignar Valor Único") == 0 || 
-                this.state.reglas[i].operacion.localeCompare("Asignar Valor Único Si") == 0 || 
-                this.state.reglas[i].operacion.localeCompare("Asignar Valor Multiples") == 0 || 
-                this.state.reglas[i].operacion.localeCompare("Asignar Valor Multiples Si") == 0 || 
-                this.state.reglas[i].operacion.localeCompare("Contar") == 0 || 
-                this.state.reglas[i].operacion.localeCompare("Contar Si") == 0 || 
-                this.state.reglas[i].operacion.localeCompare("Calcular Promedio") == 0 || 
-                this.state.reglas[i].operacion.localeCompare("Máximo") == 0 || 
-                this.state.reglas[i].operacion.localeCompare("Mínimo") == 0 || 
-                this.state.reglas[i].operacion.localeCompare("Sumar") == 0) {
-                return true;
-            }
-        };
-        return false;
-    }
-
-    retornarCodigoOperacion (codigo) {
-        if(codigo.localeCompare("Asignar Valor Único") == 0) {
-            return "ASIGUNI";
-        }
-        if(codigo.localeCompare("Asignar Valor Único Si") == 0) {
-            return "ASIGUNI";
-        }
-        if(codigo.localeCompare("Asignar Valor Multiples") == 0) {
-            return "ASIGMUL";
-        }
-        if(codigo.localeCompare("Asignar Valor Multiples Si") == 0) {
-            return "ASIGMUL";
-        }
-        if(codigo.localeCompare("Contar") == 0) {
-            return "COUNT";
-        }
-        if(codigo.localeCompare("Contar Si") == 0) {
-            return "COUNT";
-        }
-        if(codigo.localeCompare("Calcular Promedio") == 0) {
-            return "PROM";
-        }
-        if(codigo.localeCompare("Máximo") == 0) {
-            return "MAX";
-        }
-        if(codigo.localeCompare("Mínimo") == 0) {
-            return "MIN";
-        }
-        if(codigo.localeCompare("Sumar") == 0) {
-            return "SUM";
-        }
-    }
-
-    retornoSeleccionCampo (variable) {
-        columnaSeleccionada = {};
-        //fuenteDatoAtributo.columnaSeleccionada = {};
-        if(variable[0].valor.length > 0) {
-            columnaSeleccionada = variable[0];
-            //fuenteDatoAtributo.columnaSeleccionada = variable[0];
-            var tipoVariable = '';
-            if(columnaSeleccionada.tipo.localeCompare("int") == 0 || columnaSeleccionada.tipo.localeCompare("decimal") == 0) {
-                tipoVariable = 'Número';
-                this.setState({
-                    operaciones: operacionesNumero,
-                    tipoVariable: tipoVariable
-                });
-            } else if(columnaSeleccionada.tipo.localeCompare("varchar") == 0) {
-                tipoVariable = 'Cadena';
-                this.setState({
-                    operaciones: operacionesCadena,
-                    tipoVariable: tipoVariable
-                });
-            } else if(columnaSeleccionada.tipo.localeCompare("date") == 0) {
-                tipoVariable = 'Fecha';
-                this.setState({
-                    operaciones: operacionesFecha,
-                    tipoVariable: tipoVariable
-                });
-            } else if(columnaSeleccionada.tipo.localeCompare("bit") == 0) {
-                tipoVariable = 'Booleano';
-                this.setState({
-                    operaciones: operacionesBoolean,
-                    tipoVariable: tipoVariable
-                });
-            }
-            //this.setState({
-            //    tipoVariable: tipoVariable
-            //});
-        }
-    }
-
-    retornoSeleccionOperacion (operacion) {
-        operacionSeleccionada = {};
-        //fuenteDatoAtributo.operacionSeleccionada = {};
-        if(operacion[0].valor.length > 0) {
-            operacionSeleccionada = operacion[0];
-            //fuenteDatoAtributo.operacionSeleccionada = operacion[0];
-        }
-    }*/
 
     cambioInstruccionSQL () {
         mostrarInstruccionSQLGlobal = !this.state.mostrarInstruccionSQL;
@@ -250,6 +125,30 @@ export default class FuenteDatoVariable extends React.Component {
         }
         this.props.actualizarEstadoSiEsObjeto(this.state.mostrarEsObjeto);
         this.props.actualizarEstadoSiEsInstruccionSQL(this.state.mostrarInstruccionSQL);
+    }
+
+    actualizarPeriodicidad () {
+        var periodicidad = $("#periodicidad").val();
+        this.setState({
+            valorPeriodicidad: periodicidad
+        }, this.cargarDatePicker )
+        this.props.actualizarPeriodicidad();
+    }
+
+    cargarDatePicker () {
+        $('#fecha').datepicker({
+            format: "dd-mm-yyyy",
+            todayHighlight: true,
+            viewMode: "days", 
+            minViewMode: "days",
+            language: 'es'
+        });
+        $("#fecha").datepicker("setDate", this.props.fechaInicioVariable);
+        var self = this;
+        $('#fecha').datepicker().on('changeDate', function () {
+            var fecha = $("#fecha").datepicker('getDate');
+            self.props.actualizarFechaInicio(fecha);
+        });
     }
 
     render() {
@@ -303,6 +202,39 @@ export default class FuenteDatoVariable extends React.Component {
                 }
                 <div className={"row"} style={{width: "100%"}}>
                     <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
+                        <label htmlFor="periodicidad" className="col-form-label">Periodicidad</label>
+                    </div>
+                    <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"}>
+                        <select id="periodicidad" defaultValue={this.props.periodicidadVariable} onChange={this.actualizarPeriodicidad} className="form-control">
+                            <option value="-1">Ninguno</option>
+                            {periodicidad.map((periodicidad, i) =>
+                                <option value={periodicidad.nombre} key={periodicidad.nombre}>{periodicidad.nombre}</option>
+                            )}
+                        </select>
+                    </div>
+                </div>
+                {this.state.valorPeriodicidad.localeCompare("-1") != 0
+                    ?
+                        <div className={"row"} style={{width: "100%"}}>
+                            <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
+                                <label htmlFor="esObjetoFuenteDato" className="col-form-label">Fecha de Inicio de Cálculo:</label>
+                            </div>
+                            <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"}>
+                                <input type="text" className="form-control" id="fecha"/>
+                            </div>
+                        </div>
+                    : null
+                }
+                <div className={"row"} style={{width: "100%"}}>
+                    <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
+                        <label htmlFor="analista" className="col-form-label">Nombre Encargado</label>
+                    </div>
+                    <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"}>
+                        <input id="analista" defaultValue={this.props.analistaVariable} onKeyUp={this.props.actualizarNombreEncargado} type="text" className="form-control form-control-sm"/>
+                    </div>
+                </div>
+                <div className={"row"} style={{width: "100%"}}>
+                    <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
                         <label htmlFor="guardarFuenteDato" className="col-form-label">Guardar Valores Obtenidos en Base de Datos:</label>
                     </div>
                     <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"}>
@@ -339,7 +271,17 @@ export default class FuenteDatoVariable extends React.Component {
                 </div>
                 <br/>
                 <div className={"row"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
-                    <a className={"btn btn-brand btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.props.guardarVariable}>Crear Variable</a>
+                    <a href="#" className="btn btn-brand active" onClick={this.props.guardarVariable}>Modificar Variable</a>
+                    {
+                        this.props.tipoVariableOriginal.localeCompare("variable") == 0
+                        ? <a href="#" className="btn btn-secondary active" style={{marginLeft: "10px"}} onClick={this.props.eliminarVariable}>Eliminar Variable</a>
+                        : null
+                    }
+                    {
+                        this.props.tipoVariableOriginal.localeCompare("variable") == 0
+                        ? <a href="#" className="btn btn-primary active" style={{marginLeft: "10px"}} onClick={this.calculoVariable}>Realizar Cálculo</a>
+                        : null
+                    }
                 </div>
                 <br/>
             </div>

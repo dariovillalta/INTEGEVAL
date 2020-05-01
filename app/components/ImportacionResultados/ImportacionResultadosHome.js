@@ -105,7 +105,8 @@ function (_React$Component) {
           pool: this.props.pool,
           fechaInicial: this.state.fechaInicial,
           fechaFinal: this.state.fechaFinal,
-          retornoVariables: this.props.retornoVariables
+          retornoVariables: this.props.retornoVariables,
+          returnChooseDates: this.props.returnChooseDates
         }));
       }
     }

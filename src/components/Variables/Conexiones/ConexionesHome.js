@@ -13,13 +13,14 @@ export default class ConexionesHome extends React.Component {
             contrasenaTablaSeleccionada: "",
             servidorTablaSeleccionada: "",
             baseDatosTablaSeleccionada: "",
-            tablaTablaSeleccionada: ""
+            tablaTablaSeleccionada: "",
+            tipoConexionTablaSeleccionada: ""
         }
         this.terminoSeleccionTabla = this.terminoSeleccionTabla.bind(this);
         this.retornoSeleccionTabla = this.retornoSeleccionTabla.bind(this);
     }
 
-    terminoSeleccionTabla (id, nombre, usuario, contrasena, servidor, baseDatos, tabla) {
+    terminoSeleccionTabla (id, nombre, usuario, contrasena, servidor, baseDatos, tabla, tipoConexion) {
         this.setState({
             idTablaSeleccionada: id,
             nombreTablaSeleccionada: nombre,
@@ -27,7 +28,8 @@ export default class ConexionesHome extends React.Component {
             contrasenaTablaSeleccionada: contrasena,
             servidorTablaSeleccionada: servidor,
             baseDatosTablaSeleccionada: baseDatos,
-            tablaTablaSeleccionada: tabla
+            tablaTablaSeleccionada: tabla,
+            tipoConexionTablaSeleccionada: tipoConexion
         });
     }
 
@@ -62,7 +64,8 @@ export default class ConexionesHome extends React.Component {
                                 contrasenaTablaSeleccionada={this.state.contrasenaTablaSeleccionada}
                                 servidorTablaSeleccionada={this.state.servidorTablaSeleccionada}
                                 baseDatosTablaSeleccionada={this.state.baseDatosTablaSeleccionada}
-                                tablaTablaSeleccionada={this.state.tablaTablaSeleccionada}>
+                                tablaTablaSeleccionada={this.state.tablaTablaSeleccionada}
+                                tipoConexion={this.state.tipoConexionTablaSeleccionada}>
                     </EditarTabla>
                 </div>
             );

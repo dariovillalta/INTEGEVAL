@@ -76,6 +76,13 @@ function (_React$Component) {
       }, _react["default"].createElement("ol", {
         className: "breadcrumb"
       }, _react["default"].createElement("li", {
+        className: "breadcrumb-item font-16",
+        "aria-current": "page",
+        onClick: this.props.returnImportResults
+      }, _react["default"].createElement("a", {
+        href: "#",
+        className: "breadcrumb-link"
+      }, "Crear Filtro")), _react["default"].createElement("li", {
         className: "breadcrumb-item active font-16",
         "aria-current": "page"
       }, "Visualizar Variables"))))))), this.props.variables.map(function (variable, i) {
@@ -91,17 +98,17 @@ function (_React$Component) {
             display: "inline-block",
             minWidth: "100%"
           }
-        }, _react["default"].createElement("div", {
+        }, _react["default"].createElement("h5", {
+          style: {
+            display: "inline",
+            marginTop: "20px",
+            marginLeft: "10px"
+          }
+        }, variable.nombreVariable), _react["default"].createElement("div", {
           style: {
             "float": "right"
           }
-        }, _react["default"].createElement("h5", {
-          className: "card-header",
-          style: {
-            display: "inline",
-            left: "10px"
-          }
-        }, variable.nombreVariable), _react["default"].createElement("a", {
+        }, _react["default"].createElement("a", {
           href: "#",
           className: "btn btn-outline-light",
           style: {
@@ -118,7 +125,7 @@ function (_React$Component) {
             display: "inline"
           }
         }, "PDF")), _react["default"].createElement("table", {
-          className: "table table-striped"
+          className: "table table-striped table-bordered"
         }, _react["default"].createElement("thead", null, _react["default"].createElement("tr", null, _react["default"].createElement("th", {
           scope: "col"
         }, "#"), variable.atributos.map(function (campo, j) {
@@ -150,17 +157,17 @@ function (_React$Component) {
             display: "inline-block",
             minWidth: "100%"
           }
-        }, _react["default"].createElement("div", {
+        }, _react["default"].createElement("h5", {
+          style: {
+            display: "inline",
+            marginTop: "20px",
+            marginLeft: "10px"
+          }
+        }, indicador.nombreIndicador), _react["default"].createElement("div", {
           style: {
             "float": "right"
           }
-        }, _react["default"].createElement("h5", {
-          className: "card-header",
-          style: {
-            display: "inline",
-            left: "10px"
-          }
-        }, indicador.nombreIndicador), _react["default"].createElement("a", {
+        }, _react["default"].createElement("a", {
           href: "#",
           className: "btn btn-outline-light",
           style: {
@@ -177,7 +184,7 @@ function (_React$Component) {
             display: "inline"
           }
         }, "PDF")), _react["default"].createElement("table", {
-          className: "table table-striped"
+          className: "table table-striped table-bordered"
         }, _react["default"].createElement("thead", null, _react["default"].createElement("tr", null, _react["default"].createElement("th", {
           scope: "col"
         }, "#"), indicador.atributos.map(function (campo, j) {
@@ -209,17 +216,17 @@ function (_React$Component) {
             display: "inline-block",
             minWidth: "100%"
           }
-        }, _react["default"].createElement("div", {
+        }, _react["default"].createElement("h5", {
+          style: {
+            display: "inline",
+            marginTop: "20px",
+            marginLeft: "10px"
+          }
+        }, riesgo.nombreRiesgo), _react["default"].createElement("div", {
           style: {
             "float": "right"
           }
-        }, _react["default"].createElement("h5", {
-          className: "card-header",
-          style: {
-            display: "inline",
-            left: "10px"
-          }
-        }, riesgo.nombreRiesgo), _react["default"].createElement("a", {
+        }, _react["default"].createElement("a", {
           href: "#",
           className: "btn btn-outline-light",
           style: {
@@ -236,7 +243,7 @@ function (_React$Component) {
             display: "inline"
           }
         }, "PDF")), _react["default"].createElement("table", {
-          className: "table table-striped"
+          className: "table table-striped table-bordered"
         }, _react["default"].createElement("thead", null, _react["default"].createElement("tr", null, _react["default"].createElement("th", {
           scope: "col"
         }, "#"), riesgo.atributos.map(function (campo, j) {

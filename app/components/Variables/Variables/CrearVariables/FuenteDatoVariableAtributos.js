@@ -100,14 +100,15 @@ function (_React$Component) {
       }, _react["default"].createElement("div", {
         className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
       }, _react["default"].createElement("br", null), _react["default"].createElement("a", {
-        className: "btn btn-success btn-block btnWhiteColorHover font-bold font-20",
+        href: "#",
+        className: "btn btn-success active font-20",
         style: {
-          color: "#fafafa"
+          width: "100%"
         },
         onClick: function onClick() {
           return _this2.props.goCreateVariableFieldSQL();
         }
-      }, "Crear Instrucci\xF3n SQL "), _react["default"].createElement("br", null))) : _react["default"].createElement("div", {
+      }, "Crear Instrucci\xF3n SQL"), _react["default"].createElement("br", null))) : _react["default"].createElement("div", {
         className: "row"
       }, _react["default"].createElement("div", {
         className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
@@ -132,9 +133,10 @@ function (_React$Component) {
         className: "breadcrumb-item active font-20",
         "aria-current": "page"
       }, this.props.tipoNuevaVariable))), _react["default"].createElement("br", null), _react["default"].createElement("a", {
-        className: "btn btn-success btn-block btnWhiteColorHover font-bold font-20",
+        href: "#",
+        className: "btn btn-success active font-20",
         style: {
-          color: "#fafafa"
+          width: "100%"
         },
         onClick: function onClick() {
           return _this2.actualizarIndiceAtributoSeleccionado(-1);
@@ -149,11 +151,17 @@ function (_React$Component) {
           width: "100%"
         }
       }, _react["default"].createElement("div", {
-        className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
-      }, _react["default"].createElement("a", {
-        className: "btn btn-success btn-block btnWhiteColorHover font-bold font-20",
+        className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12",
         style: {
-          color: "#fafafa"
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center"
+        }
+      }, _react["default"].createElement("a", {
+        href: "#",
+        className: "btn btn-success active font-20",
+        style: {
+          width: "100%"
         },
         onClick: function onClick() {
           return _this2.props.goCreateVariableFieldSQL();
@@ -217,9 +225,10 @@ function (_React$Component) {
       }, _react["default"].createElement("div", {
         className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
       }, _react["default"].createElement("a", {
-        className: "btn btn-success btn-block btnWhiteColorHover font-bold font-20",
+        href: "#",
+        className: "btn btn-success active font-20",
         style: {
-          color: "#fafafa"
+          width: "100%"
         },
         onClick: function onClick() {
           return _this2.actualizarIndiceAtributoSeleccionado(-1);
@@ -232,10 +241,8 @@ function (_React$Component) {
           justifyContent: "center"
         }
       }, _react["default"].createElement("a", {
-        className: "btn btn-primary btnWhiteColorHover font-bold font-20",
-        style: {
-          color: "#fafafa"
-        },
+        href: "#",
+        className: "btn btn-primary active",
         onClick: this.props.crearAtributoVariable
       }, "Crear Atributo")), _react["default"].createElement("br", null), this.props.atributos.map(function (atributo, i) {
         return _react["default"].createElement("div", {
@@ -290,9 +297,10 @@ function (_React$Component) {
           className: "breadcrumb-item active font-20",
           "aria-current": "page"
         }, atributo.tipo))), _react["default"].createElement("br", null), _react["default"].createElement("a", {
-          className: "btn btn-success btn-block btnWhiteColorHover font-bold font-20",
+          href: "#",
+          className: "btn btn-success active font-20",
           style: {
-            color: "#fafafa"
+            width: "100%"
           },
           onClick: function onClick() {
             return _this2.actualizarIndiceAtributoSeleccionado(i);

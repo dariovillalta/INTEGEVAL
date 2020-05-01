@@ -99,7 +99,13 @@ export default class CrearVariable extends React.Component {
                                                                 nombreCampoNuevoAtributosVario={this.props.nombreCampoNuevoAtributosVario}
                                                                 tipoNuevaVariable={this.props.tipoNuevaVariable}
                                                                 actualizarNombreCampoNuevoAtributosVario={this.props.actualizarNombreCampoNuevoAtributosVario}
-                                                                atributos={this.props.atributos}>
+                                                                atributos={this.props.atributos}
+                                                                actualizarFechaInicio={this.props.actualizarFechaInicio}
+                                                                actualizarPeriodicidad={this.props.actualizarPeriodicidad}
+                                                                actualizarNombreEncargado={this.props.actualizarNombreEncargado}
+                                                                fechaInicioVariable={this.props.fechaInicioVariable}
+                                                                periodicidadVariable={this.props.periodicidadVariable}
+                                                                analistaVariable={this.props.analistaVariable}>
                                             </FuenteDatoVariable>
                                         : null
                                     }

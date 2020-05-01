@@ -78,7 +78,7 @@ function (_React$Component) {
       }, _react["default"].createElement("a", {
         className: "btn btn-outline-info btn-block btnWhiteColorHover font-bold font-20",
         onClick: this.props.goFuentes
-      }, "Configuraci\xF3n de Conexiones"), _react["default"].createElement("a", {
+      }, "Configuraci\xF3n de Conexiones a Bases de Datos"), _react["default"].createElement("a", {
         className: "btn btn-outline-brand btn-block btnWhiteColorHover font-bold font-20",
         onClick: this.props.goVariables
       }, "Creaci\xF3n / Configuraci\xF3n de Variables")))))));

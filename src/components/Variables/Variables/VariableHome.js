@@ -16,11 +16,13 @@ export default class VariableHome extends React.Component {
             idVariable: -1,
             tipoVariable: "",
             esObjetoVariable: "",
-            esInstruccionSQLVariable: ""
+            esInstruccionSQLVariable: "",
+            esPrimeraVez: true
         }
         this.crearVariables = this.crearVariables.bind(this);
         this.retornoSeleccionVariables = this.retornoSeleccionVariables.bind(this);
         this.editarVariables = this.editarVariables.bind(this);
+        this.changeStateFirstTimeToFalse = this.changeStateFirstTimeToFalse.bind(this);
         this.terminoCrearVariablesPasarAEdit = this.terminoCrearVariablesPasarAEdit.bind(this);
         this.actualizarIDVariableModificada = this.actualizarIDVariableModificada.bind(this);
     }
@@ -51,7 +53,14 @@ export default class VariableHome extends React.Component {
             componenteActual: "editarVariables",
             tipoVariable: tipoVariable,
             esObjetoVariable: esObjetoVariable,
-            esInstruccionSQLVariable: esInstruccionSQLVariable
+            esInstruccionSQLVariable: esInstruccionSQLVariable,
+            esPrimeraVez: true
+        });
+    }
+
+    changeStateFirstTimeToFalse() {
+        this.setState({
+            esPrimeraVez: false
         });
     }
 
@@ -196,7 +205,9 @@ export default class VariableHome extends React.Component {
                                     esInstruccionSQLVariable={this.state.esInstruccionSQLVariable}
                                     retornoSeleccionVariables={this.retornoSeleccionVariables}
                                     configuracionHome={this.props.configuracionHome}
-                                    actualizarIDVariableModificada={this.actualizarIDVariableModificada}>
+                                    actualizarIDVariableModificada={this.actualizarIDVariableModificada}
+                                    changeStateFirstTimeToFalse={this.changeStateFirstTimeToFalse}
+                                    esPrimeraVez={this.state.esPrimeraVez}>
                     </EditarVariablesHome>
                 </div>
             );

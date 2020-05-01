@@ -29,6 +29,23 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
+var variables = [];
+var excel = [];
+var formas = [];
+var periodicidad = [{
+  nombre: "diario"
+}, {
+  nombre: "semanal"
+}, {
+  nombre: "mensual"
+}, {
+  nombre: "trimestral"
+}, {
+  nombre: "bi-anual"
+}, {
+  nombre: "anual"
+}];
+
 var FuenteDatoForma =
 /*#__PURE__*/
 function (_React$Component) {
@@ -40,49 +57,226 @@ function (_React$Component) {
     _classCallCheck(this, FuenteDatoForma);
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(FuenteDatoForma).call(this, props));
-    _this.state = {};
+    _this.state = {
+      valorPeriodicidad: '-1'
+    };
     _this.crearVariable = _this.crearVariable.bind(_assertThisInitialized(_this));
+    _this.getVariables = _this.getVariables.bind(_assertThisInitialized(_this));
+    _this.getExcel = _this.getExcel.bind(_assertThisInitialized(_this));
+    _this.getFormas = _this.getFormas.bind(_assertThisInitialized(_this));
+    _this.verificarNoExisteNombreVar = _this.verificarNoExisteNombreVar.bind(_assertThisInitialized(_this));
+    _this.actualizarPeriodicidad = _this.actualizarPeriodicidad.bind(_assertThisInitialized(_this));
+    _this.isValidDate = _this.isValidDate.bind(_assertThisInitialized(_this));
     return _this;
   }
 
   _createClass(FuenteDatoForma, [{
+    key: "componentDidMount",
+    value: function componentDidMount() {
+      this.getVariables();
+      this.getExcel();
+      this.getFormas();
+    }
+  }, {
     key: "crearVariable",
     value: function crearVariable() {
+      var _this2 = this;
+
       var nombreVariable = $("#nombreVariable").val();
       var tipo = $("#tipo").val();
       var guardarVariable;
       if ($("#guardarVariable").is(':checked')) guardarVariable = true;else guardarVariable = false;
+      var periodicidad = $("#periodicidad").val();
+      var fecha;
+      if (periodicidad.localeCompare("-1") == 0) fecha = new Date(1964, 4, 28);else fecha = $("#fecha").datepicker('getDate');
+      var analista = $("#analista").val();
 
-      if (nombreVariable.length > 0 && nombreVariable.length < 1001) {
-        if (tipo.length > 0 && tipo.length < 1001) {
-          var transaction = new _mssql["default"].Transaction(this.props.pool);
-          transaction.begin(function (err) {
-            var rolledBack = false;
-            transaction.on('rollback', function (aborted) {
-              rolledBack = true;
-            });
-            var request = new _mssql["default"].Request(transaction);
-            request.query("insert into FormasVariables (nombre, tipo, guardar) values ('" + nombreVariable + "', '" + tipo + "', '" + guardarVariable + "')", function (err, result) {
-              if (err) {
-                console.log(err);
+      if (nombreVariable.length > 0 && nombreVariable.length < 101) {
+        if (this.verificarNoExisteNombreVar(nombreVariable)) {
+          if (tipo.length > 0 && tipo.length < 31) {
+            if (periodicidad.length > 0 && periodicidad.length < 51) {
+              if (this.isValidDate(fecha)) {
+                if (analista.length > 0 && analista.length < 101) {
+                  var transaction = new _mssql["default"].Transaction(this.props.pool);
+                  transaction.begin(function (err) {
+                    var rolledBack = false;
+                    transaction.on('rollback', function (aborted) {
+                      rolledBack = true;
+                    });
+                    var request = new _mssql["default"].Request(transaction);
+                    request.query("insert into FormasVariables (nombre, tipo, periodicidad, fechaInicioCalculo, analista, guardar) values ('" + nombreVariable + "', '" + tipo + "', '" + periodicidad + "', '" + fechaInicioCalculo + "', '" + analista + "', '" + guardarVariable + "')", function (err, result) {
+                      if (err) {
+                        console.log(err);
 
-                if (!rolledBack) {
-                  transaction.rollback(function (err) {});
+                        if (!rolledBack) {
+                          transaction.rollback(function (err) {});
+                        }
+                      } else {
+                        transaction.commit(function (err) {
+                          alert("Variable Creada");
+                          $("#nombreVariable").val("");
+                          $("#tipo").val("numero");
+                          $("#periodicidad").val("");
+                          $("#analista").val("");
+
+                          _this2.getFormas();
+                        });
+                      }
+                    });
+                  }); // fin transaction
+                } else {
+                  alert('Ingrese un valor para el analista que debe ser menor a 51 caracteres');
                 }
               } else {
-                transaction.commit(function (err) {
-                  alert("Variable Creada");
-                  $("#nombreVariable").val("");
-                  $("#tipo").val("numero");
-                });
+                alert('Ingrese un valor para la fecha');
               }
-            });
-          }); // fin transaction
+            } else {
+              alert('Ingrese un valor para el valor de periodicidad que debe ser menor a 51 caracteres');
+            }
+          } else {
+            alert('Ingrese un valor para el tipo de la variable que debe ser menor a 31 caracteres');
+          }
         } else {
-          alert('Ingrese un valor para el tipo de la variable que debe ser menor a 31 caracteres');
+          alert('El nombre de la variable debe ser único.');
         }
       } else {
         alert('Ingrese un valor para el nombre de la variable que debe ser menor a 101 caracteres');
+      }
+    }
+  }, {
+    key: "getVariables",
+    value: function getVariables() {
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("select * from Variables", function (err, result) {
+          if (err) {
+            console.log(err);
+
+            if (!rolledBack) {
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              variables = result.recordset;
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
+    key: "getExcel",
+    value: function getExcel() {
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("select * from ExcelVariables", function (err, result) {
+          if (err) {
+            console.log(err);
+
+            if (!rolledBack) {
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              excel = result.recordset;
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
+    key: "getFormas",
+    value: function getFormas() {
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("select * from FormasVariables", function (err, result) {
+          if (err) {
+            console.log(err);
+
+            if (!rolledBack) {
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              formas = result.recordset;
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
+    key: "verificarNoExisteNombreVar",
+    value: function verificarNoExisteNombreVar(nombre) {
+      var noExiste = true;
+
+      for (var i = 0; i < variables.length; i++) {
+        if (this.state.variables[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
+          noExiste = false;
+          break;
+        }
+      }
+
+      ;
+
+      if (noExiste) {
+        for (var i = 0; i < excel.length; i++) {
+          if (this.state.excel[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
+            noExiste = false;
+            break;
+          }
+        }
+
+        ;
+      }
+
+      if (noExiste) {
+        for (var i = 0; i < formas.length; i++) {
+          if (this.state.formas[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
+            noExiste = false;
+            break;
+          }
+        }
+
+        ;
+      }
+
+      return noExiste;
+    }
+  }, {
+    key: "actualizarPeriodicidad",
+    value: function actualizarPeriodicidad() {
+      var periodicidad = $("#periodicidad").val();
+      this.setState({
+        valorPeriodicidad: periodicidad
+      }, this.cargarDatePicker);
+    }
+  }, {
+    key: "isValidDate",
+    value: function isValidDate(fecha) {
+      if (Object.prototype.toString.call(fecha) === "[object Date]") {
+        if (isNaN(fecha.getTime())) {
+          alert("Ingrese una fecha valida.");
+          return false;
+        } else {
+          return true;
+        }
+      } else {
+        alert("Ingrese una fecha valida.");
+        return false;
       }
     }
   }, {
@@ -138,6 +332,64 @@ function (_React$Component) {
       }, "Fecha"), _react["default"].createElement("option", {
         value: "bit"
       }, "Booleano")))), _react["default"].createElement("div", {
+        className: "row",
+        style: {
+          width: "100%"
+        }
+      }, _react["default"].createElement("div", {
+        className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
+      }, _react["default"].createElement("label", {
+        htmlFor: "periodicidad",
+        className: "col-form-label"
+      }, "Periodicidad")), _react["default"].createElement("div", {
+        className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
+      }, _react["default"].createElement("select", {
+        id: "periodicidad",
+        defaultValue: this.props.periodicidadVariable,
+        onChange: this.actualizarPeriodicidad,
+        className: "form-control"
+      }, _react["default"].createElement("option", {
+        value: "-1"
+      }, "Ninguno"), periodicidad.map(function (periodicidad, i) {
+        return _react["default"].createElement("option", {
+          value: periodicidad.nombre,
+          key: periodicidad.nombre
+        }, periodicidad.nombre);
+      })))), this.state.valorPeriodicidad.localeCompare("-1") != 0 ? _react["default"].createElement("div", {
+        className: "row",
+        style: {
+          width: "100%"
+        }
+      }, _react["default"].createElement("div", {
+        className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
+      }, _react["default"].createElement("label", {
+        htmlFor: "fecha",
+        className: "col-form-label"
+      }, "Fecha de Inicio de C\xE1lculo:")), _react["default"].createElement("div", {
+        className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
+      }, _react["default"].createElement("input", {
+        type: "text",
+        className: "form-control",
+        id: "fecha"
+      }))) : null, _react["default"].createElement("div", {
+        className: "row",
+        style: {
+          width: "100%"
+        }
+      }, _react["default"].createElement("div", {
+        className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
+      }, _react["default"].createElement("label", {
+        htmlFor: "analista",
+        className: "col-form-label"
+      }, "Nombre Encargado")), _react["default"].createElement("div", {
+        className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
+      }, _react["default"].createElement("input", {
+        id: "analista",
+        defaultValue: this.props.analistaVariable,
+        onKeyUp: this.props.actualizarNombreEncargado,
+        type: "text",
+        className: "form-control form-control-sm"
+      }))), _react["default"].createElement("div", {
         className: "row",
         style: {
           width: "100%"

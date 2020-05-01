@@ -67,31 +67,9 @@ function (_React$Component) {
       var _this2 = this;
 
       var nombre = $("#nombreRiesgo").val();
-      var formula = '';
+      var formula = $("#formula").val();
+      ;
       var peso = this.state.x;
-      var tolerancia = parseInt($("#tolerancia").val());
-      var valorIdeal = parseInt($("#valorIdeal").val());
-      var riesgoPadre = parseInt(this.props.riesgoPadre);
-      var nivel = 0;
-
-      if (this.props.riesgoPadre == undefined || this.props.riesgoPadre == -1) {
-        riesgoPadre = parseInt($("#riesgoPadre").val());
-      }
-
-      console.log('nombre');
-      console.log(nombre);
-      console.log('formula');
-      console.log(formula);
-      console.log('peso');
-      console.log(peso);
-      console.log('tolerancia');
-      console.log(tolerancia);
-      console.log('valorIdeal');
-      console.log(valorIdeal);
-      console.log('riesgoPadre');
-      console.log(riesgoPadre);
-      console.log('nivel');
-      console.log(nivel);
       var transaction = new _mssql["default"].Transaction(this.props.pool);
       transaction.begin(function (err) {
         var rolledBack = false;
@@ -99,7 +77,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("insert into Riesgos (nombre, formula, peso, tolerancia, valorIdeal, idRiesgoPadre, nivelRiesgoHijo) values ('" + nombre + "', '" + formula + "', " + peso + ", " + tolerancia + ", " + valorIdeal + ", " + riesgoPadre + ", " + nivel + ")", function (err, result) {
+        request.query("insert into Riesgos (nombre, formula, peso) values ('" + nombre + "', '" + formula + "', " + peso + ")", function (err, result) {
           if (err) {
             if (!rolledBack) {
               console.log(err);
@@ -188,9 +166,9 @@ function (_React$Component) {
       }, _react["default"].createElement("div", {
         className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
       }, _react["default"].createElement("label", {
-        htmlFor: "nombreRiesgo",
+        htmlFor: "formula",
         className: "col-form-label"
-      }, "F\xF3rmula")), _react["default"].createElement("div", {
+      }, "Tipo de Indicador")), _react["default"].createElement("div", {
         className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
       }, _react["default"].createElement("select", {
         id: "formula",
@@ -234,61 +212,7 @@ function (_React$Component) {
       }, _react["default"].createElement("label", {
         id: "pesoLabel",
         className: "col-form-label"
-      }, this.state.x))), _react["default"].createElement("div", {
-        className: "row",
-        style: {
-          width: "100%"
-        }
-      }, _react["default"].createElement("div", {
-        className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
-      }, _react["default"].createElement("label", {
-        htmlFor: "tolerancia",
-        className: "col-form-label"
-      }, "Tolerancia")), _react["default"].createElement("div", {
-        className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
-      }, _react["default"].createElement("input", {
-        id: "tolerancia",
-        type: "text",
-        className: "form-control form-control-sm"
-      }))), _react["default"].createElement("div", {
-        className: "row",
-        style: {
-          width: "100%"
-        }
-      }, _react["default"].createElement("div", {
-        className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
-      }, _react["default"].createElement("label", {
-        htmlFor: "valorIdeal",
-        className: "col-form-label"
-      }, "Valor Ideal")), _react["default"].createElement("div", {
-        className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
-      }, _react["default"].createElement("input", {
-        id: "valorIdeal",
-        type: "text",
-        className: "form-control form-control-sm"
-      }))), _react["default"].createElement("div", {
-        className: "row",
-        style: {
-          width: "100%"
-        }
-      }, _react["default"].createElement("div", {
-        className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
-      }, _react["default"].createElement("label", {
-        htmlFor: "riesgoPadre",
-        className: "col-form-label"
-      }, "Riesgo Padre")), _react["default"].createElement("div", {
-        className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
-      }, _react["default"].createElement("select", {
-        id: "riesgoPadre",
-        className: "form-control"
-      }, _react["default"].createElement("option", {
-        value: "-1"
-      }, "Ninguno"), this.props.riesgos.map(function (riesgo, i) {
-        return _react["default"].createElement("option", {
-          value: riesgo.ID,
-          key: riesgo.ID
-        }, riesgo.nombre);
-      })))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
+      }, this.state.x))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
         className: "row",
         style: {
           display: "flex",

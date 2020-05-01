@@ -1,9 +1,10 @@
 import React from 'react';
+import sql from 'mssql';
 
 import VistaUmbral from './VistaUmbral.js';
-import UmbralOpciones from './UmbralOpciones.js';
+import CrearUmbral from './EditarUmbral.js';
 
-const secciones = [{nombre: "MONO 1", color: "#00c853", width: "25%"}, {nombre: "MONO 2", color: "#ffab40", width: "50%"}, {nombre: "MONO 1", color: "#00c853", width: "25%"}];
+const secciones = [{nombre: "MONO 1", color: "#00c853", width: "25"}, {nombre: "MONO 2", color: "#ffab40", width: "50"}, {nombre: "MONO 1", color: "#00c853", width: "25"}];
 var seccionesConRango = [];
 var posicionesInsertadasRango = 0, posicionesAInsertarRango = 0;
 
@@ -36,7 +37,7 @@ export default class Umbral extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("select * from Umbral where variableID = "+this.props.idVariable, (err, result) => {
+            request.query("select * from Umbral where variableID = "+this.props.idVariable+" and tablaVariable = '"+this.props.tablaVariable+"'", (err, result) => {
                 if (err) {
                     if (!rolledBack) {
                         console.log(err);
@@ -96,7 +97,7 @@ export default class Umbral extends React.Component {
         for (var i = 0; i < seccionesConRango.length; i++) {
             for (var j = 0; j < seccionesConRango[i].length; j++) {
                 posicionesAInsertarRango++;
-                this.traerSeccionRango(seccionesConRango[i][j]);
+                this.traerSeccionRango(seccionesConRango[i][j], i, j);
             };
         };
     }
@@ -109,7 +110,7 @@ export default class Umbral extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("select * from RangoSeccionUmbral where variableID = "+this.props.idVariable, (err, result) => {
+            request.query("select * from RangoSeccionUmbral where umbralID = "+seccionRango.umbralID+" and seccionUmbralID = "+seccionRango.ID, (err, result) => {
                 if (err) {
                     posicionesInsertadasRango++;
                     console.log(err);
@@ -177,7 +178,9 @@ export default class Umbral extends React.Component {
             <div>
                 {this.props.navbar}
                 <VistaUmbral umbrales={secciones}> </VistaUmbral>
-                <UmbralOpciones idVariable={this.props.idVariable} pool={this.props.pool}> </UmbralOpciones>
+                <CrearUmbral idVariable={this.props.idVariable} pool={this.props.pool}
+                                                        tablaVariable={this.props.tablaVariable}
+                                                        tituloUmbral={this.props.tituloUmbral}> </CrearUmbral>
             </div>
         );
     }

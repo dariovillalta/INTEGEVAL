@@ -97,7 +97,8 @@ function (_React$Component) {
           pool: this.props.pool,
           variables: this.state.variables,
           indicadores: this.state.indicadores,
-          riesgos: this.state.riesgos
+          riesgos: this.state.riesgos,
+          returnImportResults: this.returnImportResults
         }));
       }
     }

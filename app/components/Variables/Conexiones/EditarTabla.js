@@ -159,8 +159,6 @@ function (_React$Component) {
                         } else {
                           transaction.commit(function (err) {
                             _this2.showSuccesMessage("Exito", "Tabla creada con éxito.");
-
-                            _this2.loadTables();
                           });
                         }
                       });
@@ -459,14 +457,27 @@ function (_React$Component) {
         defaultValue: this.props.tablaTablaSeleccionada,
         type: "text",
         className: "form-control"
-      }))), this.state.errorCreacionTabla.mostrar ? _react["default"].createElement(_ErrorMessage["default"], {
+      }))), _react["default"].createElement("div", {
+        className: "row",
+        style: {
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center"
+        }
+      }, _react["default"].createElement("select", {
+        id: "tipoConexion",
+        defaultValue: this.props.tipoConexion,
+        className: "form-control"
+      }, _react["default"].createElement("option", {
+        value: "sql"
+      }, "Transact-SQL"))), this.state.errorCreacionTabla.mostrar ? _react["default"].createElement(_ErrorMessage["default"], {
         campo: this.state.errorCreacionTabla.campo,
         descripcion: this.state.errorCreacionTabla.descripcion,
         dismissTableError: this.dismissTableNewError
       }, " ") : _react["default"].createElement("span", null), _react["default"].createElement("div", {
         className: "row"
       }, _react["default"].createElement("button", {
-        onClick: this.insertTable,
+        onClick: this.updateTable,
         className: "btn btn-success btn-block col-xl-10 col-10 font-bold font-20",
         style: {
           margin: "0 auto",

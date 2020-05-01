@@ -17,11 +17,6 @@ export default class NavBar extends React.Component {
                                 <div className={"nav-user-info"}>
                                     <h5 className={"mb-0 text-white nav-user-name"}>{this.props.userName}</h5>
                                 </div>
-                                { this.props.permision.localeCompare("admin") == 0 ? (
-                                    <a className={"dropdown-item"} href="#" onClick={this.props.showConfigurationComponent}><i className={"fas fa-user mr-2"}></i>Configuración</a>
-                                ) : (
-                                    <span></span>
-                                )}
                                 <a className={"dropdown-item"} href="#" onClick={this.props.logOff}><i className={"fas fa-power-off mr-2"}></i>Salir</a>
                             </div>
                         </li>

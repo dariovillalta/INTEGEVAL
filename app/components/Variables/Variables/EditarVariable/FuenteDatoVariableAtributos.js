@@ -100,9 +100,10 @@ function (_React$Component) {
       }, _react["default"].createElement("div", {
         className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
       }, _react["default"].createElement("br", null), _react["default"].createElement("a", {
-        className: "btn btn-success btn-block btnWhiteColorHover font-bold font-20",
+        href: "#",
+        className: "btn btn-success active font-20",
         style: {
-          color: "#fafafa"
+          width: "100%"
         },
         onClick: function onClick() {
           return _this2.props.goCreateVariableFieldSQL();
@@ -132,9 +133,10 @@ function (_React$Component) {
         className: "breadcrumb-item active font-20",
         "aria-current": "page"
       }, this.props.tipoNuevaVariable))), _react["default"].createElement("br", null), _react["default"].createElement("a", {
-        className: "btn btn-success btn-block btnWhiteColorHover font-bold font-20",
+        href: "#",
+        className: "btn btn-success active font-20",
         style: {
-          color: "#fafafa"
+          width: "100%"
         },
         onClick: function onClick() {
           return _this2.actualizarIndiceAtributoSeleccionado(0);
@@ -151,9 +153,10 @@ function (_React$Component) {
       }, _react["default"].createElement("div", {
         className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
       }, _react["default"].createElement("a", {
-        className: "btn btn-success btn-block btnWhiteColorHover font-bold font-20",
+        href: "#",
+        className: "btn btn-success active font-20",
         style: {
-          color: "#fafafa"
+          width: "100%"
         },
         onClick: function onClick() {
           return _this2.props.goCreateVariableFieldSQL();
@@ -217,9 +220,10 @@ function (_React$Component) {
       }, _react["default"].createElement("div", {
         className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
       }, _react["default"].createElement("a", {
-        className: "btn btn-success btn-block btnWhiteColorHover font-bold font-20",
+        href: "#",
+        className: "btn btn-success active font-20",
         style: {
-          color: "#fafafa"
+          width: "100%"
         },
         onClick: function onClick() {
           return _this2.actualizarIndiceAtributoSeleccionado(-1);
@@ -290,9 +294,10 @@ function (_React$Component) {
           className: "breadcrumb-item active font-20",
           "aria-current": "page"
         }, atributo.tipo))), _react["default"].createElement("br", null), _react["default"].createElement("a", {
-          className: "btn btn-success btn-block btnWhiteColorHover font-bold font-20",
+          href: "#",
+          className: "btn btn-success active font-20",
           style: {
-            color: "#fafafa"
+            width: "100%"
           },
           onClick: function onClick() {
             return _this2.actualizarIndiceAtributoSeleccionado(i);

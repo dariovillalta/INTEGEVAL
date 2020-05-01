@@ -7,9 +7,11 @@ exports["default"] = void 0;
 
 var _react = _interopRequireDefault(require("react"));
 
+var _mssql = _interopRequireDefault(require("mssql"));
+
 var _VistaUmbral = _interopRequireDefault(require("./VistaUmbral.js"));
 
-var _UmbralOpciones = _interopRequireDefault(require("./UmbralOpciones.js"));
+var _EditarUmbral = _interopRequireDefault(require("./EditarUmbral.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
@@ -34,15 +36,15 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 var secciones = [{
   nombre: "MONO 1",
   color: "#00c853",
-  width: "25%"
+  width: "25"
 }, {
   nombre: "MONO 2",
   color: "#ffab40",
-  width: "50%"
+  width: "50"
 }, {
   nombre: "MONO 1",
   color: "#00c853",
-  width: "25%"
+  width: "25"
 }];
 var seccionesConRango = [];
 var posicionesInsertadasRango = 0,
@@ -84,14 +86,14 @@ function (_React$Component) {
     value: function traerUmbrales() {
       var _this2 = this;
 
-      var transaction = new sql.Transaction(this.props.pool);
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
       transaction.begin(function (err) {
         var rolledBack = false;
         transaction.on('rollback', function (aborted) {
           rolledBack = true;
         });
-        var request = new sql.Request(transaction);
-        request.query("select * from Umbral where variableID = " + _this2.props.idVariable, function (err, result) {
+        var request = new _mssql["default"].Request(transaction);
+        request.query("select * from Umbral where variableID = " + _this2.props.idVariable + " and tablaVariable = '" + _this2.props.tablaVariable + "'", function (err, result) {
           if (err) {
             if (!rolledBack) {
               console.log(err);
@@ -124,13 +126,13 @@ function (_React$Component) {
     value: function traerSeccion(umbral, index, ultimoIndex, posicionesInsertadas) {
       var _this3 = this;
 
-      var transaction = new sql.Transaction(this.props.pool);
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
       transaction.begin(function (err) {
         var rolledBack = false;
         transaction.on('rollback', function (aborted) {
           rolledBack = true;
         });
-        var request = new sql.Request(transaction);
+        var request = new _mssql["default"].Request(transaction);
         request.query("select * from SeccionUmbral where umbralID = " + umbral.ID, function (err, result) {
           if (err) {
             if (!rolledBack) {
@@ -156,7 +158,7 @@ function (_React$Component) {
       for (var i = 0; i < seccionesConRango.length; i++) {
         for (var j = 0; j < seccionesConRango[i].length; j++) {
           posicionesAInsertarRango++;
-          this.traerSeccionRango(seccionesConRango[i][j]);
+          this.traerSeccionRango(seccionesConRango[i][j], i, j);
         }
 
         ;
@@ -169,14 +171,14 @@ function (_React$Component) {
     value: function traerSeccionRango(seccionRango, indexUmbral, indexRango) {
       var _this4 = this;
 
-      var transaction = new sql.Transaction(this.props.pool);
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
       transaction.begin(function (err) {
         var rolledBack = false;
         transaction.on('rollback', function (aborted) {
           rolledBack = true;
         });
-        var request = new sql.Request(transaction);
-        request.query("select * from RangoSeccionUmbral where variableID = " + _this4.props.idVariable, function (err, result) {
+        var request = new _mssql["default"].Request(transaction);
+        request.query("select * from RangoSeccionUmbral where umbralID = " + seccionRango.umbralID + " and seccionUmbralID = " + seccionRango.ID, function (err, result) {
           if (err) {
             posicionesInsertadasRango++;
             console.log(err);
@@ -259,9 +261,11 @@ function (_React$Component) {
     value: function render() {
       return _react["default"].createElement("div", null, this.props.navbar, _react["default"].createElement(_VistaUmbral["default"], {
         umbrales: secciones
-      }, " "), _react["default"].createElement(_UmbralOpciones["default"], {
+      }, " "), _react["default"].createElement(_EditarUmbral["default"], {
         idVariable: this.props.idVariable,
-        pool: this.props.pool
+        pool: this.props.pool,
+        tablaVariable: this.props.tablaVariable,
+        tituloUmbral: this.props.tituloUmbral
       }, " "));
     }
   }]);

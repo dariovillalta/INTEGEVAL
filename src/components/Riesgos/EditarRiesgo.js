@@ -10,7 +10,7 @@ export default class EditarRiesgo extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            x: 0,
+            x: this.props.pesoRiesgo,
             componentActual: "EditarRiesgo",
             navbar: ""
         }
@@ -51,30 +51,8 @@ export default class EditarRiesgo extends React.Component {
 
     guardarRiesgo () {
         var nombre = $("#nombreRiesgo").val();
-        var formula = '';
+        var formula = $("#formula").val();
         var peso = this.state.x;
-        var tolerancia = parseInt($("#tolerancia").val());
-        var valorIdeal = parseInt($("#valorIdeal").val());
-        var tipoValorIdeal = $("#tipoValorIdeal").val();
-        var riesgoPadre = parseInt(this.props.riesgoPadre);
-        var nivel = 0;
-        if(this.props.riesgoPadre == -1) {
-            riesgoPadre = parseInt($("#riesgoPadre").val());
-        }
-        console.log('nombre');
-        console.log(nombre);
-        console.log('formula');
-        console.log(formula);
-        console.log('peso');
-        console.log(peso);
-        console.log('tolerancia');
-        console.log(tolerancia);
-        console.log('valorIdeal');
-        console.log(valorIdeal);
-        console.log('riesgoPadre');
-        console.log(riesgoPadre);
-        console.log('nivel');
-        console.log(nivel);
         const transaction = new sql.Transaction( this.props.pool );
         transaction.begin(err => {
             var rolledBack = false;
@@ -82,7 +60,7 @@ export default class EditarRiesgo extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("update Riesgos set nombre = '"+nombre+"', peso = "+peso+", tolerancia = "+tolerancia+", valorIdeal = "+valorIdeal+", tipoValorIdeal = '"+tipoValorIdeal+"', riesgoPadre = "+riesgoPadre+" where ID = "+this.props.idRiesgoSeleccionado, (err, result) => {
+            request.query("update Riesgos set nombre = '"+nombre+"', peso = "+peso+", formula = "+formula+" where ID = "+this.props.idRiesgoSeleccionado, (err, result) => {
                 if (err) {
                     if (!rolledBack) {
                         console.log(err);
@@ -133,9 +111,21 @@ export default class EditarRiesgo extends React.Component {
                                         </div>
                                         <div className={"row"} style={{width: "100%"}}>
                                             <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
-                                                <label htmlFor="peso" className="col-form-label">Peso</label>
+                                                <label htmlFor="formula" className="col-form-label">Tipo de Indicador</label>
                                             </div>
                                             <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"}>
+                                                <select id="formula" defaultValue={this.props.formula} className="form-control">
+                                                    <option value="ambos">Calidad de Gestión + Riesgo Inherente</option>
+                                                    <option value="riesgoInherente">Riesgo Inherente</option>
+                                                    <option value="calidadGestión">Calidad de Gestión</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div className={"row"} style={{width: "100%"}}>
+                                            <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
+                                                <label htmlFor="peso" className="col-form-label">Peso</label>
+                                            </div>
+                                            <div className={"col-xl-8 col-lg-8 col-md-8 col-sm-8 col-8 form-group"}>
                                                 <Slider
                                                     axis="x"
                                                     xstep={1}
@@ -145,46 +135,8 @@ export default class EditarRiesgo extends React.Component {
                                                     onChange={({ x }) => this.setState({ x: x }) }
                                                     style={{width: "100%", marginTop: "10px"}}/>
                                             </div>
-                                        </div>
-                                        <div className={"row"} style={{width: "100%"}}>
-                                            <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
-                                                <label htmlFor="tolerancia" className="col-form-label">Tolerancia</label>
-                                            </div>
-                                            <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"}>
-                                                <input id="tolerancia" type="text" className="form-control form-control-sm" defaultValue={this.props.toleranciaRiesgo}/>
-                                            </div>
-                                        </div>
-                                        <div className={"row"} style={{width: "100%"}}>
-                                            <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
-                                                <label htmlFor="valorIdeal" className="col-form-label">Valor Ideal</label>
-                                            </div>
-                                            <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"}>
-                                                <input id="valorIdeal" type="text" className="form-control form-control-sm" defaultValue={this.props.valorIdealRiesgo}/>
-                                            </div>
-                                        </div>
-                                        <div className={"row"} style={{width: "100%"}}>
-                                            <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
-                                                <label htmlFor="tipoValorIdeal" className="col-form-label">Tipo de Valor Ideal</label>
-                                            </div>
-                                            <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"}>
-                                                <select id="tipoValorIdeal" className="form-control">
-                                                    {tipoCampos.map((tipo, i) =>
-                                                        <option value={tipo.nombre} key={tipo.nombre}>{tipo.nombre}</option>
-                                                    )}
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div className={"row"} style={{width: "100%"}}>
-                                            <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
-                                                <label htmlFor="riesgoPadre" className="col-form-label">Riesgo Padre</label>
-                                            </div>
-                                            <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"}>
-                                                <select id="riesgoPadre" className="form-control" defaultValue={this.props.padreRiesgo}>
-                                                    <option value="-1">Ninguno</option>
-                                                    {this.props.riesgos.map((riesgo, i) =>
-                                                        <option value={riesgo.ID} key={riesgo.ID}>{riesgo.nombre}</option>
-                                                    )}
-                                                </select>
+                                            <div className={"col-xl-1 col-lg-1 col-md-1 col-sm-1 col-1 form-group"}>
+                                                <label id="pesoLabel" className="col-form-label">{this.state.x}</label>
                                             </div>
                                         </div>
                                         <a className={"btn btn-brand btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.goCrearUmbral}>Umbrales</a>
@@ -203,7 +155,9 @@ export default class EditarRiesgo extends React.Component {
         } else if(this.state.componentActual.localeCompare("EditarUmbral") == 0) {
             return (
                 <div>
-                    <Umbral navbar={this.state.navbar} idVariable={this.props.idRiesgoSeleccionado} pool={this.props.pool}> </Umbral>
+                    <Umbral navbar={this.state.navbar} idVariable={this.props.idRiesgoSeleccionado} pool={this.props.pool}
+                                                        tablaVariable={"Riesgo"}
+                                                        tituloUmbral={"Riesgo: "+this.props.nombreRiesgo}> </Umbral>
                 </div>
             );
         }

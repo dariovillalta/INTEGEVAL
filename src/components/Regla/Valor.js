@@ -18,6 +18,7 @@ export default class Valor extends React.Component {
         this.mostrarListas = this.mostrarListas.bind(this);
         this.mostrarFecha = this.mostrarFecha.bind(this);
         this.initFecha = this.initFecha.bind(this);
+        this.isValidDate = this.isValidDate.bind(this);
         this.mostrarTiempo = this.mostrarTiempo.bind(this);
         this.changeTime = this.changeTime.bind(this);
     }
@@ -134,12 +135,30 @@ export default class Valor extends React.Component {
             todayHighlight: true,
             viewMode: "days", 
             minViewMode: "days",
-            language: 'es',
-            onSelect: function (date) {
-                var valorARetornar = "FECHA=("+date.getFullYear()+"-"+date.getMonth()+"-"+date.getDate()+")";
-                this.props.retornarValor(valorARetornar, date.getFullYear()+"-"+date.getMonth()+"-"+date.getDate());
+            language: 'es'
+        });
+        var self = this;
+        $('#fecha').datepicker().on('changeDate', function () {
+            var fecha = $("#fecha").datepicker('getDate');
+            if(self.isValidDate(fecha)) {
+                var valorARetornar = "FECHA=("+fecha.getFullYear()+"-"+fecha.getMonth()+"-"+fecha.getDate()+")";
+                self.props.retornarValorFecha(valorARetornar, fecha.getFullYear()+"-"+fecha.getMonth()+"-"+fecha.getDate());
             }
         });
+    }
+
+    isValidDate (fecha) {
+        if (Object.prototype.toString.call(fecha) === "[object Date]") {
+            if (isNaN(fecha.getTime())) {
+                alert("Ingrese una fecha valida.");
+                return false;
+            } else {
+                return true;
+            }
+        } else {
+            alert("Ingrese una fecha valida.");
+            return false;
+        }
     }
 
     mostrarTiempo () {
@@ -153,7 +172,7 @@ export default class Valor extends React.Component {
 
     changeTime() {
         var valorARetornar = "TIEMPO=[DIAS="+$("#dias").val()+",MES="+$("#mes").val()+",AÑOS="+$("#anio").val()+"]";
-        this.props.retornarValor(valorARetornar, "DIAS="+$("#dias").val()+",MES="+$("#mes").val()+",AÑOS="+$("#anio").val());
+        this.props.retornarValorTime(valorARetornar, "DIAS="+$("#dias").val()+",MES="+$("#mes").val()+",AÑOS="+$("#anio").val());
     }
 
     render() {
@@ -263,11 +282,11 @@ export default class Valor extends React.Component {
                     <label className="custom-control custom-radio custom-control-inline">
                         <input type="radio" name="radio-inline" className="custom-control-input" onClick={() => this.mostrarListas()}/><span className="custom-control-label">Listas</span>
                     </label>
-                    <label className="custom-control custom-radio custom-control-inline">
-                        <input type="radio" name="radio-inline" className="custom-control-input" onClick={() => this.mostrarFecha()}/><span className="custom-control-label">Fecha</span>
+                    <label className="custom-control custom-radio custom-control-inline" style={{display: (this.props.esFecha ? "" : "none")}}>
+                        <input type="radio" name="radio-inline" className="custom-control-input" style={{display: ( this.props.esFecha ? "" : "none")}} onClick={() => this.mostrarFecha()}/><span className="custom-control-label">Fecha</span>
                     </label>
-                    <label className="custom-control custom-radio custom-control-inline">
-                        <input type="radio" name="radio-inline" className="custom-control-input" onClick={() => this.mostrarTiempo()}/><span className="custom-control-label">Tiempo</span>
+                    <label className="custom-control custom-radio custom-control-inline" style={{display: (this.props.esFecha ? "" : "none")}}>
+                        <input type="radio" name="radio-inline" className="custom-control-input" style={{display: ( this.props.esFecha ? "" : "none")}} onClick={() => this.mostrarTiempo()}/><span className="custom-control-label">Tiempo</span>
                     </label>
                 </div>
                 {
@@ -299,7 +318,7 @@ export default class Valor extends React.Component {
                     : null
                 }
                 {
-                    this.state.radioFecha
+                    this.state.radioFecha && this.props.esFecha
                     ?   <div className={"row"} style={{width: "100%"}}>
                             <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
                                 <label htmlFor="valor" className="col-form-label">Fecha:</label>
@@ -311,7 +330,7 @@ export default class Valor extends React.Component {
                     : null
                 }
                 {
-                    this.state.radioTiempo
+                    this.state.radioTiempo && this.props.esFecha
                     ?   <div className={"row"} style={{width: "100%"}}>
                             <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
                                 <label htmlFor="dias" className="col-form-label">Días:</label>

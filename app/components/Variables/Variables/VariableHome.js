@@ -53,12 +53,15 @@ function (_React$Component) {
       idVariable: -1,
       tipoVariable: "",
       esObjetoVariable: "",
-      esInstruccionSQLVariable: ""
+      esInstruccionSQLVariable: "",
+      esPrimeraVez: true
     };
     _this.crearVariables = _this.crearVariables.bind(_assertThisInitialized(_this));
     _this.retornoSeleccionVariables = _this.retornoSeleccionVariables.bind(_assertThisInitialized(_this));
     _this.editarVariables = _this.editarVariables.bind(_assertThisInitialized(_this));
+    _this.changeStateFirstTimeToFalse = _this.changeStateFirstTimeToFalse.bind(_assertThisInitialized(_this));
     _this.terminoCrearVariablesPasarAEdit = _this.terminoCrearVariablesPasarAEdit.bind(_assertThisInitialized(_this));
+    _this.actualizarIDVariableModificada = _this.actualizarIDVariableModificada.bind(_assertThisInitialized(_this));
     return _this;
   }
 
@@ -92,7 +95,15 @@ function (_React$Component) {
         componenteActual: "editarVariables",
         tipoVariable: tipoVariable,
         esObjetoVariable: esObjetoVariable,
-        esInstruccionSQLVariable: esInstruccionSQLVariable
+        esInstruccionSQLVariable: esInstruccionSQLVariable,
+        esPrimeraVez: true
+      });
+    }
+  }, {
+    key: "changeStateFirstTimeToFalse",
+    value: function changeStateFirstTimeToFalse() {
+      this.setState({
+        esPrimeraVez: false
       });
     }
   }, {
@@ -127,6 +138,93 @@ function (_React$Component) {
       }); // fin transaction
     }
   }, {
+    key: "actualizarIDVariableModificada",
+    value: function actualizarIDVariableModificada(tablaDeVariableModificada) {
+      var _this3 = this;
+
+      if (tablaDeVariableModificada.localeCompare("excel") == 0) {
+        var transaction = new _mssql["default"].Transaction(this.props.pool);
+        transaction.begin(function (err) {
+          var rolledBack = false;
+          transaction.on('rollback', function (aborted) {
+            rolledBack = true;
+          });
+          var request = new _mssql["default"].Request(transaction);
+          request.query("select top 1 * from ExcelArchivos order by ID desc", function (err, result) {
+            if (err) {
+              console.log(err);
+
+              if (!rolledBack) {
+                transaction.rollback(function (err) {});
+              }
+            } else {
+              transaction.commit(function (err) {
+                if (result.recordset.length > 0) {
+                  _this3.editarVariables(result.recordset[0].ID, false, false, "excel");
+                }
+              });
+            }
+          });
+        }); // fin transaction
+      } else if (tablaDeVariableModificada.localeCompare("forma") == 0) {
+        var _transaction = new _mssql["default"].Transaction(this.props.pool);
+
+        _transaction.begin(function (err) {
+          var rolledBack = false;
+
+          _transaction.on('rollback', function (aborted) {
+            rolledBack = true;
+          });
+
+          var request = new _mssql["default"].Request(_transaction);
+          request.query("select top 1 * from FormasVariables order by ID desc", function (err, result) {
+            if (err) {
+              console.log(err);
+
+              if (!rolledBack) {
+                _transaction.rollback(function (err) {});
+              }
+            } else {
+              _transaction.commit(function (err) {
+                if (result.recordset.length > 0) {
+                  _this3.editarVariables(result.recordset[0].ID, false, false, "forma");
+                }
+              });
+            }
+          });
+        }); // fin transaction
+
+      } else if (tablaDeVariableModificada.localeCompare("variable") == 0) {
+        var _transaction2 = new _mssql["default"].Transaction(this.props.pool);
+
+        _transaction2.begin(function (err) {
+          var rolledBack = false;
+
+          _transaction2.on('rollback', function (aborted) {
+            rolledBack = true;
+          });
+
+          var request = new _mssql["default"].Request(_transaction2);
+          request.query("select top 1 * from Variables order by ID desc", function (err, result) {
+            if (err) {
+              console.log(err);
+
+              if (!rolledBack) {
+                _transaction2.rollback(function (err) {});
+              }
+            } else {
+              _transaction2.commit(function (err) {
+                if (result.recordset.length > 0) {
+                  _this3.editarVariables(result.recordset[0].ID, result.recordset[0].esObjeto, result.recordset[0].esInstruccionSQL, "variable");
+                }
+              });
+            }
+          });
+        }); // fin transaction
+
+      }
+    }
+  }, {
     key: "render",
     value: function render() {
       if (this.state.componenteActual.localeCompare("selVariables") == 0) {
@@ -157,7 +255,10 @@ function (_React$Component) {
           esObjetoVariable: this.state.esObjetoVariable,
           esInstruccionSQLVariable: this.state.esInstruccionSQLVariable,
           retornoSeleccionVariables: this.retornoSeleccionVariables,
-          configuracionHome: this.props.configuracionHome
+          configuracionHome: this.props.configuracionHome,
+          actualizarIDVariableModificada: this.actualizarIDVariableModificada,
+          changeStateFirstTimeToFalse: this.changeStateFirstTimeToFalse,
+          esPrimeraVez: this.state.esPrimeraVez
         }));
       }
     }

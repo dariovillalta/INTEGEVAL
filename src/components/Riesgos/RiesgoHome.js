@@ -9,6 +9,7 @@ export default class RiesgoHome extends React.Component {
 
     constructor(props) {
         super(props);
+        //cuando es llamado desde indicadores
         var componente = "selRiesgo";
         if(this.props.crearRiesgo)
             componente = "crearRiesgo";
@@ -16,7 +17,10 @@ export default class RiesgoHome extends React.Component {
             riesgos: [],
             pesoDisponible: 0,
             idRiesgoSeleccionado: -1,
-            componenteActual: componente
+            componenteActual: componente,
+            nombreRiesgo: "",
+            pesoRiesgo: 0,
+            formulaRiesgo: ""
         }
         this.getRiesgos = this.getRiesgos.bind(this);
         this.acutalizarPesoMaximoDisponible = this.acutalizarPesoMaximoDisponible.bind(this);
@@ -64,10 +68,6 @@ export default class RiesgoHome extends React.Component {
         for (var i = 0; i < this.state.riesgos.length; i++) {
             pesoExistente += this.state.riesgos[i].peso;
         };
-        console.log('pesoInstitucional');
-        console.log(pesoInstitucional);
-        console.log('pesoExistente');
-        console.log(pesoExistente);
         this.setState({
             pesoDisponible: pesoInstitucional-pesoExistente
         });
@@ -86,16 +86,14 @@ export default class RiesgoHome extends React.Component {
         });
     }
 
-    editarRiesgo (id, nombreRiesgo, pesoRiesgo, toleranciaRiesgo, valorIdealRiesgo, padreRiesgo) {
+    editarRiesgo (id, nombreRiesgo, pesoRiesgo, formulaRiesgo) {
         this.setState({
             idRiesgoSeleccionado: id,
             componenteActual: "editarRiesgo",
             nombreRiesgo: nombreRiesgo,
             pesoRiesgo: pesoRiesgo,
-            toleranciaRiesgo: toleranciaRiesgo,
-            valorIdealRiesgo: valorIdealRiesgo,
-            padreRiesgo: padreRiesgo
-        }, console.log(this.state.idRiesgoSeleccionado) );
+            formulaRiesgo: formulaRiesgo,
+        });
     }
 
     terminoCrearRiesgoPasarAEdit () {
@@ -161,13 +159,32 @@ export default class RiesgoHome extends React.Component {
         } else if(this.state.componenteActual.localeCompare("crearRiesgo") == 0) {
             return (
                 <div>
-                    <CrearRiesgo pool={this.props.pool} showCondicionVar={this.props.showCondicionVar} showRiesgos={this.props.showRiesgos} retornoSeleccionRiesgo={this.retornoSeleccionRiesgo} configuracionHome={this.props.configuracionHome} updateNavBar={this.props.updateNavBar} showUmbralHome={this.props.showUmbralHome} riesgos={this.state.riesgos} terminoCrearRiesgo={this.terminoCrearRiesgoPasarAEdit} actualizarRiesgos={this.getRiesgos} pesoMaximo={this.state.pesoDisponible}> </CrearRiesgo>
+                    <CrearRiesgo pool={this.props.pool}
+                                    showCondicionVar={this.props.showCondicionVar}
+                                    showRiesgos={this.props.showRiesgos}
+                                    retornoSeleccionRiesgo={this.retornoSeleccionRiesgo}
+                                    configuracionHome={this.props.configuracionHome}
+                                    showUmbralHome={this.props.showUmbralHome}
+                                    riesgos={this.state.riesgos}
+                                    terminoCrearRiesgo={this.terminoCrearRiesgoPasarAEdit}
+                                    actualizarRiesgos={this.getRiesgos}
+                                    pesoMaximo={this.state.pesoDisponible}> </CrearRiesgo>
                 </div>
             );
         } else if(this.state.componenteActual.localeCompare("editarRiesgo") == 0) {
             return (
                 <div>
-                    <EditarRiesgo pool={this.props.pool} showCondicionVar={this.props.showCondicionVar} showRiesgos={this.props.showRiesgos} retornoSeleccionRiesgo={this.retornoSeleccionRiesgo} configuracionHome={this.props.configuracionHome} updateNavBar={this.props.updateNavBar} showUmbralHome={this.props.showUmbralHome} riesgos={this.state.riesgos} nombreRiesgo={this.state.nombreRiesgo} pesoRiesgo={this.state.pesoRiesgo} toleranciaRiesgo={this.state.toleranciaRiesgo} valorIdealRiesgo={this.state.valorIdealRiesgo} padreRiesgo={this.state.padreRiesgo} updateFormula={this.props.updateFormula} idRiesgoSeleccionado={this.state.idRiesgoSeleccionado}> </EditarRiesgo>
+                    <EditarRiesgo pool={this.props.pool}
+                                    showCondicionVar={this.props.showCondicionVar}
+                                    showRiesgos={this.props.showRiesgos}
+                                    retornoSeleccionRiesgo={this.retornoSeleccionRiesgo}
+                                    configuracionHome={this.props.configuracionHome}
+                                    showUmbralHome={this.props.showUmbralHome}
+                                    riesgos={this.state.riesgos}
+                                    nombreRiesgo={this.state.nombreRiesgo}
+                                    pesoRiesgo={this.state.pesoRiesgo}
+                                    formulaRiesgo={this.state.formulaRiesgo}
+                                    idRiesgoSeleccionado={this.state.idRiesgoSeleccionado}> </EditarRiesgo>
                 </div>
             );
         }

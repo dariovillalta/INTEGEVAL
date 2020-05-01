@@ -49,7 +49,8 @@ function (_React$Component) {
       contrasenaTablaSeleccionada: "",
       servidorTablaSeleccionada: "",
       baseDatosTablaSeleccionada: "",
-      tablaTablaSeleccionada: ""
+      tablaTablaSeleccionada: "",
+      tipoConexionTablaSeleccionada: ""
     };
     _this.terminoSeleccionTabla = _this.terminoSeleccionTabla.bind(_assertThisInitialized(_this));
     _this.retornoSeleccionTabla = _this.retornoSeleccionTabla.bind(_assertThisInitialized(_this));
@@ -58,7 +59,7 @@ function (_React$Component) {
 
   _createClass(ConexionesHome, [{
     key: "terminoSeleccionTabla",
-    value: function terminoSeleccionTabla(id, nombre, usuario, contrasena, servidor, baseDatos, tabla) {
+    value: function terminoSeleccionTabla(id, nombre, usuario, contrasena, servidor, baseDatos, tabla, tipoConexion) {
       this.setState({
         idTablaSeleccionada: id,
         nombreTablaSeleccionada: nombre,
@@ -66,7 +67,8 @@ function (_React$Component) {
         contrasenaTablaSeleccionada: contrasena,
         servidorTablaSeleccionada: servidor,
         baseDatosTablaSeleccionada: baseDatos,
-        tablaTablaSeleccionada: tabla
+        tablaTablaSeleccionada: tabla,
+        tipoConexionTablaSeleccionada: tipoConexion
       });
     }
   }, {
@@ -99,7 +101,8 @@ function (_React$Component) {
           contrasenaTablaSeleccionada: this.state.contrasenaTablaSeleccionada,
           servidorTablaSeleccionada: this.state.servidorTablaSeleccionada,
           baseDatosTablaSeleccionada: this.state.baseDatosTablaSeleccionada,
-          tablaTablaSeleccionada: this.state.tablaTablaSeleccionada
+          tablaTablaSeleccionada: this.state.tablaTablaSeleccionada,
+          tipoConexion: this.state.tipoConexionTablaSeleccionada
         }));
       }
     }

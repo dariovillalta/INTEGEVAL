@@ -166,7 +166,13 @@ function (_React$Component) {
         nombreCampoNuevoAtributosVario: this.props.nombreCampoNuevoAtributosVario,
         tipoNuevaVariable: this.props.tipoNuevaVariable,
         actualizarNombreCampoNuevoAtributosVario: this.props.actualizarNombreCampoNuevoAtributosVario,
-        atributos: this.props.atributos
+        atributos: this.props.atributos,
+        actualizarFechaInicio: this.props.actualizarFechaInicio,
+        actualizarPeriodicidad: this.props.actualizarPeriodicidad,
+        actualizarNombreEncargado: this.props.actualizarNombreEncargado,
+        fechaInicioVariable: this.props.fechaInicioVariable,
+        periodicidadVariable: this.props.periodicidadVariable,
+        analistaVariable: this.props.analistaVariable
       }) : null, this.state.mostrarFuenteDatoForma ? _react["default"].createElement(_FuenteDatoForma["default"], {
         pool: this.props.pool
       }) : null, this.state.mostrarFuenteDatoExcel ? _react["default"].createElement(_FuenteDatoExcel["default"], {

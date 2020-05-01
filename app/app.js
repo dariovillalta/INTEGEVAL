@@ -9,6 +9,8 @@ var _react = _interopRequireDefault(require("react"));
 
 var _mssql = _interopRequireDefault(require("mssql"));
 
+var _fs = _interopRequireDefault(require("fs"));
+
 var _Layout = _interopRequireDefault(require("./components/Layout.js"));
 
 var _LoginPage = _interopRequireDefault(require("./components/LoginPage.js"));
@@ -34,38 +36,39 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
 //import odbc from 'odbc';
-var config = {
-  user: 'SA',
-  password: 'password111!',
-  server: 'localhost',
-  database: 'TOLOC_INTEG',
-  stream: true,
-  pool: {
-    max: 40,
-    min: 0,
-    idleTimeoutMillis: 60000
-  },
-  options: {
-    useUTC: false
-  }
-};
-var pool = new _mssql["default"].ConnectionPool(config, function (err) {
-  if (err) {
-    console.log(err);
-    console.log("Error en conección con la base de datos");
-    /*$("body").overhang({
-        type: "error",
-        primary: "#f84a1d",
-        accent: "#d94e2a",
-        message: "Error en conección con la base de datos.",
-        overlay: true,
-        closeConfirm: true
-    });*/
-  } else {
-    console.log('pool loaded');
-  }
-});
 
+/*const config = {
+    user: 'SA',
+    password: 'password111!',
+    server: 'localhost',
+    database: 'TOLOC_INTEG',
+    stream: true,
+    pool: {
+        max: 40,
+        min: 0,
+        idleTimeoutMillis: 60000
+    },
+    options: {
+        useUTC: false
+    }
+}*/
+
+/*const pool = new sql.ConnectionPool(config, err => {
+    if(err) {
+        console.log(err);
+        console.log("Error en conección con la base de datos");
+        $("body").overhang({
+            type: "error",
+            primary: "#f84a1d",
+            accent: "#d94e2a",
+            message: "Error en conección con la base de datos.",
+            overlay: true,
+            closeConfirm: true
+        });
+    } else {
+        console.log('pool loaded');
+    }
+});*/
 var App =
 /*#__PURE__*/
 function (_React$Component) {
@@ -80,15 +83,24 @@ function (_React$Component) {
     _this.state = {
       isLoggedIn: false,
       userName: null,
-      permision: "" // connection2 is now an open Connection
+      permision: "",
+      config: {},
+      pool: null // connection2 is now an open Connection
 
     };
     _this.login = _this.login.bind(_assertThisInitialized(_this));
     _this.logOff = _this.logOff.bind(_assertThisInitialized(_this));
+    _this.readConfigFile = _this.readConfigFile.bind(_assertThisInitialized(_this));
+    _this.connectToDB = _this.connectToDB.bind(_assertThisInitialized(_this));
     return _this;
   }
 
   _createClass(App, [{
+    key: "componentDidMount",
+    value: function componentDidMount() {
+      this.readConfigFile();
+    }
+  }, {
     key: "login",
     value: function login(userName, permision) {
       this.setState({
@@ -105,16 +117,91 @@ function (_React$Component) {
       });
     }
   }, {
+    key: "readConfigFile",
+    value: function readConfigFile() {
+      var _this2 = this;
+
+      _fs["default"].readFile('./conf.dar', 'utf-8', function (err, data) {
+        if (err) {
+          alert("Error al leer el archivo de configuracion de tabla.");
+        } else {
+          var lineas = data.split("\n");
+          var user, password, server, database;
+
+          for (var i = 0; i < lineas.length; i++) {
+            if (i == 0) {
+              //var bytes = CryptoJS.AES.decrypt(lineas[i].replace(/\r?\n|\r/g), 'AncientAliens');
+              //var despues = bytes.toString(CryptoJS.enc.Utf8);
+              user = lineas[i].toString();
+            } else if (i == 1) {
+              /*var bytes = CryptoJS.AES.decrypt(lineas[i].replace(/\r?\n|\r/g), 'AncientAliens');
+              var despues = bytes.toString(CryptoJS.enc.Utf8);*/
+              password = lineas[i].toString();
+            } else if (i == 2) {
+              /*var bytes = CryptoJS.AES.decrypt(lineas[i].replace(/\r?\n|\r/g), 'AncientAliens');
+              var despues = bytes.toString(CryptoJS.enc.Utf8);*/
+              server = lineas[i].toString();
+            } else if (i == 3) {
+              /*var bytes = CryptoJS.AES.decrypt(lineas[i].replace(/\r?\n|\r/g), 'AncientAliens');
+              var despues = bytes.toString(CryptoJS.enc.Utf8);*/
+              database = lineas[i].toString();
+            }
+          }
+
+          ;
+
+          if (user != undefined && password != undefined && server != undefined && database != undefined) {
+            var configTemp = {
+              user: user,
+              password: password,
+              server: server,
+              database: database,
+              stream: true,
+              pool: {
+                max: 40,
+                min: 0,
+                idleTimeoutMillis: 60000
+              },
+              options: {
+                useUTC: false
+              }
+            };
+
+            _this2.setState({
+              config: configTemp
+            }, _this2.connectToDB);
+          }
+        }
+      });
+    }
+  }, {
+    key: "connectToDB",
+    value: function connectToDB() {
+      var poolTemp = new _mssql["default"].ConnectionPool(this.state.config, function (err) {
+        if (err) {
+          console.log(err);
+          console.log("Error en conección con la base de datos");
+          alert("Error en conección con la base de datos");
+        } else {
+          console.log('pool loaded');
+        }
+      });
+      this.setState({
+        pool: poolTemp
+      });
+    }
+  }, {
     key: "render",
     value: function render() {
       return _react["default"].createElement("div", null, this.state.isLoggedIn ? _react["default"].createElement(_Layout["default"], {
         userName: this.state.userName,
         permision: this.state.permision,
         logOff: this.logOff,
-        pool: pool
+        pool: this.state.pool
       }, " ") : _react["default"].createElement(_LoginPage["default"], {
         login: this.login,
-        pool: pool
+        pool: this.state.pool,
+        readConfigFile: this.readConfigFile
       }, " "));
     }
   }]);

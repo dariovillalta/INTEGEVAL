@@ -41,6 +41,20 @@ const operacionesCadena = [{valor: "Asignar Valor Único"}, {valor: "Asignar Val
 var mostrarEsObjetoGlobal = true;
 var mostrarInstruccionSQLGlobal = true;
 var tituloGlobal = "Instrucción SQL";
+var valorPeriodicidadGlobal = "-1";
+var periodicidad = [{
+  nombre: "diario"
+}, {
+  nombre: "semanal"
+}, {
+  nombre: "mensual"
+}, {
+  nombre: "trimestral"
+}, {
+  nombre: "bi-anual"
+}, {
+  nombre: "anual"
+}];
 
 var FuenteDatoVariable =
 /*#__PURE__*/
@@ -54,191 +68,37 @@ function (_React$Component) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(FuenteDatoVariable).call(this, props));
     _this.state = {
-      //atributos: this.props.atributos,
       mostrarEsObjeto: mostrarEsObjetoGlobal,
       titulo: tituloGlobal,
-      mostrarInstruccionSQL: mostrarInstruccionSQLGlobal
-      /*tipoVariable: '',
-      operaciones: operacionesCadena,
-      reglas: []*/
-
-      /*this.crearAtributoFuenteDatos = this.crearAtributoFuenteDatos.bind(this);
-      this.crearFuenteDato = this.crearFuenteDato.bind(this);
-      this.existeReglaAsignacion = this.existeReglaAsignacion.bind(this);
-      this.retornarCodigoOperacion = this.retornarCodigoOperacion.bind(this);
-      this.retornoSeleccionCampo = this.retornoSeleccionCampo.bind(this);
-      this.retornoSeleccionOperacion = this.retornoSeleccionOperacion.bind(this);*/
-
+      mostrarInstruccionSQL: mostrarInstruccionSQLGlobal,
+      valorPeriodicidad: valorPeriodicidadGlobal
     };
     _this.cambioInstruccionSQL = _this.cambioInstruccionSQL.bind(_assertThisInitialized(_this));
     _this.cambioAObjeto = _this.cambioAObjeto.bind(_assertThisInitialized(_this));
     _this.cambiarTitulo = _this.cambiarTitulo.bind(_assertThisInitialized(_this));
+    _this.actualizarPeriodicidad = _this.actualizarPeriodicidad.bind(_assertThisInitialized(_this));
+    _this.cargarDatePicker = _this.cargarDatePicker.bind(_assertThisInitialized(_this));
     return _this;
   }
-  /*crearAtributoFuenteDatos () {
-      var nombre = $("#nombreFuenteDato").val();
-      var esObjeto;
-      if ($("#esObjetoFuenteDato").is(':checked'))
-          esObjeto = true;
-      else
-          esObjeto = false;
-      var nombreAtributo = nombre;
-      if(esObjeto) {
-          nombreAtributo = $("#nombreAtributo").val();
-      }
-      var formula = this.retornarCodigoOperacion(operacionSeleccionada.valor) + "(" + columnaSeleccionada.valor + ")";
-      if(nombreAtributo.length > 0) {
-          if(formula.length > 0) {
-          } else {
-              alert("Ingrese un valor para el nombre del atributo.");
-          }
-      } else {
-          alert("Ingrese un valor para el nombre del atributo.");
-      }
-      var fuenteDatoAtributo = {nombre: nombreAtributo, tipo: this.state.tipoVariable, formula: formula};
-      var copiaAntigua = [...this.state.atributos];
-      copiaAntigua.push(fuenteDatoAtributo);
-      this.setState({
-          atributos: copiaAntigua
-      }, console.log(this.state.atributos));
-  }
-   crearFuenteDato () {
-      if(columnaSeleccionada.valor != undefined) {            //if(columnaSeleccionada.valor != undefined) {
-          if(operacionSeleccionada.valor != undefined) {      //if(operacionSeleccionada.valor != undefined) {
-              if(operacionSeleccionada.valor.localeCompare("Asignar Valor Único Si") != 0 && operacionSeleccionada.valor.localeCompare("Asignar Valor Multiples Si") != 0 && operacionSeleccionada.valor.localeCompare("Contar Si") != 0) {
-                  if(this.state.reglas.length > 0) {  //no existe ninguna regla
-                      if(this.existeReglaAsignacion()) {       //no existe ni regla de asignacion
-                          var nombre = $("#nombreFuenteDato").val();
-                          var descripcion = $("#descripcionFuenteDato").val();
-                          var esObjeto;
-                          if ($("#esObjetoFuenteDato").is(':checked'))
-                              esObjeto = true;
-                          else
-                              esObjeto = false;
-                          var objetoPadreID = -1;
-                          if(!this.state.mostrarEsObjeto)
-                              objetoPadreID = $("#objetoPadreID").val();
-                          var guardar;
-                          if ($("#guardarFuenteDato").is(':checked'))
-                              guardar = true;
-                          else
-                              guardar = false;
-                          //var formula = this.retornarCodigoOperacion(operacionSeleccionada.valor) + "(" + columnaSeleccionada.valor + ")";
-                          var fuenteDato = {nombre: nombre, descripcion: descripcion, esObjeto: esObjeto, objetoPadreID: objetoPadreID, guardar: guardar};
-                          var regla = {reglaPadreID: -1, variablePadreID: -1, esFuenteDato: true, operacion: operacionSeleccionada.valor, valor: '', nivel: 0, orden: 0};
-                      } else {
-                          alert("Tiene que crear por lo menos una regla de asignacion.");
-                      }
-                  } else {
-                      alert("Tiene que crear por lo menos una regla.");
-                  }
-              } else if(operacionSeleccionada.valor.localeCompare("Asignar Si Único Si") == 0) {
-                  //
-              }
-          } else {
-              alert("Seleccione una operación de la tabla.");
-          }
-      } else {
-          alert("Seleccione una columna de la tabla.");
-      }
-  }
-   existeReglaAsignacion () {
-      for (var i = 0; i < this.state.reglas.length; i++) {
-          if(this.state.reglas[i].operacion.localeCompare("Asignar Valor Único") == 0 || 
-              this.state.reglas[i].operacion.localeCompare("Asignar Valor Único Si") == 0 || 
-              this.state.reglas[i].operacion.localeCompare("Asignar Valor Multiples") == 0 || 
-              this.state.reglas[i].operacion.localeCompare("Asignar Valor Multiples Si") == 0 || 
-              this.state.reglas[i].operacion.localeCompare("Contar") == 0 || 
-              this.state.reglas[i].operacion.localeCompare("Contar Si") == 0 || 
-              this.state.reglas[i].operacion.localeCompare("Calcular Promedio") == 0 || 
-              this.state.reglas[i].operacion.localeCompare("Máximo") == 0 || 
-              this.state.reglas[i].operacion.localeCompare("Mínimo") == 0 || 
-              this.state.reglas[i].operacion.localeCompare("Sumar") == 0) {
-              return true;
-          }
-      };
-      return false;
-  }
-   retornarCodigoOperacion (codigo) {
-      if(codigo.localeCompare("Asignar Valor Único") == 0) {
-          return "ASIGUNI";
-      }
-      if(codigo.localeCompare("Asignar Valor Único Si") == 0) {
-          return "ASIGUNI";
-      }
-      if(codigo.localeCompare("Asignar Valor Multiples") == 0) {
-          return "ASIGMUL";
-      }
-      if(codigo.localeCompare("Asignar Valor Multiples Si") == 0) {
-          return "ASIGMUL";
-      }
-      if(codigo.localeCompare("Contar") == 0) {
-          return "COUNT";
-      }
-      if(codigo.localeCompare("Contar Si") == 0) {
-          return "COUNT";
-      }
-      if(codigo.localeCompare("Calcular Promedio") == 0) {
-          return "PROM";
-      }
-      if(codigo.localeCompare("Máximo") == 0) {
-          return "MAX";
-      }
-      if(codigo.localeCompare("Mínimo") == 0) {
-          return "MIN";
-      }
-      if(codigo.localeCompare("Sumar") == 0) {
-          return "SUM";
-      }
-  }
-   retornoSeleccionCampo (variable) {
-      columnaSeleccionada = {};
-      //fuenteDatoAtributo.columnaSeleccionada = {};
-      if(variable[0].valor.length > 0) {
-          columnaSeleccionada = variable[0];
-          //fuenteDatoAtributo.columnaSeleccionada = variable[0];
-          var tipoVariable = '';
-          if(columnaSeleccionada.tipo.localeCompare("int") == 0 || columnaSeleccionada.tipo.localeCompare("decimal") == 0) {
-              tipoVariable = 'Número';
-              this.setState({
-                  operaciones: operacionesNumero,
-                  tipoVariable: tipoVariable
-              });
-          } else if(columnaSeleccionada.tipo.localeCompare("varchar") == 0) {
-              tipoVariable = 'Cadena';
-              this.setState({
-                  operaciones: operacionesCadena,
-                  tipoVariable: tipoVariable
-              });
-          } else if(columnaSeleccionada.tipo.localeCompare("date") == 0) {
-              tipoVariable = 'Fecha';
-              this.setState({
-                  operaciones: operacionesFecha,
-                  tipoVariable: tipoVariable
-              });
-          } else if(columnaSeleccionada.tipo.localeCompare("bit") == 0) {
-              tipoVariable = 'Booleano';
-              this.setState({
-                  operaciones: operacionesBoolean,
-                  tipoVariable: tipoVariable
-              });
-          }
-          //this.setState({
-          //    tipoVariable: tipoVariable
-          //});
-      }
-  }
-   retornoSeleccionOperacion (operacion) {
-      operacionSeleccionada = {};
-      //fuenteDatoAtributo.operacionSeleccionada = {};
-      if(operacion[0].valor.length > 0) {
-          operacionSeleccionada = operacion[0];
-          //fuenteDatoAtributo.operacionSeleccionada = operacion[0];
-      }
-  }*/
-
 
   _createClass(FuenteDatoVariable, [{
+    key: "componentDidMount",
+    value: function componentDidMount() {
+      $('#fecha').datepicker({
+        format: "dd-mm-yyyy",
+        todayHighlight: true,
+        viewMode: "days",
+        minViewMode: "days",
+        language: 'es'
+      });
+      $("#fecha").datepicker("setDate", this.props.fechaInicioVariable);
+      var self = this;
+      $('#fecha').datepicker().on('changeDate', function () {
+        var fecha = $("#fecha").datepicker('getDate');
+        self.props.actualizarFechaInicio(fecha);
+      });
+    }
+  }, {
     key: "cambioInstruccionSQL",
     value: function cambioInstruccionSQL() {
       mostrarInstruccionSQLGlobal = !this.state.mostrarInstruccionSQL;
@@ -281,6 +141,33 @@ function (_React$Component) {
 
       this.props.actualizarEstadoSiEsObjeto(this.state.mostrarEsObjeto);
       this.props.actualizarEstadoSiEsInstruccionSQL(this.state.mostrarInstruccionSQL);
+    }
+  }, {
+    key: "actualizarPeriodicidad",
+    value: function actualizarPeriodicidad() {
+      var periodicidad = $("#periodicidad").val();
+      valorPeriodicidadGlobal = periodicidad;
+      this.setState({
+        valorPeriodicidad: periodicidad
+      }, this.cargarDatePicker);
+      this.props.actualizarPeriodicidad();
+    }
+  }, {
+    key: "cargarDatePicker",
+    value: function cargarDatePicker() {
+      $('#fecha').datepicker({
+        format: "dd-mm-yyyy",
+        todayHighlight: true,
+        viewMode: "days",
+        minViewMode: "days",
+        language: 'es'
+      });
+      $("#fecha").datepicker("setDate", this.props.fechaInicioVariable);
+      var self = this;
+      $('#fecha').datepicker().on('changeDate', function () {
+        var fecha = $("#fecha").datepicker('getDate');
+        self.props.actualizarFechaInicio(fecha);
+      });
     }
   }, {
     key: "render",
@@ -386,6 +273,64 @@ function (_React$Component) {
       }, _react["default"].createElement("div", {
         className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
       }, _react["default"].createElement("label", {
+        htmlFor: "periodicidad",
+        className: "col-form-label"
+      }, "Periodicidad")), _react["default"].createElement("div", {
+        className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
+      }, _react["default"].createElement("select", {
+        id: "periodicidad",
+        defaultValue: this.props.periodicidadVariable,
+        onChange: this.actualizarPeriodicidad,
+        className: "form-control"
+      }, _react["default"].createElement("option", {
+        value: "-1"
+      }, "Ninguno"), periodicidad.map(function (periodicidad, i) {
+        return _react["default"].createElement("option", {
+          value: periodicidad.nombre,
+          key: periodicidad.nombre
+        }, periodicidad.nombre);
+      })))), this.state.valorPeriodicidad.localeCompare("-1") != 0 ? _react["default"].createElement("div", {
+        className: "row",
+        style: {
+          width: "100%"
+        }
+      }, _react["default"].createElement("div", {
+        className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
+      }, _react["default"].createElement("label", {
+        htmlFor: "fecha",
+        className: "col-form-label"
+      }, "Fecha de Inicio de C\xE1lculo:")), _react["default"].createElement("div", {
+        className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
+      }, _react["default"].createElement("input", {
+        type: "text",
+        className: "form-control",
+        id: "fecha"
+      }))) : null, _react["default"].createElement("div", {
+        className: "row",
+        style: {
+          width: "100%"
+        }
+      }, _react["default"].createElement("div", {
+        className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
+      }, _react["default"].createElement("label", {
+        htmlFor: "analista",
+        className: "col-form-label"
+      }, "Nombre Encargado")), _react["default"].createElement("div", {
+        className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
+      }, _react["default"].createElement("input", {
+        id: "analista",
+        defaultValue: this.props.analistaVariable,
+        onKeyUp: this.props.actualizarNombreEncargado,
+        type: "text",
+        className: "form-control form-control-sm"
+      }))), _react["default"].createElement("div", {
+        className: "row",
+        style: {
+          width: "100%"
+        }
+      }, _react["default"].createElement("div", {
+        className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
+      }, _react["default"].createElement("label", {
         htmlFor: "guardarFuenteDato",
         className: "col-form-label"
       }, "Guardar Valores Obtenidos en Base de Datos:")), _react["default"].createElement("div", {
@@ -446,10 +391,8 @@ function (_React$Component) {
           justifyContent: "center"
         }
       }, _react["default"].createElement("a", {
-        className: "btn btn-brand btnWhiteColorHover font-bold font-20",
-        style: {
-          color: "#fafafa"
-        },
+        href: "#",
+        className: "btn btn-brand active",
         onClick: this.props.guardarVariable
       }, "Crear Variable")), _react["default"].createElement("br", null));
     }

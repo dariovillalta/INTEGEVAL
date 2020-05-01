@@ -45,14 +45,18 @@ function (_React$Component) {
 
     _classCallCheck(this, RiesgoHome);
 
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(RiesgoHome).call(this, props));
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(RiesgoHome).call(this, props)); //cuando es llamado desde indicadores
+
     var componente = "selRiesgo";
     if (_this.props.crearRiesgo) componente = "crearRiesgo";
     _this.state = {
       riesgos: [],
       pesoDisponible: 0,
       idRiesgoSeleccionado: -1,
-      componenteActual: componente
+      componenteActual: componente,
+      nombreRiesgo: "",
+      pesoRiesgo: 0,
+      formulaRiesgo: ""
     };
     _this.getRiesgos = _this.getRiesgos.bind(_assertThisInitialized(_this));
     _this.acutalizarPesoMaximoDisponible = _this.acutalizarPesoMaximoDisponible.bind(_assertThisInitialized(_this));
@@ -109,10 +113,6 @@ function (_React$Component) {
       }
 
       ;
-      console.log('pesoInstitucional');
-      console.log(pesoInstitucional);
-      console.log('pesoExistente');
-      console.log(pesoExistente);
       this.setState({
         pesoDisponible: pesoInstitucional - pesoExistente
       });
@@ -134,16 +134,14 @@ function (_React$Component) {
     }
   }, {
     key: "editarRiesgo",
-    value: function editarRiesgo(id, nombreRiesgo, pesoRiesgo, toleranciaRiesgo, valorIdealRiesgo, padreRiesgo) {
+    value: function editarRiesgo(id, nombreRiesgo, pesoRiesgo, formulaRiesgo) {
       this.setState({
         idRiesgoSeleccionado: id,
         componenteActual: "editarRiesgo",
         nombreRiesgo: nombreRiesgo,
         pesoRiesgo: pesoRiesgo,
-        toleranciaRiesgo: toleranciaRiesgo,
-        valorIdealRiesgo: valorIdealRiesgo,
-        padreRiesgo: padreRiesgo
-      }, console.log(this.state.idRiesgoSeleccionado));
+        formulaRiesgo: formulaRiesgo
+      });
     }
   }, {
     key: "terminoCrearRiesgoPasarAEdit",
@@ -222,7 +220,6 @@ function (_React$Component) {
           showRiesgos: this.props.showRiesgos,
           retornoSeleccionRiesgo: this.retornoSeleccionRiesgo,
           configuracionHome: this.props.configuracionHome,
-          updateNavBar: this.props.updateNavBar,
           showUmbralHome: this.props.showUmbralHome,
           riesgos: this.state.riesgos,
           terminoCrearRiesgo: this.terminoCrearRiesgoPasarAEdit,
@@ -236,15 +233,11 @@ function (_React$Component) {
           showRiesgos: this.props.showRiesgos,
           retornoSeleccionRiesgo: this.retornoSeleccionRiesgo,
           configuracionHome: this.props.configuracionHome,
-          updateNavBar: this.props.updateNavBar,
           showUmbralHome: this.props.showUmbralHome,
           riesgos: this.state.riesgos,
           nombreRiesgo: this.state.nombreRiesgo,
           pesoRiesgo: this.state.pesoRiesgo,
-          toleranciaRiesgo: this.state.toleranciaRiesgo,
-          valorIdealRiesgo: this.state.valorIdealRiesgo,
-          padreRiesgo: this.state.padreRiesgo,
-          updateFormula: this.props.updateFormula,
+          formulaRiesgo: this.state.formulaRiesgo,
           idRiesgoSeleccionado: this.state.idRiesgoSeleccionado
         }, " "));
       }

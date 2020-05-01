@@ -89,9 +89,6 @@ function (_React$Component) {
         };*/
       }
 
-      console.log('this.props.indicesVarSeleccionados');
-      console.log(this.props.indicesVarSeleccionados);
-
       if (this.props.indicesVarSeleccionados[indice]) {
         this.deseleccionarIndice(variable, indice);
       } else {
@@ -119,11 +116,6 @@ function (_React$Component) {
 
       var nuevoArr = _toConsumableArray(this.props.indicesVarSeleccionados);
 
-      console.log('nuevoArr ANTES');
-      console.log(nuevoArr);
-      console.log('this.props.indicesVarSeleccionados');
-      console.log(this.props.indicesVarSeleccionados);
-
       for (var i = 0; i < nuevoArr.length; i++) {
         if (i != indice) nuevoArr[i] = false;
       }
@@ -134,7 +126,6 @@ function (_React$Component) {
           indicesVarSeleccionados: nuevoArr
       });*/
 
-      console.log('nuevoArr DESPUES');
       console.log(nuevoArr);
       this.props.retornoSeleccion(arregloCeldasSeleccionadas, this.props.indiceTabla, nuevoArr);
     }
@@ -151,11 +142,6 @@ function (_React$Component) {
 
       var nuevoArr = _toConsumableArray(this.props.indicesVarSeleccionados);
 
-      console.log('nuevoArr ANTES');
-      console.log(nuevoArr);
-      console.log('this.props.indicesVarSeleccionados');
-      console.log(this.props.indicesVarSeleccionados);
-
       for (var i = 0; i < nuevoArr.length; i++) {
         if (i != indice) nuevoArr[i] = false;
       }
@@ -166,8 +152,6 @@ function (_React$Component) {
           indicesVarSeleccionados: nuevoArr
       });*/
 
-      console.log('nuevoArr DESPUES');
-      console.log(nuevoArr);
       if (arregloCeldasSeleccionadas.length > 0) this.props.retornoSeleccion(arregloCeldasSeleccionadas, this.props.indiceTabla, nuevoArr);
     }
   }, {

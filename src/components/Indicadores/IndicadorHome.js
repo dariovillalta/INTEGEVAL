@@ -12,7 +12,18 @@ export default class IndicadorHome extends React.Component {
             componenteAMostrar: "selIndicador",
             idIndicadorSeleccionado: -1,
             nombreIndicadorSeleccionada: "",
-            idRiesgoPadreSeleccionado: -1
+            codigoIndicadorSeleccionada: "",
+            formulaIndicadorSeleccionada: "",
+            pesoIndicadorSeleccionada: "",
+            toleranciaIndicadorSeleccionada: "",
+            tipoToleranciaIndicadorSeleccionada: "",
+            valorIdealIndicadorSeleccionada: "",
+            periodicidadIndicadorSeleccionada: "",
+            tipoIndicadorIndicadorSeleccionada: "",
+            analistaIndicadorSeleccionada: "",
+            idRiesgoPadreSeleccionado: -1,
+            formulaRiesgo: "",
+            pesoDisponibleRiesgo: 0
         }
         this.terminoSeleccionIndicador = this.terminoSeleccionIndicador.bind(this);
         this.retornoSeleccionIndicador = this.retornoSeleccionIndicador.bind(this);
@@ -20,11 +31,11 @@ export default class IndicadorHome extends React.Component {
         this.terminoCrearIndicadorPasarAEdit = this.terminoCrearIndicadorPasarAEdit.bind(this);
     }
 
-    terminoSeleccionIndicador (id, nombre) {
+    terminoSeleccionIndicador (id, formula) {
         this.setState({
             componenteAMostrar: "editIndicador",
             idIndicadorSeleccionado: id,
-            nombreTablaSeleccionada: nombre
+            formulaRiesgo: formula
         });
     }
 
@@ -32,15 +43,36 @@ export default class IndicadorHome extends React.Component {
         this.setState({
             componenteAMostrar: "selIndicador",
             idIndicadorSeleccionado: -1,
-            nombreTablaSeleccionada: "",
             idRiesgoPadreSeleccionado: -1
         });
     }
 
-    goCrearIndicador (idRiesgo) {
+    goCrearIndicador (idRiesgo, formula, pesoDisponible) {
         this.setState({
             componenteAMostrar: "crearIndicador",
-            idRiesgoPadreSeleccionado: idRiesgo
+            idRiesgoPadreSeleccionado: idRiesgo,
+            formulaRiesgo: formula,
+            pesoDisponibleRiesgo: pesoDisponible
+        });
+    }
+
+    goEditarIndicador (idRiesgo, formula, pesoDisponible, idIndicador, nombreIndicador, codigoIndicador, formulaIndicador, pesoIndicador, toleranciaIndicador, tipoToleranciaIndicador, valorIdealIndicador, periodicidadIndicador, tipoIndicadorIndicador, analistaIndicador) {
+        this.setState({
+            componenteAMostrar: "editIndicador",
+            idRiesgoPadreSeleccionado: idRiesgo,
+            formulaRiesgo: formula,
+            pesoDisponibleRiesgo: pesoDisponible,
+            idIndicadorSeleccionado: idIndicador,
+            nombreIndicadorSeleccionada: nombreIndicador,
+            codigoIndicadorSeleccionada: codigoIndicador,
+            formulaIndicadorSeleccionada: formulaIndicador,
+            pesoIndicadorSeleccionada: pesoIndicador,
+            toleranciaIndicadorSeleccionada: toleranciaIndicador,
+            tipoToleranciaIndicadorSeleccionada: tipoToleranciaIndicador,
+            valorIdealIndicadorSeleccionada: valorIdealIndicador,
+            periodicidadIndicadorSeleccionada: periodicidadIndicador,
+            tipoIndicadorIndicadorSeleccionada: tipoIndicadorIndicador,
+            analistaIndicadorSeleccionada: analistaIndicador
         });
     }
 
@@ -74,19 +106,50 @@ export default class IndicadorHome extends React.Component {
         if(this.state.componenteAMostrar.localeCompare("selIndicador") == 0) {
             return (
                 <div>
-                    <SeleccionarIndicador pool={this.props.pool} configuracionHome={this.props.configuracionHome} terminoSeleccionIndicador={this.terminoSeleccionIndicador} goCrearIndicador={this.goCrearIndicador} showRiesgos={this.props.showRiesgos} showRiesgos={this.props.showRiesgos} updateBanderaCrearRiesgoTrue={this.props.updateBanderaCrearRiesgoTrue}> </SeleccionarIndicador>
+                    <SeleccionarIndicador pool={this.props.pool}
+                                        configuracionHome={this.props.configuracionHome}
+                                        terminoSeleccionIndicador={this.terminoSeleccionIndicador}
+                                        goCrearIndicador={this.goCrearIndicador}
+                                        showRiesgos={this.props.showRiesgos}
+                                        showRiesgos={this.props.showRiesgos}
+                                        updateBanderaCrearRiesgoTrue={this.props.updateBanderaCrearRiesgoTrue}></SeleccionarIndicador>
                 </div>
             );
         } else if(this.state.componenteAMostrar.localeCompare("crearIndicador") == 0) {
             return (
                 <div>
-                    <CrearIndicador pool={this.props.pool} showCondicionVar={this.props.showCondicionVar} retornoSeleccionIndicador={this.retornoSeleccionIndicador} configuracionHome={this.props.configuracionHome} terminoCrearIndicadorPasarAEdit={this.terminoCrearIndicadorPasarAEdit} riesgoPadre={this.state.idRiesgoPadreSeleccionado}> </CrearIndicador>
+                    <CrearIndicador pool={this.props.pool}
+                                    showCondicionVar={this.props.showCondicionVar}
+                                    retornoSeleccionIndicador={this.retornoSeleccionIndicador}
+                                    configuracionHome={this.props.configuracionHome}
+                                    terminoCrearIndicadorPasarAEdit={this.terminoCrearIndicadorPasarAEdit}
+                                    riesgoPadre={this.state.idRiesgoPadreSeleccionado}
+                                    formulaRiesgo={this.state.formulaRiesgo}
+                                    pesoDisponibleRiesgo={this.state.pesoDisponibleRiesgo}> </CrearIndicador>
                 </div>
             );
         } else if(this.state.componenteAMostrar.localeCompare("editIndicador") == 0) {
             return (
                 <div>
-                    <EditarIndicador pool={this.props.pool} showFormula={this.props.showFormula} showCondicionVar={this.props.showCondicionVar} retornoSeleccionIndicador={this.retornoSeleccionIndicador} configuracionHome={this.props.configuracionHome} idIndicadorSeleccionado={this.state.idIndicadorSeleccionado} nombreIndicadorSeleccionada={this.state.nombreIndicadorSeleccionada} riesgoPadre={this.state.idRiesgoPadreSeleccionado}> </EditarIndicador>
+                    <EditarIndicador pool={this.props.pool}
+                                    showFormula={this.props.showFormula}
+                                    showCondicionVar={this.props.showCondicionVar}
+                                    retornoSeleccionIndicador={this.retornoSeleccionIndicador}
+                                    configuracionHome={this.props.configuracionHome}
+                                    riesgoPadre={this.state.idRiesgoPadreSeleccionado}
+                                    formulaRiesgo={this.state.formulaRiesgo}
+                                    pesoDisponibleRiesgo={this.state.pesoDisponibleRiesgo}
+                                    idIndicadorSeleccionado={this.state.idIndicadorSeleccionado}
+                                    nombreIndicadorSeleccionada={this.state.nombreIndicadorSeleccionada}
+                                    codigoIndicadorSeleccionada={this.state.codigoIndicadorSeleccionada}
+                                    formulaIndicadorSeleccionada={this.state.formulaIndicadorSeleccionada}
+                                    pesoIndicadorSeleccionada={this.state.pesoIndicadorSeleccionada}
+                                    toleranciaIndicadorSeleccionada={this.state.toleranciaIndicadorSeleccionada}
+                                    tipoToleranciaIndicadorSeleccionada={this.state.tipoToleranciaIndicadorSeleccionada}
+                                    valorIdealIndicadorSeleccionada={this.state.valorIdealIndicadorSeleccionada}
+                                    periodicidadIndicadorSeleccionada={this.state.periodicidadIndicadorSeleccionada}
+                                    tipoIndicadorIndicadorSeleccionada={this.state.tipoIndicadorIndicadorSeleccionada}
+                                    analistaIndicadorSeleccionada={this.state.analistaIndicadorSeleccionada}> </EditarIndicador>
                 </div>
             );
         }

@@ -165,6 +165,36 @@ function (_React$Component) {
   }, {
     key: "verificarAccion",
     value: function verificarAccion() {
+      $("#reglaInit").removeClass("colorPunteroFormula");
+      $("#reglaInit").removeClass("blink");
+      $("#reglaFin").removeClass("colorPunteroFormula");
+      $("#reglaFin").removeClass("blink");
+      $("#unicaRegla").css("border", "initial");
+      $("#unicaRegla").removeClass("blink");
+
+      for (var i = 0; i < this.props.reglas.length; i++) {
+        if (this.props.reglas.length == 1 && this.props.reglas[0] != undefined && this.props.reglas[0].length == 1) {
+          console.log('YEAH1');
+          $("#reglaInit" + i).removeClass("colorPunteroFormula");
+          $("#reglaInit" + i).removeClass("blink");
+          $("#reglaFin" + i).removeClass("colorPunteroFormula");
+          $("#reglaFin" + i).removeClass("blink");
+        } else {
+          console.log('YEAH2');
+
+          for (var j = 0; j < this.props.reglas[i].length; j++) {
+            console.log('j = ' + j);
+            $("#regla" + i + j).css("border", "initial");
+            $("#regla" + i + j).removeClass("blink");
+            $("#reglaInit" + i + j).removeClass("colorPunteroFormula");
+            $("#reglaInit" + i + j).removeClass("blink");
+            $("#reglaFin" + i + j).removeClass("colorPunteroFormula");
+            $("#reglaFin" + i + j).removeClass("blink");
+          }
+        }
+      }
+
+      ;
       if (this.state.crearSelected) this.verificarSeleccionFormula();else if (this.state.editarSelected) {
         if (formulaSeleccionada != undefined && formulaSeleccionada != null) {
           this.props.callbackModificarRegla(true, formulaSeleccionada, posicionFormula);

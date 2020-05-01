@@ -13,6 +13,7 @@ export default class SeleccionarIndicador extends React.Component {
         this.getIndicators = this.getIndicators.bind(this);
         this.insertIndicator = this.insertIndicator.bind(this);
         this.irCrearRiesgos = this.irCrearRiesgos.bind(this);
+        this.calcularPesoDisponible = this.calcularPesoDisponible.bind(this);
     }
 
     componentDidMount() {
@@ -84,6 +85,24 @@ export default class SeleccionarIndicador extends React.Component {
         this.props.showRiesgos();
     }
 
+    calcularPesoDisponible (riesgo, indexRiesgo) {
+        var pesoRiesgoTotal = 100;
+        var pesoExistente = 0;
+        for (var i = 0; i < this.state.indicadores[indexRiesgo].length; i++) {
+            console.log('i = '+i);
+            console.log(this.state.indicadores[indexRiesgo][i]);
+            pesoExistente += this.state.indicadores[indexRiesgo][i].peso;
+        };
+        console.log('pesoExistente');
+        console.log(pesoExistente);
+        console.log('pesoRiesgoTotal');
+        console.log(pesoRiesgoTotal);
+        var pesoDisponible = pesoRiesgoTotal-pesoExistente
+        console.log('pesoDisponible');
+        console.log(pesoDisponible);
+        this.props.goCrearIndicador(riesgo.ID, riesgo.formula, pesoDisponible);
+    }
+
     render() {
         return (
             <div>
@@ -115,7 +134,7 @@ export default class SeleccionarIndicador extends React.Component {
                                                     <a className={"btn btn-outline-info btn-block btnWhiteColorHover fontSize1EM"} key={indicador.ID}>{indicador.nombre}</a>
                                                 )}
                                                 <div className={"row"}>
-                                                    <a className={"btn btn-success btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={() => this.props.goCrearIndicador(riesgo.ID)}>Crear Indicador</a>
+                                                    <a className={"btn btn-success btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={() => this.calcularPesoDisponible(riesgo, i)}>Crear Indicador</a>
                                                 </div>
                                             </div>
                                         ) : (

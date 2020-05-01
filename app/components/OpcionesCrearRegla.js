@@ -115,6 +115,7 @@ function (_React$Component) {
       }, this.props.mostrarCrearCondicion ? _react["default"].createElement(_VariableCreation["default"], {
         pool: this.props.pool,
         campos: this.props.campos,
+        reglas: this.props.reglas,
         retornarCampo: this.props.retornarCampo,
         retornarValor: this.props.retornarValor,
         camposDropdown: this.props.camposDropdown,
@@ -138,6 +139,7 @@ function (_React$Component) {
         callbackCrearRegla: this.props.callbackCrearRegla
       }) : _react["default"].createElement(_ContenedorFormulas["default"], {
         asignaciones: this.props.asignaciones,
+        reglas: this.props.reglas,
         callbackCrearRegla: this.props.callbackCrearRegla,
         callbackModificarRegla: this.props.callbackModificarRegla,
         callbackEliminarRegla: this.props.callbackEliminarRegla,

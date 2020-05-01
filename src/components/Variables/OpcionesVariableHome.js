@@ -24,7 +24,7 @@ export default class OpcionesVariableHome extends React.Component {
                         <div className={"card influencer-profile-data"}>
                             <div className={"card-body"}>
                                 <div className={"row border-top border-bottom addPaddingToConfig"}>
-                                    <a className={"btn btn-outline-info btn-block btnWhiteColorHover font-bold font-20"} onClick={this.props.goFuentes}>Configuración de Conexiones</a>
+                                    <a className={"btn btn-outline-info btn-block btnWhiteColorHover font-bold font-20"} onClick={this.props.goFuentes}>Configuración de Conexiones a Bases de Datos</a>
                                     <a className={"btn btn-outline-brand btn-block btnWhiteColorHover font-bold font-20"} onClick={this.props.goVariables}>Creación / Configuración de Variables</a>
                                 </div>
                             </div>

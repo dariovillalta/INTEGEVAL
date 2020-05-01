@@ -39,6 +39,7 @@ export default class OpcionesCrearRegla extends React.Component {
                 <div className={"row"} style={{width: "100%"}}>
                     {this.props.mostrarCrearCondicion
                         ?   <VariableCreation pool={this.props.pool} campos={this.props.campos}
+                                        reglas={this.props.reglas}
                                         retornarCampo={this.props.retornarCampo}
                                         retornarValor={this.props.retornarValor}
                                         camposDropdown={this.props.camposDropdown}
@@ -62,6 +63,7 @@ export default class OpcionesCrearRegla extends React.Component {
                                         callbackCrearRegla={this.props.callbackCrearRegla}>
                             </VariableCreation>
                         :   <ContenedorFormulas asignaciones={this.props.asignaciones}
+                                                            reglas={this.props.reglas}
                                                             callbackCrearRegla={this.props.callbackCrearRegla}
                                                             callbackModificarRegla={this.props.callbackModificarRegla}
                                                             callbackEliminarRegla={this.props.callbackEliminarRegla}

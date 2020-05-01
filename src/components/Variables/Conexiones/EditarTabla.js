@@ -73,7 +73,6 @@ export default class EditarTabla extends React.Component {
                                             } else {
                                                 transaction.commit(err => {
                                                     this.showSuccesMessage("Exito", "Tabla creada con éxito.");
-                                                    this.loadTables();
                                                 });
                                             }
                                         });
@@ -255,13 +254,18 @@ export default class EditarTabla extends React.Component {
                                         <input id="tablaTablaNuevo" defaultValue={this.props.tablaTablaSeleccionada} type="text" className={"form-control"}/>
                                     </div>
                                 </div>
+                                <div className={"row"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
+                                    <select id="tipoConexion" defaultValue={this.props.tipoConexion} className="form-control">
+                                        <option value="sql">Transact-SQL</option>
+                                    </select>
+                                </div>
                                 { this.state.errorCreacionTabla.mostrar ? (
                                     <ErrorMessage campo={this.state.errorCreacionTabla.campo} descripcion={this.state.errorCreacionTabla.descripcion} dismissTableError={this.dismissTableNewError}> </ErrorMessage>
                                 ) : (
                                     <span></span>
                                 )}
                                 <div className={"row"}>
-                                    <button onClick={this.insertTable} className={"btn btn-success btn-block col-xl-10 col-10 font-bold font-20"} style={{margin: "0 auto", display: "block"}}>Guardas Cambios</button>
+                                    <button onClick={this.updateTable} className={"btn btn-success btn-block col-xl-10 col-10 font-bold font-20"} style={{margin: "0 auto", display: "block"}}>Guardas Cambios</button>
                                 </div>
                             </div>
                         </div>

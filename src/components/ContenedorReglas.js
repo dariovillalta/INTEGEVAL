@@ -1,6 +1,6 @@
 import React from 'react';
 
-var colores = [
+/*var colores = [
                 ["d50000", "d32f2f", "ff1744", "ef5350", "e57373", "ef9a9a", "ffcdd2"],
                 ["ffd600", "fbc02d", "ffff00", "fdd835", "fff176", "fff59d", "fff9c4"],
                 ["e65100", "ff6d00", "ef6c00", "ffa726", "ffb74d", "ffcc80", "ffe0b2"],
@@ -10,7 +10,8 @@ var colores = [
                 ["37474f", "546e7a", "607d8b", "78909c", "90a4ae", "b0bec5", "cfd8dc"],
                 ["006064", "00838f", "0097a7", "00acc1", "4dd0e1", "80deea", "b2ebf2"],
                 ["33691e", "558b2f", "689f38", "7cb342", "8bc34a", "aed581", "c5e1a5"],
-            ];
+            ];*/
+var colores = ["ff1744", "1e88e5", "fdd835", "ff6d00", "ff4081", "4caf50", "607d8b", "4dd0e1", "558b2f" ];
 //  [rojo, amarillo, naranja, rosa, verde oscuro, azul, gris, cyan, verde claro]
 
 export default class ContenedorReglas extends React.Component {
@@ -26,14 +27,18 @@ export default class ContenedorReglas extends React.Component {
         $("#reglaFin").removeClass("colorPunteroFormula");
         $("#reglaFin").removeClass("blink");
         $("#unicaRegla").css("border", "initial");
+        $("#unicaRegla").removeClass("blink");
         for (var i = 0; i < this.props.reglas.length; i++) {
-            if(this.props.reglas[0] != undefined && this.props.reglas[0].length == 1) {
+            if(this.props.reglas.length == 1 && this.props.reglas[0] != undefined && this.props.reglas[0].length == 1) {
+                console.log('YEAH1')
                 $("#reglaInit"+i).removeClass("colorPunteroFormula");
                 $("#reglaInit"+i).removeClass("blink");
                 $("#reglaFin"+i).removeClass("colorPunteroFormula");
                 $("#reglaFin"+i).removeClass("blink");
             } else {
+                console.log('YEAH2')
                 for (var j = 0; j < this.props.reglas[i].length; j++) {
+                    console.log('j = '+j)
                     $("#regla"+i+j).css("border", "initial");
                     $("#regla"+i+j).removeClass("blink");
                     $("#reglaInit"+i+j).removeClass("colorPunteroFormula");
@@ -46,7 +51,7 @@ export default class ContenedorReglas extends React.Component {
         var indexSeleccionadoSegmento, indexSeleccionadoRegla, tipoIndiceSeleccionado;
         this.props.actualizarEstadoSeleccionSinoNuevaRegla(false);
         if(this.props.reglas.length > 0) {
-            if(this.props.reglas[0] != undefined && this.props.reglas[0].length == 1) {
+            if(this.props.reglas.length == 1 && this.props.reglas[0] != undefined && this.props.reglas[0].length == 1) {
                 indexSeleccionadoSegmento = 0;
                 indexSeleccionadoRegla = 0;
                 if(objeto.localeCompare("arriba") == 0) {
@@ -95,7 +100,7 @@ export default class ContenedorReglas extends React.Component {
     }
 
     getColor (posicionSegmentoEnCampo, nivel) {
-        console.log('posicionSegmentoEnCampo');
+        /*console.log('posicionSegmentoEnCampo');
         console.log(posicionSegmentoEnCampo);
         console.log('nivel');
         console.log(nivel);
@@ -121,6 +126,11 @@ export default class ContenedorReglas extends React.Component {
                 console.log('color');
                 console.log(colores[posicionSegmentoEnCampo%colores.length][nivel%colores.length]);
             }
+        }*/
+        if(colores[posicionSegmentoEnCampo]!=undefined) {
+            return colores[posicionSegmentoEnCampo];
+        } else {
+            return colores[posicionSegmentoEnCampo%colores.length];
         }
     }
 
@@ -182,7 +192,7 @@ export default class ContenedorReglas extends React.Component {
                                                     : null
                                                 }
                                                 <div onClick={() => this.seleccionRegla(i, "condicion", j)} className="row" style={{width: "100%", margin: "1% 0% 1% 0%"}}>
-                                                    <div id={"regla"+i+""+j} className="addPointer font-20 textoRegla" style={{backgroundColor: "#"+this.getColor(regla.posicionSegmentoEnCampo, regla.nivel), borderRadius: "15px", padding: "0% 2%", width: 100-(this.props.reglas[i][j].nivel*10)+"%", marginLeft: "auto", marginRight: "0", fontFamily: "Arial Black, Gadget, sans-serif"}}>
+                                                    <div id={"regla"+i+""+j} className="addPointer font-20 textoRegla" style={{backgroundColor: "#"+this.getColor(i, regla.nivel), borderRadius: "15px", padding: "0% 2%", width: 100-(this.props.reglas[i][j].nivel*10)+"%", marginLeft: "auto", marginRight: "0", fontFamily: "Arial Black, Gadget, sans-serif"}}>
                                                         {
                                                             regla.esCondicion
                                                             ? "SI "

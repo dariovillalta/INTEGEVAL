@@ -169,6 +169,7 @@ function (_React$Component) {
       var basedatosTabla = $("#basedatosTablaNuevo").val();
       var tablaTabla = $("#tablaTablaNuevo").val();
       var funcionTabla = $("#funcionTabla").val();
+      var tipoConexion = $("#tipoConexion").val();
 
       if (nombreTabla.length > 0 && nombreTabla.length < 71) {
         if (usuarioTabla.length > 0 && usuarioTabla.length < 51) {
@@ -176,7 +177,7 @@ function (_React$Component) {
             if (servidorTabla.length > 0 && servidorTabla.length < 51) {
               if (basedatosTabla.length > 0 && basedatosTabla.length < 51) {
                 if (tablaTabla.length > 0 && tablaTabla.length < 71) {
-                  if (tablaTabla.length > 0 && tablaTabla.length < 71) {
+                  if (tipoConexion.length > 0 && tipoConexion.length < 31) {
                     this.setState({
                       errorCreacionTabla: {
                         campo: "",
@@ -191,7 +192,7 @@ function (_React$Component) {
                         rolledBack = true;
                       });
                       var request = new _mssql["default"].Request(transaction);
-                      request.query("insert into Tablas (Nombre, Usuario, Contrasena, Servidor, BaseDatos, Tabla, Funcion) values ('" + nombreTabla + "','" + usuarioTabla + "','" + contrasenaTabla + "','" + servidorTabla + "','" + basedatosTabla + "','" + tablaTabla + "','" + funcionTabla + "')", function (err, result) {
+                      request.query("insert into Tablas (Nombre, Usuario, Contrasena, Servidor, BaseDatos, Tabla, tipoConexion) values ('" + nombreTabla + "','" + usuarioTabla + "','" + contrasenaTabla + "','" + servidorTabla + "','" + basedatosTabla + "','" + tablaTabla + "','" + tipoConexion + "')", function (err, result) {
                         if (err) {
                           if (!rolledBack) {
                             console.log(err);
@@ -207,9 +208,9 @@ function (_React$Component) {
                       });
                     }); // fin transaction
                   } else {
-                    var campo = "Función de la Tabla";
+                    var campo = "Tipo de Conexión";
                     var descripcion;
-                    if (funcionTabla.length == 0) descripcion = "El campo debe tener una longitud mayor a 0.";else descripcion = "El campo debe tener una longitud menor a 31.";
+                    if (tipoConexion.length == 0) descripcion = "El campo debe tener una longitud mayor a 0.";else descripcion = "El campo debe tener una longitud menor a 31.";
                     this.setState({
                       errorCreacionTabla: {
                         campo: campo,
@@ -289,7 +290,7 @@ function (_React$Component) {
           });
         }
       } else {
-        var _campo6 = "Nombre de la Conección";
+        var _campo6 = "Nombre de la Conexión";
 
         var _descripcion6;
 
@@ -519,6 +520,12 @@ function (_React$Component) {
         className: "breadcrumb-item active font-16",
         "aria-current": "page"
       }, "Tablas"))))))), _react["default"].createElement("div", {
+        className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
+      }, _react["default"].createElement("h2", null, "Descripci\xF3n"), _react["default"].createElement("p", {
+        className: "lead"
+      }, "Esta secci\xF3n consiste en administrar las configuraciones necesarias para que el programa pueda conectarse con las tablas internas, para seleccionar los campos bases de los cuales se crear\xE1n las variables y consecuentemente los c\xE1lculos de indicadores y riesgos."), _react["default"].createElement("ul", {
+        className: "list-unstyled arrow"
+      }, _react["default"].createElement("li", null, "Nombre de la Conecci\xF3n: Nombre de referencia dentro del programa para refererse a la tabla de la instituci\xF3n"), _react["default"].createElement("li", null, "Usuario de la Tabla: Usuario para acceder a la base de Datos"), _react["default"].createElement("li", null, "Contrase\xF1a de la Tabla: Contrase\xF1a para acceder a la base de Datos"), _react["default"].createElement("li", null, "Servidor de la Tabla: Servidor donde se encuentra la base de Datos"), _react["default"].createElement("li", null, "Base de Datos de la Tabla: Nombre de la base de Datos donde se encuentra la tabla"), _react["default"].createElement("li", null, "Nombre de la Tabla: Nombre de la tabla a acceder a la base de Datos"), _react["default"].createElement("li", null, "Tipo de Conexi\xF3n: Tipo de conexi\xF3n de la base de datos"))), _react["default"].createElement("div", {
         className: "row"
       }, _react["default"].createElement("div", {
         className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
@@ -580,11 +587,23 @@ function (_React$Component) {
         id: "tablaTablaNuevo",
         type: "text",
         className: "form-control"
-      }))), this.state.errorCreacionTabla.mostrar ? _react["default"].createElement(_ErrorMessage["default"], {
+      }))), _react["default"].createElement("div", {
+        className: "row",
+        style: {
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center"
+        }
+      }, _react["default"].createElement("select", {
+        id: "tipoConexion",
+        className: "form-control"
+      }, _react["default"].createElement("option", {
+        value: "sql"
+      }, "Transact-SQL"))), this.state.errorCreacionTabla.mostrar ? _react["default"].createElement(_ErrorMessage["default"], {
         campo: this.state.errorCreacionTabla.campo,
         descripcion: this.state.errorCreacionTabla.descripcion,
         dismissTableError: this.dismissTableNewError
-      }, " ") : _react["default"].createElement("span", null), _react["default"].createElement("div", {
+      }, " ") : _react["default"].createElement("span", null), _react["default"].createElement("br", null), _react["default"].createElement("div", {
         className: "row"
       }, _react["default"].createElement("button", {
         onClick: this.insertTable,
@@ -643,7 +662,7 @@ function (_React$Component) {
           }
         }, _react["default"].createElement("img", {
           onClick: function onClick() {
-            return _this5.props.terminoSeleccionTabla(tabla.ID, tabla.tabla, tabla.usuario, tabla.contrasena, tabla.servidor, tabla.baseDatos, tabla.tabla);
+            return _this5.props.terminoSeleccionTabla(tabla.ID, tabla.tabla, tabla.usuario, tabla.contrasena, tabla.servidor, tabla.baseDatos, tabla.tabla, tabla.tipoConexion);
           },
           src: "../assets/edit.png",
           style: {

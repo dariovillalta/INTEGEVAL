@@ -1,12 +1,31 @@
 import React from 'react';
 import sql from 'mssql';
 
+var variables = [];
+var excel = [];
+var formas = [];
+
+const periodicidad = [ {nombre: "diario"}, {nombre: "semanal"}, {nombre: "mensual"}, {nombre: "trimestral"}, {nombre: "bi-anual"}, {nombre: "anual"} ];
+
 export default class FuenteDatoForma extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            valorPeriodicidad: '-1'
         }
         this.crearVariable = this.crearVariable.bind(this);
+        this.getVariables = this.getVariables.bind(this);
+        this.getExcel = this.getExcel.bind(this);
+        this.getFormas = this.getFormas.bind(this);
+        this.verificarNoExisteNombreVar = this.verificarNoExisteNombreVar.bind(this);
+        this.actualizarPeriodicidad = this.actualizarPeriodicidad.bind(this);
+        this.isValidDate = this.isValidDate.bind(this);
+    }
+
+    componentDidMount() {
+        this.getVariables();
+        this.getExcel();
+        this.getFormas();
     }
 
     crearVariable () {
@@ -17,36 +36,182 @@ export default class FuenteDatoForma extends React.Component {
             guardarVariable = true;
         else
             guardarVariable = false;
-        if(nombreVariable.length > 0 && nombreVariable.length < 1001) {
-            if(tipo.length > 0 && tipo.length < 1001) {
-                const transaction = new sql.Transaction( this.props.pool );
-                transaction.begin(err => {
-                    var rolledBack = false;
-                    transaction.on('rollback', aborted => {
-                        rolledBack = true;
-                    });
-                    const request = new sql.Request(transaction);
-                    request.query("insert into FormasVariables (nombre, tipo, guardar) values ('"+nombreVariable+"', '"+tipo+"', '"+guardarVariable+"')", (err, result) => {
-                        if (err) {
-                            console.log(err);
-                            if (!rolledBack) {
-                                transaction.rollback(err => {
-                                });
+        var periodicidad = $("#periodicidad").val();
+        var fecha;
+        if(periodicidad.localeCompare("-1") == 0)
+            fecha = new Date(1964, 4, 28);
+        else
+            fecha = $("#fecha").datepicker('getDate');
+        var analista = $("#analista").val();
+        if(nombreVariable.length > 0 && nombreVariable.length < 101) {
+            if(this.verificarNoExisteNombreVar(nombreVariable)) {
+                if(tipo.length > 0 && tipo.length < 31) {
+                    if(periodicidad.length > 0 && periodicidad.length < 51) {
+                        if(this.isValidDate(fecha)) {
+                            if(analista.length > 0 && analista.length < 101) {
+                                const transaction = new sql.Transaction( this.props.pool );
+                                transaction.begin(err => {
+                                    var rolledBack = false;
+                                    transaction.on('rollback', aborted => {
+                                        rolledBack = true;
+                                    });
+                                    const request = new sql.Request(transaction);
+                                    request.query("insert into FormasVariables (nombre, tipo, periodicidad, fechaInicioCalculo, analista, guardar) values ('"+nombreVariable+"', '"+tipo+"', '"+periodicidad+"', '"+fechaInicioCalculo+"', '"+analista+"', '"+guardarVariable+"')", (err, result) => {
+                                        if (err) {
+                                            console.log(err);
+                                            if (!rolledBack) {
+                                                transaction.rollback(err => {
+                                                });
+                                            }
+                                        } else {
+                                            transaction.commit(err => {
+                                                alert("Variable Creada");
+                                                $("#nombreVariable").val("");
+                                                $("#tipo").val("numero");
+                                                $("#periodicidad").val("");
+                                                $("#analista").val("");
+                                                this.getFormas();
+                                            });
+                                        }
+                                    });
+                                }); // fin transaction
+                            } else {
+                                alert('Ingrese un valor para el analista que debe ser menor a 51 caracteres');
                             }
                         } else {
-                            transaction.commit(err => {
-                                alert("Variable Creada");
-                                $("#nombreVariable").val("");
-                                $("#tipo").val("numero");
-                            });
+                            alert('Ingrese un valor para la fecha');
                         }
-                    });
-                }); // fin transaction
+                    } else {
+                        alert('Ingrese un valor para el valor de periodicidad que debe ser menor a 51 caracteres');
+                    }
+                } else {
+                    alert('Ingrese un valor para el tipo de la variable que debe ser menor a 31 caracteres');
+                }
             } else {
-                alert('Ingrese un valor para el tipo de la variable que debe ser menor a 31 caracteres');
+                alert('El nombre de la variable debe ser único.');
             }
         } else {
             alert('Ingrese un valor para el nombre de la variable que debe ser menor a 101 caracteres');
+        }
+    }
+
+    getVariables() {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("select * from Variables", (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        variables = result.recordset;
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    getExcel() {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("select * from ExcelVariables", (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        excel = result.recordset;
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    getFormas() {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("select * from FormasVariables", (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        formas = result.recordset;
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    verificarNoExisteNombreVar (nombre) {
+        var noExiste = true;
+        for (var i = 0; i < variables.length; i++) {
+            if (this.state.variables[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
+                noExiste = false;
+                break;
+            }
+        };
+        if(noExiste) {
+            for (var i = 0; i < excel.length; i++) {
+                if (this.state.excel[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
+                    noExiste = false;
+                    break;
+                }
+            };
+        }
+        if(noExiste) {
+            for (var i = 0; i < formas.length; i++) {
+                if (this.state.formas[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
+                    noExiste = false;
+                    break;
+                }
+            };
+        }
+        return noExiste;
+    }
+
+    actualizarPeriodicidad () {
+        var periodicidad = $("#periodicidad").val();
+        this.setState({
+            valorPeriodicidad: periodicidad
+        }, this.cargarDatePicker );
+    }
+
+    isValidDate (fecha) {
+        if (Object.prototype.toString.call(fecha) === "[object Date]") {
+            if (isNaN(fecha.getTime())) {
+                alert("Ingrese una fecha valida.");
+                return false;
+            } else {
+                return true;
+            }
+        } else {
+            alert("Ingrese una fecha valida.");
+            return false;
         }
     }
 
@@ -73,6 +238,40 @@ export default class FuenteDatoForma extends React.Component {
                             <option value="date">Fecha</option>
                             <option value="bit">Booleano</option>
                         </select>
+                    </div>
+                </div>
+                <div className={"row"} style={{width: "100%"}}>
+                    <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
+                        <label htmlFor="periodicidad" className="col-form-label">Periodicidad</label>
+                    </div>
+                    <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"}>
+                        <select id="periodicidad" defaultValue={this.props.periodicidadVariable} onChange={this.actualizarPeriodicidad} className="form-control">
+                            <option value="-1">Ninguno</option>
+                            {periodicidad.map((periodicidad, i) =>
+                                <option value={periodicidad.nombre} key={periodicidad.nombre}>{periodicidad.nombre}</option>
+                            )}
+                        </select>
+                    </div>
+                </div>
+                {
+                    this.state.valorPeriodicidad.localeCompare("-1") != 0
+                    ?
+                        <div className={"row"} style={{width: "100%"}}>
+                            <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
+                                <label htmlFor="fecha" className="col-form-label">Fecha de Inicio de Cálculo:</label>
+                            </div>
+                            <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"}>
+                                <input type="text" className="form-control" id="fecha"/>
+                            </div>
+                        </div>
+                    : null
+                }
+                <div className={"row"} style={{width: "100%"}}>
+                    <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
+                        <label htmlFor="analista" className="col-form-label">Nombre Encargado</label>
+                    </div>
+                    <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"}>
+                        <input id="analista" defaultValue={this.props.analistaVariable} onKeyUp={this.props.actualizarNombreEncargado} type="text" className="form-control form-control-sm"/>
                     </div>
                 </div>
                 <div className={"row"} style={{width: "100%"}}>

@@ -86,13 +86,7 @@ function (_React$Component) {
         className: "nav-user-info"
       }, _react["default"].createElement("h5", {
         className: "mb-0 text-white nav-user-name"
-      }, this.props.userName)), this.props.permision.localeCompare("admin") == 0 ? _react["default"].createElement("a", {
-        className: "dropdown-item",
-        href: "#",
-        onClick: this.props.showConfigurationComponent
-      }, _react["default"].createElement("i", {
-        className: "fas fa-user mr-2"
-      }), "Configuraci\xF3n") : _react["default"].createElement("span", null), _react["default"].createElement("a", {
+      }, this.props.userName)), _react["default"].createElement("a", {
         className: "dropdown-item",
         href: "#",
         onClick: this.props.logOff

@@ -59,6 +59,8 @@ export default class VariableCreation extends React.Component {
         this.goModificar = this.goModificar.bind(this);
         this.goEliminar = this.goEliminar.bind(this);
         this.verificarAccion = this.verificarAccion.bind(this);
+        this.retornarValorFecha = this.retornarValorFecha.bind(this);
+        this.retornarValorTime = this.retornarValorTime.bind(this);
         this.isValidDate = this.isValidDate.bind(this);
     }
 
@@ -423,6 +425,20 @@ export default class VariableCreation extends React.Component {
         }
     }
 
+    retornarValorFecha(valorRegla, valorTexto) {
+        this.setState({
+            textoValor: valorTexto
+        });
+        this.props.retornarValor(valorRegla, valorTexto);
+    }
+
+    retornarValorTime(valorRegla, valorTexto) {
+        this.setState({
+            textoValor: valorTexto
+        });
+        this.props.retornarValor(valorRegla, valorTexto);
+    }
+
     isValidDate (fecha) {
         if (Object.prototype.toString.call(fecha) === "[object Date]") {
             if (isNaN(fecha.getTime())) {
@@ -563,6 +579,37 @@ export default class VariableCreation extends React.Component {
     }
 
     verificarAccion () {
+        this.setState({
+            campoSeleccionadoNombre: '{campo}',
+            textoOperacion: '{operación}',
+            textoValor: '{valor}',
+        });
+        $("#reglaInit").removeClass("colorPunteroFormula");
+        $("#reglaInit").removeClass("blink");
+        $("#reglaFin").removeClass("colorPunteroFormula");
+        $("#reglaFin").removeClass("blink");
+        $("#unicaRegla").css("border", "initial");
+        $("#unicaRegla").removeClass("blink");
+        for (var i = 0; i < this.props.reglas.length; i++) {
+            if(this.props.reglas.length == 1 && this.props.reglas[0] != undefined && this.props.reglas[0].length == 1) {
+                console.log('YEAH1')
+                $("#reglaInit"+i).removeClass("colorPunteroFormula");
+                $("#reglaInit"+i).removeClass("blink");
+                $("#reglaFin"+i).removeClass("colorPunteroFormula");
+                $("#reglaFin"+i).removeClass("blink");
+            } else {
+                console.log('YEAH2')
+                for (var j = 0; j < this.props.reglas[i].length; j++) {
+                    console.log('j = '+j)
+                    $("#regla"+i+j).css("border", "initial");
+                    $("#regla"+i+j).removeClass("blink");
+                    $("#reglaInit"+i+j).removeClass("colorPunteroFormula");
+                    $("#reglaInit"+i+j).removeClass("blink");
+                    $("#reglaFin"+i+j).removeClass("colorPunteroFormula");
+                    $("#reglaFin"+i+j).removeClass("blink");
+                }
+            }
+        };
         if(this.state.crearSelected)
             this.props.callbackCrearRegla(false);
         else if(this.state.editarSelected)
@@ -621,7 +668,8 @@ export default class VariableCreation extends React.Component {
                             esBoolean={this.state.tipoCampo.esBoolean}
                             esFecha={this.state.tipoCampo.esFecha}
                             esTexto={this.state.tipoCampo.esTexto}
-                            retornarValor={this.props.retornarValor}
+                            retornarValorFecha={this.retornarValorFecha}
+                            retornarValorTime={this.retornarValorTime}
                             camposDropdown={this.props.camposDropdown}
                             valoresDropdown={this.props.valoresDropdown}
                             actualizarValor={this.actualizarValor}

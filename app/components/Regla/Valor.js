@@ -54,6 +54,7 @@ function (_React$Component) {
     _this.mostrarListas = _this.mostrarListas.bind(_assertThisInitialized(_this));
     _this.mostrarFecha = _this.mostrarFecha.bind(_assertThisInitialized(_this));
     _this.initFecha = _this.initFecha.bind(_assertThisInitialized(_this));
+    _this.isValidDate = _this.isValidDate.bind(_assertThisInitialized(_this));
     _this.mostrarTiempo = _this.mostrarTiempo.bind(_assertThisInitialized(_this));
     _this.changeTime = _this.changeTime.bind(_assertThisInitialized(_this));
     return _this;
@@ -197,12 +198,32 @@ function (_React$Component) {
         todayHighlight: true,
         viewMode: "days",
         minViewMode: "days",
-        language: 'es',
-        onSelect: function onSelect(date) {
-          var valorARetornar = "FECHA=(" + date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate() + ")";
-          this.props.retornarValor(valorARetornar, date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate());
+        language: 'es'
+      });
+      var self = this;
+      $('#fecha').datepicker().on('changeDate', function () {
+        var fecha = $("#fecha").datepicker('getDate');
+
+        if (self.isValidDate(fecha)) {
+          var valorARetornar = "FECHA=(" + fecha.getFullYear() + "-" + fecha.getMonth() + "-" + fecha.getDate() + ")";
+          self.props.retornarValorFecha(valorARetornar, fecha.getFullYear() + "-" + fecha.getMonth() + "-" + fecha.getDate());
         }
       });
+    }
+  }, {
+    key: "isValidDate",
+    value: function isValidDate(fecha) {
+      if (Object.prototype.toString.call(fecha) === "[object Date]") {
+        if (isNaN(fecha.getTime())) {
+          alert("Ingrese una fecha valida.");
+          return false;
+        } else {
+          return true;
+        }
+      } else {
+        alert("Ingrese una fecha valida.");
+        return false;
+      }
     }
   }, {
     key: "mostrarTiempo",
@@ -218,7 +239,7 @@ function (_React$Component) {
     key: "changeTime",
     value: function changeTime() {
       var valorARetornar = "TIEMPO=[DIAS=" + $("#dias").val() + ",MES=" + $("#mes").val() + ",AÑOS=" + $("#anio").val() + "]";
-      this.props.retornarValor(valorARetornar, "DIAS=" + $("#dias").val() + ",MES=" + $("#mes").val() + ",AÑOS=" + $("#anio").val());
+      this.props.retornarValorTime(valorARetornar, "DIAS=" + $("#dias").val() + ",MES=" + $("#mes").val() + ",AÑOS=" + $("#anio").val());
     }
   }, {
     key: "render",
@@ -356,22 +377,34 @@ function (_React$Component) {
       }), _react["default"].createElement("span", {
         className: "custom-control-label"
       }, "Listas")), _react["default"].createElement("label", {
-        className: "custom-control custom-radio custom-control-inline"
+        className: "custom-control custom-radio custom-control-inline",
+        style: {
+          display: this.props.esFecha ? "" : "none"
+        }
       }, _react["default"].createElement("input", {
         type: "radio",
         name: "radio-inline",
         className: "custom-control-input",
+        style: {
+          display: this.props.esFecha ? "" : "none"
+        },
         onClick: function onClick() {
           return _this4.mostrarFecha();
         }
       }), _react["default"].createElement("span", {
         className: "custom-control-label"
       }, "Fecha")), _react["default"].createElement("label", {
-        className: "custom-control custom-radio custom-control-inline"
+        className: "custom-control custom-radio custom-control-inline",
+        style: {
+          display: this.props.esFecha ? "" : "none"
+        }
       }, _react["default"].createElement("input", {
         type: "radio",
         name: "radio-inline",
         className: "custom-control-input",
+        style: {
+          display: this.props.esFecha ? "" : "none"
+        },
         onClick: function onClick() {
           return _this4.mostrarTiempo();
         }
@@ -428,7 +461,7 @@ function (_React$Component) {
           alignItems: "center",
           justifyContent: "center"
         }
-      })) : null, this.state.radioFecha ? _react["default"].createElement("div", {
+      })) : null, this.state.radioFecha && this.props.esFecha ? _react["default"].createElement("div", {
         className: "row",
         style: {
           width: "100%"
@@ -448,7 +481,7 @@ function (_React$Component) {
       }, _react["default"].createElement("div", {
         id: "fecha",
         className: "center-block"
-      }))) : null, this.state.radioTiempo ? _react["default"].createElement("div", {
+      }))) : null, this.state.radioTiempo && this.props.esFecha ? _react["default"].createElement("div", {
         className: "row",
         style: {
           width: "100%"

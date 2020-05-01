@@ -732,6 +732,7 @@ function (_React$Component) {
       }, _react["default"].createElement(_OpcionesCrearRegla["default"], {
         pool: this.props.pool,
         campos: this.props.campos,
+        reglas: this.state.reglas,
         asignaciones: this.props.asignaciones,
         retornarValor: this.props.retornarValor,
         retornoCampo: this.props.retornoCampo,

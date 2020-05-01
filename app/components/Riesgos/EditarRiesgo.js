@@ -57,7 +57,7 @@ function (_React$Component) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(EditarRiesgo).call(this, props));
     _this.state = {
-      x: 0,
+      x: _this.props.pesoRiesgo,
       componentActual: "EditarRiesgo",
       navbar: ""
     };
@@ -128,32 +128,8 @@ function (_React$Component) {
       var _this2 = this;
 
       var nombre = $("#nombreRiesgo").val();
-      var formula = '';
+      var formula = $("#formula").val();
       var peso = this.state.x;
-      var tolerancia = parseInt($("#tolerancia").val());
-      var valorIdeal = parseInt($("#valorIdeal").val());
-      var tipoValorIdeal = $("#tipoValorIdeal").val();
-      var riesgoPadre = parseInt(this.props.riesgoPadre);
-      var nivel = 0;
-
-      if (this.props.riesgoPadre == -1) {
-        riesgoPadre = parseInt($("#riesgoPadre").val());
-      }
-
-      console.log('nombre');
-      console.log(nombre);
-      console.log('formula');
-      console.log(formula);
-      console.log('peso');
-      console.log(peso);
-      console.log('tolerancia');
-      console.log(tolerancia);
-      console.log('valorIdeal');
-      console.log(valorIdeal);
-      console.log('riesgoPadre');
-      console.log(riesgoPadre);
-      console.log('nivel');
-      console.log(nivel);
       var transaction = new _mssql["default"].Transaction(this.props.pool);
       transaction.begin(function (err) {
         var rolledBack = false;
@@ -161,7 +137,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("update Riesgos set nombre = '" + nombre + "', peso = " + peso + ", tolerancia = " + tolerancia + ", valorIdeal = " + valorIdeal + ", tipoValorIdeal = '" + tipoValorIdeal + "', riesgoPadre = " + riesgoPadre + " where ID = " + _this2.props.idRiesgoSeleccionado, function (err, result) {
+        request.query("update Riesgos set nombre = '" + nombre + "', peso = " + peso + ", formula = " + formula + " where ID = " + _this2.props.idRiesgoSeleccionado, function (err, result) {
           if (err) {
             if (!rolledBack) {
               console.log(err);
@@ -250,10 +226,32 @@ function (_React$Component) {
         }, _react["default"].createElement("div", {
           className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
         }, _react["default"].createElement("label", {
+          htmlFor: "formula",
+          className: "col-form-label"
+        }, "Tipo de Indicador")), _react["default"].createElement("div", {
+          className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
+        }, _react["default"].createElement("select", {
+          id: "formula",
+          defaultValue: this.props.formula,
+          className: "form-control"
+        }, _react["default"].createElement("option", {
+          value: "ambos"
+        }, "Calidad de Gesti\xF3n + Riesgo Inherente"), _react["default"].createElement("option", {
+          value: "riesgoInherente"
+        }, "Riesgo Inherente"), _react["default"].createElement("option", {
+          value: "calidadGesti\xF3n"
+        }, "Calidad de Gesti\xF3n")))), _react["default"].createElement("div", {
+          className: "row",
+          style: {
+            width: "100%"
+          }
+        }, _react["default"].createElement("div", {
+          className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
+        }, _react["default"].createElement("label", {
           htmlFor: "peso",
           className: "col-form-label"
         }, "Peso")), _react["default"].createElement("div", {
-          className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
+          className: "col-xl-8 col-lg-8 col-md-8 col-sm-8 col-8 form-group"
         }, _react["default"].createElement(_reactInputSlider["default"], {
           axis: "x",
           xstep: 1,
@@ -270,84 +268,12 @@ function (_React$Component) {
             width: "100%",
             marginTop: "10px"
           }
-        }))), _react["default"].createElement("div", {
-          className: "row",
-          style: {
-            width: "100%"
-          }
-        }, _react["default"].createElement("div", {
-          className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
+        })), _react["default"].createElement("div", {
+          className: "col-xl-1 col-lg-1 col-md-1 col-sm-1 col-1 form-group"
         }, _react["default"].createElement("label", {
-          htmlFor: "tolerancia",
+          id: "pesoLabel",
           className: "col-form-label"
-        }, "Tolerancia")), _react["default"].createElement("div", {
-          className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
-        }, _react["default"].createElement("input", {
-          id: "tolerancia",
-          type: "text",
-          className: "form-control form-control-sm",
-          defaultValue: this.props.toleranciaRiesgo
-        }))), _react["default"].createElement("div", {
-          className: "row",
-          style: {
-            width: "100%"
-          }
-        }, _react["default"].createElement("div", {
-          className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
-        }, _react["default"].createElement("label", {
-          htmlFor: "valorIdeal",
-          className: "col-form-label"
-        }, "Valor Ideal")), _react["default"].createElement("div", {
-          className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
-        }, _react["default"].createElement("input", {
-          id: "valorIdeal",
-          type: "text",
-          className: "form-control form-control-sm",
-          defaultValue: this.props.valorIdealRiesgo
-        }))), _react["default"].createElement("div", {
-          className: "row",
-          style: {
-            width: "100%"
-          }
-        }, _react["default"].createElement("div", {
-          className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
-        }, _react["default"].createElement("label", {
-          htmlFor: "tipoValorIdeal",
-          className: "col-form-label"
-        }, "Tipo de Valor Ideal")), _react["default"].createElement("div", {
-          className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
-        }, _react["default"].createElement("select", {
-          id: "tipoValorIdeal",
-          className: "form-control"
-        }, tipoCampos.map(function (tipo, i) {
-          return _react["default"].createElement("option", {
-            value: tipo.nombre,
-            key: tipo.nombre
-          }, tipo.nombre);
-        })))), _react["default"].createElement("div", {
-          className: "row",
-          style: {
-            width: "100%"
-          }
-        }, _react["default"].createElement("div", {
-          className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
-        }, _react["default"].createElement("label", {
-          htmlFor: "riesgoPadre",
-          className: "col-form-label"
-        }, "Riesgo Padre")), _react["default"].createElement("div", {
-          className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
-        }, _react["default"].createElement("select", {
-          id: "riesgoPadre",
-          className: "form-control",
-          defaultValue: this.props.padreRiesgo
-        }, _react["default"].createElement("option", {
-          value: "-1"
-        }, "Ninguno"), this.props.riesgos.map(function (riesgo, i) {
-          return _react["default"].createElement("option", {
-            value: riesgo.ID,
-            key: riesgo.ID
-          }, riesgo.nombre);
-        })))), _react["default"].createElement("a", {
+        }, this.state.x))), _react["default"].createElement("a", {
           className: "btn btn-brand btn-block btnWhiteColorHover font-bold font-20",
           style: {
             color: "#fafafa"
@@ -371,7 +297,9 @@ function (_React$Component) {
         return _react["default"].createElement("div", null, _react["default"].createElement(_Umbral["default"], {
           navbar: this.state.navbar,
           idVariable: this.props.idRiesgoSeleccionado,
-          pool: this.props.pool
+          pool: this.props.pool,
+          tablaVariable: "Riesgo",
+          tituloUmbral: "Riesgo: " + this.props.nombreRiesgo
         }, " "));
       }
     }

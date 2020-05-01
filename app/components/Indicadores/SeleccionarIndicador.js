@@ -49,6 +49,7 @@ function (_React$Component) {
     _this.getIndicators = _this.getIndicators.bind(_assertThisInitialized(_this));
     _this.insertIndicator = _this.insertIndicator.bind(_assertThisInitialized(_this));
     _this.irCrearRiesgos = _this.irCrearRiesgos.bind(_assertThisInitialized(_this));
+    _this.calcularPesoDisponible = _this.calcularPesoDisponible.bind(_assertThisInitialized(_this));
     return _this;
   }
 
@@ -134,6 +135,28 @@ function (_React$Component) {
       this.props.showRiesgos();
     }
   }, {
+    key: "calcularPesoDisponible",
+    value: function calcularPesoDisponible(riesgo, indexRiesgo) {
+      var pesoRiesgoTotal = 100;
+      var pesoExistente = 0;
+
+      for (var i = 0; i < this.state.indicadores[indexRiesgo].length; i++) {
+        console.log('i = ' + i);
+        console.log(this.state.indicadores[indexRiesgo][i]);
+        pesoExistente += this.state.indicadores[indexRiesgo][i].peso;
+      }
+
+      ;
+      console.log('pesoExistente');
+      console.log(pesoExistente);
+      console.log('pesoRiesgoTotal');
+      console.log(pesoRiesgoTotal);
+      var pesoDisponible = pesoRiesgoTotal - pesoExistente;
+      console.log('pesoDisponible');
+      console.log(pesoDisponible);
+      this.props.goCrearIndicador(riesgo.ID, riesgo.formula, pesoDisponible);
+    }
+  }, {
     key: "render",
     value: function render() {
       var _this4 = this;
@@ -189,7 +212,7 @@ function (_React$Component) {
             color: "#fafafa"
           },
           onClick: function onClick() {
-            return _this4.props.goCrearIndicador(riesgo.ID);
+            return _this4.calcularPesoDisponible(riesgo, i);
           }
         }, "Crear Indicador"))) : null)), _react["default"].createElement("br", null));
       }), this.state.riesgos.length == 0 ? _react["default"].createElement("a", {

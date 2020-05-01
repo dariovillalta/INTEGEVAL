@@ -87,6 +87,8 @@ var nombreIndicador = '',
     codigoIndicador = '',
     toleranciaIndicador = '',
     valorIdealIndicador = '',
+    tipoValorIdealIndicador = '',
+    tipoToleranciaIndicador = '',
     periodicidadIndicador = '',
     tipoIndicador = '',
     nombreEncargadoIndicador = '';
@@ -137,6 +139,8 @@ function (_React$Component) {
     _this.getElementsFromFormula = _this.getElementsFromFormula.bind(_assertThisInitialized(_this));
     _this.modificarRegla = _this.modificarRegla.bind(_assertThisInitialized(_this));
     _this.eliminarRegla = _this.eliminarRegla.bind(_assertThisInitialized(_this));
+    console.log('this.props');
+    console.log(_this.props);
     return _this;
   }
 
@@ -149,8 +153,10 @@ function (_React$Component) {
       var codigo = $("#codigo").val();
       var formula = formulaG;
       var peso = this.state.x;
-      var tolerancia = parseInt($("#tolerancia").val());
       var valorIdeal = parseInt($("#valorIdeal").val());
+      var tipoValorIdeal = $("#tipoValorIdeal").val();
+      var tolerancia = parseInt($("#tolerancia").val());
+      var tipoTolerancia = $("#tipoTolerancia").val();
       var tipoIndicador = $("#tipoIndicador").val();
       var periodicidad = $("#periodicidad").val();
       var analista = $("#analista").val();
@@ -163,10 +169,14 @@ function (_React$Component) {
       console.log(formula);
       console.log('peso');
       console.log(peso);
-      console.log('tolerancia');
-      console.log(tolerancia);
       console.log('valorIdeal');
       console.log(valorIdeal);
+      console.log('tipoValorIdeal');
+      console.log(tipoValorIdeal);
+      console.log('tolerancia');
+      console.log(tolerancia);
+      console.log('tipoTolerancia');
+      console.log(tipoTolerancia);
       console.log('periodicidad');
       console.log(periodicidad);
       console.log('tipoIndicador');
@@ -182,7 +192,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("insert into Indicadores (nombre, codigo, formula, peso, tolerancia, valorIdeal, periodicidad, tipoIndicador, analista, idRiesgoPadre) values ('" + nombre + "', '" + codigo + "', '" + formula + "', " + peso + ", " + tolerancia + ", " + valorIdeal + ", '" + periodicidad + "', '" + tipoIndicador + "', '" + analista + "', " + riesgoPadre + ")", function (err, result) {
+        request.query("insert into Indicadores (nombre, codigo, formula, peso, tolerancia, tipoTolerancia, valorIdeal, tipoValorIdeal, periodicidad, tipoIndicador, analista, idRiesgoPadre) values ('" + nombre + "', '" + codigo + "', '" + formula + "', " + peso + ", " + tolerancia + ", '" + tipoTolerancia + "', " + valorIdeal + ", '" + tipoValorIdeal + "', '" + periodicidad + "', '" + tipoIndicador + "', '" + analista + "', " + riesgoPadre + ")", function (err, result) {
           if (err) {
             console.log(err);
 
@@ -195,7 +205,9 @@ function (_React$Component) {
               nombreIndicador = '';
               codigoIndicador = '';
               toleranciaIndicador = '';
+              tipoToleranciaIndicador = '';
               valorIdealIndicador = '';
+              tipoValorIdealIndicador = '';
               periodicidadIndicador = '';
               tipoIndicador = '';
               nombreEncargadoIndicador = '';
@@ -207,7 +219,10 @@ function (_React$Component) {
               });
 
               $("#valorIdeal").val("");
-              $("#periodicidad").val("diario");
+              $("#tipoValorIdeal").val("numerico");
+              $("#tolerancia").val("");
+              $("#tipoTolerancia").val("numerico");
+              $("#periodicidad").val("-1");
               $("#tipoIndicador").val("riesgoInherente");
               $("#analista").val("");
 
@@ -1295,9 +1310,17 @@ function (_React$Component) {
       var reglaEsValida = true;
 
       if (!esFormula) {
-        if (campoSeleccionado.valor == undefined) reglaEsValida = false;
-        if (valorSeleccionado.length == 0) reglaEsValida = false;
-        if (operacionSeleccionada.operacion == undefined) reglaEsValida = false;
+        if (campoSeleccionado == undefined || campoSeleccionado.valor == undefined) {
+          reglaEsValida = false;
+        }
+
+        if (valorSeleccionado.length == 0) {
+          reglaEsValida = false;
+        }
+
+        if (operacionSeleccionada.operacion == undefined) {
+          reglaEsValida = false;
+        }
 
         if (campoSeleccionado.tipo != undefined) {
           if (campoSeleccionado.tipo.localeCompare("int") == 0 || campoSeleccionado.tipo.localeCompare("decimal") == 0) {
@@ -1309,7 +1332,7 @@ function (_React$Component) {
               reglaEsValida = false;
             }
           } else if (campoSeleccionado.tipo.localeCompare("date") == 0) {
-            if (valorSeleccionado.indexOf("FECHA") == -1 && valorSeleccionado.indexOf("LISTAID") == -1) {
+            if (valorSeleccionado.indexOf("FECHA") == -1 && valorSeleccionado.indexOf("TIME") == -1 && valorSeleccionado.indexOf("LISTAID") == -1) {
               reglaEsValida = false;
             }
           } else if (campoSeleccionado.tipo.localeCompare("varchar") == 0) {
@@ -1319,7 +1342,9 @@ function (_React$Component) {
           }
         }
       } else {
-        if (formulaSeleccionada.formula == undefined) reglaEsValida = false;
+        if (formulaSeleccionada.formula == undefined) {
+          reglaEsValida = false;
+        }
       } //si es formula, viendo que no haya regla debajo, formulas solo se pueden agregar al final
 
 
@@ -1967,9 +1992,17 @@ function (_React$Component) {
         var reglaEsValida = true;
 
         if (!esFormula) {
-          if (campoSeleccionado.valor == undefined) reglaEsValida = false;
-          if (valorSeleccionado.length == 0) reglaEsValida = false;
-          if (operacionSeleccionada.operacion == undefined) reglaEsValida = false;
+          if (campoSeleccionado == undefined || campoSeleccionado.valor == undefined) {
+            reglaEsValida = false;
+          }
+
+          if (valorSeleccionado.length == 0) {
+            reglaEsValida = false;
+          }
+
+          if (operacionSeleccionada.operacion == undefined) {
+            reglaEsValida = false;
+          }
 
           if (campoSeleccionado.tipo != undefined) {
             if (campoSeleccionado.tipo.localeCompare("int") == 0 || campoSeleccionado.tipo.localeCompare("decimal") == 0) {
@@ -1981,7 +2014,7 @@ function (_React$Component) {
                 reglaEsValida = false;
               }
             } else if (campoSeleccionado.tipo.localeCompare("date") == 0) {
-              if (valorSeleccionado.indexOf("FECHA") == -1 && valorSeleccionado.indexOf("LISTAID") == -1) {
+              if (valorSeleccionado.indexOf("FECHA") == -1 && valorSeleccionado.indexOf("TIME") == -1 && valorSeleccionado.indexOf("LISTAID") == -1) {
                 reglaEsValida = false;
               }
             } else if (campoSeleccionado.tipo.localeCompare("varchar") == 0) {
@@ -1991,7 +2024,9 @@ function (_React$Component) {
             }
           }
         } else {
-          if (formulaSeleccionada.formula == undefined) reglaEsValida = false;
+          if (formulaSeleccionada.formula == undefined) {
+            reglaEsValida = false;
+          }
         } //si es formula, viendo que no haya regla debajo, formulas solo se pueden agregar al final
 
 
@@ -2266,14 +2301,24 @@ function (_React$Component) {
       codigoIndicador = $("#codigo").val();
     }
   }, {
+    key: "updateValorIdealIndicador",
+    value: function updateValorIdealIndicador() {
+      valorIdealIndicador = $("#valorIdeal").val();
+    }
+  }, {
+    key: "updateTipoValorIdealIndicador",
+    value: function updateTipoValorIdealIndicador() {
+      tipoValorIdealIndicador = $("#tipoValorIdeal").val();
+    }
+  }, {
     key: "updateToleranciaIndicador",
     value: function updateToleranciaIndicador() {
       toleranciaIndicador = $("#tolerancia").val();
     }
   }, {
-    key: "updateValorIdealIndicador",
-    value: function updateValorIdealIndicador() {
-      valorIdealIndicador = $("#valorIdeal").val();
+    key: "updateTipoTolerancia",
+    value: function updateTipoTolerancia() {
+      tipoToleranciaIndicador = $("#tipoTolerancia").val();
     }
   }, {
     key: "updatePeriodicidadIndicador",
@@ -2392,7 +2437,7 @@ function (_React$Component) {
           axis: "x",
           xstep: 1,
           xmin: 0,
-          xmax: 100,
+          xmax: this.props.pesoDisponibleRiesgo,
           x: this.state.x,
           onChange: function onChange(_ref) {
             var x = _ref.x;
@@ -2410,6 +2455,45 @@ function (_React$Component) {
           id: "pesoLabel",
           className: "col-form-label"
         }, this.state.x))), _react["default"].createElement("div", {
+          className: "row",
+          style: {
+            width: "100%"
+          }
+        }, _react["default"].createElement("div", {
+          className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
+        }, _react["default"].createElement("label", {
+          htmlFor: "valorIdeal",
+          className: "col-form-label"
+        }, "Valor Ideal")), _react["default"].createElement("div", {
+          className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
+        }, _react["default"].createElement("input", {
+          id: "valorIdeal",
+          defaultValue: valorIdealIndicador,
+          onKeyUp: this.updateValorIdealIndicador,
+          type: "text",
+          className: "form-control form-control-sm"
+        }))), _react["default"].createElement("div", {
+          className: "row",
+          style: {
+            width: "100%"
+          }
+        }, _react["default"].createElement("div", {
+          className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
+        }, _react["default"].createElement("label", {
+          htmlFor: "tipoValorIdeal",
+          className: "col-form-label"
+        }, "Tipo de Valor Ideal")), _react["default"].createElement("div", {
+          className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
+        }, _react["default"].createElement("select", {
+          id: "tipoValorIdeal",
+          defaultValue: tipoValorIdealIndicador,
+          onChange: this.updateTipoValorIdealIndicador,
+          className: "form-control"
+        }, _react["default"].createElement("option", {
+          value: "numerico"
+        }, "Num\xE9rico"), _react["default"].createElement("option", {
+          value: "porcentual"
+        }, "Porcentual")))), _react["default"].createElement("div", {
           className: "row",
           style: {
             width: "100%"
@@ -2435,17 +2519,20 @@ function (_React$Component) {
         }, _react["default"].createElement("div", {
           className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
         }, _react["default"].createElement("label", {
-          htmlFor: "valorIdeal",
+          htmlFor: "tipoTolerancia",
           className: "col-form-label"
-        }, "Valor Ideal")), _react["default"].createElement("div", {
+        }, "Tipo de Tolerancia")), _react["default"].createElement("div", {
           className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
-        }, _react["default"].createElement("input", {
-          id: "valorIdeal",
-          defaultValue: valorIdealIndicador,
-          onKeyUp: this.updateValorIdealIndicador,
-          type: "text",
-          className: "form-control form-control-sm"
-        }))), _react["default"].createElement("div", {
+        }, _react["default"].createElement("select", {
+          id: "tipoTolerancia",
+          defaultValue: tipoToleranciaIndicador,
+          onChange: this.updateTipoTolerancia,
+          className: "form-control"
+        }, _react["default"].createElement("option", {
+          value: "numerico"
+        }, "Num\xE9rico"), _react["default"].createElement("option", {
+          value: "porcentual"
+        }, "Porcentual")))), _react["default"].createElement("div", {
           className: "row",
           style: {
             width: "100%"
@@ -2481,7 +2568,7 @@ function (_React$Component) {
           className: "col-form-label"
         }, "Tipo Indicador")), _react["default"].createElement("div", {
           className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
-        }, _react["default"].createElement("select", {
+        }, this.props.formulaRiesgo.localeCompare('ambos') == 0 ? _react["default"].createElement("select", {
           id: "tipoIndicador",
           defaultValue: tipoIndicador,
           onChange: this.updateTipoIndicador,
@@ -2490,7 +2577,21 @@ function (_React$Component) {
           value: "riesgoInherente"
         }, "Riesgo Inherente"), _react["default"].createElement("option", {
           value: "calidadGestion"
-        }, "Calidad de Gesti\xF3n")))), _react["default"].createElement("div", {
+        }, "Calidad de Gesti\xF3n")) : null, this.props.formulaRiesgo.localeCompare('calidadGestión') == 0 ? _react["default"].createElement("select", {
+          id: "tipoIndicador",
+          defaultValue: tipoIndicador,
+          onChange: this.updateTipoIndicador,
+          className: "form-control"
+        }, _react["default"].createElement("option", {
+          value: "calidadGestion"
+        }, "Calidad de Gesti\xF3n")) : null, this.props.formulaRiesgo.localeCompare('riesgoInherente') == 0 ? _react["default"].createElement("select", {
+          id: "tipoIndicador",
+          defaultValue: tipoIndicador,
+          onChange: this.updateTipoIndicador,
+          className: "form-control"
+        }, _react["default"].createElement("option", {
+          value: "riesgoInherente"
+        }, "Riesgo Inherente")) : null)), _react["default"].createElement("div", {
           className: "row",
           style: {
             width: "100%"
@@ -2522,146 +2623,6 @@ function (_React$Component) {
           },
           onClick: this.goToCreateFormula
         }, "Crear F\xF3rmula"))), _react["default"].createElement("br", null), _react["default"].createElement("hr", null), _react["default"].createElement("div", {
-          className: "row"
-        }, _react["default"].createElement("div", {
-          className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
-        }, _react["default"].createElement("div", {
-          style: {
-            width: "100%"
-          }
-        }, _react["default"].createElement("div", {
-          className: "row",
-          style: {
-            width: "100%"
-          }
-        }, _react["default"].createElement("div", {
-          className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3"
-        }, _react["default"].createElement("label", {
-          htmlFor: "nombreAtributoNuevoCampo",
-          className: "col-form-label"
-        }, "Nombre de Atributo:")), _react["default"].createElement("div", {
-          className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9",
-          style: {
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center"
-          }
-        }, _react["default"].createElement("input", {
-          id: "nombreAtributoNuevoCampo",
-          defaultValue: nombreCampoNuevoAtributo,
-          onKeyUp: this.actualizarNombreCampoNuevoAtributo,
-          type: "text",
-          className: "form-control form-control-sm"
-        })))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
-          className: "row",
-          style: {
-            width: "100%"
-          }
-        }, _react["default"].createElement("div", {
-          className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
-        }, _react["default"].createElement("label", {
-          htmlFor: "tipoFuenteDato",
-          className: "col-form-label"
-        }, "Tipo de Variable")), _react["default"].createElement("div", {
-          className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group",
-          style: {
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center"
-          }
-        }, _react["default"].createElement("a", {
-          className: "breadcrumb-item active font-20",
-          "aria-current": "page"
-        }, this.state.tipoNuevaVariable))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
-          className: "row",
-          style: {
-            width: "100%"
-          }
-        }, _react["default"].createElement("div", {
-          className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
-        }, _react["default"].createElement("a", {
-          className: "btn btn-success btn-block btnWhiteColorHover font-bold font-20",
-          style: {
-            color: "#fafafa"
-          },
-          onClick: function onClick() {
-            return _this14.goToCreateConditions(-1);
-          }
-        }, "Crear Instrucci\xF3n Personalizada "))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
-          className: "row",
-          style: {
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center"
-          }
-        }, _react["default"].createElement("a", {
-          className: "btn btn-primary btnWhiteColorHover font-bold font-20",
-          style: {
-            color: "#fafafa"
-          },
-          onClick: this.props.crearAtributoVariable
-        }, "Crear Atributo")), _react["default"].createElement("br", null), this.state.atributos.map(function (atributo, i) {
-          return _react["default"].createElement("div", {
-            style: {
-              width: "100%"
-            },
-            key: i
-          }, _react["default"].createElement("hr", null), _react["default"].createElement("div", {
-            style: {
-              width: "100%"
-            }
-          }, _react["default"].createElement("div", {
-            className: "row",
-            style: {
-              width: "100%"
-            }
-          }, _react["default"].createElement("div", {
-            className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3"
-          }, _react["default"].createElement("label", {
-            htmlFor: "nombreAtributo",
-            className: "col-form-label"
-          }, "Nombre de Atributo:")), _react["default"].createElement("div", {
-            className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9",
-            style: {
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center"
-            }
-          }, _react["default"].createElement("input", {
-            id: "nombreAtributo",
-            type: "text",
-            defaultValue: atributo.nombre,
-            className: "form-control form-control-sm"
-          })))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
-            className: "row",
-            style: {
-              width: "100%"
-            }
-          }, _react["default"].createElement("div", {
-            className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
-          }, _react["default"].createElement("label", {
-            htmlFor: "tipoFuenteDato",
-            className: "col-form-label"
-          }, "Tipo de Variable")), _react["default"].createElement("div", {
-            className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group",
-            style: {
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center"
-            }
-          }, _react["default"].createElement("a", {
-            className: "breadcrumb-item active font-20",
-            "aria-current": "page"
-          }, atributo.tipo))), _react["default"].createElement("br", null), _react["default"].createElement("a", {
-            className: "btn btn-success btn-block btnWhiteColorHover font-bold font-20",
-            style: {
-              color: "#fafafa"
-            },
-            onClick: function onClick() {
-              return _this14.actualizarIndiceAtributoSeleccionado(i);
-            }
-          }, "Editar Instrucci\xF3n Personalizada "), _react["default"].createElement("br", null));
-        }))), _react["default"].createElement("br", null), _react["default"].createElement("hr", null), _react["default"].createElement("div", {
           className: "row",
           style: {
             display: "flex",

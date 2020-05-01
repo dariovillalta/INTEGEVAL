@@ -77,6 +77,7 @@ function (_React$Component) {
     _this.crearTablaResultadosIndicadoresDate = _this.crearTablaResultadosIndicadoresDate.bind(_assertThisInitialized(_this));
     _this.crearTablaResultadosIndicadoresBool = _this.crearTablaResultadosIndicadoresBool.bind(_assertThisInitialized(_this));
     _this.crearTablaResultadosIndicadoresString = _this.crearTablaResultadosIndicadoresString.bind(_assertThisInitialized(_this));
+    _this.crearTablaPeriodicidadCalculo = _this.crearTablaPeriodicidadCalculo.bind(_assertThisInitialized(_this));
     _this.crearTablaTablas = _this.crearTablaTablas.bind(_assertThisInitialized(_this));
     _this.crearTablaSegmentoReglasVariables = _this.crearTablaSegmentoReglasVariables.bind(_assertThisInitialized(_this));
     _this.crearTablaReglasVariables = _this.crearTablaReglasVariables.bind(_assertThisInitialized(_this));
@@ -89,10 +90,6 @@ function (_React$Component) {
     _this.showModal = _this.showModal.bind(_assertThisInitialized(_this));
     _this.closeModal = _this.closeModal.bind(_assertThisInitialized(_this));
     _this.saveFile = _this.saveFile.bind(_assertThisInitialized(_this));
-    _this.crearCodigo = _this.crearCodigo.bind(_assertThisInitialized(_this));
-    _this.updateForm = _this.updateForm.bind(_assertThisInitialized(_this));
-    _this.closeModalForma = _this.closeModalForma.bind(_assertThisInitialized(_this));
-    _this.loadFechas = _this.loadFechas.bind(_assertThisInitialized(_this));
     return _this;
   }
 
@@ -100,6 +97,16 @@ function (_React$Component) {
     key: "componentDidMount",
     value: function componentDidMount() {
       this.probarExistenciaTablas();
+    }
+  }, {
+    key: "componentDidUpdate",
+    value: function componentDidUpdate(prevProps, prevState, snapshot) {
+      if (prevProps.pool == null && this.props.pool != null) {
+        var self = this;
+        setTimeout(function () {
+          self.probarExistenciaTablas();
+        }, 500);
+      }
     }
   }, {
     key: "login",
@@ -154,68 +161,72 @@ function (_React$Component) {
   }, {
     key: "probarExistenciaTablas",
     value: function probarExistenciaTablas() {
-      //Riesgos
-      this.existeTabla("Riesgos"); //Indicadores
+      if (this.props.pool != null) {
+        //Riesgos
+        this.existeTabla("Riesgos"); //Indicadores
 
-      this.existeTabla("Indicadores"); //ElementoIndicador
+        this.existeTabla("Indicadores"); //ElementoIndicador
 
-      this.existeTabla("ElementoIndicador"); //IndicadoresCampos
+        this.existeTabla("ElementoIndicador"); //IndicadoresCampos
 
-      this.existeTabla("IndicadoresCampos"); //FormulasIndicadoresCampos
+        this.existeTabla("IndicadoresCampos"); //FormulasIndicadoresCampos
 
-      this.existeTabla("FormulasIndicadoresCampos"); //ElementoFormulasIndicadoresCampos
+        this.existeTabla("FormulasIndicadoresCampos"); //ElementoFormulasIndicadoresCampos
 
-      this.existeTabla("ElementoFormulasIndicadoresCampos"); //SegmentoReglasIndicadores
+        this.existeTabla("ElementoFormulasIndicadoresCampos"); //SegmentoReglasIndicadores
 
-      this.existeTabla("SegmentoReglasIndicadores"); //ReglasIndicadores
+        this.existeTabla("SegmentoReglasIndicadores"); //ReglasIndicadores
 
-      this.existeTabla("ReglasIndicadores"); //Variables
+        this.existeTabla("ReglasIndicadores"); //Variables
 
-      this.existeTabla("Variables"); //VariablesCampos
+        this.existeTabla("Variables"); //VariablesCampos
 
-      this.existeTabla("VariablesCampos"); //FormulasVariablesCampos
+        this.existeTabla("VariablesCampos"); //FormulasVariablesCampos
 
-      this.existeTabla("FormulasVariablesCampos"); //ElementoFormulasVariablesCampos
+        this.existeTabla("FormulasVariablesCampos"); //ElementoFormulasVariablesCampos
 
-      this.existeTabla("ElementoFormulasVariablesCampos"); //InstruccionSQLCampos
+        this.existeTabla("ElementoFormulasVariablesCampos"); //InstruccionSQLCampos
 
-      this.existeTabla("InstruccionSQLCampos"); //InstruccionSQL
+        this.existeTabla("InstruccionSQLCampos"); //InstruccionSQL
 
-      this.existeTabla("InstruccionSQL"); //ResultadosNombreVariables
+        this.existeTabla("InstruccionSQL"); //ResultadosNombreVariables
 
-      this.existeTabla("ResultadosNombreVariables"); //ResultadosNombreIndicadores
+        this.existeTabla("ResultadosNombreVariables"); //ResultadosNombreIndicadores
 
-      this.existeTabla("ResultadosNombreIndicadores"); //ResultadosNombreRiesgos
+        this.existeTabla("ResultadosNombreIndicadores"); //ResultadosNombreRiesgos
 
-      this.existeTabla("ResultadosNombreRiesgos"); //ResultadosIndicadoresInt
+        this.existeTabla("ResultadosNombreRiesgos"); //ResultadosIndicadoresInt
 
-      this.existeTabla("ResultadosIndicadoresInt"); //ResultadosIndicadoresDecimal
+        this.existeTabla("ResultadosIndicadoresInt"); //ResultadosIndicadoresDecimal
 
-      this.existeTabla("ResultadosIndicadoresDecimal"); //ResultadosIndicadoresDate
+        this.existeTabla("ResultadosIndicadoresDecimal"); //ResultadosIndicadoresDate
 
-      this.existeTabla("ResultadosIndicadoresDate"); //ResultadosIndicadoresBool
+        this.existeTabla("ResultadosIndicadoresDate"); //ResultadosIndicadoresBool
 
-      this.existeTabla("ResultadosIndicadoresBool"); //ResultadosIndicadoresString
+        this.existeTabla("ResultadosIndicadoresBool"); //ResultadosIndicadoresString
 
-      this.existeTabla("ResultadosIndicadoresString"); //Tablas
+        this.existeTabla("ResultadosIndicadoresString"); //PeriodicidadCalculo
 
-      this.existeTabla("Tablas"); //SegmentoReglasVariables
+        this.existeTabla("PeriodicidadCalculo"); //Tablas
 
-      this.existeTabla("SegmentoReglasVariables"); //ReglasVariables
+        this.existeTabla("Tablas"); //SegmentoReglasVariables
 
-      this.existeTabla("ReglasVariables"); //ExcelArchivos
+        this.existeTabla("SegmentoReglasVariables"); //ReglasVariables
 
-      this.existeTabla("ExcelArchivos"); //ExcelVariables
+        this.existeTabla("ReglasVariables"); //ExcelArchivos
 
-      this.existeTabla("ExcelVariables"); //FormasVariables
+        this.existeTabla("ExcelArchivos"); //ExcelVariables
 
-      this.existeTabla("FormasVariables"); //Umbral
+        this.existeTabla("ExcelVariables"); //FormasVariables
 
-      this.existeTabla("Umbral"); //SeccionUmbral
+        this.existeTabla("FormasVariables"); //Umbral
 
-      this.existeTabla("SeccionUmbral"); //RangoSeccionUmbral
+        this.existeTabla("Umbral"); //SeccionUmbral
 
-      this.existeTabla("RangoSeccionUmbral");
+        this.existeTabla("SeccionUmbral"); //RangoSeccionUmbral
+
+        this.existeTabla("RangoSeccionUmbral");
+      }
     }
   }, {
     key: "existeTabla",
@@ -283,6 +294,8 @@ function (_React$Component) {
                   _this2.crearTablaResultadosIndicadoresBool();
                 } else if (nombreTabla.localeCompare("ResultadosIndicadoresString") == 0) {
                   _this2.crearTablaResultadosIndicadoresString();
+                } else if (nombreTabla.localeCompare("PeriodicidadCalculo") == 0) {
+                  _this2.crearTablaPeriodicidadCalculo();
                 } else if (nombreTabla.localeCompare("Tablas") == 0) {
                   _this2.crearTablaTablas();
                 } else if (nombreTabla.localeCompare("SegmentoReglasVariables") == 0) {
@@ -318,7 +331,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("CREATE TABLE Riesgos ( ID int IDENTITY(1,1) PRIMARY KEY, nombre varchar(100), formula varchar(500), peso decimal(8,4), tolerancia decimal(8,4), valorIdeal decimal(8,4), idRiesgoPadre int, nivelRiesgoHijo int, color varchar(25) )", function (err, result) {
+        request.query("CREATE TABLE Riesgos ( ID int IDENTITY(1,1) PRIMARY KEY, nombre varchar(100), formula varchar(500), peso decimal(8,4) )", function (err, result) {
           if (err) {
             if (!rolledBack) {
               console.log(err);
@@ -342,7 +355,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("CREATE TABLE Indicadores ( ID int IDENTITY(1,1) PRIMARY KEY, nombre varchar(100), codigo varchar(100), formula varchar(500), peso decimal(8,4), tolerancia decimal(8,4), valorIdeal decimal(8,4), periodicidad varchar(100), tipoIndicador varchar(20), analista varchar(100), idRiesgoPadre int )", function (err, result) {
+        request.query("CREATE TABLE Indicadores ( ID int IDENTITY(1,1) PRIMARY KEY, nombre varchar(100), codigo varchar(100), formula varchar(500), peso decimal(8,4), tolerancia decimal(8,4), tipoTolerancia varchar(20), valorIdeal decimal(8,4), tipoValorIdeal varchar(20), periodicidad varchar(50), tipoIndicador varchar(20), analista varchar(100), idRiesgoPadre int, fechaInicioCalculo date )", function (err, result) {
           if (err) {
             if (!rolledBack) {
               console.log(err);
@@ -510,7 +523,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("CREATE TABLE Variables ( ID int IDENTITY(1,1) PRIMARY KEY, nombre varchar(100), descripcion varchar(700), esObjeto bit, objetoPadreID int, esInstruccionSQL bit, guardar bit )", function (err, result) {
+        request.query("CREATE TABLE Variables ( ID int IDENTITY(1,1) PRIMARY KEY, nombre varchar(100), descripcion varchar(700), esObjeto bit, objetoPadreID int, esInstruccionSQL bit, guardar bit, periodicidad varchar(50), analista varchar(100), fechaInicioCalculo date )", function (err, result) {
           if (err) {
             if (!rolledBack) {
               console.log(err);
@@ -837,6 +850,30 @@ function (_React$Component) {
       }); // fin transaction
     }
   }, {
+    key: "crearTablaPeriodicidadCalculo",
+    value: function crearTablaPeriodicidadCalculo() {
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("CREATE TABLE PeriodicidadCalculo ( ID int IDENTITY(1,1) PRIMARY KEY, variableID int, tablaVariable varchar(20), fechaInicio date, fechaUltimoCalculo date )", function (err, result) {
+          if (err) {
+            if (!rolledBack) {
+              console.log(err);
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              console.log("Tabla PeriodicidadCalculo creada.");
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
     key: "crearTablaTablas",
     value: function crearTablaTablas() {
       var transaction = new _mssql["default"].Transaction(this.props.pool);
@@ -943,7 +980,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("CREATE TABLE ExcelVariables ( ID int IDENTITY(1,1) PRIMARY KEY, excelArchivoID int, nombreHoja varchar(200), nombre varchar(100), operacion varchar(30), celdas varchar(100), tipo varchar(30), guardar bit )", function (err, result) {
+        request.query("CREATE TABLE ExcelVariables ( ID int IDENTITY(1,1) PRIMARY KEY, excelArchivoID int, nombreHoja varchar(200), nombre varchar(100), operacion varchar(30), celdas varchar(100), tipo varchar(30), periodicidad varchar(50), fechaInicioCalculo date, analista varchar(100), guardar bit )", function (err, result) {
           if (err) {
             if (!rolledBack) {
               console.log(err);
@@ -967,7 +1004,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("CREATE TABLE FormasVariables ( ID int IDENTITY(1,1) PRIMARY KEY, nombre varchar(100), tipo varchar(30), guardar bit )", function (err, result) {
+        request.query("CREATE TABLE FormasVariables ( ID int IDENTITY(1,1) PRIMARY KEY, nombre varchar(100), tipo varchar(30), periodicidad varchar(50), fechaInicioCalculo date, analista varchar(100), guardar bit )", function (err, result) {
           if (err) {
             if (!rolledBack) {
               console.log(err);
@@ -991,7 +1028,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("CREATE TABLE Umbral ( ID int IDENTITY(1,1) PRIMARY KEY, variableID int, nombre varchar(100) )", function (err, result) {
+        request.query("CREATE TABLE Umbral ( ID int IDENTITY(1,1) PRIMARY KEY, variableID int, tablaVariable varchar(20) )", function (err, result) {
           if (err) {
             if (!rolledBack) {
               console.log(err);
@@ -1015,7 +1052,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("CREATE TABLE SeccionUmbral ( ID int IDENTITY(1,1) PRIMARY KEY, umbralID int, nombre varchar(100) )", function (err, result) {
+        request.query("CREATE TABLE SeccionUmbral ( ID int IDENTITY(1,1) PRIMARY KEY, umbralID int, nombre varchar(100), color varchar(25) )", function (err, result) {
           if (err) {
             if (!rolledBack) {
               console.log(err);
@@ -1085,8 +1122,12 @@ function (_React$Component) {
               writeStream.write(password + "\n");
               writeStream.write(server + "\n");
               writeStream.write(database + "\n");
-              writeStream.end();
-              this.probarExistenciaTablas(); //this.props.actualizarConexion();
+              writeStream.end(); //this.probarExistenciaTablas();
+
+              var self = this;
+              setTimeout(function () {
+                self.props.readConfigFile();
+              }, 600);
             } else {
               alert("Ingrese un valor para el nombre de la base de datos.");
             }
@@ -1099,418 +1140,6 @@ function (_React$Component) {
       } else {
         alert("Ingrese un valor para el usuario de la base de datos.");
       }
-    }
-  }, {
-    key: "crearCodigo",
-    value: function crearCodigo() {
-      var _this3 = this;
-
-      var formas = [{
-        ID: 1,
-        nombre: "saldo",
-        tipo: "numero"
-      }, {
-        ID: 2,
-        nombre: "existe",
-        tipo: "bit"
-      }, {
-        ID: 3,
-        nombre: "nombre",
-        tipo: "varchar"
-      }, {
-        ID: 4,
-        nombre: "fecha",
-        tipo: "date"
-      }];
-      arregloHTMLFormas = [];
-
-      for (var i = 0; i < formas.length; i++) {
-        if (formas[i].tipo.localeCompare("numero") == 0) {
-          if (i + 1 < formas.length) {
-            (function () {
-              var index = i + 1;
-              var nombre = formas[i + 1].nombre;
-              var id = formas[i + 1].ID;
-              var tipo = formas[i + 1].tipo;
-              arregloHTMLFormas[i] = _react["default"].createElement("div", {
-                style: {
-                  width: "100%"
-                }
-              }, _react["default"].createElement("br", null), _react["default"].createElement("div", {
-                className: "row",
-                style: {
-                  width: "100%"
-                }
-              }, _react["default"].createElement("div", {
-                className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
-              }, _react["default"].createElement("label", {
-                htmlFor: "variableForma" + formas[i].ID,
-                className: "col-form-label"
-              }, "Valor:")), _react["default"].createElement("div", {
-                className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group",
-                style: {
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center"
-                }
-              }, _react["default"].createElement("input", {
-                id: "variableForma" + formas[i].ID,
-                type: "text",
-                className: "form-control form-control-sm"
-              }))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
-                className: "text-center",
-                style: {
-                  width: "100%"
-                }
-              }, _react["default"].createElement("a", {
-                href: "#",
-                className: "btn btn-brand active",
-                onClick: function onClick() {
-                  return _this3.updateForm(nombre, index, tipo, "variableForma" + id);
-                }
-              }, "Guardar")), _react["default"].createElement("br", null));
-            })();
-          } else {
-            arregloHTMLFormas[i] = _react["default"].createElement("div", {
-              style: {
-                width: "100%"
-              }
-            }, _react["default"].createElement("br", null), _react["default"].createElement("div", {
-              className: "row",
-              style: {
-                width: "100%"
-              }
-            }, _react["default"].createElement("div", {
-              className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
-            }, _react["default"].createElement("label", {
-              htmlFor: "variableForma" + formas[i].ID,
-              className: "col-form-label"
-            }, "Valor:")), _react["default"].createElement("div", {
-              className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group",
-              style: {
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center"
-              }
-            }, _react["default"].createElement("input", {
-              id: "variableForma" + formas[i].ID,
-              type: "text",
-              className: "form-control form-control-sm"
-            }))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
-              className: "text-center",
-              style: {
-                width: "100%"
-              }
-            }, _react["default"].createElement("a", {
-              href: "#",
-              className: "btn btn-brand active"
-            }, "Guardar")), _react["default"].createElement("br", null));
-          }
-        } else if (formas[i].tipo.localeCompare("bit") == 0) {
-          if (i + 1 < formas.length) {
-            (function () {
-              var index = i + 1;
-              var nombre = formas[i + 1].nombre;
-              var id = formas[i + 1].ID;
-              var tipo = formas[i + 1].tipo;
-              arregloHTMLFormas[i] = _react["default"].createElement("div", {
-                style: {
-                  width: "100%"
-                }
-              }, _react["default"].createElement("br", null), _react["default"].createElement("div", {
-                className: "row",
-                style: {
-                  width: "100%"
-                }
-              }, _react["default"].createElement("div", {
-                className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
-              }, _react["default"].createElement("label", {
-                htmlFor: "variableForma" + formas[i].ID,
-                className: "col-form-label"
-              }, "Valor:")), _react["default"].createElement("div", {
-                className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
-              }, _react["default"].createElement("br", null), _react["default"].createElement("div", {
-                className: "switch-button switch-button-bool",
-                style: {
-                  margin: "0 auto",
-                  display: "block"
-                }
-              }, _react["default"].createElement("input", {
-                type: "checkbox",
-                defaultChecked: true,
-                name: "guardarFuenteDato",
-                id: "variableForma" + formas[i].ID
-              }), _react["default"].createElement("span", null, _react["default"].createElement("label", {
-                htmlFor: "guardarFuenteDato"
-              }))))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
-                className: "text-center",
-                style: {
-                  width: "100%"
-                }
-              }, _react["default"].createElement("a", {
-                href: "#",
-                className: "btn btn-brand active",
-                onClick: function onClick() {
-                  return _this3.updateForm(nombre, index, tipo, "variableForma" + id);
-                }
-              }, "Guardar")), _react["default"].createElement("br", null));
-            })();
-          } else {
-            arregloHTMLFormas[i] = _react["default"].createElement("div", {
-              style: {
-                width: "100%"
-              }
-            }, _react["default"].createElement("br", null), _react["default"].createElement("div", {
-              className: "row",
-              style: {
-                width: "100%"
-              }
-            }, _react["default"].createElement("div", {
-              className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
-            }, _react["default"].createElement("label", {
-              htmlFor: "variableForma" + formas[i].ID,
-              className: "col-form-label"
-            }, "Valor:")), _react["default"].createElement("div", {
-              className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
-            }, _react["default"].createElement("br", null), _react["default"].createElement("div", {
-              className: "switch-button switch-button-bool",
-              style: {
-                margin: "0 auto",
-                display: "block"
-              }
-            }, _react["default"].createElement("input", {
-              type: "checkbox",
-              defaultChecked: true,
-              name: "guardarFuenteDato",
-              id: "variableForma" + formas[i].ID
-            }), _react["default"].createElement("span", null, _react["default"].createElement("label", {
-              htmlFor: "guardarFuenteDato"
-            }))))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
-              className: "text-center",
-              style: {
-                width: "100%"
-              }
-            }, _react["default"].createElement("a", {
-              href: "#",
-              className: "btn btn-brand active"
-            }, "Guardar")), _react["default"].createElement("br", null));
-          }
-        } else if (formas[i].tipo.localeCompare("varchar") == 0) {
-          if (i + 1 < formas.length) {
-            (function () {
-              var index = i + 1;
-              var nombre = formas[i + 1].nombre;
-              var id = formas[i + 1].ID;
-              var tipo = formas[i + 1].tipo;
-              arregloHTMLFormas[i] = _react["default"].createElement("div", {
-                style: {
-                  width: "100%"
-                }
-              }, _react["default"].createElement("br", null), _react["default"].createElement("div", {
-                className: "row",
-                style: {
-                  width: "100%"
-                }
-              }, _react["default"].createElement("div", {
-                className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
-              }, _react["default"].createElement("label", {
-                htmlFor: "variableForma" + formas[i].ID,
-                className: "col-form-label"
-              }, "Valor:")), _react["default"].createElement("div", {
-                className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group",
-                style: {
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center"
-                }
-              }, _react["default"].createElement("input", {
-                id: "variableForma" + formas[i].ID,
-                type: "text",
-                className: "form-control form-control-sm"
-              }))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
-                className: "text-center",
-                style: {
-                  width: "100%"
-                }
-              }, _react["default"].createElement("a", {
-                href: "#",
-                className: "btn btn-brand active",
-                onClick: function onClick() {
-                  return _this3.updateForm(nombre, index, tipo, "variableForma" + id);
-                }
-              }, "Guardar")), _react["default"].createElement("br", null));
-            })();
-          } else {
-            arregloHTMLFormas[i] = _react["default"].createElement("div", {
-              style: {
-                width: "100%"
-              }
-            }, _react["default"].createElement("br", null), _react["default"].createElement("div", {
-              className: "row",
-              style: {
-                width: "100%"
-              }
-            }, _react["default"].createElement("div", {
-              className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
-            }, _react["default"].createElement("label", {
-              htmlFor: "variableForma" + formas[i].ID,
-              className: "col-form-label"
-            }, "Valor:")), _react["default"].createElement("div", {
-              className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group",
-              style: {
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center"
-              }
-            }, _react["default"].createElement("input", {
-              id: "variableForma" + formas[i].ID,
-              type: "text",
-              className: "form-control form-control-sm"
-            }))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
-              className: "text-center",
-              style: {
-                width: "100%"
-              }
-            }, _react["default"].createElement("a", {
-              href: "#",
-              className: "btn btn-brand active"
-            }, "Guardar")), _react["default"].createElement("br", null));
-          }
-        } else if (formas[i].tipo.localeCompare("date") == 0) {
-          if (i + 1 < formas.length) {
-            (function () {
-              var index = i + 1;
-              var nombre = formas[i + 1].nombre;
-              var id = formas[i + 1].ID;
-              var tipo = formas[i + 1].tipo;
-              arregloHTMLFormas[i] = _react["default"].createElement("div", {
-                style: {
-                  width: "100%"
-                }
-              }, _react["default"].createElement("br", null), _react["default"].createElement("div", {
-                className: "row",
-                style: {
-                  width: "100%"
-                }
-              }, _react["default"].createElement("div", {
-                className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
-              }, _react["default"].createElement("label", {
-                htmlFor: "variableForma" + formas[i].ID,
-                className: "col-form-label"
-              }, "Valor:")), _react["default"].createElement("div", {
-                className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group",
-                style: {
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center"
-                }
-              }, _react["default"].createElement("div", {
-                className: "row",
-                style: {
-                  display: "flex",
-                  justifyContent: "center"
-                }
-              }, _react["default"].createElement("div", {
-                id: "variableForma" + formas[i].ID,
-                className: "center-block"
-              })))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
-                className: "text-center",
-                style: {
-                  width: "100%"
-                }
-              }, _react["default"].createElement("a", {
-                href: "#",
-                className: "btn btn-brand active",
-                onClick: function onClick() {
-                  return _this3.updateForm(nombre, index, tipo, "variableForma" + id);
-                }
-              }, "Guardar")), _react["default"].createElement("br", null));
-            })();
-          } else {
-            arregloHTMLFormas[i] = _react["default"].createElement("div", {
-              style: {
-                width: "100%"
-              }
-            }, _react["default"].createElement("br", null), _react["default"].createElement("div", {
-              className: "row",
-              style: {
-                width: "100%"
-              }
-            }, _react["default"].createElement("div", {
-              className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
-            }, _react["default"].createElement("label", {
-              htmlFor: "variableForma" + formas[i].ID,
-              className: "col-form-label"
-            }, "Valor:")), _react["default"].createElement("div", {
-              className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group",
-              style: {
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center"
-              }
-            }, _react["default"].createElement("div", {
-              className: "row",
-              style: {
-                display: "flex",
-                justifyContent: "center"
-              }
-            }, _react["default"].createElement("div", {
-              id: "variableForma" + formas[i].ID,
-              className: "center-block"
-            })))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
-              className: "text-center",
-              style: {
-                width: "100%"
-              }
-            }, _react["default"].createElement("a", {
-              href: "#",
-              className: "btn btn-brand active"
-            }, "Guardar")), _react["default"].createElement("br", null));
-          }
-        }
-      }
-
-      ;
-      console.log('arregloHTMLFormas');
-      console.log(arregloHTMLFormas);
-      this.updateForm(formas[0].nombre, 0, formas[0].tipo);
-      /*window['calculoPrincipal'] = new Function(
-          'return function calculoPrincipalMain(){'+
-                  codigo+
-          '}'
-      )();
-      window['calculoPrincipal']();*/
-    }
-  }, {
-    key: "updateForm",
-    value: function updateForm(titulo, index, tipo, idInput) {
-      this.setState({
-        showModalForma: true,
-        tituloVariableForma: "Variable: " + titulo,
-        htmlForma: arregloHTMLFormas[index]
-      }, this.loadFechas(tipo, idInput));
-    }
-  }, {
-    key: "loadFechas",
-    value: function loadFechas(tipo, idInput) {
-      if (tipo.localeCompare("date") == 0) {
-        setTimeout(function () {
-          $('#' + idInput).datepicker({
-            format: "dd-mm-yyyy",
-            todayHighlight: true,
-            viewMode: "days",
-            minViewMode: "days",
-            language: 'es'
-          });
-        }, 250);
-      }
-    }
-  }, {
-    key: "closeModalForma",
-    value: function closeModalForma() {
-      this.setState({
-        showModalForma: false
-      });
     }
   }, {
     key: "render",
@@ -1629,11 +1258,16 @@ function (_React$Component) {
         id: "basedatosConexion",
         type: "text",
         className: "form-control form-control-sm"
-      })))), _react["default"].createElement(_Modal["default"], {
-        show: this.state.showModalForma,
-        titulo: this.state.tituloVariableForma,
-        onClose: this.closeModalForma
-      }, this.state.htmlForma));
+      }))), _react["default"].createElement("div", {
+        className: "text-center",
+        style: {
+          width: "100%"
+        }
+      }, _react["default"].createElement("a", {
+        href: "#",
+        className: "btn btn-brand active",
+        onClick: this.saveFile
+      }, "Guardar Configuraci\xF3n"))));
     }
   }]);
 

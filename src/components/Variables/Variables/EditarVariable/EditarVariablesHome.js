@@ -52,6 +52,9 @@ var indiceSeleccionadoFormula = -1;                 //indice seleccionado formul
 
 var nombreVariable = '';
 var descripcionVariable = '';
+var fechaInicioVariable = '';
+var periodicidadVariable = '';
+var analistaVariable = '';
 
 var nombreCampoNuevoAtributosVario = '';
 var atributosVario = [];
@@ -77,9 +80,9 @@ var contadorObjetosGuardados = 0;                            //bandera que lleva
 export default class EditarVariablesHome extends React.Component {
     constructor(props) {
         super(props);
-        console.log(this.props.idVariable)
-        console.log(this.props.esObjetoVariable)
-        console.log(this.props.esInstruccionSQLVariable)
+        console.log(this.props.idVariable);
+        console.log(this.props.esObjetoVariable);
+        console.log(this.props.esInstruccionSQLVariable);
         this.state = {
             componenteActual: 'editarVariable',
             atributos: [],
@@ -97,8 +100,9 @@ export default class EditarVariablesHome extends React.Component {
             nombreVariable: "",
             descripcionVariable: "",
             objetoPadreIDVariable: -1,
-            guardarVariable: ""
+            guardarVariable: "",
         }
+        this.traerInstruccionSQLVariable = this.traerInstruccionSQLVariable.bind(this);
         this.traerInstruccionSQL = this.traerInstruccionSQL.bind(this);
         this.traerVariable = this.traerVariable.bind(this);
         this.traerSegmentosDeCampo = this.traerSegmentosDeCampo.bind(this);
@@ -151,6 +155,9 @@ export default class EditarVariablesHome extends React.Component {
         this.actualizarNivelNuevaRegla = this.actualizarNivelNuevaRegla.bind(this);
         this.actualizarNombreVariable = this.actualizarNombreVariable.bind(this);
         this.actualizarDescripcionVariable = this.actualizarDescripcionVariable.bind(this);
+        this.actualizarFechaInicio = this.actualizarFechaInicio.bind(this);
+        this.actualizarPeriodicidad = this.actualizarPeriodicidad.bind(this);
+        this.actualizarNombreEncargado = this.actualizarNombreEncargado.bind(this);
         this.actualizarNombreCampoNuevoAtributosVario = this.actualizarNombreCampoNuevoAtributosVario.bind(this);
         this.retornarCodigoOperacion = this.retornarCodigoOperacion.bind(this);
         this.getVariables = this.getVariables.bind(this);
@@ -171,15 +178,76 @@ export default class EditarVariablesHome extends React.Component {
         this.getFormas();
         if(this.props.tipoVariable.localeCompare("variable") == 0) {
             if(this.props.esInstruccionSQLVariable) {
-                this.traerInstruccionSQL();
+                console.log('p1');
+                this.traerInstruccionSQLVariable();
             } else if(this.props.esObjetoVariable) {
+                console.log('p2');
                 this.traerVariable(true);
                 banderaEsObjeto = true;
             } else {
+                console.log('p3');
                 this.traerVariable(false);
                 banderaEsObjeto = false;
             }
         }
+    }
+
+    traerInstruccionSQLVariable () {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("select * from Variables where ID = "+this.props.idVariable, (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        contadorObjetosGuardados++;
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        console.log('result.recordset');
+                        console.log(result.recordset);
+                        if(result.recordset.length > 0) {
+                            nombreVariable = result.recordset[0].nombre;
+                            descripcionVariable = result.recordset[0].descripcion;
+                            $("#nombreFuenteDato").val(result.recordset[0].nombre);
+                            $("#descripcionFuenteDato").val(result.recordset[0].descripcion);
+                            if(this.props.esInstruccionSQLVariable)
+                                $("#esInstruccionSQL").prop('checked', true);
+                            else
+                                $("#esInstruccionSQL").prop('checked', false);
+                            if(this.props.esObjetoVariable)
+                                $("#esObjetoFuenteDato").prop('checked', true);
+                            else
+                                $("#esObjetoFuenteDato").prop('checked', false);
+                            if(result.recordset[0].guardar)
+                                $("#guardarFuenteDato").prop('checked', true);
+                            else
+                                $("#guardarFuenteDato").prop('checked', false);
+                            fechaInicioVariable = result.recordset[0].nombre;
+                            periodicidadVariable = result.recordset[0].nombre;
+                            analistaVariable = result.recordset[0].nombre;
+                            $("#periodicidad").val(periodicidadVariable);
+                            $("#analista").val(analistaVariable);
+                            if(fechaInicioVariable.getFullYear() != 1964 && fechaInicioVariable.getMonth() != 4 && fechaInicioVariable.getDate() != 28)
+                                $("#fecha").datepicker("setDate", fechaInicioVariable);
+                            /*this.setState({
+                                nombreVariable: result.recordset[0].nombre,
+                                descripcionVariable: result.recordset[0].descripcion,
+                                objetoPadreIDVariable: result.recordset[0].objetoPadreID,
+                                guardarVariable: result.recordset[0].guardar
+                            });*/
+                            this.traerInstruccionSQL();
+                        }
+                    });
+                }
+            });
+        }); // fin transaction
     }
 
     traerInstruccionSQL () {
@@ -258,7 +326,25 @@ export default class EditarVariablesHome extends React.Component {
                     }
                 } else {
                     transaction.commit(err => {
+                        console.log('result.recordset');
+                        console.log(result.recordset);
                         if(result.recordset.length > 0) {
+                            nombreVariable = result.recordset[0].nombre;
+                            descripcionVariable = result.recordset[0].descripcion;
+                            $("#nombreFuenteDato").val(result.recordset[0].nombre);
+                            $("#descripcionFuenteDato").val(result.recordset[0].descripcion);
+                            if(this.props.esInstruccionSQLVariable)
+                                $("#esInstruccionSQL").prop('checked', true);
+                            else
+                                $("#esInstruccionSQL").prop('checked', false);
+                            if(this.props.esObjetoVariable)
+                                $("#esObjetoFuenteDato").prop('checked', true);
+                            else
+                                $("#esObjetoFuenteDato").prop('checked', false);
+                            if(result.recordset[0].guardar)
+                                $("#guardarFuenteDato").prop('checked', true);
+                            else
+                                $("#guardarFuenteDato").prop('checked', false);
                             this.setState({
                                 nombreVariable: result.recordset[0].nombre,
                                 descripcionVariable: result.recordset[0].descripcion,
@@ -708,6 +794,8 @@ export default class EditarVariablesHome extends React.Component {
 
     createVariableSQL () {
         for (var i = 0; i < variablesSQL.length; i++) {
+            let nombre = variablesSQL[i].nombre;
+            let tipo = variablesSQL[i].tipo;
             const transaction = new sql.Transaction( this.props.pool );
             transaction.begin(err => {
                 var rolledBack = false;
@@ -715,7 +803,7 @@ export default class EditarVariablesHome extends React.Component {
                     rolledBack = true;
                 });
                 const request = new sql.Request(transaction);
-                request.query("insert into InstruccionSQLCampos (variableID, nombre, tipo) values ("+this.props.idVariable+", '"+variablesSQL[i].nombre+"', '"+variable.tipo+"')", (err, result) => {
+                request.query("insert into InstruccionSQLCampos (variableID, nombre, tipo) values ("+this.props.idVariable+", '"+nombre+"', '"+tipo+"')", (err, result) => {
                     if (err) {
                         console.log(err);
                         if (!rolledBack) {
@@ -1400,13 +1488,13 @@ export default class EditarVariablesHome extends React.Component {
     guardarVariable() {
         contadorObjetosGuardados = 0;
         contadorObjetosAGuardar = 0;
-        if (this.props.tipoVariableOriginal.localeCompare("excel") == 0) {
+        if (this.props.tipoVariable.localeCompare("excel") == 0) {
             this.eliminarVarExcel();
         }
-        if (this.props.tipoVariableOriginal.localeCompare("variable") == 0) {
+        if (this.props.tipoVariable.localeCompare("variable") == 0) {
             this.eliminarVariable();
         }
-        if (this.props.tipoVariableOriginal.localeCompare("forma") == 0) {
+        if (this.props.tipoVariable.localeCompare("forma") == 0) {
             this.eliminarVarForma();
         }
         if (banderaEsInstruccionSQL) {
@@ -1455,10 +1543,10 @@ export default class EditarVariablesHome extends React.Component {
                                     if(variablesSQL.length > 0) {
                                         if(instruccionSQL.length > 0) {
                                             var nuevaVariable = {nombre: nombreVariable, descripcion: descripcionVariable, esObjeto: esObjeto, objetoPadreID: objetoPadreID, esInstruccionSQL: esInstruccionSQL, guardar: guardarResultadosEnBaseDatos};
-                                            if (this.props.tipoVariableOriginal.localeCompare("variable") == 0) {
-                                                this.updateVariable(nuevaVariable, [nuevoAtributo]);
+                                            if (this.props.tipoVariable.localeCompare("variable") == 0) {
+                                                this.updateVariable(nuevaVariable);
                                             } else {
-                                                this.createVariable(nuevaVariable, [nuevoAtributo]);
+                                                this.createVariable(nuevaVariable);
                                             }
                                             contadorObjetosAGuardar++;
                                         } else {
@@ -1735,6 +1823,7 @@ export default class EditarVariablesHome extends React.Component {
             this.setState({
                 comandoSQL: instruccionSQL
             });
+            alert('Instrucción Guardada');
         } else {
             alert("El nombre del campo debe tener una longitud menor a 101 caracteres.");
         }
@@ -1791,12 +1880,15 @@ export default class EditarVariablesHome extends React.Component {
         }
         var reglaEsValida = true;
         if(!esFormula) {
-            if(campoSeleccionado.valor == undefined)
+            if(campoSeleccionado == undefined || campoSeleccionado.valor == undefined) {
                 reglaEsValida = false;
-            if(valorSeleccionado.length == 0)
+            }
+            if(valorSeleccionado.length == 0) {
                 reglaEsValida = false;
-            if(operacionSeleccionada.operacion == undefined)
+            }
+            if(operacionSeleccionada.operacion == undefined) {
                 reglaEsValida = false;
+            }
             if(campoSeleccionado.tipo != undefined) {
                 if(campoSeleccionado.tipo.localeCompare("int") == 0 || campoSeleccionado.tipo.localeCompare("decimal") == 0) {
                     if(valorSeleccionado.indexOf("NUMERO") == -1 && valorSeleccionado.indexOf("LISTAID") == -1) {
@@ -1807,7 +1899,7 @@ export default class EditarVariablesHome extends React.Component {
                         reglaEsValida = false;
                     }
                 } else if(campoSeleccionado.tipo.localeCompare("date") == 0) {
-                    if(valorSeleccionado.indexOf("FECHA") == -1 && valorSeleccionado.indexOf("LISTAID") == -1) {
+                    if(valorSeleccionado.indexOf("FECHA") == -1 && valorSeleccionado.indexOf("TIME") == -1 && valorSeleccionado.indexOf("LISTAID") == -1) {
                         reglaEsValida = false;
                     }
                 } else if(campoSeleccionado.tipo.localeCompare("varchar") == 0) {
@@ -1817,8 +1909,9 @@ export default class EditarVariablesHome extends React.Component {
                 }
             }
         } else {
-            if(formulaSeleccionada.formula == undefined)
+            if(formulaSeleccionada.formula == undefined) {
                 reglaEsValida = false;
+            }
         }
         //si es formula, viendo que no haya regla debajo, formulas solo se pueden agregar al final
         if(banderaSinoReglaValido && reglaEsValida) {
@@ -2512,12 +2605,15 @@ export default class EditarVariablesHome extends React.Component {
             }
             var reglaEsValida = true;
             if(!esFormula) {
-                if(campoSeleccionado.valor == undefined)
+                if(campoSeleccionado == undefined || campoSeleccionado.valor == undefined) {
                     reglaEsValida = false;
-                if(valorSeleccionado.length == 0)
+                }
+                if(valorSeleccionado.length == 0) {
                     reglaEsValida = false;
-                if(operacionSeleccionada.operacion == undefined)
+                }
+                if(operacionSeleccionada.operacion == undefined) {
                     reglaEsValida = false;
+                }
                 if(campoSeleccionado.tipo != undefined) {
                     if(campoSeleccionado.tipo.localeCompare("int") == 0 || campoSeleccionado.tipo.localeCompare("decimal") == 0) {
                         if(valorSeleccionado.indexOf("NUMERO") == -1 && valorSeleccionado.indexOf("LISTAID") == -1) {
@@ -2528,7 +2624,7 @@ export default class EditarVariablesHome extends React.Component {
                             reglaEsValida = false;
                         }
                     } else if(campoSeleccionado.tipo.localeCompare("date") == 0) {
-                        if(valorSeleccionado.indexOf("FECHA") == -1 && valorSeleccionado.indexOf("LISTAID") == -1) {
+                        if(valorSeleccionado.indexOf("FECHA") == -1 && valorSeleccionado.indexOf("TIME") == -1 && valorSeleccionado.indexOf("LISTAID") == -1) {
                             reglaEsValida = false;
                         }
                     } else if(campoSeleccionado.tipo.localeCompare("varchar") == 0) {
@@ -2538,8 +2634,9 @@ export default class EditarVariablesHome extends React.Component {
                     }
                 }
             } else {
-                if(formulaSeleccionada.formula == undefined)
+                if(formulaSeleccionada.formula == undefined) {
                     reglaEsValida = false;
+                }
             }
             //si es formula, viendo que no haya regla debajo, formulas solo se pueden agregar al final
             if(banderaSinoReglaValido && reglaEsValida) {
@@ -2921,6 +3018,20 @@ export default class EditarVariablesHome extends React.Component {
         nombreCampoNuevoAtributosVario = nombreCampo;
     }
 
+    actualizarFechaInicio (fecha) {
+        fechaInicioVariable = fecha;
+    }
+
+    actualizarPeriodicidad () {
+        var periodicidad = $("#periodicidad").val();
+        periodicidadVariable = periodicidad;
+    }
+
+    actualizarNombreEncargado () {
+        var analista = $("#analista").val();
+        analistaVariable = analista;
+    }
+
     retornarCodigoOperacion (codigo) {
         if(codigo.localeCompare("ASIG") == 0) {
             return "ASIGNAR";
@@ -3262,7 +3373,7 @@ export default class EditarVariablesHome extends React.Component {
                 rolledBack = true;
             });
             const request7 = new sql.Request(transaction7);
-            request7.query("delete from InstruccionSQL variableID = "+this.props.idVariable, (err, result) => {
+            request7.query("DELETE FROM InstruccionSQL WHERE variableID = "+this.props.idVariable, (err, result) => {
                 if (err) {
                     console.log(err);
                     if (!rolledBack) {
@@ -3283,7 +3394,7 @@ export default class EditarVariablesHome extends React.Component {
                 rolledBack = true;
             });
             const request8 = new sql.Request(transaction8);
-            request8.query("delete from InstruccionSQLCampos where variableID = "+this.props.idVariable, (err, result) => {
+            request8.query("DELETE FROM InstruccionSQLCampos WHERE variableID = "+this.props.idVariable, (err, result) => {
                 if (err) {
                     console.log(err);
                     if (!rolledBack) {
@@ -3329,7 +3440,18 @@ export default class EditarVariablesHome extends React.Component {
                                                 goCreateVariableFieldSQL={this.goCreateVariableFieldSQL}
                                                 guardarVariable={this.guardarVariable}
                                                 crearAtributoVariable={this.crearAtributoVariable}
-                                                actualizarIDVariableModificada={this.props.actualizarIDVariableModificada}>
+                                                actualizarIDVariableModificada={this.props.actualizarIDVariableModificada}
+                                                changeStateFirstTimeToFalse={this.props.changeStateFirstTimeToFalse}
+                                                esPrimeraVez={this.props.esPrimeraVez}
+                                                eliminarVariable={this.eliminarVariable}
+                                                eliminarVarForma={this.eliminarVarForma}
+                                                eliminarVarExcel={this.eliminarVarExcel}
+                                                actualizarFechaInicio={this.actualizarFechaInicio}
+                                                actualizarPeriodicidad={this.actualizarPeriodicidad}
+                                                actualizarNombreEncargado={this.actualizarNombreEncargado}
+                                                fechaInicioVariable={fechaInicioVariable}
+                                                periodicidadVariable={periodicidadVariable}
+                                                analistaVariable={analistaVariable}>
                     </EditarVariable>
                 </div>
             );

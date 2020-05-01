@@ -15,29 +15,8 @@ export default class CrearRiesgo extends React.Component {
 
     crearRiesgo () {
         var nombre = $("#nombreRiesgo").val();
-        var formula = '';
+        var formula = $("#formula").val();;
         var peso = this.state.x;
-        var tolerancia = parseInt($("#tolerancia").val());
-        var valorIdeal = parseInt($("#valorIdeal").val());
-        var riesgoPadre = parseInt(this.props.riesgoPadre);
-        var nivel = 0;
-        if(this.props.riesgoPadre == undefined || this.props.riesgoPadre == -1) {
-            riesgoPadre = parseInt($("#riesgoPadre").val());
-        }
-        console.log('nombre');
-        console.log(nombre);
-        console.log('formula');
-        console.log(formula);
-        console.log('peso');
-        console.log(peso);
-        console.log('tolerancia');
-        console.log(tolerancia);
-        console.log('valorIdeal');
-        console.log(valorIdeal);
-        console.log('riesgoPadre');
-        console.log(riesgoPadre);
-        console.log('nivel');
-        console.log(nivel);
         const transaction = new sql.Transaction( this.props.pool );
         transaction.begin(err => {
             var rolledBack = false;
@@ -45,7 +24,7 @@ export default class CrearRiesgo extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("insert into Riesgos (nombre, formula, peso, tolerancia, valorIdeal, idRiesgoPadre, nivelRiesgoHijo) values ('"+nombre+"', '"+formula+"', "+peso+", "+tolerancia+", "+valorIdeal+", "+riesgoPadre+", "+nivel+")", (err, result) => {
+            request.query("insert into Riesgos (nombre, formula, peso) values ('"+nombre+"', '"+formula+"', "+peso+")", (err, result) => {
                 if (err) {
                     if (!rolledBack) {
                         console.log(err);
@@ -96,7 +75,7 @@ export default class CrearRiesgo extends React.Component {
                                     </div>
                                     <div className={"row"} style={{width: "100%"}}>
                                         <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
-                                            <label htmlFor="nombreRiesgo" className="col-form-label">Fórmula</label>
+                                            <label htmlFor="formula" className="col-form-label">Tipo de Indicador</label>
                                         </div>
                                         <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"}>
                                             <select id="formula" className="form-control">
@@ -122,35 +101,6 @@ export default class CrearRiesgo extends React.Component {
                                         </div>
                                         <div className={"col-xl-1 col-lg-1 col-md-1 col-sm-1 col-1 form-group"}>
                                             <label id="pesoLabel" className="col-form-label">{this.state.x}</label>
-                                        </div>
-                                    </div>
-                                    <div className={"row"} style={{width: "100%"}}>
-                                        <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
-                                            <label htmlFor="tolerancia" className="col-form-label">Tolerancia</label>
-                                        </div>
-                                        <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"}>
-                                            <input id="tolerancia" type="text" className="form-control form-control-sm"/>
-                                        </div>
-                                    </div>
-                                    <div className={"row"} style={{width: "100%"}}>
-                                        <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
-                                            <label htmlFor="valorIdeal" className="col-form-label">Valor Ideal</label>
-                                        </div>
-                                        <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"}>
-                                            <input id="valorIdeal" type="text" className="form-control form-control-sm"/>
-                                        </div>
-                                    </div>
-                                    <div className={"row"} style={{width: "100%"}}>
-                                        <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
-                                            <label htmlFor="riesgoPadre" className="col-form-label">Riesgo Padre</label>
-                                        </div>
-                                        <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"}>
-                                            <select id="riesgoPadre" className="form-control">
-                                                <option value="-1">Ninguno</option>
-                                                {this.props.riesgos.map((riesgo, i) =>
-                                                    <option value={riesgo.ID} key={riesgo.ID}>{riesgo.nombre}</option>
-                                                )}
-                                            </select>
                                         </div>
                                     </div>
                                     <br/>

@@ -40,6 +40,7 @@ export default class LoginPage extends React.Component {
         this.crearTablaResultadosIndicadoresDate = this.crearTablaResultadosIndicadoresDate.bind(this);
         this.crearTablaResultadosIndicadoresBool = this.crearTablaResultadosIndicadoresBool.bind(this);
         this.crearTablaResultadosIndicadoresString = this.crearTablaResultadosIndicadoresString.bind(this);
+        this.crearTablaPeriodicidadCalculo = this.crearTablaPeriodicidadCalculo.bind(this);
         this.crearTablaTablas = this.crearTablaTablas.bind(this);
         this.crearTablaSegmentoReglasVariables = this.crearTablaSegmentoReglasVariables.bind(this);
         this.crearTablaReglasVariables = this.crearTablaReglasVariables.bind(this);
@@ -53,15 +54,19 @@ export default class LoginPage extends React.Component {
         this.showModal = this.showModal.bind(this);
         this.closeModal = this.closeModal.bind(this);
         this.saveFile = this.saveFile.bind(this);
-
-        this.crearCodigo = this.crearCodigo.bind(this);
-        this.updateForm = this.updateForm.bind(this);
-        this.closeModalForma = this.closeModalForma.bind(this);
-        this.loadFechas = this.loadFechas.bind(this);
     }
 
     componentDidMount() {
         this.probarExistenciaTablas();
+    }
+
+    componentDidUpdate (prevProps, prevState, snapshot) {
+        if(prevProps.pool == null && this.props.pool != null) {
+            var self = this;
+            setTimeout(function(){
+                self.probarExistenciaTablas();
+            }, 500);
+        }
     }
 
     login () {
@@ -114,68 +119,72 @@ export default class LoginPage extends React.Component {
     }
 
     probarExistenciaTablas () {
-        //Riesgos
-        this.existeTabla("Riesgos");
-        //Indicadores
-        this.existeTabla("Indicadores");
-        //ElementoIndicador
-        this.existeTabla("ElementoIndicador");
-        //IndicadoresCampos
-        this.existeTabla("IndicadoresCampos");
-        //FormulasIndicadoresCampos
-        this.existeTabla("FormulasIndicadoresCampos");
-        //ElementoFormulasIndicadoresCampos
-        this.existeTabla("ElementoFormulasIndicadoresCampos");
-        //SegmentoReglasIndicadores
-        this.existeTabla("SegmentoReglasIndicadores");
-        //ReglasIndicadores
-        this.existeTabla("ReglasIndicadores");
-        //Variables
-        this.existeTabla("Variables");
-        //VariablesCampos
-        this.existeTabla("VariablesCampos");
-        //FormulasVariablesCampos
-        this.existeTabla("FormulasVariablesCampos");
-        //ElementoFormulasVariablesCampos
-        this.existeTabla("ElementoFormulasVariablesCampos");
-        //InstruccionSQLCampos
-        this.existeTabla("InstruccionSQLCampos");
-        //InstruccionSQL
-        this.existeTabla("InstruccionSQL");
-        //ResultadosNombreVariables
-        this.existeTabla("ResultadosNombreVariables");
-        //ResultadosNombreIndicadores
-        this.existeTabla("ResultadosNombreIndicadores");
-        //ResultadosNombreRiesgos
-        this.existeTabla("ResultadosNombreRiesgos");
-        //ResultadosIndicadoresInt
-        this.existeTabla("ResultadosIndicadoresInt");
-        //ResultadosIndicadoresDecimal
-        this.existeTabla("ResultadosIndicadoresDecimal");
-        //ResultadosIndicadoresDate
-        this.existeTabla("ResultadosIndicadoresDate");
-        //ResultadosIndicadoresBool
-        this.existeTabla("ResultadosIndicadoresBool");
-        //ResultadosIndicadoresString
-        this.existeTabla("ResultadosIndicadoresString");
-        //Tablas
-        this.existeTabla("Tablas");
-        //SegmentoReglasVariables
-        this.existeTabla("SegmentoReglasVariables");
-        //ReglasVariables
-        this.existeTabla("ReglasVariables");
-        //ExcelArchivos
-        this.existeTabla("ExcelArchivos");
-        //ExcelVariables
-        this.existeTabla("ExcelVariables");
-        //FormasVariables
-        this.existeTabla("FormasVariables");
-        //Umbral
-        this.existeTabla("Umbral");
-        //SeccionUmbral
-        this.existeTabla("SeccionUmbral");
-        //RangoSeccionUmbral
-        this.existeTabla("RangoSeccionUmbral");
+        if(this.props.pool != null) {
+            //Riesgos
+            this.existeTabla("Riesgos");
+            //Indicadores
+            this.existeTabla("Indicadores");
+            //ElementoIndicador
+            this.existeTabla("ElementoIndicador");
+            //IndicadoresCampos
+            this.existeTabla("IndicadoresCampos");
+            //FormulasIndicadoresCampos
+            this.existeTabla("FormulasIndicadoresCampos");
+            //ElementoFormulasIndicadoresCampos
+            this.existeTabla("ElementoFormulasIndicadoresCampos");
+            //SegmentoReglasIndicadores
+            this.existeTabla("SegmentoReglasIndicadores");
+            //ReglasIndicadores
+            this.existeTabla("ReglasIndicadores");
+            //Variables
+            this.existeTabla("Variables");
+            //VariablesCampos
+            this.existeTabla("VariablesCampos");
+            //FormulasVariablesCampos
+            this.existeTabla("FormulasVariablesCampos");
+            //ElementoFormulasVariablesCampos
+            this.existeTabla("ElementoFormulasVariablesCampos");
+            //InstruccionSQLCampos
+            this.existeTabla("InstruccionSQLCampos");
+            //InstruccionSQL
+            this.existeTabla("InstruccionSQL");
+            //ResultadosNombreVariables
+            this.existeTabla("ResultadosNombreVariables");
+            //ResultadosNombreIndicadores
+            this.existeTabla("ResultadosNombreIndicadores");
+            //ResultadosNombreRiesgos
+            this.existeTabla("ResultadosNombreRiesgos");
+            //ResultadosIndicadoresInt
+            this.existeTabla("ResultadosIndicadoresInt");
+            //ResultadosIndicadoresDecimal
+            this.existeTabla("ResultadosIndicadoresDecimal");
+            //ResultadosIndicadoresDate
+            this.existeTabla("ResultadosIndicadoresDate");
+            //ResultadosIndicadoresBool
+            this.existeTabla("ResultadosIndicadoresBool");
+            //ResultadosIndicadoresString
+            this.existeTabla("ResultadosIndicadoresString");
+            //PeriodicidadCalculo
+            this.existeTabla("PeriodicidadCalculo");
+            //Tablas
+            this.existeTabla("Tablas");
+            //SegmentoReglasVariables
+            this.existeTabla("SegmentoReglasVariables");
+            //ReglasVariables
+            this.existeTabla("ReglasVariables");
+            //ExcelArchivos
+            this.existeTabla("ExcelArchivos");
+            //ExcelVariables
+            this.existeTabla("ExcelVariables");
+            //FormasVariables
+            this.existeTabla("FormasVariables");
+            //Umbral
+            this.existeTabla("Umbral");
+            //SeccionUmbral
+            this.existeTabla("SeccionUmbral");
+            //RangoSeccionUmbral
+            this.existeTabla("RangoSeccionUmbral");
+        }
     }
 
     existeTabla (nombreTabla) {
@@ -241,6 +250,8 @@ export default class LoginPage extends React.Component {
                                 this.crearTablaResultadosIndicadoresBool();
                             } else if(nombreTabla.localeCompare("ResultadosIndicadoresString") == 0) {
                                 this.crearTablaResultadosIndicadoresString();
+                            } else if(nombreTabla.localeCompare("PeriodicidadCalculo") == 0) {
+                                this.crearTablaPeriodicidadCalculo();
                             } else if(nombreTabla.localeCompare("Tablas") == 0) {
                                 this.crearTablaTablas();
                             } else if(nombreTabla.localeCompare("SegmentoReglasVariables") == 0) {
@@ -275,7 +286,7 @@ export default class LoginPage extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("CREATE TABLE Riesgos ( ID int IDENTITY(1,1) PRIMARY KEY, nombre varchar(100), formula varchar(500), peso decimal(8,4), tolerancia decimal(8,4), valorIdeal decimal(8,4), idRiesgoPadre int, nivelRiesgoHijo int, color varchar(25) )", (err, result) => {
+            request.query("CREATE TABLE Riesgos ( ID int IDENTITY(1,1) PRIMARY KEY, nombre varchar(100), formula varchar(500), peso decimal(8,4) )", (err, result) => {
                 if (err) {
                     if (!rolledBack) {
                         console.log(err);
@@ -299,7 +310,7 @@ export default class LoginPage extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("CREATE TABLE Indicadores ( ID int IDENTITY(1,1) PRIMARY KEY, nombre varchar(100), codigo varchar(100), formula varchar(500), peso decimal(8,4), tolerancia decimal(8,4), valorIdeal decimal(8,4), periodicidad varchar(100), tipoIndicador varchar(20), analista varchar(100), idRiesgoPadre int )", (err, result) => {
+            request.query("CREATE TABLE Indicadores ( ID int IDENTITY(1,1) PRIMARY KEY, nombre varchar(100), codigo varchar(100), formula varchar(500), peso decimal(8,4), tolerancia decimal(8,4), tipoTolerancia varchar(20), valorIdeal decimal(8,4), tipoValorIdeal varchar(20), periodicidad varchar(50), tipoIndicador varchar(20), analista varchar(100), idRiesgoPadre int, fechaInicioCalculo date )", (err, result) => {
                 if (err) {
                     if (!rolledBack) {
                         console.log(err);
@@ -467,7 +478,7 @@ export default class LoginPage extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("CREATE TABLE Variables ( ID int IDENTITY(1,1) PRIMARY KEY, nombre varchar(100), descripcion varchar(700), esObjeto bit, objetoPadreID int, esInstruccionSQL bit, guardar bit )", (err, result) => {
+            request.query("CREATE TABLE Variables ( ID int IDENTITY(1,1) PRIMARY KEY, nombre varchar(100), descripcion varchar(700), esObjeto bit, objetoPadreID int, esInstruccionSQL bit, guardar bit, periodicidad varchar(50), analista varchar(100), fechaInicioCalculo date )", (err, result) => {
                 if (err) {
                     if (!rolledBack) {
                         console.log(err);
@@ -795,6 +806,30 @@ export default class LoginPage extends React.Component {
         }); // fin transaction
     }
 
+    crearTablaPeriodicidadCalculo () {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("CREATE TABLE PeriodicidadCalculo ( ID int IDENTITY(1,1) PRIMARY KEY, variableID int, tablaVariable varchar(20), fechaInicio date, fechaUltimoCalculo date )", (err, result) => {
+                if (err) {
+                    if (!rolledBack) {
+                        console.log(err);
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        console.log("Tabla PeriodicidadCalculo creada.");
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
     crearTablaTablas () {
         const transaction = new sql.Transaction( this.props.pool );
         transaction.begin(err => {
@@ -900,7 +935,7 @@ export default class LoginPage extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("CREATE TABLE ExcelVariables ( ID int IDENTITY(1,1) PRIMARY KEY, excelArchivoID int, nombreHoja varchar(200), nombre varchar(100), operacion varchar(30), celdas varchar(100), tipo varchar(30), guardar bit )", (err, result) => {
+            request.query("CREATE TABLE ExcelVariables ( ID int IDENTITY(1,1) PRIMARY KEY, excelArchivoID int, nombreHoja varchar(200), nombre varchar(100), operacion varchar(30), celdas varchar(100), tipo varchar(30), periodicidad varchar(50), fechaInicioCalculo date, analista varchar(100), guardar bit )", (err, result) => {
                 if (err) {
                     if (!rolledBack) {
                         console.log(err);
@@ -924,7 +959,7 @@ export default class LoginPage extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("CREATE TABLE FormasVariables ( ID int IDENTITY(1,1) PRIMARY KEY, nombre varchar(100), tipo varchar(30), guardar bit )", (err, result) => {
+            request.query("CREATE TABLE FormasVariables ( ID int IDENTITY(1,1) PRIMARY KEY, nombre varchar(100), tipo varchar(30), periodicidad varchar(50), fechaInicioCalculo date, analista varchar(100), guardar bit )", (err, result) => {
                 if (err) {
                     if (!rolledBack) {
                         console.log(err);
@@ -948,7 +983,7 @@ export default class LoginPage extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("CREATE TABLE Umbral ( ID int IDENTITY(1,1) PRIMARY KEY, variableID int, nombre varchar(100) )", (err, result) => {
+            request.query("CREATE TABLE Umbral ( ID int IDENTITY(1,1) PRIMARY KEY, variableID int, tablaVariable varchar(20) )", (err, result) => {
                 if (err) {
                     if (!rolledBack) {
                         console.log(err);
@@ -972,7 +1007,7 @@ export default class LoginPage extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("CREATE TABLE SeccionUmbral ( ID int IDENTITY(1,1) PRIMARY KEY, umbralID int, nombre varchar(100) )", (err, result) => {
+            request.query("CREATE TABLE SeccionUmbral ( ID int IDENTITY(1,1) PRIMARY KEY, umbralID int, nombre varchar(100), color varchar(25) )", (err, result) => {
                 if (err) {
                     if (!rolledBack) {
                         console.log(err);
@@ -1039,8 +1074,11 @@ export default class LoginPage extends React.Component {
                         writeStream.write(server+"\n");
                         writeStream.write(database+"\n");
                         writeStream.end();
-                        this.probarExistenciaTablas();
-                        //this.props.actualizarConexion();
+                        //this.probarExistenciaTablas();
+                        var self = this;
+                        setTimeout(function() {
+                            self.props.readConfigFile();
+                        }, 600)
                     } else {
                         alert("Ingrese un valor para el nombre de la base de datos.");
                     }
@@ -1053,228 +1091,6 @@ export default class LoginPage extends React.Component {
         } else {
             alert("Ingrese un valor para el usuario de la base de datos.");
         }
-    }
-
-    crearCodigo () {
-        var formas = [
-                        {ID: 1,nombre: "saldo", tipo: "numero"},
-                        {ID: 2,nombre: "existe", tipo: "bit"},
-                        {ID: 3,nombre: "nombre", tipo: "varchar"},
-                        {ID: 4,nombre: "fecha", tipo: "date"}
-                     ];
-        arregloHTMLFormas = [];
-        for (var i = 0; i < formas.length; i++) {
-            if(formas[i].tipo.localeCompare("numero") == 0) {
-                if(i+1 < formas.length) {
-                    let index = i+1;
-                    let nombre = formas[i+1].nombre;
-                    let id = formas[i+1].ID;
-                    let tipo = formas[i+1].tipo;
-                    arregloHTMLFormas[i] =  <div style={{width: "100%"}}>
-                                                <br/>
-                                                <div className={"row"} style={{width: "100%"}}>
-                                                    <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
-                                                        <label htmlFor={"variableForma"+formas[i].ID} className="col-form-label">Valor:</label>
-                                                    </div>
-                                                    <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
-                                                        <input id={"variableForma"+formas[i].ID} type="text" className="form-control form-control-sm"/>
-                                                    </div>
-                                                </div>
-                                                <br/>
-                                                <div className={"text-center"} style={{width: "100%"}}>
-                                                    <a href="#" className="btn btn-brand active" onClick={() => this.updateForm(nombre, index, tipo, "variableForma"+id)}>Guardar</a>
-                                                </div>
-                                                <br/>
-                                            </div>;
-                } else {
-                    arregloHTMLFormas[i] =  <div style={{width: "100%"}}>
-                                                <br/>
-                                                <div className={"row"} style={{width: "100%"}}>
-                                                    <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
-                                                        <label htmlFor={"variableForma"+formas[i].ID} className="col-form-label">Valor:</label>
-                                                    </div>
-                                                    <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
-                                                        <input id={"variableForma"+formas[i].ID} type="text" className="form-control form-control-sm"/>
-                                                    </div>
-                                                </div>
-                                                <br/>
-                                                <div className={"text-center"} style={{width: "100%"}}>
-                                                    <a href="#" className="btn btn-brand active">Guardar</a>
-                                                </div>
-                                                <br/>
-                                            </div>;
-                }
-            } else if(formas[i].tipo.localeCompare("bit") == 0) {
-                if(i+1 < formas.length) {
-                    let index = i+1;
-                    let nombre = formas[i+1].nombre;
-                    let id = formas[i+1].ID;
-                    let tipo = formas[i+1].tipo;
-                    arregloHTMLFormas[i] =  <div style={{width: "100%"}}>
-                                                <br/>
-                                                <div className={"row"} style={{width: "100%"}}>
-                                                    <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
-                                                        <label htmlFor={"variableForma"+formas[i].ID} className="col-form-label">Valor:</label>
-                                                    </div>
-                                                    <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"}>
-                                                        <br/>
-                                                        <div className={"switch-button switch-button-bool"} style={{margin:"0 auto", display:"block"}}>
-                                                            <input type="checkbox" defaultChecked name={"guardarFuenteDato"} id={"variableForma"+formas[i].ID}/><span>
-                                                            <label htmlFor={"guardarFuenteDato"}></label></span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <br/>
-                                                <div className={"text-center"} style={{width: "100%"}}>
-                                                    <a href="#" className="btn btn-brand active" onClick={() => this.updateForm(nombre, index, tipo, "variableForma"+id)}>Guardar</a>
-                                                </div>
-                                                <br/>
-                                            </div>;
-                } else {
-                    arregloHTMLFormas[i] =  <div style={{width: "100%"}}>
-                                                <br/>
-                                                <div className={"row"} style={{width: "100%"}}>
-                                                    <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
-                                                        <label htmlFor={"variableForma"+formas[i].ID} className="col-form-label">Valor:</label>
-                                                    </div>
-                                                    <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"}>
-                                                        <br/>
-                                                        <div className={"switch-button switch-button-bool"} style={{margin:"0 auto", display:"block"}}>
-                                                            <input type="checkbox" defaultChecked name={"guardarFuenteDato"} id={"variableForma"+formas[i].ID}/><span>
-                                                            <label htmlFor={"guardarFuenteDato"}></label></span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <br/>
-                                                <div className={"text-center"} style={{width: "100%"}}>
-                                                    <a href="#" className="btn btn-brand active">Guardar</a>
-                                                </div>
-                                                <br/>
-                                            </div>;
-                }
-            } else if(formas[i].tipo.localeCompare("varchar") == 0) {
-                if(i+1 < formas.length) {
-                    let index = i+1;
-                    let nombre = formas[i+1].nombre;
-                    let id = formas[i+1].ID;
-                    let tipo = formas[i+1].tipo;
-                    arregloHTMLFormas[i] =  <div style={{width: "100%"}}>
-                                                <br/>
-                                                <div className={"row"} style={{width: "100%"}}>
-                                                    <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
-                                                        <label htmlFor={"variableForma"+formas[i].ID} className="col-form-label">Valor:</label>
-                                                    </div>
-                                                    <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
-                                                        <input id={"variableForma"+formas[i].ID} type="text" className="form-control form-control-sm"/>
-                                                    </div>
-                                                </div>
-                                                <br/>
-                                                <div className={"text-center"} style={{width: "100%"}}>
-                                                    <a href="#" className="btn btn-brand active" onClick={() => this.updateForm(nombre, index, tipo, "variableForma"+id)}>Guardar</a>
-                                                </div>
-                                                <br/>
-                                            </div>;
-                } else {
-                    arregloHTMLFormas[i] =  <div style={{width: "100%"}}>
-                                                <br/>
-                                                <div className={"row"} style={{width: "100%"}}>
-                                                    <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
-                                                        <label htmlFor={"variableForma"+formas[i].ID} className="col-form-label">Valor:</label>
-                                                    </div>
-                                                    <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
-                                                        <input id={"variableForma"+formas[i].ID} type="text" className="form-control form-control-sm"/>
-                                                    </div>
-                                                </div>
-                                                <br/>
-                                                <div className={"text-center"} style={{width: "100%"}}>
-                                                    <a href="#" className="btn btn-brand active">Guardar</a>
-                                                </div>
-                                                <br/>
-                                            </div>;
-                }
-            } else if(formas[i].tipo.localeCompare("date") == 0) {
-                if(i+1 < formas.length) {
-                    let index = i+1;
-                    let nombre = formas[i+1].nombre;
-                    let id = formas[i+1].ID;
-                    let tipo = formas[i+1].tipo;
-                    arregloHTMLFormas[i] =  <div style={{width: "100%"}}>
-                                                <br/>
-                                                <div className={"row"} style={{width: "100%"}}>
-                                                    <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
-                                                        <label htmlFor={"variableForma"+formas[i].ID} className="col-form-label">Valor:</label>
-                                                    </div>
-                                                    <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
-                                                        <div className="row" style={{display: "flex", justifyContent: "center"}}>
-                                                            <div id={"variableForma"+formas[i].ID} className="center-block"></div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <br/>
-                                                <div className={"text-center"} style={{width: "100%"}}>
-                                                    <a href="#" className="btn btn-brand active" onClick={() => this.updateForm(nombre, index, tipo, "variableForma"+id)}>Guardar</a>
-                                                </div>
-                                                <br/>
-                                            </div>;
-                } else {
-                    arregloHTMLFormas[i] =  <div style={{width: "100%"}}>
-                                                <br/>
-                                                <div className={"row"} style={{width: "100%"}}>
-                                                    <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
-                                                        <label htmlFor={"variableForma"+formas[i].ID} className="col-form-label">Valor:</label>
-                                                    </div>
-                                                    <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
-                                                        <div className="row" style={{display: "flex", justifyContent: "center"}}>
-                                                            <div id={"variableForma"+formas[i].ID} className="center-block"></div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <br/>
-                                                <div className={"text-center"} style={{width: "100%"}}>
-                                                    <a href="#" className="btn btn-brand active">Guardar</a>
-                                                </div>
-                                                <br/>
-                                            </div>;
-                }
-            }
-        };
-        console.log('arregloHTMLFormas');
-        console.log(arregloHTMLFormas);
-        this.updateForm(formas[0].nombre, 0, formas[0].tipo);
-        /*window['calculoPrincipal'] = new Function(
-            'return function calculoPrincipalMain(){'+
-                    codigo+
-            '}'
-        )();
-        window['calculoPrincipal']();*/
-    }
-
-    updateForm (titulo, index, tipo, idInput) {
-        this.setState({
-            showModalForma: true,
-            tituloVariableForma: "Variable: "+titulo,
-            htmlForma: arregloHTMLFormas[index]
-        }, this.loadFechas(tipo, idInput));
-    }
-
-    loadFechas (tipo, idInput) {
-        if(tipo.localeCompare("date") == 0) {
-            setTimeout(function(){
-                $('#'+idInput).datepicker({
-                    format: "dd-mm-yyyy",
-                    todayHighlight: true,
-                    viewMode: "days", 
-                    minViewMode: "days",
-                    language: 'es'
-                });
-            }, 250);
-        }
-    }
-
-    closeModalForma () {
-        this.setState({
-            showModalForma: false
-        });
     }
 
     render() {
@@ -1338,11 +1154,9 @@ export default class LoginPage extends React.Component {
                                 <input id="basedatosConexion" type="text" className="form-control form-control-sm"/>
                             </div>
                         </div>
-                </Modal>
-                <Modal show={this.state.showModalForma}
-                    titulo={this.state.tituloVariableForma}
-                    onClose={this.closeModalForma}>
-                        {this.state.htmlForma}
+                        <div className={"text-center"} style={{width: "100%"}}>
+                            <a href="#" className="btn btn-brand active" onClick={this.saveFile}>Guardar Configuración</a>
+                        </div>
                 </Modal>
             </div>
         );
