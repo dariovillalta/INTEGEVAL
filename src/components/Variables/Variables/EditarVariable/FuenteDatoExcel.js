@@ -6,7 +6,30 @@ var variables = [];
 var excel = [];
 var formas = [];
 
+var agregoVariable = false;
+
 const periodicidad = [ {nombre: "diario"}, {nombre: "semanal"}, {nombre: "mensual"}, {nombre: "trimestral"}, {nombre: "bi-anual"}, {nombre: "anual"} ];
+
+
+
+
+/*
+    **************************************
+    **************************************
+                VARIABLES CALCULO 
+    **************************************
+    **************************************
+*/
+
+window.arregloDeErroresExcel = [];
+
+/*
+    **************************************
+    **************************************
+            VARIABLES CALCULO FIN
+    **************************************
+    **************************************
+*/
 
 export default class FuenteDatoExcel extends React.Component {
     constructor(props) {
@@ -33,10 +56,30 @@ export default class FuenteDatoExcel extends React.Component {
         this.getExcel = this.getExcel.bind(this);
         this.getFormas = this.getFormas.bind(this);
         this.verificarNoExisteNombreVar = this.verificarNoExisteNombreVar.bind(this);
+        this.verificarNoExisteNombreVarUpdate = this.verificarNoExisteNombreVarUpdate.bind(this);
         this.actualizarPeriodicidad = this.actualizarPeriodicidad.bind(this);
         this.cargarDatePicker = this.cargarDatePicker.bind(this);
+        this.actualizarPeriodicidadUpdate = this.actualizarPeriodicidadUpdate.bind(this);
         this.inicializarFecha = this.inicializarFecha.bind(this);
         this.isValidDate = this.isValidDate.bind(this);
+        this.verificarSiExisteExcelEnResultadosHistoricosModificar = this.verificarSiExisteExcelEnResultadosHistoricosModificar.bind(this);
+        this.crearTablaDeResultadoNombreModificar = this.crearTablaDeResultadoNombreModificar.bind(this);
+        this.crearResultadoNombreModificar = this.crearResultadoNombreModificar.bind(this);
+        this.modificarResultadosNombre = this.modificarResultadosNombre.bind(this);
+        this.verificarPeriodicidadGuardarModificar = this.verificarPeriodicidadGuardarModificar.bind(this);
+        this.updatePeriodicidadModificar = this.updatePeriodicidadModificar.bind(this);
+
+        this.verificarPeriodicidad = this.verificarPeriodicidad.bind(this);
+        this.addDays = this.addDays.bind(this);
+        this.addMonths = this.addMonths.bind(this);
+        this.addYears = this.addYears.bind(this);
+        this.traerPeriodicidadVariable = this.traerPeriodicidadVariable.bind(this);
+        this.crearVariablesExcel = this.crearVariablesExcel.bind(this);
+        this.getArregloPosicionesExcel = this.getArregloPosicionesExcel.bind(this);
+        this.getObjetoLetraNumeroCelda = this.getObjetoLetraNumeroCelda.bind(this);
+        this.esLetra = this.esLetra.bind(this);
+        this.toColumnLetter = this.toColumnLetter.bind(this);
+        this.toColumnNumber = this.toColumnNumber.bind(this);
     }
 
     componentDidMount() {
@@ -71,6 +114,7 @@ export default class FuenteDatoExcel extends React.Component {
                                 ubicacionArchivo: result.recordset[0].ubicacionArchivo
                             });
                             this.traerVariables();
+                            agregoVariable = false;
                         }
                     });
                 }
@@ -95,8 +139,13 @@ export default class FuenteDatoExcel extends React.Component {
                     }
                 } else {
                     transaction.commit(err => {
+                        var temp = [];
+                        for (var i = 0; i < result.recordset.length; i++) {
+                            temp.push(result.recordset[i].periodicidad);
+                        };
                         this.setState({
-                            variables: result.recordset
+                            variables: result.recordset,
+                            valoresPeriodicidad: temp
                         });
                     });
                 }
@@ -161,61 +210,64 @@ export default class FuenteDatoExcel extends React.Component {
                     if (this.props.tipoVariableOriginal.localeCompare("variable") == 0) {
                         this.eliminarVariable();
                     }
-                    if (this.props.tipoVariableOriginal.localeCompare("excel") != 0) {
-                        const transaction = new sql.Transaction( this.props.pool );
-                        transaction.begin(err => {
-                            var rolledBack = false;
-                            transaction.on('rollback', aborted => {
-                                rolledBack = true;
-                            });
-                            const request = new sql.Request(transaction);
-                            request.query("insert into ExcelArchivos (ubicacionArchivo, nombre) values ('"+this.state.ubicacionArchivo+"', '"+nombre+"')", (err, result) => {
-                                if (err) {
-                                    console.log(err);
-                                    if (!rolledBack) {
-                                        transaction.rollback(err => {
+                    var self = this;
+                    setTimeout(function() {
+                        if (self.props.tipoVariableOriginal.localeCompare("excel") != 0) {
+                            const transaction = new sql.Transaction( self.props.pool );
+                            transaction.begin(err => {
+                                var rolledBack = false;
+                                transaction.on('rollback', aborted => {
+                                    rolledBack = true;
+                                });
+                                const request = new sql.Request(transaction);
+                                request.query("insert into ExcelArchivos (ubicacionArchivo, nombre) values ('"+self.state.ubicacionArchivo+"', '"+nombre+"')", (err, result) => {
+                                    if (err) {
+                                        console.log(err);
+                                        if (!rolledBack) {
+                                            transaction.rollback(err => {
+                                            });
+                                        }
+                                    } else {
+                                        transaction.commit(err => {
+                                            alert('Variable Creada');
+                                            /*$("#nombreArchivo").val("");
+                                            self.setState({
+                                                ubicacionArchivo: ""
+                                            });*/
+                                            self.traerArchivoID();
                                         });
                                     }
-                                } else {
-                                    transaction.commit(err => {
-                                        alert('Variable Creada');
-                                        /*$("#nombreArchivo").val("");
-                                        this.setState({
-                                            ubicacionArchivo: ""
-                                        });*/
-                                        this.traerArchivoID();
-                                    });
-                                }
-                            });
-                        }); // fin transaction
-                    } else {
-                        const transaction = new sql.Transaction( this.props.pool );
-                        transaction.begin(err => {
-                            var rolledBack = false;
-                            transaction.on('rollback', aborted => {
-                                rolledBack = true;
-                            });
-                            const request = new sql.Request(transaction);
-                            request.query("update ExcelArchivos set ubicacionArchivo = '"+this.state.ubicacionArchivo+"', nombre = '"+nombre+"' where ID = "+this.props.idVariable, (err, result) => {
-                                if (err) {
-                                    console.log(err);
-                                    if (!rolledBack) {
-                                        transaction.rollback(err => {
+                                });
+                            }); // fin transaction
+                        } else {
+                            const transaction = new sql.Transaction( self.props.pool );
+                            transaction.begin(err => {
+                                var rolledBack = false;
+                                transaction.on('rollback', aborted => {
+                                    rolledBack = true;
+                                });
+                                const request = new sql.Request(transaction);
+                                request.query("update ExcelArchivos set ubicacionArchivo = '"+self.state.ubicacionArchivo+"', nombre = '"+nombre+"' where ID = "+self.props.idVariable, (err, result) => {
+                                    if (err) {
+                                        console.log(err);
+                                        if (!rolledBack) {
+                                            transaction.rollback(err => {
+                                            });
+                                        }
+                                    } else {
+                                        transaction.commit(err => {
+                                            alert('Variable Modificada');
+                                            /*$("#nombreArchivo").val("");
+                                            self.setState({
+                                                ubicacionArchivo: ""
+                                            });*/
+                                            self.guardarVariablesModificar();
                                         });
                                     }
-                                } else {
-                                    transaction.commit(err => {
-                                        alert('Variable Modificada');
-                                        /*$("#nombreArchivo").val("");
-                                        this.setState({
-                                            ubicacionArchivo: ""
-                                        });*/
-                                        this.guardarVariablesModificar();
-                                    });
-                                }
-                            });
-                        }); // fin transaction
-                    }
+                                });
+                            }); // fin transaction
+                        }
+                    }, 1000);
                 //}
             } else {
                 alert('Ingrese un valor para la ubicación del archivo que debe ser menor a 1001 caracteres');
@@ -263,7 +315,7 @@ export default class FuenteDatoExcel extends React.Component {
                     rolledBack = true;
                 });
                 let request = new sql.Request(transaction);
-                request.query("insert into ExcelVariables (excelArchivoID, nombreHoja, nombre, operacion, celdas, tipo, periodicidad, fechaInicioCalculo, analista, guardar) values ("+this.props.idVariable+", '"+nombreHoja+"','"+nombre+"', '"+operacion+"', '"+celdas+"', '"+tipo+"', '"+periodicidad+"', '"+fechaInicioCalculo+"', '"+analista+"', '"+guardarVariable+"')", (err, result) => {
+                request.query("insert into ExcelVariables (excelArchivoID, nombreHoja, nombre, operacion, celdas, tipo, periodicidad, fechaInicioCalculo, analista, guardar) values ("+this.props.idVariable+", '"+nombreHoja+"','"+nombre+"', '"+operacion+"', '"+celdas+"', '"+tipo+"', '"+periodicidad+"', '"+fechaInicioCalculo.getFullYear()+"-"+(fechaInicioCalculo.getMonth()+1)+"-"+fechaInicioCalculo.getDate()+"', '"+analista+"', '"+guardarVariable+"')", (err, result) => {
                     if (err) {
                         console.log(err);
                         if (!rolledBack) {
@@ -275,6 +327,9 @@ export default class FuenteDatoExcel extends React.Component {
                             if(i == this.state.variables.length-1) {
                                 this.traerArchivo();
                                 this.getExcel();
+                            }
+                            if(agregoVariable) {
+                                this.verificarSiExisteExcelEnResultadosHistoricosModificar(this.state.variables[i]);
                             }
                         });
                     }
@@ -325,7 +380,7 @@ export default class FuenteDatoExcel extends React.Component {
                     rolledBack = true;
                 });
                 const request = new sql.Request(transaction);
-                request.query("insert into ExcelVariables (excelArchivoID, nombreHoja, nombre, operacion, celdas, tipo, periodicidad, fechaInicioCalculo, analista, guardar) values ("+archivoExcelID+", '"+nombreHoja+"', '"+nombre+"', '"+operacion+"', '"+celdas+"', '"+tipo+"', '"+periodicidad+"', '"+fechaInicioCalculo+"', '"+analista+"', '"+guardarVariable+"')", (err, result) => {
+                request.query("insert into ExcelVariables (excelArchivoID, nombreHoja, nombre, operacion, celdas, tipo, periodicidad, fechaInicioCalculo, analista, guardar) values ("+archivoExcelID+", '"+nombreHoja+"', '"+nombre+"', '"+operacion+"', '"+celdas+"', '"+tipo+"', '"+periodicidad+"', '"+fechaInicioCalculo.getFullYear()+"-"+(fechaInicioCalculo.getMonth()+1)+"-"+fechaInicioCalculo.getDate()+"', '"+analista+"', '"+guardarVariable+"')", (err, result) => {
                     if (err) {
                         console.log(err);
                         if (!rolledBack) {
@@ -337,6 +392,9 @@ export default class FuenteDatoExcel extends React.Component {
                             if(i == this.state.variables.length-1) {
                                 this.props.actualizarIDVariableModificada("excel");
                                 this.getExcel();
+                            }
+                            if(agregoVariable) {
+                                this.verificarSiExisteExcelEnResultadosHistoricosModificar(this.state.variables[i]);
                             }
                         });
                     }
@@ -386,8 +444,9 @@ export default class FuenteDatoExcel extends React.Component {
                                             $("#hojaExcelVariable").val("");
                                             $("#tipoVariable").val("numero");
                                             $("#celdasVariable").val("");
-                                            $("#periodicidad").val("");
+                                            //$("#periodicidad").val("");
                                             $("#analista").val("");
+                                            agregoVariable = true;
                                         } else {
                                             alert('Ingrese un valor para el valor de analista que debe ser menor a 101 caracteres');
                                         }
@@ -428,10 +487,10 @@ export default class FuenteDatoExcel extends React.Component {
                                 if($("#periodicidad"+index).val().localeCompare("-1") == 0)
                                     fecha = new Date(1964, 4, 28);
                                 else
-                                    fecha = $("#fecha").datepicker('getDate');
+                                    fecha = $("#fecha"+index).datepicker('getDate');
                                 if(this.isValidDate(fecha)) {
                                     if($("#analista"+index).val().length > 0 && $("#analista"+index).val().length < 101) {
-                                        if(this.verificarNoExisteNombreVar($("#nombreVariable"+index).val())) {
+                                        if(this.verificarNoExisteNombreVarUpdate($("#nombreVariable"+index).val(), index)) {
                                             var copyTemp = [...this.state.variables];
                                             copyTemp[index].nombre = $("#nombreVariable"+index).val();
                                             copyTemp[index].operacion = $("#operacion"+index).val();
@@ -447,12 +506,13 @@ export default class FuenteDatoExcel extends React.Component {
                                             else
                                                 guardarVariable = false;
                                             var copyTempPeriodicidad = [...this.state.valoresPeriodicidad];
-                                            copyTempPeriodicidad[index] = periodicidad;
+                                            copyTempPeriodicidad[index] = $("#periodicidad"+index).val();
                                             copyTemp[index].guardar = guardarVariable;
                                             this.setState({
                                                 variables: copyTemp,
                                                 valoresPeriodicidad: copyTempPeriodicidad
                                             });
+                                            agregoVariable = true;
                                         } else {
                                             alert('El nombre de la variable debe ser único.');
                                         }
@@ -488,6 +548,7 @@ export default class FuenteDatoExcel extends React.Component {
         this.setState({
             variables: copyTemp
         });
+        agregoVariable = true;
     }
 
     eliminarVarForma () {
@@ -650,7 +711,6 @@ export default class FuenteDatoExcel extends React.Component {
                     }
                 } else {
                     transaction7.commit(err => {
-                        this.limpiarArreglos();
                     });
                 }
             });
@@ -761,7 +821,56 @@ export default class FuenteDatoExcel extends React.Component {
         };
         if(noExiste) {
             for (var i = 0; i < excel.length; i++) {
-                if (excel[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
+                if(this.props.tipoVariableOriginal.localeCompare("excel") == 0) {
+                    if (excel[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0 && excel[i].ID != this.props.idVariable) {
+                        noExiste = false;
+                        break;
+                    }
+                } else {
+                    if (excel[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
+                        noExiste = false;
+                        break;
+                    }
+                }
+            };
+        }
+        if(noExiste) {
+            for (var i = 0; i < formas.length; i++) {
+                if (formas[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
+                    noExiste = false;
+                    break;
+                }
+            };
+        }
+        return noExiste;
+    }
+
+    verificarNoExisteNombreVarUpdate (nombre, index) {
+        var noExiste = true;
+        for (var i = 0; i < variables.length; i++) {
+            if (variables[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
+                noExiste = false;
+                break;
+            }
+        };
+        if(noExiste) {
+            for (var i = 0; i < excel.length; i++) {
+                if(this.props.tipoVariableOriginal.localeCompare("excel") == 0) {
+                    if (excel[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0 && excel[i].ID != this.props.idVariable) {
+                        noExiste = false;
+                        break;
+                    }
+                } else {
+                    if (excel[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
+                        noExiste = false;
+                        break;
+                    }
+                }
+            };
+        }
+        if(noExiste) {
+            for (var i = 0; i < this.state.variables.length; i++) {
+                if (this.state.variables[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0 && index != i) {
                     noExiste = false;
                     break;
                 }
@@ -795,8 +904,18 @@ export default class FuenteDatoExcel extends React.Component {
         });
     }
 
-    inicializarFecha (periodicidad, index, fecha) {
-        if(periodicidad.localeCompare("-1") != 0) {
+    actualizarPeriodicidadUpdate (index) {
+        var periodicidad = $("#periodicidad"+index).val();
+        var copyTempPeriodicidad = [...this.state.valoresPeriodicidad];
+        copyTempPeriodicidad[index] = periodicidad;
+        this.setState({
+            valorPeriodicidad: periodicidad,
+            valoresPeriodicidad: copyTempPeriodicidad
+        });
+    }
+
+    inicializarFecha (index, fecha) {
+        if(this.state.valoresPeriodicidad[index].localeCompare("-1") != 0) {
             setTimeout(function () {
                 $('#fecha'+index).datepicker({
                     format: "dd-mm-yyyy",
@@ -805,7 +924,12 @@ export default class FuenteDatoExcel extends React.Component {
                     minViewMode: "days",
                     language: 'es'
                 });
-                $("#fecha"+index).datepicker("setDate", fecha);
+                if(fecha.getFullYear() == 1964 && fecha.getMonth() == 4 && fecha.getDate() == 28) {
+                    //
+                } else {
+                    console.log('YEAAAH')
+                    $("#fecha"+index).datepicker("setDate", fecha);
+                }
             }, 500);
             return true;
         }
@@ -825,6 +949,953 @@ export default class FuenteDatoExcel extends React.Component {
             return false;
         }
     }
+    
+    verificarSiExisteExcelEnResultadosHistoricosModificar (variable) {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("select * from ResultadosNombreVariables where nombreVariable = '"+variable.nombre+"' and finVigencia = '1964-05-28'", (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        if (result.recordset.length == 0) {
+                            this.crearTablaDeResultadoNombreModificar(variable);
+                        } else {
+                            console.log("ENCONTRO")
+                            console.log(result.recordset[0])
+                            this.modificarResultadosNombre(variable, result.recordset[0].inicioVigencia);
+                        }
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    crearTablaDeResultadoNombreModificar (variable) {
+        //NOMBRE TABLA: NOMBREVARIABLE_AÑOVIGENCIA_MESVIGENCIA_DIAVIGENCIA_HORAVIGENCIA_MINUTOSVIGENCIA_SEGUNDOSVIGENCIA
+        //VIGENCIA: DIA CREACION
+        let hoy = new Date();
+        var textoCreacionTabla = 'CREATE TABLE '+variable.nombre+'_'+hoy.getFullYear()+'_'+(hoy.getMonth()+1)+'_'+hoy.getDate()+'_'+hoy.getHours()+'_'+hoy.getMinutes()+'_'+hoy.getSeconds()+' ( ID int IDENTITY(1,1) PRIMARY KEY, ';
+        for (var i = 0; i < variable.variables.length; i++) {
+            if(i != 0)
+                textoCreacionTabla += ', ';
+            if(variable.variables[i].tipo.localeCompare("numero") == 0) {
+                textoCreacionTabla += variable.variables[i].nombre+' decimal(22,4)';
+            } else if(variable.variables[i].tipo.localeCompare("varchar") == 0) {
+                textoCreacionTabla += variable.variables[i].nombre+' varchar(1000)';
+            } else if(variable.variables[i].tipo.localeCompare("bit") == 0) {
+                textoCreacionTabla += variable.variables[i].nombre+' bit';
+            } else if(variable.variables[i].tipo.localeCompare("date") == 0) {
+                textoCreacionTabla += variable.variables[i].nombre+' date';
+            }
+        };
+        textoCreacionTabla += ', f3ch4Gu4rd4do date )';
+        console.log('textoCreacionTabla')
+        console.log(textoCreacionTabla)
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query(textoCreacionTabla, (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        //console.log("Tabla "+variable.nombre+'_'+hoy.getFullYear()+'_'+hoy.getMonth()+'_'+hoy.getDate()+'_'+hoy.getHours()+'_'+hoy.getMinutes()+'_'+hoy.getSeconds()+" creada.");
+                        console.log('CREO TABLA');
+                        this.crearResultadoNombreModificar(variable, hoy);
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    crearResultadoNombreModificar (variable, hoy) {
+        console.log('INICAR CREAR RESULTADO');
+        let mes = hoy.getMonth()+1;
+        if(mes.toString().length == 1)
+            mes = '0'+mes;
+        let dia = hoy.getDate();
+        if(dia.toString().length == 1)
+            dia = '0'+dia;
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("insert into ResultadosNombreVariables (nombreVariable, inicioVigencia, finVigencia) values ('"+variable.nombre+"', '"+hoy.getFullYear()+'-'+mes+'-'+dia+" "+hoy.getHours()+":"+hoy.getMinutes()+":"+hoy.getSeconds()+"', '1964-05-28')", (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        console.log('GUARDO RESULTADO');
+                        this.verificarPeriodicidadGuardarModificar(variable, "excel", hoy);
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    modificarResultadosNombre (resultado, variable, hoy)  {
+        console.log('MODIFICAR CREAR RESULTADO');
+        let mes = hoy.getMonth()+1;
+        if(mes.toString().length == 1)
+            mes = '0'+mes;
+        let dia = hoy.getDate();
+        if(dia.toString().length == 1)
+            dia = '0'+dia;
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("update ResultadosNombreVariables set finVigencia = '"+hoy.getFullYear()+'-'+mes+'-'+dia+" "+hoy.getHours()+"' where ID = "+resultado.ID, (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        console.log('GUARDO RESULTADO');
+                        this.crearTablaDeResultadoNombreModificar(variable);
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    verificarPeriodicidadGuardarModificar (variable, tabla, hoy) {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("select * from PeriodicidadCalculo where variableID = "+variable.ID+" and tablaVariable = '"+tabla+"'", (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        if(result.recordset.length > 0) {
+                            this.updatePeriodicidadModificar(variable, tabla, hoy);
+                        }/* else {
+                            this.guardarPeriodicidad(variable, tabla, hoy);
+                        }*/
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    updatePeriodicidadModificar (variable, tabla, hoy) {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("update PeriodicidadCalculo where variableID = "+variable.ID+" and tablaVariable = '"+tabla+"' set fechaUltimoCalculo = '1964-05-28'", (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /*
+        **************************************
+        **************************************
+                    CALCULO CODIGO
+        **************************************
+        **************************************
+    */
+
+    verificarPeriodicidad () {
+        for (var j = 0; j < this.state.variables.length; j++) {
+            this.traerPeriodicidadVariable(this.state.variables[j], "excel", arregloDeExcel, j, null);
+        };
+    }
+
+    addDays (fecha, days) {
+        var date = new Date(fecha);
+        date.setDate(date.getDate() + days);
+        return date;
+    }
+
+    addMonths (fecha, months) {
+        var date = new Date(fecha);
+        date.setMonth(date.getMonth() + months);
+        return date;
+    }
+
+    addYears (fecha, years) {
+        var date = new Date(fecha);
+        date.setYear(date.getYear() + years);
+        return date;
+    }
+
+    traerPeriodicidadVariable (variable, tabla, arreglo, indexI, indexJ) {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("select * from PeriodicidadCalculo where variableID = "+variable.ID+" and tablaVariable = '"+tabla+"'", (err, result) => {
+                if (err) {
+                    console.log(err);
+                    this.verificarFinPeriodicidad();
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        if(result.recordset.length > 0) {
+                            var fechaInicioCalculo = variable.fechaInicioCalculo;
+                            var fechaUltimoCalculo = result.recordset[0].fechaUltimoCalculo;
+                            var tieneUltimoCalculo = false;
+                            //si la fecha es null, realizar calculo (28, 4, 1964) POPS BIRTHDAY
+                            if(fechaUltimoCalculo.getFullYear() != 1964 && fechaUltimoCalculo.getMonth() != 4 && fechaUltimoCalculo.getDate() != 28) {
+                                tieneUltimoCalculo = true;
+                            }
+                            if(!tieneUltimoCalculo) {
+                                if(indexJ != null)
+                                    arreglo[indexI].variables[indexJ].realizarCalculo = true;
+                                else
+                                    arreglo[indexI].realizarCalculo = true;
+                            } else {
+                                var ultimoCalculoVigente = false;
+                                var periodicidad = variable.periodicidad;
+                                var fechaSiguienteCalculo = new Date(fechaInicioCalculo);
+                                while(fechaSiguienteCalculo.getFullYear() < fechaUltimoCalculo.getFullYear() && fechaSiguienteCalculo.getMonth() < fechaUltimoCalculo.getMonth() && fechaSiguienteCalculo.getDate() < fechaUltimoCalculo.getDate()) {
+                                    if(periodicidad.localeCompare("diario") == 0) {
+                                        fechaSiguienteCalculo = this.addDays(fechaSiguienteCalculo, 1);
+                                    } else if(periodicidad.localeCompare("semanal") == 0) {
+                                        fechaSiguienteCalculo = this.addDays(fechaSiguienteCalculo, 7);
+                                    } else if(periodicidad.localeCompare("mensual") == 0) {
+                                        fechaSiguienteCalculo = this.addMonths(fechaSiguienteCalculo, 1);
+                                    } else if(periodicidad.localeCompare("trimestral") == 0) {
+                                        fechaSiguienteCalculo = this.addMonths(fechaSiguienteCalculo, 3);
+                                    } else if(periodicidad.localeCompare("bi-anual") == 0) {
+                                        fechaSiguienteCalculo = this.addMonths(fechaSiguienteCalculo, 6);
+                                    } else if(periodicidad.localeCompare("anual") == 0) {
+                                        fechaSiguienteCalculo = this.addYears(fechaSiguienteCalculo, 1);
+                                    }
+                                }
+                                var tocaNuevoCalculo = false;
+                                if(periodicidad.localeCompare("diario") == 0) {
+                                    if(fechaSiguienteCalculo.getDate() >= fechaUltimoCalculo.getDate()+1) {
+                                        tocaNuevoCalculo = true;
+                                    }
+                                } else if(periodicidad.localeCompare("semanal") == 0) {
+                                    if(fechaSiguienteCalculo.getDate() >= fechaUltimoCalculo.getDate()+7) {
+                                        tocaNuevoCalculo = true;
+                                    }
+                                } else if(periodicidad.localeCompare("mensual") == 0) {
+                                    if(fechaSiguienteCalculo.getMonth() >= fechaUltimoCalculo.getMonth()+1) {
+                                        tocaNuevoCalculo = true;
+                                    }
+                                } else if(periodicidad.localeCompare("trimestral") == 0) {
+                                    if(fechaSiguienteCalculo.getMonth() >= fechaUltimoCalculo.getMonth()+3) {
+                                        tocaNuevoCalculo = true;
+                                    }
+                                } else if(periodicidad.localeCompare("bi-anual") == 0) {
+                                    if(fechaSiguienteCalculo.getMonth() >= fechaUltimoCalculo.getMonth()+6) {
+                                        tocaNuevoCalculo = true;
+                                    }
+                                } else if(periodicidad.localeCompare("anual") == 0) {
+                                    if(fechaSiguienteCalculo.getFullYear() >= fechaUltimoCalculo.getFullYear()+1) {
+                                        tocaNuevoCalculo = true;
+                                    }
+                                }
+                                if(tocaNuevoCalculo) {
+                                    if(indexJ != null)
+                                        arreglo[indexI].variables[indexJ].realizarCalculo = true;
+                                    else
+                                        arreglo[indexI].realizarCalculo = true;
+                                } else {
+                                    if(indexJ != null)
+                                        arreglo[indexI].variables[indexJ].realizarCalculo = false;
+                                    else
+                                        arreglo[indexI].realizarCalculo = false;
+                                }
+                            }
+                        } else {
+                            if(indexJ != null)
+                                arreglo[indexI].variables[indexJ].realizarCalculo = true;
+                            else
+                                arreglo[indexI].realizarCalculo = true;
+                        }
+                        this.crearVariablesExcel();
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    crearVariablesExcel () {
+        var workbook = null;
+        workbook = XLSX.readFile(this.state.ubicacionArchivo);
+        if(workbook != null) {
+            for (var j = 0; j < this.state.variables.length; j++) {
+                for (var k = 0; k < workbook.SheetNames.length; k++) {
+                    if (workbook.SheetNames[k].localeCompare(this.state.variables[j].nombreHoja) == 0) {
+                        break;
+                    }
+                };
+                var sheet = workbook.Sheets[workbook.SheetNames[k]];
+                if(sheet != null && this.state.variables[j].realizarCalculo) {
+                    try {
+                        var arregloPosicionesExcel = this.getArregloPosicionesExcel(this.state.variables[j].celdas);
+                        if(arregloPosicionesExcel.length == 1) {
+                            var variable;
+                            if(this.state.variables[j].tipo.localeCompare('numero') == 0 && sheet[arregloPosicionesExcel[0]].t.localeCompare('n') == 0) {
+                                variable = parseFloat(sheet[arregloPosicionesExcel[0]].v);
+                            } else if(this.state.variables[j].tipo.localeCompare('bit') == 0 && sheet[arregloPosicionesExcel[0]].t.localeCompare('b') == 0) {
+                                variable = sheet[arregloPosicionesExcel[0]].v;
+                            } else if(this.state.variables[j].tipo.localeCompare('varchar') == 0 && sheet[arregloPosicionesExcel[0]].t.localeCompare('s') == 0) {
+                                variable = sheet[arregloPosicionesExcel[0]].v;
+                            } else if(this.state.variables[j].tipo.localeCompare('date') == 0 && sheet[arregloPosicionesExcel[0]].t.localeCompare('d') == 0) {
+                                variable = new Date(sheet[arregloPosicionesExcel[0]].v);
+                            }
+                            window["'"+this.state.variables[j].nombre+"'"] = variable;
+                        } else if(arregloPosicionesExcel.length > 1 && this.state.variables[j].operacion.localeCompare("ASIG") == 0) {
+                            if(this.state.variables[j].tipo.localeCompare('numero') == 0) {
+                                window["'"+this.state.variables[j].nombre+"'"] = [];
+                                for (var k = 0; k < arregloPosicionesExcel.length; k++) {
+                                    var variable = parseFloat(sheet[arregloPosicionesExcel[k]].v);
+                                    window["'"+this.state.variables[j].nombre+"'"].push(variable);
+                                };
+                            } else if(this.state.variables[j].tipo.localeCompare('bit') == 0) {
+                                window["'"+this.state.variables[j].nombre+"'"] = [];
+                                for (var k = 0; k < arregloPosicionesExcel.length; k++) {
+                                    var variable = sheet[arregloPosicionesExcel[k]].v;
+                                    window["'"+this.state.variables[j].nombre+"'"].push(variable);
+                                };
+                            } else if(this.state.variables[j].tipo.localeCompare('varchar') == 0) {
+                                window["'"+this.state.variables[j].nombre+"'"] = [];
+                                for (var k = 0; k < arregloPosicionesExcel.length; k++) {
+                                    var variable = sheet[arregloPosicionesExcel[k]].v;
+                                    window["'"+this.state.variables[j].nombre+"'"].push(variable);
+                                };
+                            } else if(this.state.variables[j].tipo.localeCompare('date') == 0) {
+                                window["'"+this.state.variables[j].nombre+"'"] = [];
+                                for (var k = 0; k < arregloPosicionesExcel.length; k++) {
+                                    var variable = new Date(sheet[arregloPosicionesExcel[k]].v);
+                                    window["'"+this.state.variables[j].nombre+"'"].push(variable);
+                                };
+                            }
+                        } else if(arregloPosicionesExcel.length > 1) {
+                            if(this.state.variables[j].tipo.localeCompare("numero") == 0 && this.state.variables[j].operacion.localeCompare("SUM") == 0) {
+                                var suma = 0;
+                                for (var k = 0; k < arregloPosicionesExcel.length; k++) {
+                                    var variable = parseFloat(sheet[arregloPosicionesExcel[k]].v);
+                                    suma+=variable;
+                                };
+                                window["'"+this.state.variables[j].nombre+"'"] = suma;
+                            } else if(this.state.variables[j].tipo.localeCompare("numero") == 0 && this.state.variables[j].operacion.localeCompare("PROM") == 0) {
+                                var suma = 0;
+                                for (var k = 0; k < arregloPosicionesExcel.length; k++) {
+                                    var variable = parseFloat(sheet[arregloPosicionesExcel[k]].v);
+                                    suma+=variable;
+                                };
+                                var promedio = suma / arregloPosicionesExcel.length;
+                                window["'"+this.state.variables[j].nombre+"'"] = promedio;
+                            } else if(this.state.variables[j].operacion.localeCompare("MAX") == 0) {
+                                if(this.state.variables[j].tipo.localeCompare("numero") == 0) {
+                                    var max = 0;
+                                    for (var k = 0; k < arregloPosicionesExcel.length; k++) {
+                                        var variable = parseFloat(sheet[arregloPosicionesExcel[k]].v);
+                                        if(k == 0)
+                                            max = variable;
+                                        if (max < variable) {
+                                            max = variable;
+                                        }
+                                    };
+                                    window["'"+this.state.variables[j].nombre+"'"] = max;
+                                }
+                                if(this.state.variables[j].tipo.localeCompare("date") == 0) {
+                                    var max = new Date(1900, 1, 1);
+                                    for (var k = 0; k < arregloPosicionesExcel.length; k++) {
+                                        var variable = new Date(sheet[arregloPosicionesExcel[k]].v);
+                                        if(k == 0)
+                                            max = variable;
+                                        if (max.getTime() < variable.getTime()) {
+                                            max = variable;
+                                        }
+                                    };
+                                    window["'"+this.state.variables[j].nombre+"'"] = max;
+                                }
+                            } else if(this.state.variables[j].operacion.localeCompare("MIN") == 0) {
+                                if(this.state.variables[j].tipo.localeCompare("numero") == 0) {
+                                    var min = 0;
+                                    for (var k = 0; k < arregloPosicionesExcel.length; k++) {
+                                        var variable = parseFloat(sheet[arregloPosicionesExcel[k]].v);
+                                        if(k == 0)
+                                            min = variable;
+                                        if (min > variable) {
+                                            min = variable;
+                                        }
+                                    };
+                                    window["'"+this.state.variables[j].nombre+"'"] = min;
+                                }
+                                if(this.state.variables[j].tipo.localeCompare("date") == 0) {
+                                    var min = new Date(1900, 1, 1);
+                                    for (var k = 0; k < arregloPosicionesExcel.length; k++) {
+                                        var variable = new Date(sheet[arregloPosicionesExcel[k]].v);
+                                        if(k == 0)
+                                            min = variable;
+                                        if (min.getTime() > variable.getTime()) {
+                                            min = variable;
+                                        }
+                                    };
+                                    window["'"+this.state.variables[j].nombre+"'"] = min;
+                                }
+                            } else if(this.state.variables[j].operacion.localeCompare("COUNT") == 0) {
+                                if(this.state.variables[j].tipo.localeCompare("numero") == 0) {
+                                    var count = 0;
+                                    for (var k = 0; k < arregloPosicionesExcel.length; k++) {
+                                        var variable = parseFloat(sheet[arregloPosicionesExcel[k]].v);
+                                        if(!isNaN(variable))
+                                            count++;
+                                    };
+                                    window["'"+this.state.variables[j].nombre+"'"] = count;
+                                }
+                                if(this.state.variables[j].tipo.localeCompare("date") == 0) {
+                                    var count = 0;
+                                    for (var k = 0; k < arregloPosicionesExcel.length; k++) {
+                                        var variable = new Date(sheet[arregloPosicionesExcel[k]].v);
+                                        if(this.isValidDate(variable))
+                                            count++;
+                                    };
+                                    window["'"+this.state.variables[j].nombre+"'"] = count;
+                                }
+                                if(this.state.variables[j].tipo.localeCompare("varchar") == 0) {
+                                    var count = 0;
+                                    for (var k = 0; k < arregloPosicionesExcel.length; k++) {
+                                        var variable = sheet[arregloPosicionesExcel[k]].v;
+                                        if(variable.length > 0)
+                                            count++;
+                                    };
+                                    window["'"+this.state.variables[j].nombre+"'"] = count;
+                                }
+                                if(this.state.variables[j].tipo.localeCompare("bit") == 0) {
+                                    var count = 0;
+                                    for (var k = 0; k < arregloPosicionesExcel.length; k++) {
+                                        var variable = sheet[arregloPosicionesExcel[k]].v;
+                                        if(variable != undefined)
+                                            count++;
+                                    };
+                                    window["'"+this.state.variables[j].nombre+"'"] = count;
+                                }
+                            }
+                        }
+                        this.verificarSiExisteExcelEnResultadosHistoricos(this.state.variables[j]);
+                    } catch(err) {
+                        console.log(err.message);
+                        arregloDeErroresExcel.push({nombre: this.state.variables[j].nombre });
+                    }
+                } else if (!this.state.variables[j].realizarCalculo) {
+                    alert("el ultimo calculo de la variable: "+this.state.variables[j].nombre+"' todavia esta activo.");
+                } else {
+                    arregloDeErroresExcel.push({nombre: this.state.variables[j].nombre });
+                    alert("problema para leer la hoja: "+this.state.variables[j].nombreHoja);
+                }
+            };
+        } else {
+            alert("problema para leer archivo: "+this.state.ubicacionArchivo);
+        }
+    }
+
+    getArregloPosicionesExcel (celdas) {
+        var celdaInicial = this.getObjetoLetraNumeroCelda(celdas.split(":")[0]);
+        var celdaFinal;
+        if (celdas.indexOf(":") >= 0)
+            celdaFinal = this.getObjetoLetraNumeroCelda(celdas.split(":")[1]);
+        var arregloPosicionesExcel = [];
+        if(celdaFinal != undefined) {
+            if(celdaInicial.columna.toLowerCase().localeCompare(celdaFinal.columna.toLowerCase()) == 0) {
+                //misma columnas, se recorre para abajo en el archivo
+                var filaInicial = parseInt(celdaInicial.fila);
+                var filaFinal = parseInt(celdaFinal.fila);
+                for (var i = filaInicial; i <= filaFinal; i++) {
+                    arregloPosicionesExcel.push(celdaInicial.columna.toUpperCase()+i);
+                };
+            } else {
+                //misma fila, se recorre horizontal en el archivo
+                var numeroColumnaInicial = this.toColumnNumber(celdaInicial.columna.toUpperCase());
+                var numeroColumnaFinal = this.toColumnNumber(celdaFinal.columna.toUpperCase());
+                for (var i = numeroColumnaInicial; i <= numeroColumnaFinal; i++) {
+                    arregloPosicionesExcel.push(toColumnLetter(i)+celdaInicial.fila);
+                };
+            }
+        } else {
+            //solo se selecciono una celda
+            arregloPosicionesExcel.push(celdaInicial.columna+celdaInicial.fila);
+        }
+        return arregloPosicionesExcel;
+    }
+
+    getObjetoLetraNumeroCelda (celda) {
+        var columna = '';
+        var fila = '';
+        for (var i = 0; i < celda.length; i++) {
+            if ( this.esLetra(celda.charAt(i)) ) {
+                columna += celda.charAt(i);
+            } else {
+                break;
+            }
+        };
+        fila = celda.substring(i);
+        var celdaObjeto = {columna: columna, fila: fila};
+        return celdaObjeto;
+    }
+
+    esLetra (caracter) {
+        if(caracter.toLowerCase().localeCompare("a") == 0) {
+            return true;
+        } else if(caracter.toLowerCase().localeCompare("b") == 0) {
+            return true;
+        } else if(caracter.toLowerCase().localeCompare("c") == 0) {
+            return true;
+        } else if(caracter.toLowerCase().localeCompare("d") == 0) {
+            return true;
+        } else if(caracter.toLowerCase().localeCompare("e") == 0) {
+            return true;
+        } else if(caracter.toLowerCase().localeCompare("f") == 0) {
+            return true;
+        } else if(caracter.toLowerCase().localeCompare("g") == 0) {
+            return true;
+        } else if(caracter.toLowerCase().localeCompare("h") == 0) {
+            return true;
+        } else if(caracter.toLowerCase().localeCompare("i") == 0) {
+            return true;
+        } else if(caracter.toLowerCase().localeCompare("j") == 0) {
+            return true;
+        } else if(caracter.toLowerCase().localeCompare("k") == 0) {
+            return true;
+        } else if(caracter.toLowerCase().localeCompare("l") == 0) {
+            return true;
+        } else if(caracter.toLowerCase().localeCompare("m") == 0) {
+            return true;
+        } else if(caracter.toLowerCase().localeCompare("n") == 0) {
+            return true;
+        } else if(caracter.toLowerCase().localeCompare("o") == 0) {
+            return true;
+        } else if(caracter.toLowerCase().localeCompare("p") == 0) {
+            return true;
+        } else if(caracter.toLowerCase().localeCompare("q") == 0) {
+            return true;
+        } else if(caracter.toLowerCase().localeCompare("r") == 0) {
+            return true;
+        } else if(caracter.toLowerCase().localeCompare("s") == 0) {
+            return true;
+        } else if(caracter.toLowerCase().localeCompare("t") == 0) {
+            return true;
+        } else if(caracter.toLowerCase().localeCompare("u") == 0) {
+            return true;
+        } else if(caracter.toLowerCase().localeCompare("v") == 0) {
+            return true;
+        } else if(caracter.toLowerCase().localeCompare("w") == 0) {
+            return true;
+        } else if(caracter.toLowerCase().localeCompare("x") == 0) {
+            return true;
+        } else if(caracter.toLowerCase().localeCompare("y") == 0) {
+            return true;
+        } else if(caracter.toLowerCase().localeCompare("z") == 0) {
+            return true;
+        }
+    }
+
+    toColumnLetter (num) {
+        for (var ret = '', a = 1, b = 26; (num -= a) >= 0; a = b, b *= 26) {
+            ret = String.fromCharCode(parseInt((num % b) / a) + 65) + ret;
+        }
+        return ret;
+    }
+
+    toColumnNumber (val) {
+        var base = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', i, j, result = 0;
+        for (i = 0, j = val.length - 1; i < val.length; i += 1, j -= 1) {
+            result += Math.pow(base.length, j) * (base.indexOf(val[i]) + 1);
+        }
+        return result;
+    }
+
+    verificarSiExisteExcelEnResultadosHistoricos (variable) {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("select * from ResultadosNombreVariables where nombreVariable = '"+variable.nombre+"' and finVigencia = '1964-05-28'", (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        if (result.recordset.length == 0) {
+                            this.crearTablaDeResultadoNombreExcel(variable);
+                        } else {
+                            console.log("ENCONTRO")
+                            console.log(result.recordset[0])
+                            this.guardarResultadosNombreExcel(variable, result.recordset[0].inicioVigencia);
+                        }
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    crearTablaDeResultadoNombreExcel (variable) {
+        //NOMBRE TABLA: NOMBREVARIABLE_AÑOVIGENCIA_MESVIGENCIA_DIAVIGENCIA_HORAVIGENCIA_MINUTOSVIGENCIA_SEGUNDOSVIGENCIA
+        //VIGENCIA: DIA CREACION
+        let hoy = new Date();
+        var textoCreacionTabla = 'CREATE TABLE '+variable.nombre+'_'+hoy.getFullYear()+'_'+(hoy.getMonth()+1)+'_'+hoy.getDate()+'_'+hoy.getHours()+'_'+hoy.getMinutes()+'_'+hoy.getSeconds()+' ( ID int IDENTITY(1,1) PRIMARY KEY, ';
+        for (var i = 0; i < variable.variables.length; i++) {
+            if(i != 0)
+                textoCreacionTabla += ', ';
+            if(variable.variables[i].tipo.localeCompare("numero") == 0) {
+                textoCreacionTabla += variable.variables[i].nombre+' decimal(22,4)';
+            } else if(variable.variables[i].tipo.localeCompare("varchar") == 0) {
+                textoCreacionTabla += variable.variables[i].nombre+' varchar(1000)';
+            } else if(variable.variables[i].tipo.localeCompare("bit") == 0) {
+                textoCreacionTabla += variable.variables[i].nombre+' bit';
+            } else if(variable.variables[i].tipo.localeCompare("date") == 0) {
+                textoCreacionTabla += variable.variables[i].nombre+' date';
+            }
+        };
+        textoCreacionTabla += ', f3ch4Gu4rd4do date )';
+        console.log('textoCreacionTabla')
+        console.log(textoCreacionTabla)
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query(textoCreacionTabla, (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        //console.log("Tabla "+variable.nombre+'_'+hoy.getFullYear()+'_'+hoy.getMonth()+'_'+hoy.getDate()+'_'+hoy.getHours()+'_'+hoy.getMinutes()+'_'+hoy.getSeconds()+" creada.");
+                        console.log('CREO TABLA');
+                        this.crearResultadoNombreExcel(variable, hoy);
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    crearResultadoNombreExcel (variable, hoy) {
+        console.log('INICAR CREAR RESULTADO');
+        let mes = hoy.getMonth()+1;
+        if(mes.toString().length == 1)
+            mes = '0'+mes;
+        let dia = hoy.getDate();
+        if(dia.toString().length == 1)
+            dia = '0'+dia;
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("insert into ResultadosNombreVariables (nombreVariable, inicioVigencia, finVigencia) values ('"+variable.nombre+"', '"+hoy.getFullYear()+'-'+mes+'-'+dia+" "+hoy.getHours()+":"+hoy.getMinutes()+":"+hoy.getSeconds()+"', '1964-05-28')", (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        console.log('GUARDO RESULTADO');
+                        this.guardarResultadosNombreExcel(variable, hoy);
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    guardarResultadosNombreExcel (variable, fechaNombreTabla) {
+        console.log('INICAR GUARDAR RESULTADO');
+        console.log('fechaNombreTabla');
+        console.log(fechaNombreTabla);
+        console.log('fechaNombreTabla.getFullYear()');
+        console.log(fechaNombreTabla.getFullYear());
+        console.log('fechaNombreTabla.getMonth()');
+        console.log(fechaNombreTabla.getMonth());
+        console.log('fechaNombreTabla.getDate()');
+        console.log(fechaNombreTabla.getDate());
+        console.log('fechaNombreTabla.getHours()');
+        console.log(fechaNombreTabla.getHours());
+        console.log('fechaNombreTabla.getMinutes()');
+        console.log(fechaNombreTabla.getMinutes());
+        console.log('fechaNombreTabla.getSeconds()');
+        console.log(fechaNombreTabla.getSeconds());
+
+        let hoy = new Date();
+        var textoInsertPrincipio = 'INSERT INTO '+variable.nombre+'_'+fechaNombreTabla.getFullYear()+'_'+(fechaNombreTabla.getMonth()+1)+'_'+fechaNombreTabla.getDate()+'_'+fechaNombreTabla.getHours()+'_'+fechaNombreTabla.getMinutes()+'_'+fechaNombreTabla.getSeconds()+' ( ';
+        for (var i = 0; i < variable.variables.length; i++) {
+            if(i != 0)
+                textoInsertPrincipio += ', ';
+            textoInsertPrincipio += variable.variables[i].nombre;
+        };
+        textoInsertPrincipio += ', f3ch4Gu4rd4do ) values ( ';
+        var instruccionSQLBorrar = "DELETE FROM "+variable.nombre+"_"+fechaNombreTabla.getFullYear()+"_"+(fechaNombreTabla.getMonth()+1)+"_"+fechaNombreTabla.getDate()+"_"+fechaNombreTabla.getHours()+"_"+fechaNombreTabla.getMinutes()+"_"+fechaNombreTabla.getSeconds()+ " WHERE f3ch4Gu4rd4do = '"+hoy.getFullYear()+"-"+(hoy.getMonth()+1)+"-"+hoy.getDate()+"' ";
+        console.log('instruccionSQLBorrar');
+        console.log(instruccionSQLBorrar);
+        this.borrarExcel(instruccionSQLBorrar);
+        for (var i = 0; i < window[variable.nombre].length; i++) {
+            var instruccionSQLFinal = textoInsertPrincipio;
+            for (var j = 0; j < variable.variables.length; j++) {
+                if(j > 0)
+                    instruccionSQLFinal += ', ';
+                if(variable.variables[j].tipo.localeCompare("numero") == 0) {
+                    instruccionSQLFinal += window[variable.nombre][i][variable.variables[j].nombre];
+                } else if(variable.variables[j].tipo.localeCompare("varchar") == 0) {
+                    instruccionSQLFinal += "'"+window[variable.nombre][i][variable.variables[j].nombre]+"'";
+                } else if(variable.variables[j].tipo.localeCompare("bit") == 0) {
+                    instruccionSQLFinal += "'"+window[variable.nombre][i][variable.variables[j].nombre]+"'";
+                } else if(variable.variables[j].tipo.localeCompare("date") == 0) {
+                    instruccionSQLFinal += "'"+window[variable.nombre][i][variable.variables[j].nombre].getFullYear()+"-"+(window[variable.nombre][i][variable.atributos[j].nombre].getMonth()+1)+"-"+window[variable.nombre][i][variable.atributos[j].nombre].getDate()+"'";
+                }
+            };
+            instruccionSQLFinal += ", '"+hoy.getFullYear()+"-"+(hoy.getMonth()+1)+"-"+hoy.getDate()+"' )";
+            console.log('instruccionSQLFinal 1');
+            console.log(instruccionSQLFinal);
+            var self = this;
+            setTimeout(function () {
+                self.guardarExcel(instruccionSQLFinal, variable, 'excel', hoy);
+            }, 600);
+        };
+    }
+
+    guardarExcel (instruccionSQL, variable, tabla, hoy) {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query(instruccionSQL, (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        if(variable.periodicidad.localeCompare("-1") != 0)
+                            this.verificarPeriodicidadGuardar(variable, tabla, hoy);
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    borrarExcel (instruccionSQL) {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query(instruccionSQL, (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    verificarPeriodicidadGuardar (variable, tabla, hoy) {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("select * from PeriodicidadCalculo where variableID = "+variable.ID+" and tablaVariable = '"+tabla+"'", (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        if(result.recordset.length > 0) {
+                            this.updatePeriodicidad(variable, tabla, hoy);
+                        } else {
+                            this.guardarPeriodicidad(variable, tabla, hoy);
+                        }
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    updatePeriodicidad (variable, tabla, hoy) {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("update PeriodicidadCalculo where variableID = "+variable.ID+" and tablaVariable = '"+tabla+"' set fechaUltimoCalculo = '"+hoy.getFullYear()+"-"+(hoy.getMonth()+1)+"-"+hoy.getDate()+"'", (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    guardarPeriodicidad (variable, tabla, hoy) {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("insert into PeriodicidadCalculo (variableID, tablaVariable, fechaInicio, fechaUltimoCalculo) values ("+variable.ID+", '"+tabla+"', '"+hoy.getFullYear()+"-"+(hoy.getMonth()+1)+"-"+hoy.getDate()+"', '"+hoy.getFullYear()+"-"+hoy.getMonth()+"-"+hoy.getDate()+"') ", (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    /*
+        **************************************
+        **************************************
+                FIN CALCULO CODIGO
+        **************************************
+        **************************************
+    */
 
     render() {
         return (
@@ -1025,7 +2096,7 @@ export default class FuenteDatoExcel extends React.Component {
                             </div>
                         </div>
                         {
-                            this.state.valoresPeriodicidad[i].localeCompare("-1") != 0 && this.inicializarFecha(variable.periodicidad, i, variable.fechaInicioCalculo)
+                            this.state.valoresPeriodicidad[i].localeCompare("-1") != 0 && this.inicializarFecha(i, variable.fechaInicioCalculo)
                             ?
                                 <div className={"row"} style={{width: "100%"}}>
                                     <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
@@ -1073,7 +2144,7 @@ export default class FuenteDatoExcel extends React.Component {
                     }
                     {
                         this.props.tipoVariableOriginal.localeCompare("excel") == 0
-                        ? <a href="#" className="btn btn-primary active" style={{marginLeft: "10px"}} onClick={this.calculoVariable}>Realizar Cálculo</a>
+                        ? <a href="#" className="btn btn-primary active" style={{marginLeft: "10px"}} onClick={this.verificarPeriodicidad}>Realizar Cálculo</a>
                         : null
                     }
                 </div>

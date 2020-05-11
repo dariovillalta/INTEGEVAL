@@ -44,6 +44,10 @@ var identificadorIndicador = 0;
 //bandera para ver si selecciono
 var seleccionManual = false;
 
+//bandera para saber si ya trajo todas las variables
+var banderaCargaVariablesINICIO = 0;
+var banderaCargaVariablesFIN = 0;
+
 // diferencia posicionDeIndicadorSeleccionadoEnFormula y posicionIndicadorAgregarEnFormula
 //se usan en diferentes metodos, posicionDeIndicadorSeleccionadoEnFormula en clickFormula, y posicionIndicadorAgregarEnFormula para agregar var a formula
 
@@ -120,13 +124,16 @@ export default class Formula extends React.Component {
         this.retornoSeleccionOperacion = this.retornoSeleccionOperacion.bind(this);
         this.existeReglaAsignacion = this.existeReglaAsignacion.bind(this);
         this.retornarCodigoOperacion = this.retornarCodigoOperacion.bind(this);
+        this.exitseCodigoOperacion = this.exitseCodigoOperacion.bind(this);
         this.agregarAFormula = this.agregarAFormula.bind(this);
         this.verificarSeleccionoTodosDivision = this.verificarSeleccionoTodosDivision.bind(this);
-        this.getFormula = this.getFormula.bind(this);
         this.crearArregloDeFormula = this.crearArregloDeFormula.bind(this);
+        this.crearObjetosDeArregloDeFormula = this.crearObjetosDeArregloDeFormula.bind(this);
+        this.encontrarCierreParentesis = this.encontrarCierreParentesis.bind(this);
         this.esOperacionAritmetica = this.esOperacionAritmetica.bind(this);
         this.esOperacionCompleja = this.esOperacionCompleja.bind(this);
         this.getPalabraFormula = this.getPalabraFormula.bind(this);
+        this.esVariable = this.esVariable.bind(this);
         this.agregarFormulaAnchuraYAltura = this.agregarFormulaAnchuraYAltura.bind(this);
         this.findVariableInFormula = this.findVariableInFormula.bind(this);
         this.clearSelectsInFormulaIndicadores = this.clearSelectsInFormulaIndicadores.bind(this);
@@ -152,6 +159,13 @@ export default class Formula extends React.Component {
         this.initLoadExcelCampos = this.initLoadExcelCampos.bind(this);
         this.loadExcelCampos = this.loadExcelCampos.bind(this);
         this.loadFormas = this.loadFormas.bind(this);
+        if(this.props.esEditarVar) {
+            banderaCargaVariablesINICIO = 0;
+            banderaCargaVariablesFIN = 0;
+            console.log(this.props)
+        }
+        variableSeleccionada = [];
+        operacionSeleccionada = [];
     }
 
     componentDidMount() {
@@ -427,8 +441,45 @@ export default class Formula extends React.Component {
         }
     }
 
+    exitseCodigoOperacion (codigo) {
+        if(codigo.localeCompare("ASIG") == 0) {
+            return true;
+        }
+        if(codigo.localeCompare("COUNT") == 0) {
+            return true;
+        }
+        if(codigo.localeCompare("PROM") == 0) {
+            return true;
+        }
+        if(codigo.localeCompare("MAX") == 0) {
+            return true;
+        }
+        if(codigo.localeCompare("MIN") == 0) {
+            return true;
+        }
+        if(codigo.localeCompare("AUTOSUM") == 0) {
+            return true;
+        }
+        if(codigo.localeCompare("SUM") == 0) {
+            return true;
+        }
+        if(codigo.localeCompare("DATE") == 0) {
+            return true;
+        }
+        if(codigo.localeCompare("MONTH") == 0) {
+            return true;
+        }
+        if(codigo.localeCompare("YEAR") == 0) {
+            return true;
+        }
+    }
+
     agregarAFormula () {
-        if (variableSeleccionada.valor != undefined || seleccionManual) {
+        console.log('variableSeleccionada')
+        console.log(variableSeleccionada)
+        console.log('operacionSeleccionada')
+        console.log(operacionSeleccionada)
+        if (variableSeleccionada.valor != undefined || seleccionManual || operacionSeleccionada.valor.localeCompare("Borrar") == 0) {
             console.log('seleccionManual')
             console.log(seleccionManual)
             if(seleccionManual) {
@@ -479,7 +530,7 @@ export default class Formula extends React.Component {
                     variableSeleccionada.texto = this.retornarCodigoOperacion(operacionSeleccionada.valor) + "(" + variableSeleccionada.valor + ")";
                     variableSeleccionada.operacion = this.retornarCodigoOperacion(operacionSeleccionada.valor);
                 }
-                if (operacionSeleccionada.valor == undefined) {
+                if (operacionSeleccionada.valor == undefined || operacionSeleccionada.valor.localeCompare("Borrar") == 0) {
                     //cuando se agrega campo a formula para crear operacion ASIG
                     variableSeleccionada.operacion = 'ASIG';
                 }/* else {
@@ -646,7 +697,11 @@ export default class Formula extends React.Component {
                         this.agregarFormulaAnchuraYAltura(copyFormula, true);
                         this.setState({
                             formula: copyFormula
-                        }, console.log(this.state.formula) );
+                        });
+                        var self = this;
+                        setTimeout(function(){
+                            console.log(self.state.formula)
+                        }, 2000);
                     } else {
                         var indiceVarAEliminar1 = arregloVarSeleccionadas[0].substring(0, arregloVarSeleccionadas[0].lastIndexOf(']'));
                         var indiceVarAEliminar2 = indiceVarAEliminar1.substring(indiceVarAEliminar1.lastIndexOf('[')+1);
@@ -661,7 +716,11 @@ export default class Formula extends React.Component {
                         this.agregarFormulaAnchuraYAltura(copyFormula, true);
                         this.setState({
                             formula: copyFormula
-                        }, console.log(this.state.formula) );
+                        });
+                        var self = this;
+                        setTimeout(function(){
+                            console.log(self.state.formula)
+                        }, 2000);
                     }
                 } else if(arregloVarSeleccionadas.length > 1) {
                     alert("Solo debe seleccionar una variable a eliminar.");
@@ -827,7 +886,7 @@ export default class Formula extends React.Component {
                     console.log(self.state.formula)
                 }, 2000);
                 //actualizando campos de variables a mostrar segun el campo que se acaba de agregar
-                var tipoOriginal = variableSeleccionada.tipo;
+                var tipoOriginal = variableSeleccionada.tipoOriginal;
                 if(variableSeleccionada.esFuenteDato) {
                     //solo mostrar campos que sean de conexiones tabla
                     var arregloConexionesTemp = [], arregloCamposConexionesTemp = [];
@@ -838,11 +897,13 @@ export default class Formula extends React.Component {
                                 if(arregloCamposConexionesTemp[arregloConexionesTemp.length-1] == undefined)
                                     arregloCamposConexionesTemp[arregloConexionesTemp.length-1] = [];
                                 if(tipoOriginal.localeCompare("int") == 0 || tipoOriginal.localeCompare("decimal") == 0) {
-                                    if(camposTablasOriginales[i][j].tipo.localeCompare("int") == 0 || camposTablasOriginales[i][j].tipo.localeCompare("decimal") == 0)
+                                    if(camposTablasOriginales[i][j].tipo.localeCompare("int") == 0 || camposTablasOriginales[i][j].tipo.localeCompare("decimal") == 0) {
                                         arregloCamposConexionesTemp[arregloConexionesTemp.length-1].push(camposTablasOriginales[i][j]);
+                                    }
                                 } else {
-                                    if(camposTablasOriginales[i][j].tipo.localeCompare(tipoOriginal) == 0)
+                                    if(camposTablasOriginales[i][j].tipo.localeCompare(tipoOriginal) == 0) {
                                         arregloCamposConexionesTemp[arregloConexionesTemp.length-1].push(camposTablasOriginales[i][j]);
+                                    }
                                 }
                             };
                             break;
@@ -877,7 +938,6 @@ export default class Formula extends React.Component {
                                 break;
                             }
                         };
-                        console.log(variablesEscalaresOriginales)
                         this.setState({
                             tablas: [],
                             camposTablas: [],
@@ -1262,6 +1322,10 @@ export default class Formula extends React.Component {
                                     operaciones: [],
                                     formula: copyFormula
                                 });
+                                var self = this;
+                                setTimeout(function(){
+                                    console.log(self.state.formula)
+                                }, 2000);
                                 console.log('copyFormula')
                                 console.log(copyFormula);
                             } else {
@@ -1348,254 +1412,16 @@ export default class Formula extends React.Component {
                                     operaciones: [],
                                     formula: copyFormula
                                 });
+                                var self = this;
+                                setTimeout(function(){
+                                    console.log(self.state.formula)
+                                }, 2000);
                             } else {
                                 alert("Selección de división invalida. Falta selección de numerador.")
                             }
                         }
                     }
 
-                    /*//verificar que seleccion de variables es valida
-                    if(arregloVarSeleccionadas.length == 1) {
-                        //caso base, siempre valido
-                        //verificar que no sea denominador seleccionado
-                        var esValida = false;
-                        forIndicesSeleccionados:
-                        for (var a = 0; a < indicesVarSeleccionadas.length; a++) {
-                            var posicionInicial, esAntesDenominador = true;
-                            //traer la pos mas arriba del arreglo que contiene la var seleccionada
-                                //o sea en [[[var1+var],/, var3],/,var4]    la var4 es la de mas arriba
-                            eval("posicionInicial = this.state.formula"+indicesVarSeleccionadas[a]);
-                            console.log('posicionInicial');
-                            console.log(posicionInicial);
-                            for (var i = 0; i < posicionInicial.length; i++) {
-                                console.log('i = '+i);
-                                if(!Array.isArray(posicionInicial[i].valor)) {
-                                    console.log('no es arreglo');
-                                    if(posicionInicial[i].tipo.localeCompare("variable") == 0 && posicionInicial[i].activa && esAntesDenominador) {
-                                        console.log('OOOOOO');
-                                        esValida = true;
-                                    }
-                                    if(posicionInicial[i].valor.localeCompare("division\\\\") == 0) {
-                                        console.log('YYYYY');
-                                        esAntesDenominador = false;
-                                    }
-                                }
-                            };
-                            if(posicionInicial.length == undefined && posicionInicial.activa) {
-                                esValida = true;
-                            }
-                        };
-                        console.log('3.1');
-                        console.log('esValida');
-                        console.log(esValida);
-
-                        //separar arreglo arregloVarSeleccionadas por diferentes primer indices, elegir el mas corto y quitar ultimo indice solo si length != 1
-                            // 1) eje: [1][0],[1][2]    [5][1][0],[5][1][2],[5][1][4]       [8]
-                            // 2) res: [1], [5][1], [8]
-                        // verificar que cada indice inicial este a 3 numeros de distancia del otro: 1 -> 5 -> 8 ó 0 -> 3 -> 6
-                            //para verificar que cada division o variable selecc este justo al lado de la otra
-                        // en arreglo de indices arregloVarSeleccionadas[2)] tomar cada valor en el indice:
-                            //si valor es variable, tomar variable y siguiente valor si es operacion/signo, existe y arreglo de indices no ha llegado a su fin
-                            //si es arreglo, tomar arreglo, valor anterior y siguiente (indicadores->\\) y el siguiente valor si es operacion/signo, existe y arreglo de indices no ha llegado a su fin
-                        // se sigue misma logica anterior para seleccionar valores a ser quitados del arreglo de formulas
-                        //poner todo en un solo objeto/arreglo, y al final insertar eso en arreglo formula
-                        if (esValida) {
-                            var arregloAInsertar = [];
-                            for (var a = 0; a < indicesVarSeleccionadas.length; a++) {
-                                var posicionInicial;
-                                eval("posicionInicial = this.state.formula"+indicesVarSeleccionadas[a]);
-                                console.log('posicionInicial');
-                                console.log(posicionInicial);
-                                for (var i = 0; i < posicionInicial.length; i++) {
-                                    console.log('posicionInicial[i]');
-                                    console.log(posicionInicial[i]);
-                                    if(!Array.isArray(posicionInicial[i].valor) && posicionInicial[i].activa && posicionInicial[i].tipo.localeCompare("indicador") != 0 && posicionInicial[i].tipo.localeCompare("signo") != 0) {
-                                        console.log('11');
-                                        arregloAInsertar.push(posicionInicial[i]);
-                                        if(posicionInicial[i+1] != undefined && posicionInicial[i+1].tipo.localeCompare("signo") == 0) {
-                                            console.log('11.1');
-                                            //insertar signo que le sigue a variable
-                                            arregloAInsertar.push(posicionInicial[i+1]);
-                                        }
-                                    } else if(Array.isArray(posicionInicial[i].valor)) {
-                                        console.log('22');
-                                        //insertar indicador izquierda
-                                        arregloAInsertar.push(posicionInicial[i-1]);
-                                        //insertar arreglo / division
-                                        arregloAInsertar.push(posicionInicial[i]);
-                                        //insertar indicador derecha
-                                        arregloAInsertar.push(posicionInicial[i+1]);
-                                    }
-                                };
-                                if(posicionInicial.length == undefined) {
-                                    var indIzquierdo = {valor: "\\\\", width: "5%", height: "100%", tipo: "indicador", posicion: "izquierda"};
-                                    var indDerecho = {valor: "\\\\", width: "5%", height: "100%", tipo: "indicador", posicion: "derecha"};
-                                    var signoDivision = {valor: "division\\\\", width: "100%", height: "2%", tipo: "division\\\\"};
-                                    console.log('INSERTAR');
-                                    console.log('posicionInicial');
-                                    console.log(posicionInicial);
-                                    console.log('signoDivision');
-                                    console.log(signoDivision);
-                                    console.log('variableSeleccionada');
-                                    console.log(variableSeleccionada);
-                                    var division = {valor: [posicionInicial, signoDivision, variableSeleccionada], width: "90%", height: "49%", tipo: "contenedorDivision"};
-                                    arregloAInsertar.push(indIzquierdo);
-                                    arregloAInsertar.push(division);
-                                    arregloAInsertar.push(indDerecho);
-                                } else if(a == 0) {
-                                    arregloAInsertar
-                                }
-                            }
-                            console.log('arregloAInsertar');
-                            console.log(arregloAInsertar);
-                            //quitando variables a remover y seleccionando desde que posicion se insertara
-                            var posicionAInsertarNuevaDivsion = indicesVarSeleccionadas[0].split("]")[0].split("[")[1];
-                            console.log('posicionAInsertarNuevaDivsion');
-                            console.log(posicionAInsertarNuevaDivsion);
-                            var copyFormula = [...this.state.formula];
-                            for (var a = indicesVarSeleccionadas.length - 1; a >= 0; a--) {
-                                var posicionInicial;
-                                eval("posicionInicial = copyFormula"+indicesVarSeleccionadas[a]);
-                                console.log('posicionInicial');
-                                console.log(posicionInicial);
-                                for (var i = posicionInicial.length - 1; i >= 0; i--) {
-                                    if(!Array.isArray(posicionInicial[i].valor) && posicionInicial[i].tipo.localeCompare("indicador") != 0 && posicionInicial[i].tipo.localeCompare("signo") != 0) {
-                                        console.log('A');
-                                        console.log('i = '+i);
-                                        if(posicionInicial[i+1] != undefined && posicionInicial[i+1].tipo.localeCompare("signo") == 0) {
-                                            console.log('A.1');
-                                            //insertar signo que le sigue a variable
-                                            posicionInicial.splice(i+1,1);
-                                        }
-                                        console.log('posicionInicial antes');
-                                        console.log(posicionInicial);
-                                        console.log(posicionInicial[i]);
-                                        posicionInicial.splice(i,1);
-                                        console.log('posicionInicial despues');
-                                        console.log(posicionInicial);
-                                        console.log(posicionInicial[i]);
-                                    } else if(Array.isArray(posicionInicial[i].valor)) {
-                                        console.log('B');
-                                        //insertar indicador derecha
-                                        posicionInicial.splice(i+1,1);
-                                        //insertar arreglo / division
-                                        posicionInicial.splice(i,1);
-                                        //insertar indicador izquierda
-                                        posicionInicial.splice(i-1,1);
-                                    }
-                                };
-                                //revisar porque esta dentro de loop, que pasa cuando hay mas de un valor en indicesVarSeleccionadas
-                                if(posicionInicial.length == undefined) {
-                                    console.log('QUITAAAR');
-                                    console.log('copyFormula');
-                                    console.log(copyFormula);
-                                    copyFormula.splice(0,1);
-                                    console.log('copyFormula2');
-                                    console.log(copyFormula);
-                                }
-                            };
-                            for (var i = 0; i < arregloAInsertar.length; i++) {
-                                copyFormula.splice(posicionAInsertarNuevaDivsion+i, 0, arregloAInsertar[i]);
-                            };
-                            this.agregarFormulaAnchuraYAltura(copyFormula, false);
-                            console.log('copyFormula');
-                            console.log(copyFormula);
-                            this.setState({
-                                formula: copyFormula
-                            });
-                        } else {
-                            alert("Para agregar una división, seleccione las variables a ser numerador en la fórmula.");
-                        }
-                    } else {
-                        for (var a = 0; a < indicesVarSeleccionadas.length; a++) {
-                            var posicionInicial, esAntesDenominador = true;
-                            //traer la pos mas arriba del arreglo que contiene la var seleccionada
-                                //o sea en [[[var1+var],/, var3],/,var4]    la var4 es la de mas arriba
-                            eval("posicionInicial = this.state.formula"+indicesVarSeleccionadas[a]);
-                            console.log('posicionInicial');
-                            console.log(posicionInicial);
-                            //verificacion de seleccion correcta de una division
-                            //1) tienen que ser variables seleccionadas continuas, eje: [0] -> [2] -> [4]
-                                //Cuando se seleccionan variables del numerador, tienen que ser continuas
-                            //2) si de las variables anteriores, hay un cambio de nivel que puede ser
-                            //      a) cuando las var seleccionadas tienen un indice menos eje: [3][1][1][1][0], [3][1][1][1][2], [3][1][1][4]
-                            //      b) cambio de nivel puede ser en el mismo indice, pero cuando hay un valor div\\
-                                //en este caso se tienen que seleccionar todas las variables del nivel anterior o sea numerador y todas las variables del denominador
-                            
-                            //viendo si todos tienen la misma cantidad de indices
-                            var indices = 0, diferenteIndices = false;
-                            for (var i = 0; i < arregloVarSeleccionadasPorIndicesInicial[a].length; i++) {
-                                //asignando primera vez
-                                if(i == 0)
-                                    indices = arregloVarSeleccionadasPorIndicesInicial[a][i].split("]").length;
-                                //comparando despues si el indice anterior es diferente al actual
-                                if(i > 0 && indices != arregloVarSeleccionadasPorIndicesInicial[a][i].split("]").length) {
-                                    diferenteIndices = true;
-                                    break;
-                                }
-                            };
-                            if(diferenteIndices) {
-                                //caso 2) - a
-                                seleccionValidaVarDivision = true;
-                                this.verificarSeleccionoTodos(posicionInicial);
-                                console.log('3.2');
-                                console.log('seleccionValidaVarDivision');
-                                console.log(seleccionValidaVarDivision);
-                            } else {
-                                //caso 1)
-                                //var arreglo;
-                                //eval("arreglo = this.state.formula"+arregloVarSeleccionadas[0]);
-                                //viendo si es division
-                                var esDivision = false;
-                                for (var i = 0; i < posicionInicial.length; i++) {
-                                    if(!Array.isArray(posicionInicial[i].valor)) {
-                                        if(posicionInicial[i].valor.localeCompare("division\\") == 0) {
-                                            esDivision = true;
-                                            break;
-                                        }
-                                    }
-                                };
-                                if(esDivision) {
-                                    //caso 2) - b
-                                    var esValida = true;
-                                    for (var i = 0; i < posicionInicial.length; i++) {
-                                        if(!Array.isArray(posicionInicial[i].valor)) {
-                                            if(posicionInicial[i].tipo.localeCompare("variable") == 0 && !posicionInicial[i].activa) {
-                                                esValida = false;
-                                                break;
-                                            }
-                                        }
-                                    };
-                                    console.log('3.3');
-                                    console.log('esValida');
-                                    console.log(esValida);
-                                } else {
-                                    //caso 1)
-                                    var esValida = true, esAntesDenominador = true, posicionAnterior = -1;
-                                    for (var i = 0; i < posicionInicial.length; i++) {
-                                        if(!Array.isArray(posicionInicial[i].valor)) {
-                                            if(posicionInicial[i].tipo.localeCompare("variable") == 0 && posicionInicial[i].activa && esAntesDenominador) {
-                                                if (posicionAnterior == -1) {
-                                                    posicionAnterior = i;
-                                                } else {
-                                                    if(posicionAnterior+2 != i) {
-                                                        esValida = false;
-                                                        break;
-                                                    }
-                                                }
-                                            }
-                                            if(posicionInicial[i].valor.localeCompare("division\\") == 0) {
-                                                esAntesDenominador = false;
-                                            }
-                                        }
-                                    };
-                                    console.log('3.4');
-                                    console.log('esValida');
-                                    console.log(esValida);
-                                }
-                            }
-                        };
-                    }*/
                     //actualizando campos de variables a mostrar segun el campo que se acaba de agregar
                     if(variableSeleccionada.esFuenteDato) {
                         //solo mostrar campos que sean de conexiones tabla
@@ -1735,64 +1561,107 @@ export default class Formula extends React.Component {
         }
     }
 
-    getFormula () {
-        const transaction = new sql.Transaction( this.props.pool );
-        transaction.begin(err => {
-            var rolledBack = false;
-            transaction.on('rollback', aborted => {
-                rolledBack = true;
+    crearArregloDeFormula () {
+        if (this.props.esEditarVar && banderaCargaVariablesINICIO == banderaCargaVariablesFIN) {
+            var nuevoArregloFormula = [];
+            this.crearObjetosDeArregloDeFormula(nuevoArregloFormula, 0, this.props.formulaSeleccionadaEdit.formula);
+            this.agregarFormulaAnchuraYAltura(nuevoArregloFormula, true);
+            console.log('nuevoArregloFormula')
+            console.log(nuevoArregloFormula)
+            this.setState({
+                formula: nuevoArregloFormula
             });
-            const request = new sql.Request(transaction);
-            request.query("select formula from "+this.props.tablaVarEditar+" where ID = "+this.props.idVarEditar, (err, result) => {
-                if (err) {
-                    if (!rolledBack) {
-                        console.log(err);
-                        transaction.rollback(err => {
-                        });
-                    }
-                } else {
-                    transaction.commit(err => {
-                        if(result.recordset.length > 0) {
-                            this.crearArregloDeFormula(result.recordset[0].formula);
-                        }
-                    });
-                }
-            });
-        }); // fin transaction
+        }
     }
 
-    crearArregloDeFormula (formula) {
-        var nuevoArregloFormula = [];
-        for (var i = 0; i < formula.length; i++) {
-            var variableProcesarFormula = getPalabraFormula
-            if(formula.charAt(i).localeCompare('(') == 0 || formula.charAt(i).localeCompare(')') == 0) {
-                nuevoArregloFormula.push({valor: "seleccion"});
-            } else if(formula.charAt(i).localeCompare('[') == 0) {
-                //
+    crearObjetosDeArregloDeFormula (arreglo, index, formula) {
+        for (var i = index; i < formula.length; i++) {
+            if(formula.charAt(i).localeCompare('(') == 0 && !this.props.esEditarVar) {
+                //var copiaAntiguaVariable = jQuery.extend(true, {}, variableAEvaluar);
+                var indIzquierdo = {valor: "\\\\", width: "5%", height: "100%", tipo: "indicador", posicion: "izquierda"};
+                arreglo.push(indIzquierdo);
+                var signoDivision = {valor: "division\\\\", width: "100%", height: "2%", tipo: "division\\\\"};
+                var division = {valor: [], width: "90%", height: "49%", tipo: "contenedorDivision"};
+                arreglo.push(division);
+                var indDerecho = {valor: "\\\\", width: "5%", height: "100%", tipo: "indicador", posicion: "derecha"};
+                arreglo.push(indDerecho);
+                this.crearObjetosDeArregloDeFormula(arreglo[arreglo.length-2].valor, (i+1), formula);
+                var cierreParentesis = this.encontrarCierreParentesis(i, formula);
+                i += cierreParentesis;
+            } else if(formula.charAt(i).localeCompare("/") == 0) {
+                var signoDivision = {valor: "division\\\\", width: "100%", height: "2%", tipo: "division\\\\"};
+                arreglo.push(signoDivision);
             } else if(this.esOperacionAritmetica(formula.charAt(i))) {
-                nuevoArregloFormula.push({valor: formula.charAt(i)});
+                var objeto = {
+                    valor: formula.charAt(i),
+                    operacion: formula.charAt(i),
+                    activa: false,
+                    esFuenteDato: false,
+                    esObjeto: false,
+                    esInstruccionSQL: false,
+                    tipo: "signo"
+                };
+                arreglo.push(objeto);
             } else if(this.esOperacionCompleja(formula, i)) {
                 var nombre = this.getPalabraFormula(formula, i);
                 nuevoArregloFormula.push({valor: nombre});
-            } else if(this.esVariable(formula, i)) {
-                var nombre = this.getPalabraFormula(formula, i);
-                nuevoArregloFormula.push({valor: nombre});
+            } else if(this.esVariable(formula, i) !== false && formula.charAt(i).localeCompare(')') != 0) {
+                var variable = this.esVariable(formula, i);
+                var operacion = 'FORMULA', texto = variable.valor;
+                if(this.props.esOperacionSQL)
+                    operacion = this.props.operacionSQL;
+                if(this.props.esOperacionSQL && this.exitseCodigoOperacion(this.props.operacionSQL)) {
+                    texto = this.retornarCodigoOperacion(this.props.operacionSQL) + "(" + variableSeleccionada.valor + ")";
+                    operacion = this.retornarCodigoOperacion(this.props.operacionSQL);
+                }
+                if (this.props.esOperacionSQL && this.props.operacionSQL.localeCompare('ASIG') == 0) {
+                    //cuando se agrega campo a formula para crear operacion ASIG
+                    operacion = 'ASIG';
+                    texto = variable.valor;
+                }
+                var objeto = {
+                    valor: variable.valor,
+                    operacion: operacion,
+                    tipo: "variable",
+                    activa: false,
+                    esFuenteDato: false,
+                    esObjeto: false,
+                    esInstruccionSQL: false,
+                    nivel: variable.nivel,
+                    texto: texto,
+                    tipoOriginal: variable.tipo
+                };
+                arreglo.push(objeto);
+                i+=variable.valor.length-1;
             }
         };
-        this.agregarFormulaAnchuraYAltura(nuevoArregloFormula, true);
+    }
+
+    encontrarCierreParentesis (index, formula) {
+        var count = 0;
+        for (var i = index; i < formula.length; i++) {
+            if(formula.charAt(i).localeCompare(')') == 0) {
+                return count;
+            } else {
+                count++;
+            }
+        }
+        return count;
     }
 
     esOperacionAritmetica (caracter) {
-        if(caracter.localeCompare('+') == 0) {
-            return true;
-        } else if(caracter.localeCompare('-') == 0) {
-            return true;
-        } else if(caracter.localeCompare('/') == 0) {
-            return true;
-        } else if(caracter.localeCompare('*') == 0) {
-            return true;
-        } else if(caracter.localeCompare('x') == 0) {
-            return true;
+        if(caracter != undefined) {
+            if(caracter.localeCompare('+') == 0) {
+                return true;
+            } else if(caracter.localeCompare('-') == 0) {
+                return true;
+            } else if(caracter.localeCompare('/') == 0) {
+                return true;
+            } else if(caracter.localeCompare('*') == 0) {
+                return true;
+            } else if(caracter.localeCompare('x') == 0) {
+                return true;
+            }
         }
         return false;
     }
@@ -1826,20 +1695,41 @@ export default class Formula extends React.Component {
 
     esVariable (formula, posicionCaracter) {
         var palabra = this.getPalabraFormula(formula, posicionCaracter);
-        for (var i = 0; i < campos.length; i++) {
-            if(campos[i].nombre.localeCompare(palabra) == 0) {
-                return true;
+        for (var i = 0; i < tablasOriginales.length; i++) {
+            for (var j = 0; j < camposTablasOriginales[i].length; j++) {
+                if(camposTablasOriginales[i][j].valor.localeCompare(palabra) == 0) {
+                    return camposTablasOriginales[i][j];
+                }
+            };
+        };
+        for (var i = 0; i < variablesEscalaresOriginales.length; i++) {
+            if(variablesEscalaresOriginales[i].valor.localeCompare(palabra) == 0) {
+                return variablesEscalaresOriginales[i];
             }
         };
-        for (var i = 0; i < variables.length; i++) {
-            if(variables[i].nombre.localeCompare(palabra) == 0) {
-                return true;
+        for (var i = 0; i < variablesOriginales.length; i++) {
+            for (var j = 0; j < camposVariablesOriginales[i].length; j++) {
+                if(camposVariablesOriginales[i][j].valor.localeCompare(palabra) == 0) {
+                    return camposVariablesOriginales[i][j];
+                }
+            };
+        };
+        for (var i = 0; i < excelOriginales.length; i++) {
+            for (var j = 0; j < camposExcelOriginales[i].length; j++) {
+                if(camposExcelOriginales[i][j].valor.localeCompare(palabra) == 0) {
+                    return camposExcelOriginales[i][j];
+                }
+            };
+        };
+        for (var i = 0; i < formasOriginales.length; i++) {
+            if(formasOriginales[i].valor.localeCompare(palabra) == 0) {
+                return formasOriginales[i];
             }
         };
-        for (var i = 0; i < objetos.length; i++) {
-            for (var j = 0; j < camposDeObjetos[i].length; j++) {
-                if(camposDeObjetos[i][j].nombre.localeCompare(palabra) == 0) {
-                    return true;
+        for (var i = 0; i < variablesOriginalesSQL.length; i++) {
+            for (var j = 0; j < camposVariablesOriginalesSQL[i].length; j++) {
+                if(camposVariablesOriginalesSQL[i][j].valor.localeCompare(palabra) == 0) {
+                    return camposVariablesOriginalesSQL[i][j];
                 }
             };
         };
@@ -2046,7 +1936,11 @@ export default class Formula extends React.Component {
         //this.props.anadirFormula(formula, this.state.formula);
         variableSeleccionada = {};
         operacionSeleccionada = {};
-        this.props.anadirFormula(objetoFormula, this.state.formula);
+        if(!this.props.esEditarVar) {
+            this.props.anadirFormula(objetoFormula, this.state.formula);
+        } else {
+            this.props.modificarFormula(objetoFormula, this.state.formula);
+        }
         alert("Fórmula guardada.");
         //camposTablas={this.state.camposTablas} variables={this.state.variablesEscalares} objetos={this.state.variables} camposDeObjetos={this.state.camposVariables} excel={this.state.excel} camposDeExcel={this.state.camposDeExcel} formas={this.state.formas} variablesSQL={this.state.variablesSQL} camposVariablesSQL={this.state.camposVariablesSQL}
         //this.guardarVariable(formula);
@@ -2097,6 +1991,7 @@ export default class Formula extends React.Component {
                 } else {
                     transaction.commit(err => {
                         tablasOriginales = result.recordset;
+                        banderaCargaVariablesFIN += result.recordset.length;
                         this.setState({
                             tablas: result.recordset
                         }, this.initLoadTablasCampos );
@@ -2142,6 +2037,8 @@ export default class Formula extends React.Component {
                         this.setState({
                             camposTablas: array
                         });
+                        banderaCargaVariablesINICIO++;
+                        this.crearArregloDeFormula();
                     });
                 }
             });
@@ -2165,6 +2062,7 @@ export default class Formula extends React.Component {
                     }
                 } else {
                     transaction.commit(err => {
+                        banderaCargaVariablesFIN += result.recordset.length;
                         for (var i = 0; i < result.recordset.length; i++) {
                             this.loadScalarVariablesFields(result.recordset[i]);
                         };
@@ -2199,6 +2097,8 @@ export default class Formula extends React.Component {
                         this.setState({
                             variablesEscalares: variablesEscalaresOriginales
                         } );
+                        banderaCargaVariablesINICIO++;
+                        this.crearArregloDeFormula();
                     });
                 }
             });
@@ -2223,6 +2123,7 @@ export default class Formula extends React.Component {
                 } else {
                     transaction.commit(err => {
                         variablesOriginales = result.recordset;
+                        banderaCargaVariablesFIN += result.recordset.length;
                         this.setState({
                             variables: result.recordset
                         }, this.initLoadVariablesCampos );
@@ -2268,6 +2169,8 @@ export default class Formula extends React.Component {
                         this.setState({
                             camposVariables: array
                         });
+                        banderaCargaVariablesINICIO++;
+                        this.crearArregloDeFormula();
                     });
                 }
             });
@@ -2292,6 +2195,7 @@ export default class Formula extends React.Component {
                 } else {
                     transaction.commit(err => {
                         variablesOriginalesSQL = result.recordset;
+                        banderaCargaVariablesFIN += result.recordset.length;
                         this.setState({
                             variablesSQL: result.recordset
                         }, this.initLoadVariablesCamposSQL );
@@ -2337,6 +2241,8 @@ export default class Formula extends React.Component {
                         this.setState({
                             camposVariablesSQL: array
                         });
+                        banderaCargaVariablesINICIO++;
+                        this.crearArregloDeFormula();
                     });
                 }
             });
@@ -2361,6 +2267,7 @@ export default class Formula extends React.Component {
                 } else {
                     transaction.commit(err => {
                         excelOriginales = result.recordset;
+                        banderaCargaVariablesFIN += result.recordset.length;
                         this.setState({
                             excel: result.recordset
                         }, this.initLoadExcelCampos );
@@ -2414,6 +2321,8 @@ export default class Formula extends React.Component {
                         this.setState({
                             camposDeExcel: array
                         });
+                        banderaCargaVariablesINICIO++;
+                        this.crearArregloDeFormula();
                     });
                 }
             });
@@ -2441,10 +2350,13 @@ export default class Formula extends React.Component {
                         for (var i = 0; i < result.recordset.length; i++) {
                             nombreColumnas.push({valor: result.recordset[i].nombre, tipo: result.recordset[i].tipo, esFuenteDato: false, formaVariableID: result.recordset[i].ID, esObjeto: false, esInstruccionSQL: false, nivel: 0});
                         };
-                        formasOriginales = result.recordset;
+                        formasOriginales = nombreColumnas;
                         this.setState({
                             formas: nombreColumnas
                         });
+                        banderaCargaVariablesINICIO++;
+                        banderaCargaVariablesFIN++;
+                        this.crearArregloDeFormula();
                     });
                 }
             });

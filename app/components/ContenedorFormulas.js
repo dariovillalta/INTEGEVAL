@@ -53,10 +53,14 @@ function (_React$Component) {
       asignaciones: [],
       crearSelected: true,
       editarSelected: false,
-      eliminarSelected: false
+      eliminarSelected: false,
+      mostrarCrearFormula: true
     };
     _this.actualizarSeleccionFormula = _this.actualizarSeleccionFormula.bind(_assertThisInitialized(_this));
     _this.verificarSeleccionFormula = _this.verificarSeleccionFormula.bind(_assertThisInitialized(_this));
+    _this.eliminarFormula = _this.eliminarFormula.bind(_assertThisInitialized(_this));
+    _this.eliminarFormulaDataBase = _this.eliminarFormulaDataBase.bind(_assertThisInitialized(_this));
+    _this.eliminarElementosFormulaDataBase = _this.eliminarElementosFormulaDataBase.bind(_assertThisInitialized(_this));
     _this.handleMouseHoverAgregar = _this.handleMouseHoverAgregar.bind(_assertThisInitialized(_this));
     _this.handleMouseHoverModificar = _this.handleMouseHoverModificar.bind(_assertThisInitialized(_this));
     _this.handleMouseHoverEliminar = _this.handleMouseHoverEliminar.bind(_assertThisInitialized(_this));
@@ -77,8 +81,21 @@ function (_React$Component) {
   }, {
     key: "actualizarSeleccionFormula",
     value: function actualizarSeleccionFormula(asignacion, posicionFormulaN) {
-      formulaSeleccionada = asignacion;
-      posicionFormula = posicionFormulaN;
+      if (posicionFormula == posicionFormulaN) {
+        $("#formula" + posicionFormula).prop("checked", false);
+        this.setState({
+          mostrarCrearFormula: true
+        });
+        posicionFormula = -1;
+        this.props.actualizarSeleccionFormula(null, posicionFormulaN);
+      } else {
+        formulaSeleccionada = asignacion;
+        posicionFormula = posicionFormulaN;
+        this.setState({
+          mostrarCrearFormula: false
+        });
+        this.props.actualizarSeleccionFormula(asignacion, posicionFormulaN);
+      }
     }
   }, {
     key: "verificarSeleccionFormula",
@@ -88,6 +105,67 @@ function (_React$Component) {
       } else {
         alert("Seleccione por lo menos una formula");
       }
+    }
+  }, {
+    key: "eliminarFormula",
+    value: function eliminarFormula(asignacion) {
+      if (this.props.esEditarVar) {
+        this.eliminarFormulaDataBase();
+        this.eliminarElementosFormulaDataBase();
+        this.props.eliminarFormula();
+      } else {
+        this.props.eliminarFormula();
+      }
+    }
+  }, {
+    key: "eliminarFormulaDataBase",
+    value: function eliminarFormulaDataBase() {
+      var _this2 = this;
+
+      var transaction = new sql.Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new sql.Request(transaction);
+        request.query("delete from " + _this2.props.tablaBorrarFormulas + " where " + _this2.props.condicionFormula, function (err, result) {
+          if (err) {
+            console.log(err);
+
+            if (!rolledBack) {
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {});
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
+    key: "eliminarElementosFormulaDataBase",
+    value: function eliminarElementosFormulaDataBase() {
+      var _this3 = this;
+
+      var transaction = new sql.Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new sql.Request(transaction);
+        request.query("delete from " + _this3.props.tablaBorrarElementos + " where " + _this3.props.condicionElemento, function (err, result) {
+          if (err) {
+            console.log(err);
+
+            if (!rolledBack) {
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {});
+          }
+        });
+      }); // fin transaction
     }
   }, {
     key: "handleMouseHoverAgregar",
@@ -208,7 +286,7 @@ function (_React$Component) {
   }, {
     key: "render",
     value: function render() {
-      var _this2 = this;
+      var _this4 = this;
 
       return _react["default"].createElement("div", {
         style: {
@@ -218,15 +296,27 @@ function (_React$Component) {
         className: "card-header"
       }, "Crear Asignaci\xF3n"), _react["default"].createElement("br", null), _react["default"].createElement("div", {
         className: "text-center"
-      }, _react["default"].createElement("a", {
+      }, this.state.mostrarCrearFormula ? _react["default"].createElement("a", {
         className: "btn btn-success col-xs-10 col-10 btnWhiteColorHover font-bold font-20",
         style: {
           color: "#fafafa"
         },
         onClick: function onClick() {
-          return _this2.props.goToCreateFormula(-1);
+          posicionFormula = -1;
+
+          _this4.props.goToCreateFormula(-1, false);
         }
-      }, "Crear")), _react["default"].createElement("hr", null), _react["default"].createElement("h3", {
+      }, "Crear") : _react["default"].createElement("a", {
+        className: "btn btn-success col-xs-10 col-10 btnWhiteColorHover font-bold font-20",
+        style: {
+          color: "#fafafa"
+        },
+        onClick: function onClick() {
+          posicionFormula = -1;
+
+          _this4.props.goToCreateFormula(posicionFormula, true);
+        }
+      }, "Modificar")), _react["default"].createElement("hr", null), _react["default"].createElement("h3", {
         className: "card-header"
       }, "Seleccionar Asignaci\xF3n"), _react["default"].createElement("br", null), _react["default"].createElement("div", null, this.props.asignaciones.map(function (asignacion, i) {
         return _react["default"].createElement("div", {
@@ -238,15 +328,29 @@ function (_React$Component) {
         }, i != 0 ? _react["default"].createElement("br", null) : null, _react["default"].createElement("label", {
           className: "custom-control custom-radio"
         }, _react["default"].createElement("input", {
+          id: "formula" + i,
           type: "radio",
           name: "formulasRadio",
           className: "custom-control-input",
           onClick: function onClick() {
-            return _this2.actualizarSeleccionFormula(asignacion, i);
+            return _this4.actualizarSeleccionFormula(asignacion, i);
           }
         }), _react["default"].createElement("span", {
           className: "custom-control-label"
-        }, asignacion.formula)));
+        }, " ", _react["default"].createElement("img", {
+          className: "addPointer",
+          onClick: function onClick() {
+            return _this4.eliminarFormula(asignacion);
+          },
+          src: "../assets/trash.png",
+          style: {
+            height: "20px",
+            width: "20px",
+            display: "block",
+            "float": "left",
+            marginRight: "10px"
+          }
+        }), " ", asignacion.formula)));
       }), this.props.asignaciones.length == 0 ? _react["default"].createElement("div", {
         className: "text-center"
       }, _react["default"].createElement("a", {

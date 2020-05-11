@@ -18,10 +18,14 @@ export default class ContenedorFormulas extends React.Component {
             asignaciones: [],
             crearSelected: true,
             editarSelected: false,
-            eliminarSelected: false
+            eliminarSelected: false,
+            mostrarCrearFormula: true
         }
         this.actualizarSeleccionFormula = this.actualizarSeleccionFormula.bind(this);
         this.verificarSeleccionFormula = this.verificarSeleccionFormula.bind(this);
+        this.eliminarFormula = this.eliminarFormula.bind(this);
+        this.eliminarFormulaDataBase = this.eliminarFormulaDataBase.bind(this);
+        this.eliminarElementosFormulaDataBase = this.eliminarElementosFormulaDataBase.bind(this);
         this.handleMouseHoverAgregar = this.handleMouseHoverAgregar.bind(this);
         this.handleMouseHoverModificar = this.handleMouseHoverModificar.bind(this);
         this.handleMouseHoverEliminar = this.handleMouseHoverEliminar.bind(this);
@@ -38,8 +42,21 @@ export default class ContenedorFormulas extends React.Component {
     }
 
     actualizarSeleccionFormula (asignacion, posicionFormulaN) {
-        formulaSeleccionada = asignacion;
-        posicionFormula = posicionFormulaN;
+        if(posicionFormula == posicionFormulaN) {
+            $("#formula"+posicionFormula).prop("checked", false);
+            this.setState({
+                mostrarCrearFormula: true
+            });
+            posicionFormula = -1;
+            this.props.actualizarSeleccionFormula(null, posicionFormulaN);
+        } else {
+            formulaSeleccionada = asignacion;
+            posicionFormula = posicionFormulaN;
+            this.setState({
+                mostrarCrearFormula: false
+            });
+            this.props.actualizarSeleccionFormula(asignacion, posicionFormulaN);
+        }
     }
 
     verificarSeleccionFormula () {
@@ -48,6 +65,62 @@ export default class ContenedorFormulas extends React.Component {
         } else {
             alert("Seleccione por lo menos una formula")
         }
+    }
+
+    eliminarFormula (asignacion) {
+        if(this.props.esEditarVar) {
+            this.eliminarFormulaDataBase();
+            this.eliminarElementosFormulaDataBase();
+            this.props.eliminarFormula();
+        } else {
+            this.props.eliminarFormula();
+        }
+    }
+
+    eliminarFormulaDataBase () {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("delete from "+this.props.tablaBorrarFormulas+" where "+this.props.condicionFormula, (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    eliminarElementosFormulaDataBase () {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("delete from "+this.props.tablaBorrarElementos+" where "+this.props.condicionElemento, (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                    });
+                }
+            });
+        }); // fin transaction
     }
 
     handleMouseHoverAgregar() {
@@ -161,7 +234,11 @@ export default class ContenedorFormulas extends React.Component {
                 <h3 className={"card-header"}>Crear Asignación</h3>
                 <br/>
                 <div className={"text-center"}>
-                    <a className={"btn btn-success col-xs-10 col-10 btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={() => this.props.goToCreateFormula(-1)}>Crear</a>
+                    {
+                        this.state.mostrarCrearFormula
+                        ? <a className={"btn btn-success col-xs-10 col-10 btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={() => {posicionFormula = -1; this.props.goToCreateFormula(-1, false)} }>Crear</a>
+                        : <a className={"btn btn-success col-xs-10 col-10 btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={() => {posicionFormula = -1; this.props.goToCreateFormula(posicionFormula, true)} }>Modificar</a>
+                    }
                 </div>
                 <hr/>
                 <h3 className={"card-header"}>Seleccionar Asignación</h3>
@@ -175,7 +252,7 @@ export default class ContenedorFormulas extends React.Component {
                                 : null
                             }
                             <label className="custom-control custom-radio">
-                                <input type="radio" name="formulasRadio" className="custom-control-input" onClick={() => this.actualizarSeleccionFormula(asignacion, i)}/><span className="custom-control-label">{asignacion.formula}</span>
+                                <input id={"formula"+i} type="radio" name="formulasRadio" className="custom-control-input" onClick={() => this.actualizarSeleccionFormula(asignacion, i)}/><span className="custom-control-label"> <img className="addPointer" onClick={() => this.eliminarFormula(asignacion) } src={"../assets/trash.png"} style={{height: "20px", width: "20px", display: "block", float: "left", marginRight: "10px"}}></img> {asignacion.formula}</span>
                             </label>
                         </div>
                     ))}

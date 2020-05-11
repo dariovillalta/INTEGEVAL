@@ -521,6 +521,7 @@ function (_React$Component) {
       }, _react["default"].createElement("input", {
         type: "number",
         defaultValue: "0",
+        onChange: this.changeTime,
         id: "mes",
         name: "mes",
         step: "1",
@@ -540,6 +541,7 @@ function (_React$Component) {
       }, _react["default"].createElement("input", {
         type: "number",
         defaultValue: "0",
+        onChange: this.changeTime,
         id: "anio",
         name: "anio",
         step: "1",

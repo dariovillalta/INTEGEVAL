@@ -4,6 +4,8 @@ import Slider from 'react-input-slider';
 
 var colores = ["primary", "brand", "secondary", "success", "danger", "warning", "info", "dark"];
 
+var rangosSeccionUmbralTodos = [];
+
 export default class CrearUmbral extends React.Component {
     constructor(props) {
         super(props);
@@ -31,12 +33,14 @@ export default class CrearUmbral extends React.Component {
         this.modificarSeccionUmbral = this.modificarSeccionUmbral.bind(this);
         this.seleccionSeccionUmbral = this.seleccionSeccionUmbral.bind(this);
         this.retornoSeccionSeleccionUmbral = this.retornoSeccionSeleccionUmbral.bind(this);
+        this.traerTodosRangosSeccionUmbral = this.traerTodosRangosSeccionUmbral.bind(this);
         this.traerRangosSeccionUmbral = this.traerRangosSeccionUmbral.bind(this);
         this.agregarRangoSeccionUmbral = this.agregarRangoSeccionUmbral.bind(this);
         this.updateValorRangoMinimoNuevo = this.updateValorRangoMinimoNuevo.bind(this);
         this.updateValorRangoMaximoNuevo = this.updateValorRangoMaximoNuevo.bind(this);
         this.updateValorRangoMinimoCreado = this.updateValorRangoMinimoCreado.bind(this);
         this.updateValorRangoMaximoCreado = this.updateValorRangoMaximoCreado.bind(this);
+        this.modificarRangoSeccionUmbral = this.modificarRangoSeccionUmbral.bind(this);
     }
 
     componentDidMount() {
@@ -145,6 +149,11 @@ export default class CrearUmbral extends React.Component {
             });
 
         });
+        setTimeout(
+            function () {
+                $('#colorSeccionNuevo').minicolors('value',"#db913d");
+        }, 100);
+
         const transaction = new sql.Transaction( this.props.pool );
         transaction.begin(err => {
             var rolledBack = false;
@@ -237,7 +246,7 @@ export default class CrearUmbral extends React.Component {
                             rolledBack = true;
                         });
                         const request = new sql.Request(transaction);
-                        request.query("insert into SeccionUmbral (umbralID, nombre, color) values ("+this.state.umbralSeleccionadoID+", '"+nombre+"', '"+color+"')", (err, result) => {
+                        request.query("update SeccionUmbral set nombre = '"+nombre+"', color = '"+color+"' where ID = "+this.state.seccionUmbralSeleccionadoID, (err, result) => {
                             if (err) {
                                 console.log(err);
                                 if (!rolledBack) {
@@ -273,6 +282,7 @@ export default class CrearUmbral extends React.Component {
     }
 
     retornoSeccionSeleccionUmbral () {
+        this.traerSeccionesUmbral();
         this.setState({
             seccionUmbralSeleccionadoID: -1,
             tituloSeccionUmbralNombreSeleccionado: "",
@@ -281,7 +291,32 @@ export default class CrearUmbral extends React.Component {
         });
     }
 
+    traerTodosRangosSeccionUmbral () {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("select * from RangoSeccionUmbral where umbralID = "+this.state.umbralSeleccionadoID, (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        rangosSeccionUmbralTodos = result.recordset;
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
     traerRangosSeccionUmbral () {
+        this.traerTodosRangosSeccionUmbral();
         /*CARGANDO COLOR DE RANGO*/
         $('.demo').each(function() {
             $(this).minicolors({
@@ -349,8 +384,6 @@ export default class CrearUmbral extends React.Component {
                                 valorRangoMaximo: result.recordset[i].valorMaximo
                             });
                         };
-                        console.log('rangosCreados')
-                        console.log(rangosCreados)
                         this.setState({
                             rangosSeccionUmbral: result.recordset,
                             valorRangoMaximoMinimoNuevo: valorMinimo,
@@ -367,11 +400,11 @@ export default class CrearUmbral extends React.Component {
         var valMinimo = parseInt($("#nuevoRangoValorMinimo").val());
         var valMaximo = this.state.valorRangoMaximo;
         var valoresFueraDeOtrosRangos = true;
-        for (var i = 0; i < this.state.rangosSeccionUmbral.length; i++) {
-            if(valMinimo >= this.state.rangosSeccionUmbral[i].valorMinimo && valMinimo <= this.state.rangosSeccionUmbral[i].valorMaximo) {
+        for (var i = 0; i < rangosSeccionUmbralTodos.length; i++) {
+            if(valMinimo >= rangosSeccionUmbralTodos[i].valorMinimo && valMinimo <= rangosSeccionUmbralTodos[i].valorMaximo) {
                 valoresFueraDeOtrosRangos = false;
             }
-            if(valMaximo >= this.state.rangosSeccionUmbral[i].valorMinimo && valMinimo <= this.state.rangosSeccionUmbral[i].valorMaximo) {
+            if(valMaximo >= rangosSeccionUmbralTodos[i].valorMinimo && valMinimo <= rangosSeccionUmbralTodos[i].valorMaximo) {
                 valoresFueraDeOtrosRangos = false;
             }
         };
@@ -452,6 +485,54 @@ export default class CrearUmbral extends React.Component {
             });
         }
     }
+
+    modificarRangoSeccionUmbral(index) {
+        var valMinimo = parseInt($("#rangoValorMinimo"+index).val());
+        var valMaximo = this.state.rangosCreados[index].valorRangoMaximo;
+        var valoresFueraDeOtrosRangos = true;
+        for (var i = 0; i < rangosSeccionUmbralTodos.length; i++) {
+            if(valMinimo >= rangosSeccionUmbralTodos[i].valorMinimo && valMinimo <= rangosSeccionUmbralTodos[i].valorMaximo && this.state.rangosSeccionUmbral[index].ID != rangosSeccionUmbralTodos[i].ID) {
+                valoresFueraDeOtrosRangos = false;
+            }
+            if(valMaximo >= rangosSeccionUmbralTodos[i].valorMinimo && valMinimo <= rangosSeccionUmbralTodos[i].valorMaximo && this.state.rangosSeccionUmbral[index].ID != rangosSeccionUmbralTodos[i].ID) {
+                valoresFueraDeOtrosRangos = false;
+            }
+        };
+        if(valoresFueraDeOtrosRangos) {
+            if(!isNaN(valMinimo)) {
+                if(!isNaN(valMaximo)) {
+                    const transaction = new sql.Transaction( this.props.pool );
+                    transaction.begin(err => {
+                        var rolledBack = false;
+                        transaction.on('rollback', aborted => {
+                            rolledBack = true;
+                        });
+                        const request = new sql.Request(transaction);
+                        request.query("update RangoSeccionUmbral set valorMinimo = "+valMinimo+", valorMaximo = "+valMaximo+" where ID = "+this.state.rangosSeccionUmbral[index].ID, (err, result) => {
+                            if (err) {
+                                console.log(err);
+                                if (!rolledBack) {
+                                    transaction.rollback(err => {
+                                    });
+                                }
+                            } else {
+                                transaction.commit(err => {
+                                    alert("Rango modificado.");
+                                    this.traerRangosSeccionUmbral();
+                                });
+                            }
+                        });
+                    }); // fin transaction
+                } else {
+                    alert("Ingrese un número válido para el valor máximo.");
+                }
+            } else {
+                alert("Ingrese un número válido para el valor mínimo.");
+            }
+        } else {
+            alert("Los valores ingresados traspasan otros rangos.");
+        }
+    }
     
     render() {
         if(this.state.umbralSeleccionadoID == -1) {
@@ -521,7 +602,7 @@ export default class CrearUmbral extends React.Component {
                                                 <br/>
                                                 {this.state.seccionesUmbral.map((seccionUmbral, i) => (
                                                     <div key={seccionUmbral.ID} className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
-                                                        <a href="#" onClick={() => this.seleccionSeccionUmbral(i)} className={"btn btn-outline-"+ ( colores[i]!= undefined ? colores[i] : colores[i%colores.length]) } style={{width: "100%"}}>{seccionUmbral.nombre}</a>
+                                                        <a href="#" onClick={() => this.seleccionSeccionUmbral(i)} className="btn" style={{width: "100%", color: seccionUmbral.color, backgroundColor: "transparent", borderColor: seccionUmbral.color, margin: "1% 0%"}}>{seccionUmbral.nombre}</a>
                                                     </div>
                                                 ))}
                                             </div>
@@ -572,7 +653,7 @@ export default class CrearUmbral extends React.Component {
                                                     </div>
                                                     <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"}>
                                                         <div className="form-group">
-                                                            <input type="hidden" id="colorSeccionUmbralSeleccionado" className="demo" value="#db913d"/>
+                                                            <input type="hidden" id="colorSeccionUmbralSeleccionado" className="demo" value={this.state.colorSeccionUmbralSeleccionado}/>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -590,7 +671,7 @@ export default class CrearUmbral extends React.Component {
                                                 </div>
                                                 <div className={"row"}>
                                                     <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
-                                                        <input id="nuevoRangoValorMinimo" name="dias" step="1" min="0" type="number" defaultValue="0" onChange={this.updateValorRangoMinimoNuevo}/>
+                                                        <input id="nuevoRangoValorMinimo" name="nuevoRangoValorMinimo" step="1" min="0" type="number" defaultValue="0" onChange={this.updateValorRangoMinimoNuevo}/>
                                                     </div>
                                                     <div className={"col-xl-8 col-lg-8 col-md-8 col-sm-8 col-8 form-group"}>
                                                         <Slider
@@ -622,7 +703,7 @@ export default class CrearUmbral extends React.Component {
                                                         </div>
                                                         <div className={"row"}>
                                                             <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-4 col-3 form-group"}>
-                                                                <input id={"rangoValorMinimo"+i} type="text" className="form-control form-control-sm" defaultValue={rangoSeccionUmbral.valorMinimo}/>
+                                                                <input id={"rangoValorMinimo"+i} name={"rangoValorMinimo"+i} step="1" min="0" type="number" defaultValue={rangoSeccionUmbral.valorMinimo} onChange={this.updateValorRangoMinimoNuevo}/>
                                                             </div>
                                                             <div className={"col-xl-8 col-lg-8 col-md-8 col-sm-8 col-8 form-group"}>
                                                                 <Slider
@@ -639,7 +720,7 @@ export default class CrearUmbral extends React.Component {
                                                             </div>
                                                         </div>
                                                         <div className={"text-center"}>
-                                                            <a onClick={this.modificarSeccionUmbral} className={"btn btn-success col-xs-6 col-6"} style={{color: "white", fontSize: "1.2em", fontWeight: "bold"}}>Modificar Rango de Sección de Umbral</a>
+                                                            <a onClick={() => this.modificarRangoSeccionUmbral(i)} className={"btn btn-success col-xs-6 col-6"} style={{color: "white", fontSize: "1.2em", fontWeight: "bold"}}>Modificar Rango de Sección de Umbral</a>
                                                         </div>
                                                     </div>
                                                 ))}

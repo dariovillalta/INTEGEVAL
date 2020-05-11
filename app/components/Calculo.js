@@ -1893,7 +1893,8 @@ function (_React$Component) {
           console.log(window[arregloDeVariables[a].nombre]);
         }
 
-        ; //this.iniciarCalculoExcel();
+        ;
+        this.iniciarCalculoExcel();
       }
     }
   }, {
@@ -2797,7 +2798,7 @@ function (_React$Component) {
 
                 for (var p = 0; p < arregloAgrupacionElementosFormulaPorVariables[i][j].variable.atributos.length; p++) {
                   var esPromedio = false;
-                  if (arregloAgrupacionElementosFormulaPorConexionATabla[i][j].segmentoRegla.reglas[arregloAgrupacionElementosFormulaPorConexionATabla[i][j].segmentoRegla.reglas.length - 1].operacion.localeCompare("PROM") == 0) esPromedio = true;
+                  if (arregloAgrupacionElementosFormulaPorVariables[i][j].segmentoRegla.reglas[arregloAgrupacionElementosFormulaPorVariables[i][j].segmentoRegla.reglas.length - 1].operacion.localeCompare("PROM") == 0) esPromedio = true;
                   codigoIniciacionVarPrimitiva += '\n' + this.codigoIniciacion(arregloAgrupacionElementosFormulaPorVariables[i][j].variable, "atributo", arregloAgrupacionElementosFormulaPorVariables[i][j].variable.atributos[p], '\t', false, esPromedio);
                 }
 
@@ -4431,22 +4432,10 @@ function (_React$Component) {
             return date;
           };
 
-          Date.prototype.addMonths = function (months) {
-            var date = new Date(this.valueOf());
-            date.setMonth(date.getMonth() + months);
-            return date;
-          };
-
-          Date.prototype.addYears = function (years) {
-            var date = new Date(this.valueOf());
-            date.setYear(date.getYear() + years);
-            return date;
-          };
-
           var hoy = new Date();
-          hoy.addYears(aniosAgregar);
-          hoy.addMonths(mesesAgregar);
-          hoy.addDays(diasAgregar);
+          hoy = this.addYears(hoy, aniosAgregar);
+          hoy = this.addMonths(hoy, mesesAgregar);
+          hoy = this.addDays(hoy, diasAgregar);
           arregloValoresAComparar = ["new Date(" + hoy.getFullYear() + ", " + hoy.getMonth() + ", " + hoy.getDate() + ").getTime()"];
         } else if (regla.valor.indexOf("MANUAL") == 0) {
           arregloValoresAComparar = [regla.valor.substring(regla.valor.indexOf("[") + 1, regla.valor.lastIndexOf("]"))];
@@ -5076,14 +5065,14 @@ function (_React$Component) {
 
       ;
       console.log('arregloDeRiesgos');
-      console.log(arregloDeRiesgos);
-      this.guardarVariablesCalculadas();
+      console.log(arregloDeRiesgos); //this.guardarVariablesCalculadas();
     }
   }, {
     key: "guardarVariablesCalculadas",
     value: function guardarVariablesCalculadas() {
       for (var a = 0; a < arregloDeVariables.length; a++) {
-        if (arregloDeVariables[a].guardar) this.verificarSiExisteVariableEnResultadosHistoricos(arregloDeVariables[a]);
+        //if(arregloDeVariables[a].realizarCalculo && )
+        this.verificarSiExisteVariableEnResultadosHistoricos(arregloDeVariables[a]);
       }
 
       ;
@@ -5198,7 +5187,7 @@ function (_React$Component) {
       var mes = hoy.getMonth() + 1;
       if (mes.toString().length == 1) mes = '0' + mes;
       var dia = hoy.getDate();
-      if (dia.toString().length == 1) mes = '0' + mes;
+      if (dia.toString().length == 1) dia = '0' + dia;
       var transaction = new _mssql["default"].Transaction(this.props.pool);
       transaction.begin(function (err) {
         var rolledBack = false;
@@ -5251,7 +5240,7 @@ function (_React$Component) {
 
       ;
       textoInsertPrincipio += ', f3ch4Gu4rd4do ) values ( ';
-      var instruccionSQLBorrar = "DELETE FROM " + variable.nombre + "_" + fechaNombreTabla.getFullYear() + "_" + (fechaNombreTabla.getMonth() + 1) + "_" + fechaNombreTabla.getDate() + "_" + fechaNombreTabla.getHours() + "_" + fechaNombreTabla.getMinutes() + "_" + fechaNombreTabla.getSeconds() + " WHERE f3ch4Gu4rd4do = '" + hoy.getFullYear() + "-" + hoy.getMonth() + "-" + hoy.getDate() + "' ";
+      var instruccionSQLBorrar = "DELETE FROM " + variable.nombre + "_" + fechaNombreTabla.getFullYear() + "_" + (fechaNombreTabla.getMonth() + 1) + "_" + fechaNombreTabla.getDate() + "_" + fechaNombreTabla.getHours() + "_" + fechaNombreTabla.getMinutes() + "_" + fechaNombreTabla.getSeconds() + " WHERE f3ch4Gu4rd4do = '" + hoy.getFullYear() + "-" + (hoy.getMonth() + 1) + "-" + hoy.getDate() + "' ";
       console.log('instruccionSQLBorrar');
       console.log(instruccionSQLBorrar);
       this.borrarVariable(instruccionSQLBorrar);
@@ -5272,12 +5261,12 @@ function (_React$Component) {
             } else if (variable.atributos[j].tipo.localeCompare("bit") == 0) {
               instruccionSQLFinal += "'" + window[variable.nombre][i][variable.atributos[j].nombre] + "'";
             } else if (variable.atributos[j].tipo.localeCompare("date") == 0) {
-              instruccionSQLFinal += "'" + window[variable.nombre][i][variable.atributos[j].nombre].getFullYear() + "-" + window[variable.nombre][i][variable.atributos[j].nombre].getMonth() + "-" + window[variable.nombre][i][variable.atributos[j].nombre].getDate() + "'";
+              instruccionSQLFinal += "'" + window[variable.nombre][i][variable.atributos[j].nombre].getFullYear() + "-" + (window[variable.nombre][i][variable.atributos[j].nombre].getMonth() + 1) + "-" + window[variable.nombre][i][variable.atributos[j].nombre].getDate() + "'";
             }
           }
 
           ;
-          instruccionSQLFinal += ", '" + hoy.getFullYear() + "-" + hoy.getMonth() + "-" + hoy.getDate() + "' )";
+          instruccionSQLFinal += ", '" + hoy.getFullYear() + "-" + (hoy.getMonth() + 1) + "-" + hoy.getDate() + "' )";
           console.log('instruccionSQLFinal 1');
           console.log(instruccionSQLFinal);
           var self = this;
@@ -5302,12 +5291,12 @@ function (_React$Component) {
           } else if (variable.atributos[j].tipo.localeCompare("bit") == 0) {
             instruccionSQLFinal += "'" + window[variable.nombre] + "'";
           } else if (variable.atributos[j].tipo.localeCompare("date") == 0) {
-            instruccionSQLFinal += "'" + window[variable.nombre].getFullYear() + "-" + window[variable.nombre].getMonth() + "-" + window[variable.nombre].getDate() + "'";
+            instruccionSQLFinal += "'" + window[variable.nombre].getFullYear() + "-" + (window[variable.nombre].getMonth() + 1) + "-" + window[variable.nombre].getDate() + "'";
           }
         }
 
         ;
-        instruccionSQLFinal += ", '" + hoy.getFullYear() + "-" + hoy.getMonth() + "-" + hoy.getDate() + "' )";
+        instruccionSQLFinal += ", '" + hoy.getFullYear() + "-" + (hoy.getMonth() + 1) + "-" + hoy.getDate() + "' )";
         console.log('instruccionSQLFinal 2');
         console.log(instruccionSQLFinal);
         var self = this;
@@ -5485,7 +5474,7 @@ function (_React$Component) {
       var mes = hoy.getMonth() + 1;
       if (mes.toString().length == 1) mes = '0' + mes;
       var dia = hoy.getDate();
-      if (dia.toString().length == 1) mes = '0' + mes;
+      if (dia.toString().length == 1) dia = '0' + dia;
       var transaction = new _mssql["default"].Transaction(this.props.pool);
       transaction.begin(function (err) {
         var rolledBack = false;
@@ -5553,7 +5542,7 @@ function (_React$Component) {
       instruccionSQLFinal += ", '" + indicador.tipoIndicador + "'";
       instruccionSQLFinal += ", '" + indicador.analista + "'";
       instruccionSQLFinal += ", " + indicador.idRiesgoPadre;
-      var instruccionSQLBorrar = "DELETE FROM " + indicador.nombre + "_" + fechaNombreTabla.getFullYear() + "_" + (fechaNombreTabla.getMonth() + 1) + "_" + fechaNombreTabla.getDate() + "_" + fechaNombreTabla.getHours() + "_" + fechaNombreTabla.getMinutes() + "_" + fechaNombreTabla.getSeconds() + " WHERE f3ch4Gu4rd4do = '" + hoy.getFullYear() + "-" + hoy.getMonth() + "-" + hoy.getDate() + "' ";
+      var instruccionSQLBorrar = "DELETE FROM " + indicador.nombre + "_" + fechaNombreTabla.getFullYear() + "_" + (fechaNombreTabla.getMonth() + 1) + "_" + fechaNombreTabla.getDate() + "_" + fechaNombreTabla.getHours() + "_" + fechaNombreTabla.getMinutes() + "_" + fechaNombreTabla.getSeconds() + " WHERE f3ch4Gu4rd4do = '" + hoy.getFullYear() + "-" + (hoy.getMonth() + 1) + "-" + hoy.getDate() + "' ";
       console.log('instruccionSQLBorrar');
       console.log(instruccionSQLBorrar);
       this.borrarIndicador(instruccionSQLBorrar);
@@ -5571,14 +5560,14 @@ function (_React$Component) {
           } else if (indicador.atributos[j].tipo.localeCompare("bit") == 0) {
             instruccionSQLFinal += "'" + window[indicador.nombre][i][indicador.atributos[j].nombre] + "'";
           } else if (indicador.atributos[j].tipo.localeCompare("date") == 0) {
-            instruccionSQLFinal += "'" + window[indicador.nombre][i][indicador.atributos[j].nombre].getFullYear() + "-" + window[indicador.nombre][i][indicador.atributos[j].nombre].getMonth() + "-" + window[indicador.nombre][i][indicador.atributos[j].nombre].getDate() + "'";
+            instruccionSQLFinal += "'" + window[indicador.nombre][i][indicador.atributos[j].nombre].getFullYear() + "-" + (window[indicador.nombre][i][indicador.atributos[j].nombre].getMonth() + 1) + "-" + window[indicador.nombre][i][indicador.atributos[j].nombre].getDate() + "'";
           }
         }
 
         ;
       }
 
-      instruccionSQLFinal += ", '" + hoy.getFullYear() + "-" + hoy.getMonth() + "-" + hoy.getDate() + "' )";
+      instruccionSQLFinal += ", '" + hoy.getFullYear() + "-" + (hoy.getMonth() + 1) + "-" + hoy.getDate() + "' )";
       console.log('instruccionSQLFinal 1');
       console.log(instruccionSQLFinal);
       var self = this;
@@ -5736,7 +5725,7 @@ function (_React$Component) {
       var mes = hoy.getMonth() + 1;
       if (mes.toString().length == 1) mes = '0' + mes;
       var dia = hoy.getDate();
-      if (dia.toString().length == 1) mes = '0' + mes;
+      if (dia.toString().length == 1) dia = '0' + dia;
       var transaction = new _mssql["default"].Transaction(this.props.pool);
       transaction.begin(function (err) {
         var rolledBack = false;
@@ -5793,8 +5782,8 @@ function (_React$Component) {
       instruccionSQLFinal += ", " + riesgo.nivelRiesgoHijo;
       instruccionSQLFinal += ", '" + riesgo.color + "'";
       instruccionSQLFinal += ", " + riesgo.total;
-      instruccionSQLFinal += ", '" + hoy.getFullYear() + "-" + hoy.getMonth() + "-" + hoy.getDate() + "' )";
-      var instruccionSQLBorrar = "DELETE FROM " + riesgo.nombre + "_" + fechaNombreTabla.getFullYear() + "_" + (fechaNombreTabla.getMonth() + 1) + "_" + fechaNombreTabla.getDate() + "_" + fechaNombreTabla.getHours() + "_" + fechaNombreTabla.getMinutes() + "_" + fechaNombreTabla.getSeconds() + " WHERE f3ch4Gu4rd4do = '" + hoy.getFullYear() + "-" + hoy.getMonth() + "-" + hoy.getDate() + "' ";
+      instruccionSQLFinal += ", '" + hoy.getFullYear() + "-" + (hoy.getMonth() + 1) + "-" + hoy.getDate() + "' )";
+      var instruccionSQLBorrar = "DELETE FROM " + riesgo.nombre + "_" + fechaNombreTabla.getFullYear() + "_" + (fechaNombreTabla.getMonth() + 1) + "_" + fechaNombreTabla.getDate() + "_" + fechaNombreTabla.getHours() + "_" + fechaNombreTabla.getMinutes() + "_" + fechaNombreTabla.getSeconds() + " WHERE f3ch4Gu4rd4do = '" + hoy.getFullYear() + "-" + (hoy.getMonth() + 1) + "-" + hoy.getDate() + "' ";
       console.log('instruccionSQLBorrar');
       console.log(instruccionSQLBorrar);
       this.borrarRiesgo(instruccionSQLBorrar);
@@ -5957,7 +5946,7 @@ function (_React$Component) {
       var mes = hoy.getMonth() + 1;
       if (mes.toString().length == 1) mes = '0' + mes;
       var dia = hoy.getDate();
-      if (dia.toString().length == 1) mes = '0' + mes;
+      if (dia.toString().length == 1) dia = '0' + dia;
       var transaction = new _mssql["default"].Transaction(this.props.pool);
       transaction.begin(function (err) {
         var rolledBack = false;
@@ -6010,7 +5999,7 @@ function (_React$Component) {
 
       ;
       textoInsertPrincipio += ', f3ch4Gu4rd4do ) values ( ';
-      var instruccionSQLBorrar = "DELETE FROM " + variable.nombre + "_" + fechaNombreTabla.getFullYear() + "_" + (fechaNombreTabla.getMonth() + 1) + "_" + fechaNombreTabla.getDate() + "_" + fechaNombreTabla.getHours() + "_" + fechaNombreTabla.getMinutes() + "_" + fechaNombreTabla.getSeconds() + " WHERE f3ch4Gu4rd4do = '" + hoy.getFullYear() + "-" + hoy.getMonth() + "-" + hoy.getDate() + "' ";
+      var instruccionSQLBorrar = "DELETE FROM " + variable.nombre + "_" + fechaNombreTabla.getFullYear() + "_" + (fechaNombreTabla.getMonth() + 1) + "_" + fechaNombreTabla.getDate() + "_" + fechaNombreTabla.getHours() + "_" + fechaNombreTabla.getMinutes() + "_" + fechaNombreTabla.getSeconds() + " WHERE f3ch4Gu4rd4do = '" + hoy.getFullYear() + "-" + (hoy.getMonth() + 1) + "-" + hoy.getDate() + "' ";
       console.log('instruccionSQLBorrar');
       console.log(instruccionSQLBorrar);
       this.borrarExcel(instruccionSQLBorrar);
@@ -6028,12 +6017,12 @@ function (_React$Component) {
           } else if (variable.variables[j].tipo.localeCompare("bit") == 0) {
             instruccionSQLFinal += "'" + window[variable.nombre][i][variable.variables[j].nombre] + "'";
           } else if (variable.variables[j].tipo.localeCompare("date") == 0) {
-            instruccionSQLFinal += "'" + window[variable.nombre][i][variable.variables[j].nombre].getFullYear() + "-" + window[variable.nombre][i][variable.atributos[j].nombre].getMonth() + "-" + window[variable.nombre][i][variable.atributos[j].nombre].getDate() + "'";
+            instruccionSQLFinal += "'" + window[variable.nombre][i][variable.variables[j].nombre].getFullYear() + "-" + (window[variable.nombre][i][variable.atributos[j].nombre].getMonth() + 1) + "-" + window[variable.nombre][i][variable.atributos[j].nombre].getDate() + "'";
           }
         }
 
         ;
-        instruccionSQLFinal += ", '" + hoy.getFullYear() + "-" + hoy.getMonth() + "-" + hoy.getDate() + "' )";
+        instruccionSQLFinal += ", '" + hoy.getFullYear() + "-" + (hoy.getMonth() + 1) + "-" + hoy.getDate() + "' )";
         console.log('instruccionSQLFinal 1');
         console.log(instruccionSQLFinal);
         var self = this;
@@ -6195,7 +6184,7 @@ function (_React$Component) {
       var mes = hoy.getMonth() + 1;
       if (mes.toString().length == 1) mes = '0' + mes;
       var dia = hoy.getDate();
-      if (dia.toString().length == 1) mes = '0' + mes;
+      if (dia.toString().length == 1) dia = '0' + dia;
       var transaction = new _mssql["default"].Transaction(this.props.pool);
       transaction.begin(function (err) {
         var rolledBack = false;
@@ -6248,7 +6237,7 @@ function (_React$Component) {
 
       ;
       textoInsertPrincipio += ', f3ch4Gu4rd4do ) values ( ';
-      var instruccionSQLBorrar = "DELETE FROM " + variable.nombre + "_" + fechaNombreTabla.getFullYear() + "_" + (fechaNombreTabla.getMonth() + 1) + "_" + fechaNombreTabla.getDate() + "_" + fechaNombreTabla.getHours() + "_" + fechaNombreTabla.getMinutes() + "_" + fechaNombreTabla.getSeconds() + " WHERE f3ch4Gu4rd4do = '" + hoy.getFullYear() + "-" + hoy.getMonth() + "-" + hoy.getDate() + "' ";
+      var instruccionSQLBorrar = "DELETE FROM " + variable.nombre + "_" + fechaNombreTabla.getFullYear() + "_" + (fechaNombreTabla.getMonth() + 1) + "_" + fechaNombreTabla.getDate() + "_" + fechaNombreTabla.getHours() + "_" + fechaNombreTabla.getMinutes() + "_" + fechaNombreTabla.getSeconds() + " WHERE f3ch4Gu4rd4do = '" + hoy.getFullYear() + "-" + (hoy.getMonth() + 1) + "-" + hoy.getDate() + "' ";
       console.log('instruccionSQLBorrar');
       console.log(instruccionSQLBorrar);
       this.borrarForma(instruccionSQLBorrar);
@@ -6261,10 +6250,10 @@ function (_React$Component) {
       } else if (variable.tipo.localeCompare("bit") == 0) {
         instruccionSQLFinal += "'" + window[variable.nombre] + "'";
       } else if (variable.tipo.localeCompare("date") == 0) {
-        instruccionSQLFinal += "'" + window[variable.nombre].getFullYear() + "-" + window[variable.nombre].getMonth() + "-" + window[variable.nombre].getDate() + "'";
+        instruccionSQLFinal += "'" + window[variable.nombre].getFullYear() + "-" + (window[variable.nombre].getMonth() + 1) + "-" + window[variable.nombre].getDate() + "'";
       }
 
-      instruccionSQLFinal += ", '" + hoy.getFullYear() + "-" + hoy.getMonth() + "-" + hoy.getDate() + "' )";
+      instruccionSQLFinal += ", '" + hoy.getFullYear() + "-" + (hoy.getMonth() + 1) + "-" + hoy.getDate() + "' )";
       console.log('instruccionSQLFinal 1');
       console.log(instruccionSQLFinal);
       var self = this;
@@ -6363,7 +6352,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("update PeriodicidadCalculo where variableID = " + variable.ID + " and tablaVariable = '" + tabla + "' set fechaUltimoCalculo = '" + hoy.getFullYear() + "-" + hoy.getMonth() + "-" + hoy.getDate() + "'", function (err, result) {
+        request.query("update PeriodicidadCalculo where variableID = " + variable.ID + " and tablaVariable = '" + tabla + "' set fechaUltimoCalculo = '" + hoy.getFullYear() + "-" + (hoy.getMonth() + 1) + "-" + hoy.getDate() + "'", function (err, result) {
           if (err) {
             console.log(err);
 
@@ -6386,7 +6375,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("insert into PeriodicidadCalculo (variableID, tablaVariable, fechaInicio, fechaUltimoCalculo) values (" + variable.ID + ", '" + tabla + "', '" + hoy.getFullYear() + "-" + hoy.getMonth() + "-" + hoy.getDate() + "', '" + hoy.getFullYear() + "-" + hoy.getMonth() + "-" + hoy.getDate() + "') ", function (err, result) {
+        request.query("insert into PeriodicidadCalculo (variableID, tablaVariable, fechaInicio, fechaUltimoCalculo) values (" + variable.ID + ", '" + tabla + "', '" + hoy.getFullYear() + "-" + (hoy.getMonth() + 1) + "-" + hoy.getDate() + "', '" + hoy.getFullYear() + "-" + hoy.getMonth() + "-" + hoy.getDate() + "') ", function (err, result) {
           if (err) {
             console.log(err);
 

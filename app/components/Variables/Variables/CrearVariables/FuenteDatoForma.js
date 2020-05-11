@@ -66,6 +66,7 @@ function (_React$Component) {
     _this.getFormas = _this.getFormas.bind(_assertThisInitialized(_this));
     _this.verificarNoExisteNombreVar = _this.verificarNoExisteNombreVar.bind(_assertThisInitialized(_this));
     _this.actualizarPeriodicidad = _this.actualizarPeriodicidad.bind(_assertThisInitialized(_this));
+    _this.cargarDatePicker = _this.cargarDatePicker.bind(_assertThisInitialized(_this));
     _this.isValidDate = _this.isValidDate.bind(_assertThisInitialized(_this));
     return _this;
   }
@@ -104,7 +105,7 @@ function (_React$Component) {
                       rolledBack = true;
                     });
                     var request = new _mssql["default"].Request(transaction);
-                    request.query("insert into FormasVariables (nombre, tipo, periodicidad, fechaInicioCalculo, analista, guardar) values ('" + nombreVariable + "', '" + tipo + "', '" + periodicidad + "', '" + fechaInicioCalculo + "', '" + analista + "', '" + guardarVariable + "')", function (err, result) {
+                    request.query("insert into FormasVariables (nombre, tipo, periodicidad, fechaInicioCalculo, analista, guardar) values ('" + nombreVariable + "', '" + tipo + "', '" + periodicidad + "', '" + fecha.getFullYear() + "-" + (fecha.getMonth() + 1) + "-" + fecha.getDate() + "', '" + analista + "', '" + guardarVariable + "')", function (err, result) {
                       if (err) {
                         console.log(err);
 
@@ -115,8 +116,8 @@ function (_React$Component) {
                         transaction.commit(function (err) {
                           alert("Variable Creada");
                           $("#nombreVariable").val("");
-                          $("#tipo").val("numero");
-                          $("#periodicidad").val("");
+                          $("#tipo").val("numero"); //$("#periodicidad").val("");
+
                           $("#analista").val("");
 
                           _this2.getFormas();
@@ -224,7 +225,7 @@ function (_React$Component) {
       var noExiste = true;
 
       for (var i = 0; i < variables.length; i++) {
-        if (this.state.variables[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
+        if (variables[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
           noExiste = false;
           break;
         }
@@ -234,7 +235,7 @@ function (_React$Component) {
 
       if (noExiste) {
         for (var i = 0; i < excel.length; i++) {
-          if (this.state.excel[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
+          if (excel[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
             noExiste = false;
             break;
           }
@@ -245,7 +246,7 @@ function (_React$Component) {
 
       if (noExiste) {
         for (var i = 0; i < formas.length; i++) {
-          if (this.state.formas[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
+          if (formas[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
             noExiste = false;
             break;
           }
@@ -263,6 +264,17 @@ function (_React$Component) {
       this.setState({
         valorPeriodicidad: periodicidad
       }, this.cargarDatePicker);
+    }
+  }, {
+    key: "cargarDatePicker",
+    value: function cargarDatePicker() {
+      $('#fecha').datepicker({
+        format: "dd-mm-yyyy",
+        todayHighlight: true,
+        viewMode: "days",
+        minViewMode: "days",
+        language: 'es'
+      });
     }
   }, {
     key: "isValidDate",

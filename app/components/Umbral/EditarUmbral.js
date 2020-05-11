@@ -40,6 +40,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
 var colores = ["primary", "brand", "secondary", "success", "danger", "warning", "info", "dark"];
+var rangosSeccionUmbralTodos = [];
 
 var CrearUmbral =
 /*#__PURE__*/
@@ -76,12 +77,14 @@ function (_React$Component) {
     _this.modificarSeccionUmbral = _this.modificarSeccionUmbral.bind(_assertThisInitialized(_this));
     _this.seleccionSeccionUmbral = _this.seleccionSeccionUmbral.bind(_assertThisInitialized(_this));
     _this.retornoSeccionSeleccionUmbral = _this.retornoSeccionSeleccionUmbral.bind(_assertThisInitialized(_this));
+    _this.traerTodosRangosSeccionUmbral = _this.traerTodosRangosSeccionUmbral.bind(_assertThisInitialized(_this));
     _this.traerRangosSeccionUmbral = _this.traerRangosSeccionUmbral.bind(_assertThisInitialized(_this));
     _this.agregarRangoSeccionUmbral = _this.agregarRangoSeccionUmbral.bind(_assertThisInitialized(_this));
     _this.updateValorRangoMinimoNuevo = _this.updateValorRangoMinimoNuevo.bind(_assertThisInitialized(_this));
     _this.updateValorRangoMaximoNuevo = _this.updateValorRangoMaximoNuevo.bind(_assertThisInitialized(_this));
     _this.updateValorRangoMinimoCreado = _this.updateValorRangoMinimoCreado.bind(_assertThisInitialized(_this));
     _this.updateValorRangoMaximoCreado = _this.updateValorRangoMaximoCreado.bind(_assertThisInitialized(_this));
+    _this.modificarRangoSeccionUmbral = _this.modificarRangoSeccionUmbral.bind(_assertThisInitialized(_this));
     return _this;
   }
 
@@ -205,6 +208,9 @@ function (_React$Component) {
           theme: 'bootstrap'
         });
       });
+      setTimeout(function () {
+        $('#colorSeccionNuevo').minicolors('value', "#db913d");
+      }, 100);
       var transaction = new _mssql["default"].Transaction(this.props.pool);
       transaction.begin(function (err) {
         var rolledBack = false;
@@ -312,7 +318,7 @@ function (_React$Component) {
                 rolledBack = true;
               });
               var request = new _mssql["default"].Request(transaction);
-              request.query("insert into SeccionUmbral (umbralID, nombre, color) values (" + _this6.state.umbralSeleccionadoID + ", '" + nombre + "', '" + color + "')", function (err, result) {
+              request.query("update SeccionUmbral set nombre = '" + nombre + "', color = '" + color + "' where ID = " + _this6.state.seccionUmbralSeleccionadoID, function (err, result) {
                 if (err) {
                   console.log(err);
 
@@ -350,6 +356,7 @@ function (_React$Component) {
   }, {
     key: "retornoSeccionSeleccionUmbral",
     value: function retornoSeccionSeleccionUmbral() {
+      this.traerSeccionesUmbral();
       this.setState({
         seccionUmbralSeleccionadoID: -1,
         tituloSeccionUmbralNombreSeleccionado: "",
@@ -358,11 +365,40 @@ function (_React$Component) {
       });
     }
   }, {
-    key: "traerRangosSeccionUmbral",
-    value: function traerRangosSeccionUmbral() {
+    key: "traerTodosRangosSeccionUmbral",
+    value: function traerTodosRangosSeccionUmbral() {
       var _this7 = this;
 
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("select * from RangoSeccionUmbral where umbralID = " + _this7.state.umbralSeleccionadoID, function (err, result) {
+          if (err) {
+            console.log(err);
+
+            if (!rolledBack) {
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              rangosSeccionUmbralTodos = result.recordset;
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
+    key: "traerRangosSeccionUmbral",
+    value: function traerRangosSeccionUmbral() {
+      var _this8 = this;
+
+      this.traerTodosRangosSeccionUmbral();
       /*CARGANDO COLOR DE RANGO*/
+
       $('.demo').each(function () {
         $(this).minicolors({
           control: $(this).attr('data-control') || 'hue',
@@ -392,7 +428,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("select * from RangoSeccionUmbral where seccionUmbralID = " + _this7.state.seccionUmbralSeleccionadoID, function (err, result) {
+        request.query("select * from RangoSeccionUmbral where seccionUmbralID = " + _this8.state.seccionUmbralSeleccionadoID, function (err, result) {
           if (err) {
             console.log(err);
 
@@ -431,50 +467,38 @@ function (_React$Component) {
                 rangosCreados.push({
                   valorRangoMaximoMinimoNuevo: result.recordset[i].valorMinimo,
                   valorRangoMaximoMaximoNuevo: result.recordset[i].valorMaximo + 100,
-                  valorRangoMaximo: result.recordset[i].valorMaximo,
-                  color: result.recordset[i].color
+                  valorRangoMaximo: result.recordset[i].valorMaximo
                 });
               }
 
               ;
-              console.log('rangosCreados');
-              console.log(rangosCreados);
 
-              _this7.setState({
+              _this8.setState({
                 rangosSeccionUmbral: result.recordset,
                 valorRangoMaximoMinimoNuevo: valorMinimo,
                 valorRangoMaximoMaximoNuevo: valorMaximo,
                 rangosCreados: rangosCreados
-              }, _this7.inicializarColores);
+              });
             });
           }
         });
       }); // fin transaction
     }
   }, {
-    key: "inicializarColores",
-    value: function inicializarColores() {
-      for (var i = 0; i < this.state.rangosCreados.length; i++) {
-        $('#colorSeccionUmbralSeleccionado' + i).minicolors('value', this.state.rangosCreados[i].color);
-      }
-
-      ;
-    }
-  }, {
     key: "agregarRangoSeccionUmbral",
     value: function agregarRangoSeccionUmbral() {
-      var _this8 = this;
+      var _this9 = this;
 
       var valMinimo = parseInt($("#nuevoRangoValorMinimo").val());
       var valMaximo = this.state.valorRangoMaximo;
       var valoresFueraDeOtrosRangos = true;
 
-      for (var i = 0; i < this.state.rangosSeccionUmbral.length; i++) {
-        if (valMinimo >= this.state.rangosSeccionUmbral[i].valorMinimo && valMinimo <= this.state.rangosSeccionUmbral[i].valorMaximo) {
+      for (var i = 0; i < rangosSeccionUmbralTodos.length; i++) {
+        if (valMinimo >= rangosSeccionUmbralTodos[i].valorMinimo && valMinimo <= rangosSeccionUmbralTodos[i].valorMaximo) {
           valoresFueraDeOtrosRangos = false;
         }
 
-        if (valMaximo >= this.state.rangosSeccionUmbral[i].valorMinimo && valMinimo <= this.state.rangosSeccionUmbral[i].valorMaximo) {
+        if (valMaximo >= rangosSeccionUmbralTodos[i].valorMinimo && valMinimo <= rangosSeccionUmbralTodos[i].valorMaximo) {
           valoresFueraDeOtrosRangos = false;
         }
       }
@@ -491,7 +515,7 @@ function (_React$Component) {
                 rolledBack = true;
               });
               var request = new _mssql["default"].Request(transaction);
-              request.query("insert into RangoSeccionUmbral (umbralID, seccionUmbralID, valorMinimo, valorMaximo) values (" + _this8.state.umbralSeleccionadoID + ", " + _this8.state.seccionUmbralSeleccionadoID + ", " + valMinimo + ", " + valMaximo + ")", function (err, result) {
+              request.query("insert into RangoSeccionUmbral (umbralID, seccionUmbralID, valorMinimo, valorMaximo) values (" + _this9.state.umbralSeleccionadoID + ", " + _this9.state.seccionUmbralSeleccionadoID + ", " + valMinimo + ", " + valMaximo + ")", function (err, result) {
                 if (err) {
                   console.log(err);
 
@@ -500,7 +524,7 @@ function (_React$Component) {
                   }
                 } else {
                   transaction.commit(function (err) {
-                    _this8.traerRangosSeccionUmbral();
+                    _this9.traerRangosSeccionUmbral();
                   });
                 }
               });
@@ -566,9 +590,66 @@ function (_React$Component) {
       }
     }
   }, {
+    key: "modificarRangoSeccionUmbral",
+    value: function modificarRangoSeccionUmbral(index) {
+      var _this10 = this;
+
+      var valMinimo = parseInt($("#rangoValorMinimo" + index).val());
+      var valMaximo = this.state.rangosCreados[index].valorRangoMaximo;
+      var valoresFueraDeOtrosRangos = true;
+
+      for (var i = 0; i < rangosSeccionUmbralTodos.length; i++) {
+        if (valMinimo >= rangosSeccionUmbralTodos[i].valorMinimo && valMinimo <= rangosSeccionUmbralTodos[i].valorMaximo && this.state.rangosSeccionUmbral[index].ID != rangosSeccionUmbralTodos[i].ID) {
+          valoresFueraDeOtrosRangos = false;
+        }
+
+        if (valMaximo >= rangosSeccionUmbralTodos[i].valorMinimo && valMinimo <= rangosSeccionUmbralTodos[i].valorMaximo && this.state.rangosSeccionUmbral[index].ID != rangosSeccionUmbralTodos[i].ID) {
+          valoresFueraDeOtrosRangos = false;
+        }
+      }
+
+      ;
+
+      if (valoresFueraDeOtrosRangos) {
+        if (!isNaN(valMinimo)) {
+          if (!isNaN(valMaximo)) {
+            var transaction = new _mssql["default"].Transaction(this.props.pool);
+            transaction.begin(function (err) {
+              var rolledBack = false;
+              transaction.on('rollback', function (aborted) {
+                rolledBack = true;
+              });
+              var request = new _mssql["default"].Request(transaction);
+              request.query("update RangoSeccionUmbral set valorMinimo = " + valMinimo + ", valorMaximo = " + valMaximo + " where ID = " + _this10.state.rangosSeccionUmbral[index].ID, function (err, result) {
+                if (err) {
+                  console.log(err);
+
+                  if (!rolledBack) {
+                    transaction.rollback(function (err) {});
+                  }
+                } else {
+                  transaction.commit(function (err) {
+                    alert("Rango modificado.");
+
+                    _this10.traerRangosSeccionUmbral();
+                  });
+                }
+              });
+            }); // fin transaction
+          } else {
+            alert("Ingrese un número válido para el valor máximo.");
+          }
+        } else {
+          alert("Ingrese un número válido para el valor mínimo.");
+        }
+      } else {
+        alert("Los valores ingresados traspasan otros rangos.");
+      }
+    }
+  }, {
     key: "render",
     value: function render() {
-      var _this9 = this;
+      var _this11 = this;
 
       if (this.state.umbralSeleccionadoID == -1) {
         return _react["default"].createElement("div", null, _react["default"].createElement("div", {
@@ -682,11 +763,15 @@ function (_React$Component) {
           }, _react["default"].createElement("a", {
             href: "#",
             onClick: function onClick() {
-              return _this9.seleccionSeccionUmbral(i);
+              return _this11.seleccionSeccionUmbral(i);
             },
-            className: "btn btn-outline-" + (colores[i] != undefined ? colores[i] : colores[i % colores.length]),
+            className: "btn",
             style: {
-              width: "100%"
+              width: "100%",
+              color: seccionUmbral.color,
+              backgroundColor: "transparent",
+              borderColor: seccionUmbral.color,
+              margin: "1% 0%"
             }
           }, seccionUmbral.nombre));
         })))))))));
@@ -728,7 +813,7 @@ function (_React$Component) {
           className: "row"
         }, _react["default"].createElement("div", {
           onClick: function onClick() {
-            return _this9.retornoSeccionSeleccionUmbral();
+            return _this11.retornoSeccionSeleccionUmbral();
           },
           className: "col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2 form-group addPointer border"
         }, _react["default"].createElement("label", {
@@ -764,7 +849,7 @@ function (_React$Component) {
           type: "hidden",
           id: "colorSeccionUmbralSeleccionado",
           className: "demo",
-          value: "#db913d"
+          value: this.state.colorSeccionUmbralSeleccionado
         })))), _react["default"].createElement("div", {
           className: "text-center"
         }, _react["default"].createElement("a", {
@@ -793,7 +878,7 @@ function (_React$Component) {
           className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
         }, _react["default"].createElement("input", {
           id: "nuevoRangoValorMinimo",
-          name: "dias",
+          name: "nuevoRangoValorMinimo",
           step: "1",
           min: "0",
           type: "number",
@@ -809,9 +894,9 @@ function (_React$Component) {
           x: this.state.valorRangoMaximo,
           onChange: function onChange(_ref) {
             var x = _ref.x;
-            return _this9.setState({
+            return _this11.setState({
               valorRangoMaximo: x
-            }, _this9.updateValorRangoMaximoNuevo);
+            }, _this11.updateValorRangoMaximoNuevo);
           },
           style: {
             width: "100%",
@@ -853,22 +938,25 @@ function (_React$Component) {
             className: "col-xl-3 col-lg-3 col-md-3 col-sm-4 col-3 form-group"
           }, _react["default"].createElement("input", {
             id: "rangoValorMinimo" + i,
-            type: "text",
-            className: "form-control form-control-sm",
-            defaultValue: rangoSeccionUmbral.valorMinimo
+            name: "rangoValorMinimo" + i,
+            step: "1",
+            min: "0",
+            type: "number",
+            defaultValue: rangoSeccionUmbral.valorMinimo,
+            onChange: _this11.updateValorRangoMinimoNuevo
           })), _react["default"].createElement("div", {
             className: "col-xl-8 col-lg-8 col-md-8 col-sm-8 col-8 form-group"
           }, _react["default"].createElement(_reactInputSlider["default"], {
             axis: "x",
             xstep: 1,
-            xmin: _this9.state.rangosCreados[i].valorRangoMaximoMinimoNuevo,
-            xmax: _this9.state.rangosCreados[i].valorRangoMaximoMaximoNuevo,
-            x: _this9.state.rangosCreados[i].valorRangoMaximo,
+            xmin: _this11.state.rangosCreados[i].valorRangoMaximoMinimoNuevo,
+            xmax: _this11.state.rangosCreados[i].valorRangoMaximoMaximoNuevo,
+            x: _this11.state.rangosCreados[i].valorRangoMaximo,
             onChange: function onChange(_ref2) {
               var x = _ref2.x;
-              return _this9.setState({
+              return _this11.setState({
                 bandera: ""
-              }, _this9.updateValorRangoMaximoCreado(i, x));
+              }, _this11.updateValorRangoMaximoCreado(i, x));
             },
             style: {
               width: "100%",
@@ -879,26 +967,12 @@ function (_React$Component) {
           }, _react["default"].createElement("label", {
             id: "rangoValorMaximo" + i,
             className: "col-form-label"
-          }, _this9.state.rangosCreados[i].valorRangoMaximo))), _react["default"].createElement("div", {
-            className: "row"
-          }, _react["default"].createElement("div", {
-            className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
-          }, _react["default"].createElement("label", {
-            htmlFor: "colorSeccionUmbralSeleccionado" + i,
-            className: "col-form-label"
-          }, "Color de la Secci\xF3n de Umbral:")), _react["default"].createElement("div", {
-            className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
-          }, _react["default"].createElement("div", {
-            className: "form-group"
-          }, _react["default"].createElement("input", {
-            type: "hidden",
-            id: "colorSeccionUmbralSeleccionado" + i,
-            className: "demo",
-            value: "#db913d"
-          })))), _react["default"].createElement("div", {
+          }, _this11.state.rangosCreados[i].valorRangoMaximo))), _react["default"].createElement("div", {
             className: "text-center"
           }, _react["default"].createElement("a", {
-            onClick: _this9.modificarSeccionUmbral,
+            onClick: function onClick() {
+              return _this11.modificarRangoSeccionUmbral(i);
+            },
             className: "btn btn-success col-xs-6 col-6",
             style: {
               color: "white",

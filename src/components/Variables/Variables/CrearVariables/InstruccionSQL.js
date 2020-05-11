@@ -17,6 +17,7 @@ export default class InstruccionSQL extends React.Component {
         this.mostrarCampos = this.mostrarCampos.bind(this);
         this.actualizarCampo = this.actualizarCampo.bind(this);
         this.closeModal = this.closeModal.bind(this);
+        this.agregarInstruccionSQL = this.agregarInstruccionSQL.bind(this);
     }
 
     componentDidMount() {
@@ -61,7 +62,7 @@ export default class InstruccionSQL extends React.Component {
         });
     }
 
-    this.agregarInstruccionSQL () {
+    agregarInstruccionSQL () {
         var camposError = [];
         var instruccionSQL = $("#comandoSQL").val();
         if(instruccionSQL.length > 0) {

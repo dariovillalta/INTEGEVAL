@@ -135,7 +135,11 @@ function (_React$Component) {
             width: "100%"
           }
         }, _react["default"].createElement("div", {
-          className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
+          className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12",
+          style: {
+            padding: "0px",
+            border: "1px solid #d2d2e4"
+          }
         }, _react["default"].createElement("div", {
           style: {
             height: "30px",

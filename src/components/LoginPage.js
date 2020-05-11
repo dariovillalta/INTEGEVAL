@@ -310,7 +310,7 @@ export default class LoginPage extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("CREATE TABLE Indicadores ( ID int IDENTITY(1,1) PRIMARY KEY, nombre varchar(100), codigo varchar(100), formula varchar(500), peso decimal(8,4), tolerancia decimal(8,4), tipoTolerancia varchar(20), valorIdeal decimal(8,4), tipoValorIdeal varchar(20), periodicidad varchar(50), tipoIndicador varchar(20), analista varchar(100), idRiesgoPadre int, fechaInicioCalculo date )", (err, result) => {
+            request.query("CREATE TABLE Indicadores ( ID int IDENTITY(1,1) PRIMARY KEY, nombre varchar(100), codigo varchar(100), formula varchar(500), peso decimal(8,4), tolerancia decimal(8,4), valorIdeal decimal(8,4), tipoValorIdeal varchar(20), periodicidad varchar(50), tipoIndicador varchar(20), analista varchar(100), idRiesgoPadre int, fechaInicioCalculo date )", (err, result) => {
                 if (err) {
                     if (!rolledBack) {
                         console.log(err);

@@ -342,13 +342,13 @@ export default class Valor extends React.Component {
                                 <label htmlFor="mes" className="col-form-label">Meses:</label>
                             </div>
                             <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
-                                <input type="number" defaultValue="0" id="mes" name="mes" step="1" min="0"/>
+                                <input type="number" defaultValue="0" onChange={this.changeTime} id="mes" name="mes" step="1" min="0"/>
                             </div>
                             <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
                                 <label htmlFor="anio" className="col-form-label">Años:</label>
                             </div>
                             <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
-                                <input type="number" defaultValue="0" id="anio" name="anio" step="1" min="0"/>
+                                <input type="number" defaultValue="0" onChange={this.changeTime} id="anio" name="anio" step="1" min="0"/>
                             </div>
                         </div>
                     : null

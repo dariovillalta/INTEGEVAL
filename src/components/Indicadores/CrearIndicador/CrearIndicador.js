@@ -23,7 +23,7 @@ var indiceSeleccionadoSegmentoReglas = -1, indiceSeleccionadoReglas = -1, tipoEl
 
 var nombreIndicador = '', codigoIndicador = '', toleranciaIndicador = '', valorIdealIndicador = '', tipoValorIdealIndicador = '', tipoToleranciaIndicador = '', periodicidadIndicador = '', tipoIndicador = '', nombreEncargadoIndicador = '';
 
-var banderaEsFormulaIndicador = false;
+var banderaEsFormulaIndicador = false, mostrarToleranciaPorcentaje = false, periodicidadIndicador = "-1", fecha = '';
 var contadorObjetosGuardados = 0, contadorObjetosAGuardar = 0;
 export default class CrearIndicador extends React.Component {
     constructor(props) {
@@ -34,7 +34,9 @@ export default class CrearIndicador extends React.Component {
             x: 0,
             atributos: [],
             tipoNuevaVariable: "",
-            reglas: []
+            reglas: [],
+            mostrarToleranciaPorcentaje: mostrarToleranciaPorcentaje,
+            periodicidadIndicador: periodicidadIndicador
         }
         this.crearIndicador = this.crearIndicador.bind(this);
         this.getIndicadorID = this.getIndicadorID.bind(this);
@@ -61,8 +63,17 @@ export default class CrearIndicador extends React.Component {
         this.getElementsFromFormula = this.getElementsFromFormula.bind(this);
         this.modificarRegla = this.modificarRegla.bind(this);
         this.eliminarRegla = this.eliminarRegla.bind(this);
-        console.log('this.props')
-        console.log(this.props)
+        
+        this.updateNombreIndicador = this.updateNombreIndicador.bind(this);
+        this.updateCodigoIndicador = this.updateCodigoIndicador.bind(this);
+        this.updateValorIdealIndicador = this.updateValorIdealIndicador.bind(this);
+        this.updateTipoValorIdealIndicador = this.updateTipoValorIdealIndicador.bind(this);
+        this.updateToleranciaIndicador = this.updateToleranciaIndicador.bind(this);
+        this.updatePeriodicidadIndicador = this.updatePeriodicidadIndicador.bind(this);
+        this.cargarDatePicker = this.cargarDatePicker.bind(this);
+        this.updateTipoIndicador = this.updateTipoIndicador.bind(this);
+        this.updateNombreEncargadoIndicador = this.updateNombreEncargadoIndicador.bind(this);
+        this.isValidDate = this.isValidDate.bind(this);
     }
 
     crearIndicador () {
@@ -73,9 +84,9 @@ export default class CrearIndicador extends React.Component {
         var valorIdeal = parseInt($("#valorIdeal").val());
         var tipoValorIdeal = $("#tipoValorIdeal").val();
         var tolerancia = parseInt($("#tolerancia").val());
-        var tipoTolerancia = $("#tipoTolerancia").val();
         var tipoIndicador = $("#tipoIndicador").val();
         var periodicidad = $("#periodicidad").val();
+        var fecha = $("#fecha").datepicker('getDate');
         var analista = $("#analista").val();
         var riesgoPadre = this.props.riesgoPadre;
         console.log('nombre');
@@ -92,8 +103,6 @@ export default class CrearIndicador extends React.Component {
         console.log(tipoValorIdeal);
         console.log('tolerancia');
         console.log(tolerancia);
-        console.log('tipoTolerancia');
-        console.log(tipoTolerancia);
         console.log('periodicidad');
         console.log(periodicidad);
         console.log('tipoIndicador');
@@ -109,7 +118,7 @@ export default class CrearIndicador extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("insert into Indicadores (nombre, codigo, formula, peso, tolerancia, tipoTolerancia, valorIdeal, tipoValorIdeal, periodicidad, tipoIndicador, analista, idRiesgoPadre) values ('"+nombre+"', '"+codigo+"', '"+formula+"', "+peso+", "+tolerancia+", '"+tipoTolerancia+"', "+valorIdeal+", '"+tipoValorIdeal+"', '"+periodicidad+"', '"+tipoIndicador+"', '"+analista+"', "+riesgoPadre+")", (err, result) => {
+            request.query("insert into Indicadores (nombre, codigo, formula, peso, tolerancia, valorIdeal, tipoValorIdeal, periodicidad, tipoIndicador, analista, idRiesgoPadre, fechaInicioCalculo) values ('"+nombre+"', '"+codigo+"', '"+formula+"', "+peso+", "+tolerancia+", "+valorIdeal+", '"+tipoValorIdeal+"', '"+periodicidad+"', '"+tipoIndicador+"', '"+analista+"', "+riesgoPadre+", '"+fecha.getFullYear()+"-"+(fecha.getMonth()+1)+"-"+fecha.getDate()+"')", (err, result) => {
                 if (err) {
                     console.log(err);
                     if (!rolledBack) {
@@ -1911,18 +1920,44 @@ export default class CrearIndicador extends React.Component {
 
     updateTipoValorIdealIndicador() {
         tipoValorIdealIndicador = $("#tipoValorIdeal").val();
+        if(tipoValorIdealIndicador.localeCompare("numerico") == 0) {
+            mostrarToleranciaPorcentaje = false;
+        } else {
+            mostrarToleranciaPorcentaje = true;
+        }
+        this.setState({
+            mostrarToleranciaPorcentaje: mostrarToleranciaPorcentaje
+        });
     }
 
     updateToleranciaIndicador() {
         toleranciaIndicador = $("#tolerancia").val();
     }
 
-    updateTipoTolerancia () {
-        tipoToleranciaIndicador = $("#tipoTolerancia").val();
-    }
-
     updatePeriodicidadIndicador() {
         periodicidadIndicador = $("#periodicidad").val();
+        this.setState({
+            periodicidadIndicador: periodicidadIndicador
+        }, this.cargarDatePicker );
+    }
+
+    cargarDatePicker () {
+        $('#fecha').datepicker({
+            format: "dd-mm-yyyy",
+            todayHighlight: true,
+            viewMode: "days", 
+            minViewMode: "days",
+            language: 'es'
+        });
+        if(this.isValidDate(fecha)) {
+            $("#fecha").datepicker("setDate", fecha);
+        }
+        var self = this;
+        $('#fecha').datepicker().on('changeDate', function () {
+            if(self.isValidDate(fecha)) {
+                fecha = $("#fecha").datepicker('getDate');
+            }
+        });
     }
 
     updateTipoIndicador() {
@@ -1931,6 +1966,18 @@ export default class CrearIndicador extends React.Component {
 
     updateNombreEncargadoIndicador() {
         nombreEncargadoIndicador = $("#analista").val();
+    }
+
+    isValidDate (fecha) {
+        if (Object.prototype.toString.call(fecha) === "[object Date]") {
+            if (isNaN(fecha.getTime())) {
+                return false;
+            } else {
+                return true;
+            }
+        } else {
+            return false;
+        }
     }
 
     render() {
@@ -1997,7 +2044,11 @@ export default class CrearIndicador extends React.Component {
                                                 <label htmlFor="valorIdeal" className="col-form-label">Valor Ideal</label>
                                             </div>
                                             <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"}>
-                                                <input id="valorIdeal" defaultValue={valorIdealIndicador} onKeyUp={this.updateValorIdealIndicador} type="text" className="form-control form-control-sm"/>
+                                                {
+                                                    this.state.mostrarToleranciaPorcentaje
+                                                    ? <input id="valorIdeal" name="tolerancia" step="1" min="0" type="number" defaultValue={valorIdealIndicador} onChange={this.updateValorIdealIndicador} style={{textAlign: "left", background: "url(../assets/percentage.png) no-repeat left", backgroundSize: "10px", backgroundPosition: "right center", width: "100%"}}/>
+                                                    : <input id="valorIdeal" name="tolerancia" step="1" min="0" type="number" defaultValue={valorIdealIndicador} onChange={this.updateValorIdealIndicador} style={{textAlign: "left", width: "100%"}}/>
+                                                }
                                             </div>
                                         </div>
                                         <div className={"row"} style={{width: "100%"}}>
@@ -2016,18 +2067,11 @@ export default class CrearIndicador extends React.Component {
                                                 <label htmlFor="tolerancia" className="col-form-label">Tolerancia</label>
                                             </div>
                                             <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"}>
-                                                <input id="tolerancia" defaultValue={toleranciaIndicador} onKeyUp={this.updateToleranciaIndicador} type="text" className="form-control form-control-sm"/>
-                                            </div>
-                                        </div>
-                                        <div className={"row"} style={{width: "100%"}}>
-                                            <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
-                                                <label htmlFor="tipoTolerancia" className="col-form-label">Tipo de Tolerancia</label>
-                                            </div>
-                                            <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"}>
-                                                <select id="tipoTolerancia" defaultValue={tipoToleranciaIndicador} onChange={this.updateTipoTolerancia} className="form-control">
-                                                    <option value="numerico">Numérico</option>
-                                                    <option value="porcentual">Porcentual</option>
-                                                </select>
+                                                {
+                                                    this.state.mostrarToleranciaPorcentaje
+                                                    ? <input id="tolerancia" name="tolerancia" step="1" min="0" type="number" defaultValue={toleranciaIndicador} onChange={this.updateToleranciaIndicador} style={{textAlign: "left", background: "url(../assets/percentage.png) no-repeat left", backgroundSize: "10px", backgroundPosition: "right center", width: "100%"}}/>
+                                                    : <input id="tolerancia" name="tolerancia" step="1" min="0" type="number" defaultValue={toleranciaIndicador} onChange={this.updateToleranciaIndicador} style={{textAlign: "left", width: "100%"}}/>
+                                                }
                                             </div>
                                         </div>
                                         <div className={"row"} style={{width: "100%"}}>
@@ -2043,6 +2087,18 @@ export default class CrearIndicador extends React.Component {
                                                 </select>
                                             </div>
                                         </div>
+                                        {this.state.periodicidadIndicador.localeCompare("-1") != 0
+                                            ?
+                                                <div className={"row"} style={{width: "100%"}}>
+                                                    <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
+                                                        <label htmlFor="fecha" className="col-form-label">Fecha de Inicio de Cálculo:</label>
+                                                    </div>
+                                                    <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"}>
+                                                        <input type="text" className="form-control" id="fecha"/>
+                                                    </div>
+                                                </div>
+                                            : null
+                                        }
                                         <div className={"row"} style={{width: "100%"}}>
                                             <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
                                                 <label htmlFor="tipoIndicador" className="col-form-label">Tipo Indicador</label>

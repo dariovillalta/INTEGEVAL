@@ -51,7 +51,7 @@ export default class SeleccionarRiesgo extends React.Component {
                                             </div>
                                             <div style={{height: "10px", width: "100%"}}> </div>
                                             <div className={"row"} style={{width: "100%"}}>
-                                                <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
+                                                <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"} style={{padding: "0px", border: "1px solid #d2d2e4"}}>
                                                     <div style={{height: "30px", width: riesgo.peso+"%", background: "#81d4fa"}}>
                                                     </div>
                                                 </div>

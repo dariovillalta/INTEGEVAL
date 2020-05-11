@@ -52,16 +52,12 @@ function (_React$Component) {
   _createClass(VistaUmbralTexto, [{
     key: "mouseOver",
     value: function mouseOver(nombre) {
-      console.log("EMTRE");
-      console.log(nombre);
       $("." + nombre.replace(/ /g, '') + "Slider").addClass("highlightSeccionUmbralSlider");
       $("." + nombre.replace(/ /g, '') + "Texto").addClass("highlightSeccionUmbralTexto");
     }
   }, {
     key: "mouseExit",
     value: function mouseExit(nombre) {
-      console.log("ADIOS");
-      console.log(nombre);
       $("." + nombre.replace(/ /g, '') + "Slider").removeClass("highlightSeccionUmbralSlider");
       $("." + nombre.replace(/ /g, '') + "Texto").removeClass("highlightSeccionUmbralTexto");
     }

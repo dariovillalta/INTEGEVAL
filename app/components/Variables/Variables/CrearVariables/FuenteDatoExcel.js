@@ -84,6 +84,7 @@ function (_React$Component) {
     _this.getExcel = _this.getExcel.bind(_assertThisInitialized(_this));
     _this.getFormas = _this.getFormas.bind(_assertThisInitialized(_this));
     _this.verificarNoExisteNombreVar = _this.verificarNoExisteNombreVar.bind(_assertThisInitialized(_this));
+    _this.verificarNoExisteNombreVarUpdate = _this.verificarNoExisteNombreVarUpdate.bind(_assertThisInitialized(_this));
     _this.actualizarPeriodicidad = _this.actualizarPeriodicidad.bind(_assertThisInitialized(_this));
     _this.cargarDatePicker = _this.cargarDatePicker.bind(_assertThisInitialized(_this));
     _this.actualizarPeriodicidadUpdate = _this.actualizarPeriodicidadUpdate.bind(_assertThisInitialized(_this));
@@ -242,7 +243,7 @@ function (_React$Component) {
             rolledBack = true;
           });
           var request = new _mssql["default"].Request(transaction);
-          request.query("insert into ExcelVariables (excelArchivoID, nombreHoja, nombre, operacion, celdas, tipo, periodicidad, fechaInicioCalculo, analista, guardar) values (" + archivoExcelID + ", '" + nombreHoja + "', '" + nombre + "', '" + operacion + "', '" + celdas + "', '" + tipo + "', '" + periodicidad + "', '" + fechaInicioCalculo + "', '" + analista + "', '" + guardarVariable + "')", function (err, result) {
+          request.query("insert into ExcelVariables (excelArchivoID, nombreHoja, nombre, operacion, celdas, tipo, periodicidad, fechaInicioCalculo, analista, guardar) values (" + archivoExcelID + ", '" + nombreHoja + "', '" + nombre + "', '" + operacion + "', '" + celdas + "', '" + tipo + "', '" + periodicidad + "', '" + fechaInicioCalculo.getFullYear() + "-" + (fechaInicioCalculo.getMonth() + 1) + "-" + fechaInicioCalculo.getDate() + "', '" + analista + "', '" + guardarVariable + "')", function (err, result) {
             if (err) {
               console.log(err);
 
@@ -320,8 +321,8 @@ function (_React$Component) {
                         $("#operacion").val("ASIG");
                         $("#hojaExcelVariable").val("");
                         $("#tipoVariable").val("numero");
-                        $("#celdasVariable").val("");
-                        $("#periodicidad").val("");
+                        $("#celdasVariable").val(""); //$("#periodicidad").val("");
+
                         $("#analista").val("");
                       } else {
                         alert('Ingrese un valor para el valor de analista que debe ser menor a 101 caracteres');
@@ -361,11 +362,13 @@ function (_React$Component) {
               if ($("#tipoVariable" + index).val().length > 0 && $("#tipoVariable" + index).val().length < 31) {
                 if ($("#periodicidad" + index).val().length > 0 && $("#periodicidad" + index).val().length < 51) {
                   var fecha;
-                  if ($("#periodicidad" + index).val().localeCompare("-1") == 0) fecha = new Date(1964, 4, 28);else fecha = $("#fecha").datepicker('getDate');
+                  if ($("#periodicidad" + index).val().localeCompare("-1") == 0) fecha = new Date(1964, 4, 28);else fecha = $("#fecha" + index).datepicker('getDate');
+                  console.log('fecha');
+                  console.log(fecha);
 
                   if (this.isValidDate(fecha)) {
                     if ($("#analista" + index).val().length > 0 && $("#analista" + index).val().length < 101) {
-                      if (this.verificarNoExisteNombreVar($("#nombreVariable" + index).val())) {
+                      if (this.verificarNoExisteNombreVarUpdate($("#nombreVariable" + index).val(), index)) {
                         var copyTemp = _toConsumableArray(this.state.variables);
 
                         copyTemp[index].nombre = $("#nombreVariable" + index).val();
@@ -382,7 +385,7 @@ function (_React$Component) {
 
                         var copyTempPeriodicidad = _toConsumableArray(this.state.valoresPeriodicidad);
 
-                        copyTempPeriodicidad[index] = periodicidad;
+                        copyTempPeriodicidad[index] = $("#periodicidad" + index).val();
                         this.setState({
                           variables: copyTemp,
                           valoresPeriodicidad: copyTempPeriodicidad
@@ -503,10 +506,6 @@ function (_React$Component) {
   }, {
     key: "verificarNoExisteNombreVar",
     value: function verificarNoExisteNombreVar(nombre) {
-      console.log('nombre');
-      console.log(nombre);
-      console.log('this.state.variables');
-      console.log(this.state.variables);
       var noExiste = true;
 
       for (var i = 0; i < variables.length; i++) {
@@ -521,6 +520,66 @@ function (_React$Component) {
       if (noExiste) {
         for (var i = 0; i < excel.length; i++) {
           if (excel[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
+            noExiste = false;
+            break;
+          }
+        }
+
+        ;
+      }
+
+      if (noExiste) {
+        for (var i = 0; i < this.state.variables.length; i++) {
+          if (this.state.variables[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
+            noExiste = false;
+            break;
+          }
+        }
+
+        ;
+      }
+
+      if (noExiste) {
+        for (var i = 0; i < formas.length; i++) {
+          if (formas[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
+            noExiste = false;
+            break;
+          }
+        }
+
+        ;
+      }
+
+      return noExiste;
+    }
+  }, {
+    key: "verificarNoExisteNombreVarUpdate",
+    value: function verificarNoExisteNombreVarUpdate(nombre, index) {
+      var noExiste = true;
+
+      for (var i = 0; i < variables.length; i++) {
+        if (variables[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
+          noExiste = false;
+          break;
+        }
+      }
+
+      ;
+
+      if (noExiste) {
+        for (var i = 0; i < excel.length; i++) {
+          if (excel[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
+            noExiste = false;
+            break;
+          }
+        }
+
+        ;
+      }
+
+      if (noExiste) {
+        for (var i = 0; i < this.state.variables.length; i++) {
+          if (this.state.variables[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0 && index != i) {
             noExiste = false;
             break;
           }
@@ -576,8 +635,8 @@ function (_React$Component) {
     }
   }, {
     key: "inicializarFecha",
-    value: function inicializarFecha(periodicidad, index, fecha) {
-      if (periodicidad.localeCompare("-1") != 0) {
+    value: function inicializarFecha(index, fecha) {
+      if (this.state.valoresPeriodicidad[index].localeCompare("-1") != 0) {
         setTimeout(function () {
           $('#fecha' + index).datepicker({
             format: "dd-mm-yyyy",
@@ -586,7 +645,12 @@ function (_React$Component) {
             minViewMode: "days",
             language: 'es'
           });
-          $("#fecha" + index).datepicker("setDate", fecha);
+
+          if (fecha.getFullYear() == 1964 && fecha.getMonth() == 4 && fecha.getDate() == 28) {//
+          } else {
+            console.log('YEAAAH');
+            $("#fecha" + index).datepicker("setDate", fecha);
+          }
         }, 500);
         return true;
       }
@@ -598,13 +662,11 @@ function (_React$Component) {
     value: function isValidDate(fecha) {
       if (Object.prototype.toString.call(fecha) === "[object Date]") {
         if (isNaN(fecha.getTime())) {
-          alert("Ingrese una fecha valida.");
           return false;
         } else {
           return true;
         }
       } else {
-        alert("Ingrese una fecha valida.");
         return false;
       }
     }
@@ -1040,7 +1102,7 @@ function (_React$Component) {
             value: periodicidad.nombre,
             key: periodicidad.nombre
           }, periodicidad.nombre);
-        })))), _this5.state.valoresPeriodicidad[i].localeCompare("-1") != 0 && _this5.inicializarFecha(variable.periodicidad, i, variable.fechaInicioCalculo) ? _react["default"].createElement("div", {
+        })))), _this5.state.valoresPeriodicidad[i].localeCompare("-1") != 0 && _this5.inicializarFecha(i, variable.fechaInicioCalculo) ? _react["default"].createElement("div", {
           className: "row",
           style: {
             width: "100%"

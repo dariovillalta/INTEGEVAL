@@ -1,11 +1,35 @@
 import React from 'react';
 import sql from 'mssql';
 
+import Modal from '../../../Modal/Modal.js';
+
 var variables = [];
 var excel = [];
 var formas = [];
 
 const periodicidad = [ {nombre: "diario"}, {nombre: "semanal"}, {nombre: "mensual"}, {nombre: "trimestral"}, {nombre: "bi-anual"}, {nombre: "anual"} ];
+
+
+
+
+/*
+    **************************************
+    **************************************
+                VARIABLES CALCULO 
+    **************************************
+    **************************************
+*/
+
+window.arregloDeErroresFormas = [];
+window.arregloHTMLFormas = [];                          //Arreglo que contiene el codigo html de las formas
+
+/*
+    **************************************
+    **************************************
+            VARIABLES CALCULO FIN
+    **************************************
+    **************************************
+*/
 
 export default class FuenteDatoForma extends React.Component {
     constructor(props) {
@@ -14,7 +38,11 @@ export default class FuenteDatoForma extends React.Component {
             nombre: "",
             tipo: "",
             guardar: "",
-            valorPeriodicidad: '-1'
+            valorPeriodicidad: '-1',
+            forma: null,
+            showModalForma: true,
+            tituloVariableForma: "",
+            htmlForma: ''
         }
         this.crearVariable = this.crearVariable.bind(this);
         this.traerForma = this.traerForma.bind(this);
@@ -25,7 +53,34 @@ export default class FuenteDatoForma extends React.Component {
         this.getFormas = this.getFormas.bind(this);
         this.verificarNoExisteNombreVar = this.verificarNoExisteNombreVar.bind(this);
         this.actualizarPeriodicidad = this.actualizarPeriodicidad.bind(this);
+        this.cargarDatePicker = this.cargarDatePicker.bind(this);
         this.isValidDate = this.isValidDate.bind(this);
+        this.verificarSiExisteExcelEnResultadosHistoricosModificar = this.verificarSiExisteExcelEnResultadosHistoricosModificar.bind(this);
+        this.crearTablaDeResultadoNombreModificar = this.crearTablaDeResultadoNombreModificar.bind(this);
+        this.crearResultadoNombreModificar = this.crearResultadoNombreModificar.bind(this);
+        this.modificarResultadosNombre = this.modificarResultadosNombre.bind(this);
+        this.verificarPeriodicidadGuardarModificar = this.verificarPeriodicidadGuardarModificar.bind(this);
+        this.updatePeriodicidadModificar = this.updatePeriodicidadModificar.bind(this);
+
+        this.verificarPeriodicidad = this.verificarPeriodicidad.bind(this);
+        this.addDays = this.addDays.bind(this);
+        this.addMonths = this.addMonths.bind(this);
+        this.addYears = this.addYears.bind(this);
+        this.traerPeriodicidadVariable = this.traerPeriodicidadVariable.bind(this);
+        this.formaCrearVariable = this.formaCrearVariable.bind(this);
+        this.iniciarMostrarFormas = this.iniciarMostrarFormas.bind(this);
+        this.updateForm = this.updateForm.bind(this);
+        this.loadFechas = this.loadFechas.bind(this);
+        this.closeModalForma = this.closeModalForma.bind(this);
+        this.verificarSiExisteFormaEnResultadosHistoricos = this.verificarSiExisteFormaEnResultadosHistoricos.bind(this);
+        this.crearTablaDeResultadoNombreForma = this.crearTablaDeResultadoNombreForma.bind(this);
+        this.crearResultadoNombreForma = this.crearResultadoNombreForma.bind(this);
+        this.guardarResultadosNombreForma = this.guardarResultadosNombreForma.bind(this);
+        this.guardarForma = this.guardarForma.bind(this);
+        this.borrarForma = this.borrarForma.bind(this);
+        this.verificarPeriodicidadGuardar = this.verificarPeriodicidadGuardar.bind(this);
+        this.updatePeriodicidad = this.updatePeriodicidad.bind(this);
+        this.guardarPeriodicidad = this.guardarPeriodicidad.bind(this);
     }
 
     componentDidMount() {
@@ -58,7 +113,9 @@ export default class FuenteDatoForma extends React.Component {
                             this.setState({
                                 nombre: result.recordset[0].nombre,
                                 tipo: result.recordset[0].tipo,
-                                guardar: result.recordset[0].guardar
+                                guardar: result.recordset[0].guardar,
+                                valorPeriodicidad: result.recordset[0].periodicidad,
+                                forma: result.recordset[0]
                             });
                             $("#nombreVariable").val(result.recordset[0].nombre);
                             $("#tipo").val(result.recordset[0].tipo);
@@ -66,6 +123,13 @@ export default class FuenteDatoForma extends React.Component {
                                 $("#guardarVariable").prop('checked', true);
                             else
                                 $("#guardarVariable").prop('checked', false);
+                            $("#periodicidad").val(result.recordset[0].periodicidad);
+                            $("#analista").val(result.recordset[0].analista);
+                            if(result.recordset[0].fechaInicioCalculo.getFullYear() == 1964 && result.recordset[0].fechaInicioCalculo.getMonth() == 4 && result.recordset[0].fechaInicioCalculo.getDate() == 28){
+                                //
+                            } else {
+                                $("#fecha").datepicker("setDate", result.recordset[0].fechaInicioCalculo);
+                            }
                         }
                     });
                 }
@@ -108,7 +172,7 @@ export default class FuenteDatoForma extends React.Component {
                                             rolledBack = true;
                                         });
                                         const request = new sql.Request(transaction);
-                                        request.query("insert into FormasVariables (nombre, tipo, periodicidad, fechaInicioCalculo, analista, guardar) values ('"+nombreVariable+"', '"+tipo+"', '"+periodicidad+"', '"+fechaInicioCalculo+"', '"+analista+"', '"+guardarVariable+"')", (err, result) => {
+                                        request.query("insert into FormasVariables (nombre, tipo, periodicidad, fechaInicioCalculo, analista, guardar) values ('"+nombreVariable+"', '"+tipo+"', '"+periodicidad+"', '"+fecha.getFullYear()+"-"+(fecha.getMonth()+1)+"-"+fecha.getDate()+"', '"+analista+"', '"+guardarVariable+"')", (err, result) => {
                                             if (err) {
                                                 console.log(err);
                                                 if (!rolledBack) {
@@ -120,6 +184,15 @@ export default class FuenteDatoForma extends React.Component {
                                                     alert("Variable Modificada");
                                                     this.getFormas();
                                                     this.props.actualizarIDVariableModificada("forma");
+                                                    var forma = {
+                                                        nombreVariable: nombreVariable,
+                                                        tipo: tipo,
+                                                        guardarVariable: guardarVariable,
+                                                        periodicidad: periodicidad,
+                                                        fecha: fecha,
+                                                        analista: analista
+                                                    }
+                                                    this.verificarSiExisteExcelEnResultadosHistoricosModificar(forma);
                                                 });
                                             }
                                         });
@@ -132,7 +205,7 @@ export default class FuenteDatoForma extends React.Component {
                                             rolledBack = true;
                                         });
                                         const request = new sql.Request(transaction);
-                                        request.query("update FormasVariables set nombre = '"+nombreVariable+"', tipo = '"+tipo+"', periodicidad = '"+periodicidad+"', guardar = '"+guardarVariable+"', fechaInicioCalculo = '"+fechaInicioCalculo+"', analista = '"+analista+"' where ID = "+this.props.idVariable, (err, result) => {
+                                        request.query("update FormasVariables set nombre = '"+nombreVariable+"', tipo = '"+tipo+"', periodicidad = '"+periodicidad+"', guardar = '"+guardarVariable+"', fechaInicioCalculo = '"+fecha.getFullYear()+"-"+(fecha.getMonth()+1)+"-"+fecha.getDate()+"', analista = '"+analista+"' where ID = "+this.props.idVariable, (err, result) => {
                                             if (err) {
                                                 console.log(err);
                                                 if (!rolledBack) {
@@ -143,6 +216,15 @@ export default class FuenteDatoForma extends React.Component {
                                                 transaction.commit(err => {
                                                     alert("Variable Modificada");
                                                     this.getFormas();
+                                                    var forma = {
+                                                        nombreVariable: nombreVariable,
+                                                        tipo: tipo,
+                                                        guardarVariable: guardarVariable,
+                                                        periodicidad: periodicidad,
+                                                        fecha: fecha,
+                                                        analista: analista
+                                                    }
+                                                    this.verificarSiExisteExcelEnResultadosHistoricosModificar(forma);
                                                 });
                                             }
                                         });
@@ -348,7 +430,6 @@ export default class FuenteDatoForma extends React.Component {
                     }
                 } else {
                     transaction7.commit(err => {
-                        this.limpiarArreglos();
                     });
                 }
             });
@@ -467,9 +548,16 @@ export default class FuenteDatoForma extends React.Component {
         }
         if(noExiste) {
             for (var i = 0; i < formas.length; i++) {
-                if (formas[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
-                    noExiste = false;
-                    break;
+                if (this.props.tipoVariableOriginal.localeCompare("forma") == 0) {
+                    if (formas[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0 && formas[i].ID != this.props.idVariable) {
+                        noExiste = false;
+                        break;
+                    }
+                } else {
+                    if (formas[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
+                        noExiste = false;
+                        break;
+                    }
                 }
             };
         }
@@ -481,6 +569,16 @@ export default class FuenteDatoForma extends React.Component {
         this.setState({
             valorPeriodicidad: periodicidad
         }, this.cargarDatePicker );
+    }
+
+    cargarDatePicker () {
+        $('#fecha').datepicker({
+            format: "dd-mm-yyyy",
+            todayHighlight: true,
+            viewMode: "days", 
+            minViewMode: "days",
+            language: 'es'
+        });
     }
 
     isValidDate (fecha) {
@@ -496,6 +594,788 @@ export default class FuenteDatoForma extends React.Component {
             return false;
         }
     }
+
+    verificarSiExisteExcelEnResultadosHistoricosModificar (variable) {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("select * from ResultadosNombreVariables where nombreVariable = '"+variable.nombre+"' and finVigencia = '1964-05-28'", (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        if (result.recordset.length == 0) {
+                            this.crearTablaDeResultadoNombreModificar(variable);
+                        } else {
+                            console.log("ENCONTRO")
+                            console.log(result.recordset[0])
+                            this.modificarResultadosNombre(variable, result.recordset[0].inicioVigencia);
+                        }
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    crearTablaDeResultadoNombreModificar (variable) {
+        //NOMBRE TABLA: NOMBREVARIABLE_AÑOVIGENCIA_MESVIGENCIA_DIAVIGENCIA_HORAVIGENCIA_MINUTOSVIGENCIA_SEGUNDOSVIGENCIA
+        //VIGENCIA: DIA CREACION
+        let hoy = new Date();
+        var textoCreacionTabla = 'CREATE TABLE '+variable.nombre+'_'+hoy.getFullYear()+'_'+(hoy.getMonth()+1)+'_'+hoy.getDate()+'_'+hoy.getHours()+'_'+hoy.getMinutes()+'_'+hoy.getSeconds()+' ( ID int IDENTITY(1,1) PRIMARY KEY, ';
+        for (var i = 0; i < variable.variables.length; i++) {
+            if(i != 0)
+                textoCreacionTabla += ', ';
+            if(variable.variables[i].tipo.localeCompare("numero") == 0) {
+                textoCreacionTabla += variable.variables[i].nombre+' decimal(22,4)';
+            } else if(variable.variables[i].tipo.localeCompare("varchar") == 0) {
+                textoCreacionTabla += variable.variables[i].nombre+' varchar(1000)';
+            } else if(variable.variables[i].tipo.localeCompare("bit") == 0) {
+                textoCreacionTabla += variable.variables[i].nombre+' bit';
+            } else if(variable.variables[i].tipo.localeCompare("date") == 0) {
+                textoCreacionTabla += variable.variables[i].nombre+' date';
+            }
+        };
+        textoCreacionTabla += ', f3ch4Gu4rd4do date )';
+        console.log('textoCreacionTabla')
+        console.log(textoCreacionTabla)
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query(textoCreacionTabla, (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        //console.log("Tabla "+variable.nombre+'_'+hoy.getFullYear()+'_'+hoy.getMonth()+'_'+hoy.getDate()+'_'+hoy.getHours()+'_'+hoy.getMinutes()+'_'+hoy.getSeconds()+" creada.");
+                        console.log('CREO TABLA');
+                        this.crearResultadoNombreModificar(variable, hoy);
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    crearResultadoNombreModificar (variable, hoy) {
+        console.log('INICAR CREAR RESULTADO');
+        let mes = hoy.getMonth()+1;
+        if(mes.toString().length == 1)
+            mes = '0'+mes;
+        let dia = hoy.getDate();
+        if(dia.toString().length == 1)
+            dia = '0'+dia;
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("insert into ResultadosNombreVariables (nombreVariable, inicioVigencia, finVigencia) values ('"+variable.nombre+"', '"+hoy.getFullYear()+'-'+mes+'-'+dia+" "+hoy.getHours()+":"+hoy.getMinutes()+":"+hoy.getSeconds()+"', '1964-05-28')", (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        console.log('GUARDO RESULTADO');
+                        this.verificarPeriodicidadGuardarModificar(variable, "excel", hoy);
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    modificarResultadosNombre (resultado, variable, hoy)  {
+        console.log('MODIFICAR CREAR RESULTADO');
+        let mes = hoy.getMonth()+1;
+        if(mes.toString().length == 1)
+            mes = '0'+mes;
+        let dia = hoy.getDate();
+        if(dia.toString().length == 1)
+            dia = '0'+dia;
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("update ResultadosNombreVariables set finVigencia = '"+hoy.getFullYear()+'-'+mes+'-'+dia+" "+hoy.getHours()+"' where ID = "+resultado.ID, (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        console.log('GUARDO RESULTADO');
+                        this.crearTablaDeResultadoNombreModificar(variable);
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    verificarPeriodicidadGuardarModificar (variable, tabla, hoy) {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("select * from PeriodicidadCalculo where variableID = "+variable.ID+" and tablaVariable = '"+tabla+"'", (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        if(result.recordset.length > 0) {
+                            this.updatePeriodicidadModificar(variable, tabla, hoy);
+                        }/* else {
+                            this.guardarPeriodicidad(variable, tabla, hoy);
+                        }*/
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    updatePeriodicidadModificar (variable, tabla, hoy) {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("update PeriodicidadCalculo where variableID = "+variable.ID+" and tablaVariable = '"+tabla+"' set fechaUltimoCalculo = '1964-05-28'", (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /*
+        **************************************
+        **************************************
+                    CALCULO CODIGO
+        **************************************
+        **************************************
+    */
+
+    verificarPeriodicidad () {
+        var copiedObject = jQuery.extend(true, {}, this.state.forma);
+        this.traerPeriodicidadVariable(copiedObject, "forma");
+    }
+
+    addDays (fecha, days) {
+        var date = new Date(fecha);
+        date.setDate(date.getDate() + days);
+        return date;
+    }
+
+    addMonths (fecha, months) {
+        var date = new Date(fecha);
+        date.setMonth(date.getMonth() + months);
+        return date;
+    }
+
+    addYears (fecha, years) {
+        var date = new Date(fecha);
+        date.setYear(date.getYear() + years);
+        return date;
+    }
+
+    traerPeriodicidadVariable (variable, tabla) {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("select * from PeriodicidadCalculo where variableID = "+variable.ID+" and tablaVariable = '"+tabla+"'", (err, result) => {
+                if (err) {
+                    console.log(err);
+                    this.verificarFinPeriodicidad();
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        if(result.recordset.length > 0) {
+                            var fechaInicioCalculo = variable.fechaInicioCalculo;
+                            var fechaUltimoCalculo = result.recordset[0].fechaUltimoCalculo;
+                            var tieneUltimoCalculo = false;
+                            //si la fecha es null, realizar calculo (28, 4, 1964) POPS BIRTHDAY
+                            if(fechaUltimoCalculo.getFullYear() != 1964 && fechaUltimoCalculo.getMonth() != 4 && fechaUltimoCalculo.getDate() != 28) {
+                                tieneUltimoCalculo = true;
+                            }
+                            if(!tieneUltimoCalculo) {
+                                variable.realizarCalculo = true;
+                            } else {
+                                var ultimoCalculoVigente = false;
+                                var periodicidad = variable.periodicidad;
+                                var fechaSiguienteCalculo = new Date(fechaInicioCalculo);
+                                while(fechaSiguienteCalculo.getFullYear() < fechaUltimoCalculo.getFullYear() && fechaSiguienteCalculo.getMonth() < fechaUltimoCalculo.getMonth() && fechaSiguienteCalculo.getDate() < fechaUltimoCalculo.getDate()) {
+                                    if(periodicidad.localeCompare("diario") == 0) {
+                                        fechaSiguienteCalculo = this.addDays(fechaSiguienteCalculo, 1);
+                                    } else if(periodicidad.localeCompare("semanal") == 0) {
+                                        fechaSiguienteCalculo = this.addDays(fechaSiguienteCalculo, 7);
+                                    } else if(periodicidad.localeCompare("mensual") == 0) {
+                                        fechaSiguienteCalculo = this.addMonths(fechaSiguienteCalculo, 1);
+                                    } else if(periodicidad.localeCompare("trimestral") == 0) {
+                                        fechaSiguienteCalculo = this.addMonths(fechaSiguienteCalculo, 3);
+                                    } else if(periodicidad.localeCompare("bi-anual") == 0) {
+                                        fechaSiguienteCalculo = this.addMonths(fechaSiguienteCalculo, 6);
+                                    } else if(periodicidad.localeCompare("anual") == 0) {
+                                        fechaSiguienteCalculo = this.addYears(fechaSiguienteCalculo, 1);
+                                    }
+                                }
+                                var tocaNuevoCalculo = false;
+                                if(periodicidad.localeCompare("diario") == 0) {
+                                    if(fechaSiguienteCalculo.getDate() >= fechaUltimoCalculo.getDate()+1) {
+                                        tocaNuevoCalculo = true;
+                                    }
+                                } else if(periodicidad.localeCompare("semanal") == 0) {
+                                    if(fechaSiguienteCalculo.getDate() >= fechaUltimoCalculo.getDate()+7) {
+                                        tocaNuevoCalculo = true;
+                                    }
+                                } else if(periodicidad.localeCompare("mensual") == 0) {
+                                    if(fechaSiguienteCalculo.getMonth() >= fechaUltimoCalculo.getMonth()+1) {
+                                        tocaNuevoCalculo = true;
+                                    }
+                                } else if(periodicidad.localeCompare("trimestral") == 0) {
+                                    if(fechaSiguienteCalculo.getMonth() >= fechaUltimoCalculo.getMonth()+3) {
+                                        tocaNuevoCalculo = true;
+                                    }
+                                } else if(periodicidad.localeCompare("bi-anual") == 0) {
+                                    if(fechaSiguienteCalculo.getMonth() >= fechaUltimoCalculo.getMonth()+6) {
+                                        tocaNuevoCalculo = true;
+                                    }
+                                } else if(periodicidad.localeCompare("anual") == 0) {
+                                    if(fechaSiguienteCalculo.getFullYear() >= fechaUltimoCalculo.getFullYear()+1) {
+                                        tocaNuevoCalculo = true;
+                                    }
+                                }
+                                if(tocaNuevoCalculo) {
+                                    variable.realizarCalculo = true;
+                                } else {
+                                    variable.realizarCalculo = false;
+                                }
+                            }
+                        } else {
+                            if(indexJ != null)
+                                variable.realizarCalculo = true;
+                            else
+                                variable.realizarCalculo = true;
+                        }
+                        this.crearVariablesExcel(variable);
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    formaCrearVariable (id, nombreVariable, tipoVariable, variable) {
+        //variableForma
+        if(tipoVariable.localeCompare("numero") == 0) {
+            var variable = parseFloat($("#variableForma").val());
+            window[nombreVariable] = variable;
+        } else if(tipoVariable.localeCompare("bit") == 0) {
+            if ($("#variableForma").is(':checked')) {
+                window[nombreVariable] = true;
+            } else {
+                window[nombreVariable] = false;
+            }
+        } else if(tipoVariable.localeCompare("varchar") == 0) {
+            var variable = $("#variableForma").val();
+            window[nombreVariable] = variable;
+        } else if(tipoVariable.localeCompare("date") == 0) {
+            var variable = $("#variableForma").datepicker('getDate');
+            window[nombreVariable] = variable;
+        }
+        if(nombreSiguiente != undefined) {
+            this.updateForm(nombreSiguiente, indexSiguiente, tipoSiguiente, inputSiguiente);
+        } else {
+            this.closeModalForma();
+            this.verificarSiExisteFormaEnResultadosHistoricos(variable);
+        }
+    }
+
+    iniciarMostrarFormas (variable) {
+        var HTMLFormas = '';
+        if(variable.tipo.localeCompare("numero") == 0) {
+            let nombre = variable.nombre;
+            let id = variable.ID;
+            let tipo = variable.tipo;
+            HTMLFormas =  <div style={{width: "100%"}}>
+                                        <br/>
+                                        <div className={"row"} style={{width: "100%"}}>
+                                            <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
+                                                <label htmlFor={"variableForma"} className="col-form-label">Valor:</label>
+                                            </div>
+                                            <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
+                                                <input id={"variableForma"} type="text" className="form-control form-control-sm"/>
+                                            </div>
+                                        </div>
+                                        <br/>
+                                        <div className={"text-center"} style={{width: "100%"}}>
+                                            <a href="#" className="btn btn-brand active" onClick={() => this.formaCrearVariable(id, nombre, tipo, variable)}>Guardar</a>
+                                        </div>
+                                        <br/>
+                                    </div>;
+        } else if(variable.tipo.localeCompare("bit") == 0) {
+            let nombre = variable.nombre;
+            let id = variable.ID;
+            let tipo = variable.tipo;
+            HTMLFormas =  <div style={{width: "100%"}}>
+                                        <br/>
+                                        <div className={"row"} style={{width: "100%"}}>
+                                            <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
+                                                <label htmlFor={"variableForma"} className="col-form-label">Valor:</label>
+                                            </div>
+                                            <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"}>
+                                                <br/>
+                                                <div className={"switch-button switch-button-bool"} style={{margin:"0 auto", display:"block"}}>
+                                                    <input type="checkbox" defaultChecked name={"guardarFuenteDato"} id={"variableForma"}/><span>
+                                                    <label htmlFor={"guardarFuenteDato"}></label></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <br/>
+                                        <div className={"text-center"} style={{width: "100%"}}>
+                                            <a href="#" className="btn btn-brand active" onClick={() => this.formaCrearVariable(id, nombre, tipo, variable)}>Guardar</a>
+                                        </div>
+                                        <br/>
+                                    </div>;
+        } else if(variable.tipo.localeCompare("varchar") == 0) {
+            let nombre = variable.nombre;
+            let id = variable.ID;
+            let tipo = variable.tipo;
+            HTMLFormas =  <div style={{width: "100%"}}>
+                                        <br/>
+                                        <div className={"row"} style={{width: "100%"}}>
+                                            <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
+                                                <label htmlFor={"variableForma"} className="col-form-label">Valor:</label>
+                                            </div>
+                                            <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
+                                                <input id={"variableForma"} type="text" className="form-control form-control-sm"/>
+                                            </div>
+                                        </div>
+                                        <br/>
+                                        <div className={"text-center"} style={{width: "100%"}}>
+                                            <a href="#" className="btn btn-brand active" onClick={() => this.formaCrearVariable(id, nombre, tipo, variable)}>Guardar</a>
+                                        </div>
+                                        <br/>
+                                    </div>;
+        } else if(variable.tipo.localeCompare("date") == 0) {
+            let nombre = variable.nombre;
+            let id = variable.ID;
+            let tipo = variable.tipo;
+            HTMLFormas =  <div style={{width: "100%"}}>
+                                        <br/>
+                                        <div className={"row"} style={{width: "100%"}}>
+                                            <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
+                                                <label htmlFor={"variableForma"} className="col-form-label">Valor:</label>
+                                            </div>
+                                            <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
+                                                <div className="row" style={{display: "flex", justifyContent: "center"}}>
+                                                    <div id={"variableForma"} className="center-block"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <br/>
+                                        <div className={"text-center"} style={{width: "100%"}}>
+                                            <a href="#" className="btn btn-brand active" onClick={() => this.formaCrearVariable(id, nombre, tipo, variable)}>Guardar</a>
+                                        </div>
+                                        <br/>
+                                    </div>;
+        }
+        this.updateForm(variable.nombre, HTMLFormas, variable.tipo, "variableForma");
+    }
+
+    updateForm (titulo, HTMLFormas, tipo, idInput) {
+        this.setState({
+            showModalForma: true,
+            tituloVariableForma: "Variable: "+titulo,
+            htmlForma: HTMLFormas
+        }, this.loadFechas(tipo, idInput));
+    }
+
+    loadFechas (tipo, idInput) {
+        if(tipo.localeCompare("date") == 0) {
+            setTimeout(function(){
+                $('#'+idInput).datepicker({
+                    format: "dd-mm-yyyy",
+                    todayHighlight: true,
+                    viewMode: "days", 
+                    minViewMode: "days",
+                    language: 'es'
+                });
+            }, 250);
+        }
+    }
+
+    closeModalForma () {
+        this.setState({
+            showModalForma: false
+        });
+    }
+
+
+    verificarSiExisteFormaEnResultadosHistoricos (variable) {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("select * from ResultadosNombreVariables where nombreVariable = '"+variable.nombre+"' and finVigencia = '1964-05-28'", (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        if (result.recordset.length == 0) {
+                            this.crearTablaDeResultadoNombreForma(variable);
+                        } else {
+                            console.log("ENCONTRO")
+                            console.log(result.recordset[0])
+                            this.guardarResultadosNombreForma(variable, result.recordset[0].inicioVigencia);
+                        }
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    crearTablaDeResultadoNombreForma (variable) {
+        //NOMBRE TABLA: NOMBREVARIABLE_AÑOVIGENCIA_MESVIGENCIA_DIAVIGENCIA_HORAVIGENCIA_MINUTOSVIGENCIA_SEGUNDOSVIGENCIA
+        //VIGENCIA: DIA CREACION
+        let hoy = new Date();
+        var textoCreacionTabla = 'CREATE TABLE '+variable.nombre+'_'+hoy.getFullYear()+'_'+(hoy.getMonth()+1)+'_'+hoy.getDate()+'_'+hoy.getHours()+'_'+hoy.getMinutes()+'_'+hoy.getSeconds()+' ( ID int IDENTITY(1,1) PRIMARY KEY, ';
+        if(variable.tipo.localeCompare("numero") == 0) {
+            textoCreacionTabla += variable.nombre+' decimal(22,4)';
+        } else if(variable.tipo.localeCompare("varchar") == 0) {
+            textoCreacionTabla += variable.nombre+' varchar(1000)';
+        } else if(variable.tipo.localeCompare("bit") == 0) {
+            textoCreacionTabla += variable.nombre+' bit';
+        } else if(variable.tipo.localeCompare("date") == 0) {
+            textoCreacionTabla += variable.nombre+' date';
+        }
+        textoCreacionTabla += ', f3ch4Gu4rd4do date )';
+        console.log('textoCreacionTabla')
+        console.log(textoCreacionTabla)
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query(textoCreacionTabla, (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        //console.log("Tabla "+variable.nombre+'_'+hoy.getFullYear()+'_'+hoy.getMonth()+'_'+hoy.getDate()+'_'+hoy.getHours()+'_'+hoy.getMinutes()+'_'+hoy.getSeconds()+" creada.");
+                        console.log('CREO TABLA');
+                        this.crearResultadoNombreForma(variable, hoy);
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    crearResultadoNombreForma (variable, hoy) {
+        console.log('INICAR CREAR RESULTADO');
+        let mes = hoy.getMonth()+1;
+        if(mes.toString().length == 1)
+            mes = '0'+mes;
+        let dia = hoy.getDate();
+        if(dia.toString().length == 1)
+            dia = '0'+dia;
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("insert into ResultadosNombreVariables (nombreVariable, inicioVigencia, finVigencia) values ('"+variable.nombre+"', '"+hoy.getFullYear()+'-'+mes+'-'+dia+" "+hoy.getHours()+":"+hoy.getMinutes()+":"+hoy.getSeconds()+"', '1964-05-28')", (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        console.log('GUARDO RESULTADO');
+                        this.guardarResultadosNombreForma(variable, hoy);
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    guardarResultadosNombreForma (variable, fechaNombreTabla) {
+        console.log('INICAR GUARDAR RESULTADO');
+        console.log('fechaNombreTabla');
+        console.log(fechaNombreTabla);
+        console.log('fechaNombreTabla.getFullYear()');
+        console.log(fechaNombreTabla.getFullYear());
+        console.log('fechaNombreTabla.getMonth()');
+        console.log(fechaNombreTabla.getMonth());
+        console.log('fechaNombreTabla.getDate()');
+        console.log(fechaNombreTabla.getDate());
+        console.log('fechaNombreTabla.getHours()');
+        console.log(fechaNombreTabla.getHours());
+        console.log('fechaNombreTabla.getMinutes()');
+        console.log(fechaNombreTabla.getMinutes());
+        console.log('fechaNombreTabla.getSeconds()');
+        console.log(fechaNombreTabla.getSeconds());
+
+        let hoy = new Date();
+        var textoInsertPrincipio = 'INSERT INTO '+variable.nombre+'_'+fechaNombreTabla.getFullYear()+'_'+(fechaNombreTabla.getMonth()+1)+'_'+fechaNombreTabla.getDate()+'_'+fechaNombreTabla.getHours()+'_'+fechaNombreTabla.getMinutes()+'_'+fechaNombreTabla.getSeconds()+' ( ';
+        for (var i = 0; i < variable.variables.length; i++) {
+            if(i != 0)
+                textoInsertPrincipio += ', ';
+            textoInsertPrincipio += variable.variables[i].nombre;
+        };
+        textoInsertPrincipio += ', f3ch4Gu4rd4do ) values ( ';
+        var instruccionSQLBorrar = "DELETE FROM "+variable.nombre+"_"+fechaNombreTabla.getFullYear()+"_"+(fechaNombreTabla.getMonth()+1)+"_"+fechaNombreTabla.getDate()+"_"+fechaNombreTabla.getHours()+"_"+fechaNombreTabla.getMinutes()+"_"+fechaNombreTabla.getSeconds()+ " WHERE f3ch4Gu4rd4do = '"+hoy.getFullYear()+"-"+(hoy.getMonth()+1)+"-"+hoy.getDate()+"' ";
+        console.log('instruccionSQLBorrar');
+        console.log(instruccionSQLBorrar);
+        this.borrarForma(instruccionSQLBorrar);
+
+        var instruccionSQLFinal = textoInsertPrincipio;
+        if(variable.tipo.localeCompare("numero") == 0) {
+            instruccionSQLFinal += window[variable.nombre];
+        } else if(variable.tipo.localeCompare("varchar") == 0) {
+            instruccionSQLFinal += "'"+window[variable.nombre]+"'";
+        } else if(variable.tipo.localeCompare("bit") == 0) {
+            instruccionSQLFinal += "'"+window[variable.nombre]+"'";
+        } else if(variable.tipo.localeCompare("date") == 0) {
+            instruccionSQLFinal += "'"+window[variable.nombre].getFullYear()+"-"+(window[variable.nombre].getMonth()+1)+"-"+window[variable.nombre].getDate()+"'";
+        }
+        instruccionSQLFinal += ", '"+hoy.getFullYear()+"-"+(hoy.getMonth()+1)+"-"+hoy.getDate()+"' )";
+        console.log('instruccionSQLFinal 1');
+        console.log(instruccionSQLFinal);
+        var self = this;
+        setTimeout(function () {
+            self.guardarForma(instruccionSQLFinal, variable, 'forma', hoy);
+        }, 600);
+    }
+
+    guardarForma (instruccionSQL, variable, tabla, hoy) {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query(instruccionSQL, (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        if(variable.periodicidad.localeCompare("-1") != 0)
+                            this.verificarPeriodicidadGuardar(variable, tabla, hoy);
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    borrarForma (instruccionSQL) {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query(instruccionSQL, (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    verificarPeriodicidadGuardar (variable, tabla, hoy) {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("select * from PeriodicidadCalculo where variableID = "+variable.ID+" and tablaVariable = '"+tabla+"'", (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        if(result.recordset.length > 0) {
+                            this.updatePeriodicidad(variable, tabla, hoy);
+                        } else {
+                            this.guardarPeriodicidad(variable, tabla, hoy);
+                        }
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    updatePeriodicidad (variable, tabla, hoy) {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("update PeriodicidadCalculo where variableID = "+variable.ID+" and tablaVariable = '"+tabla+"' set fechaUltimoCalculo = '"+hoy.getFullYear()+"-"+(hoy.getMonth()+1)+"-"+hoy.getDate()+"'", (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    guardarPeriodicidad (variable, tabla, hoy) {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("insert into PeriodicidadCalculo (variableID, tablaVariable, fechaInicio, fechaUltimoCalculo) values ("+variable.ID+", '"+tabla+"', '"+hoy.getFullYear()+"-"+(hoy.getMonth()+1)+"-"+hoy.getDate()+"', '"+hoy.getFullYear()+"-"+hoy.getMonth()+"-"+hoy.getDate()+"') ", (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    /*
+        **************************************
+        **************************************
+                FIN CALCULO CODIGO
+        **************************************
+        **************************************
+    */
 
     render() {
         return (
@@ -578,11 +1458,16 @@ export default class FuenteDatoForma extends React.Component {
                     }
                     {
                         this.props.tipoVariableOriginal.localeCompare("forma") == 0
-                        ? <a href="#" className="btn btn-primary active" style={{marginLeft: "10px"}} onClick={this.calculoVariable}>Realizar Cálculo</a>
+                        ? <a href="#" className="btn btn-primary active" style={{marginLeft: "10px"}} onClick={this.verificarPeriodicidad}>Realizar Cálculo</a>
                         : null
                     }
                 </div>
                 <br/>
+                <Modal show={this.state.showModalForma}
+                    titulo={this.state.tituloVariableForma}
+                    onClose={() => this.closeModalForma}>
+                        {this.state.htmlForma}
+                </Modal>
             </div>
         );
     }

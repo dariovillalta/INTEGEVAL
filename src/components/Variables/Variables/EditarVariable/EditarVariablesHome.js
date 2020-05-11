@@ -8,6 +8,7 @@ import InstruccionSQL from './InstruccionSQL.js';
 
 var campoSeleccionado, operacionSeleccionada, objetoConexionSeleccionada;
 var tipoDeAsignacionSeleccionado;   //para saber el tipo de asignacion que se debera hacer al atributo / campo
+var indiceFormulaSeleccionadaEdit = -1;
 
 /*COMPONENTE PARA MANEJRA CAMBIO DE VISTA ENTRE CREAR VARIABLE Y VISTA DE CONDICIONES / INSTRUCIONES*/
 /*MANEJA TODA LA LOGICA CREAR FUENTE DATO VARIABLE (OBJETO)*/
@@ -96,11 +97,16 @@ export default class EditarVariablesHome extends React.Component {
             variables: [],
             excel: [],
             formas: [],
-            tipoVariableOriginal: this.props.tipoVariable,
             nombreVariable: "",
             descripcionVariable: "",
             objetoPadreIDVariable: -1,
             guardarVariable: "",
+            esEditarVar: false,
+            esOperacionSQL: false,
+            operacionSQL: "",
+            formulaSeleccionadaEdit: null,
+            condicionFormula: "",
+            condicionElemento: ""
         }
         this.traerInstruccionSQLVariable = this.traerInstruccionSQLVariable.bind(this);
         this.traerInstruccionSQL = this.traerInstruccionSQL.bind(this);
@@ -130,6 +136,13 @@ export default class EditarVariablesHome extends React.Component {
         this.createVariableFieldFormula = this.createVariableFieldFormula.bind(this);
         this.getVariableFieldFormulaID = this.getVariableFieldFormulaID.bind(this);
         this.createVariableFieldFormulaElement = this.createVariableFieldFormulaElement.bind(this);
+        this.limpiarArreglos = this.limpiarArreglos.bind(this);
+        this.verificarSiExisteExcelEnResultadosHistoricosModificar = this.verificarSiExisteExcelEnResultadosHistoricosModificar.bind(this);
+        this.crearTablaDeResultadoNombreModificar = this.crearTablaDeResultadoNombreModificar.bind(this);
+        this.crearResultadoNombreModificar = this.crearResultadoNombreModificar.bind(this);
+        this.modificarResultadosNombre = this.modificarResultadosNombre.bind(this);
+        this.verificarPeriodicidadGuardarModificar = this.verificarPeriodicidadGuardarModificar.bind(this);
+        this.updatePeriodicidadModificar = this.updatePeriodicidadModificar.bind(this);
         this.retornarCampo = this.retornarCampo.bind(this);
         this.retornarValor = this.retornarValor.bind(this);
         this.actualizarCondicion = this.actualizarCondicion.bind(this);
@@ -146,6 +159,8 @@ export default class EditarVariablesHome extends React.Component {
         this.getElementsFromFormula = this.getElementsFromFormula.bind(this);
         this.modificarRegla = this.modificarRegla.bind(this);
         this.eliminarRegla = this.eliminarRegla.bind(this);
+        this.modificarFormula = this.modificarFormula.bind(this);
+        this.eliminarFormula = this.eliminarFormula.bind(this);
         this.retornoCampoFormula = this.retornoCampoFormula.bind(this);
         this.retornoCampoCondicion = this.retornoCampoCondicion.bind(this);
         this.retornoOperacion = this.retornoOperacion.bind(this);
@@ -153,6 +168,7 @@ export default class EditarVariablesHome extends React.Component {
         this.actualizarEstadoSiEsObjeto = this.actualizarEstadoSiEsObjeto.bind(this);
         this.actualizarEstadoSiEsInstruccionSQL = this.actualizarEstadoSiEsInstruccionSQL.bind(this);
         this.actualizarNivelNuevaRegla = this.actualizarNivelNuevaRegla.bind(this);
+        this.actualizarSeleccionFormula = this.actualizarSeleccionFormula.bind(this);
         this.actualizarNombreVariable = this.actualizarNombreVariable.bind(this);
         this.actualizarDescripcionVariable = this.actualizarDescripcionVariable.bind(this);
         this.actualizarFechaInicio = this.actualizarFechaInicio.bind(this);
@@ -229,13 +245,16 @@ export default class EditarVariablesHome extends React.Component {
                                 $("#guardarFuenteDato").prop('checked', true);
                             else
                                 $("#guardarFuenteDato").prop('checked', false);
-                            fechaInicioVariable = result.recordset[0].nombre;
+                            fechaInicioVariable = result.recordset[0].fechaInicioCalculo;
                             periodicidadVariable = result.recordset[0].nombre;
                             analistaVariable = result.recordset[0].nombre;
                             $("#periodicidad").val(periodicidadVariable);
                             $("#analista").val(analistaVariable);
-                            if(fechaInicioVariable.getFullYear() != 1964 && fechaInicioVariable.getMonth() != 4 && fechaInicioVariable.getDate() != 28)
+                            if(fechaInicioVariable.getFullYear() == 1964 && fechaInicioVariable.getMonth() == 4 && fechaInicioVariable.getDate() == 28){
+                                //
+                            } else {
                                 $("#fecha").datepicker("setDate", fechaInicioVariable);
+                            }
                             /*this.setState({
                                 nombreVariable: result.recordset[0].nombre,
                                 descripcionVariable: result.recordset[0].descripcion,
@@ -282,7 +301,7 @@ export default class EditarVariablesHome extends React.Component {
         const transaction1 = new sql.Transaction( this.props.pool );
         transaction1.begin(err => {
             var rolledBack = false;
-            transaction.on('rollback', aborted => {
+            transaction1.on('rollback', aborted => {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction1);
@@ -664,12 +683,40 @@ export default class EditarVariablesHome extends React.Component {
                 </div>
             </div>
         </div>;
+
+        var esOperacionSQL, operacionSQL;
+        if(posicionAtributoSeleccionado == -1) {
+            esOperacionSQL = false;
+            operacionSQL = "";
+        }
+        var esEditarVar = false;
+        if (this.state.formulaSeleccionadaEdit != null) {
+            if(this.state.formulaSeleccionadaEdit.operacion.localeCompare("ASIG") == 0 ||
+                this.state.formulaSeleccionadaEdit.operacion.localeCompare("COUNT") == 0 ||
+                this.state.formulaSeleccionadaEdit.operacion.localeCompare("PROM") == 0 ||
+                this.state.formulaSeleccionadaEdit.operacion.localeCompare("MAX") == 0 ||
+                this.state.formulaSeleccionadaEdit.operacion.localeCompare("MIN") == 0 ||
+                this.state.formulaSeleccionadaEdit.operacion.localeCompare("SUM") == 0 || 
+                this.state.formulaSeleccionadaEdit.operacion.localeCompare("AUTOSUM") == 0 ) {
+
+                esOperacionSQL = true;
+                operacionSQL = formulas[posicionAtributoSeleccionado][indice].operacion;
+            } else {
+                esOperacionSQL = false;
+                operacionSQL = "";
+            }
+            esEditarVar = true;
+        }
+
         //deseleccionado regla seleccionada
         indiceSeleccionadoReglas = -1;
         indiceSeleccionadoFormula = indice;
         this.setState({
             componenteActual: "variableFormula",
-            navbar: navbar
+            navbar: navbar,
+            esEditarVar: esEditarVar,
+            esOperacionSQL: esOperacionSQL,
+            operacionSQL: operacionSQL
         });
     }
 
@@ -707,7 +754,7 @@ export default class EditarVariablesHome extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("insert into Variables (nombre, descripcion, esObjeto, objetoPadreID, esInstruccionSQL, guardar) values ('"+variable.nombre+"', '"+variable.descripcion+"', '"+variable.esObjeto+"', "+variable.objetoPadreID+", '"+variable.esInstruccionSQL+"', '"+variable.guardar+"')", (err, result) => {
+            request.query("insert into Variables (nombre, descripcion, esObjeto, objetoPadreID, esInstruccionSQL, periodicidad, fechaInicioCalculo, analista, guardar) values ('"+variable.nombre+"', '"+variable.descripcion+"', '"+variable.esObjeto+"', "+variable.objetoPadreID+", '"+variable.esInstruccionSQL+"', '"+periodicidad+"', '"+fechaInicioCalculo.getFullYear()+"-"+(fechaInicioCalculo.getMonth()+1)+"-"+fechaInicioCalculo.getDate()+"', '"+analista+"', '"+variable.guardar+"')", (err, result) => {
                 if (err) {
                     if (!rolledBack) {
                         console.log(err);
@@ -737,7 +784,7 @@ export default class EditarVariablesHome extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("update Variables set nombre = '"+variable.nombre+"', descripcion = '"+variable.descripcion+"', esObjeto = '"+variable.esObjeto+"', objetoPadreID = "+variable.objetoPadreID+", esInstruccionSQL = '"+variable.esInstruccionSQL+"', guardar = '"+variable.guardar+"' where ID = "+this.props.idVariable, (err, result) => {
+            request.query("update Variables set nombre = '"+variable.nombre+"', descripcion = '"+variable.descripcion+"', esObjeto = '"+variable.esObjeto+"', objetoPadreID = "+variable.objetoPadreID+", esInstruccionSQL = '"+variable.esInstruccionSQL+"', periodicidad = '"+periodicidad+"', fechaInicioCalculo = '"+fechaInicioCalculo.getFullYear()+"-"+(fechaInicioCalculo.getMonth()+1)+"-"+fechaInicioCalculo.getDate()+"', analista = '"+analista+"', guardar = '"+variable.guardar+"' where ID = "+this.props.idVariable, (err, result) => {
                 if (err) {
                     if (!rolledBack) {
                         console.log(err);
@@ -785,6 +832,7 @@ export default class EditarVariablesHome extends React.Component {
                                     this.createVariableField(result.recordset[0], campos[i], i);
                                 };
                             }
+                            this.verificarSiExisteExcelEnResultadosHistoricosModificar(result.recordset[0]);
                         }
                     });
                 }
@@ -1451,6 +1499,197 @@ export default class EditarVariablesHome extends React.Component {
                 this.props.actualizarIDVariableModificada("variable");
             }
         }
+    }
+
+    verificarSiExisteExcelEnResultadosHistoricosModificar (variable) {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("select * from ResultadosNombreVariables where nombreVariable = '"+variable.nombre+"' and finVigencia = '1964-05-28'", (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        if (result.recordset.length == 0) {
+                            this.crearTablaDeResultadoNombreModificar(variable);
+                        } else {
+                            console.log("ENCONTRO")
+                            console.log(result.recordset[0])
+                            this.modificarResultadosNombre(variable, result.recordset[0].inicioVigencia);
+                        }
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    crearTablaDeResultadoNombreModificar (variable) {
+        //NOMBRE TABLA: NOMBREVARIABLE_AÑOVIGENCIA_MESVIGENCIA_DIAVIGENCIA_HORAVIGENCIA_MINUTOSVIGENCIA_SEGUNDOSVIGENCIA
+        //VIGENCIA: DIA CREACION
+        let hoy = new Date();
+        var textoCreacionTabla = 'CREATE TABLE '+variable.nombre+'_'+hoy.getFullYear()+'_'+(hoy.getMonth()+1)+'_'+hoy.getDate()+'_'+hoy.getHours()+'_'+hoy.getMinutes()+'_'+hoy.getSeconds()+' ( ID int IDENTITY(1,1) PRIMARY KEY, ';
+        for (var i = 0; i < variable.variables.length; i++) {
+            if(i != 0)
+                textoCreacionTabla += ', ';
+            if(variable.variables[i].tipo.localeCompare("numero") == 0) {
+                textoCreacionTabla += variable.variables[i].nombre+' decimal(22,4)';
+            } else if(variable.variables[i].tipo.localeCompare("varchar") == 0) {
+                textoCreacionTabla += variable.variables[i].nombre+' varchar(1000)';
+            } else if(variable.variables[i].tipo.localeCompare("bit") == 0) {
+                textoCreacionTabla += variable.variables[i].nombre+' bit';
+            } else if(variable.variables[i].tipo.localeCompare("date") == 0) {
+                textoCreacionTabla += variable.variables[i].nombre+' date';
+            }
+        };
+        textoCreacionTabla += ', f3ch4Gu4rd4do date )';
+        console.log('textoCreacionTabla')
+        console.log(textoCreacionTabla)
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query(textoCreacionTabla, (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        //console.log("Tabla "+variable.nombre+'_'+hoy.getFullYear()+'_'+hoy.getMonth()+'_'+hoy.getDate()+'_'+hoy.getHours()+'_'+hoy.getMinutes()+'_'+hoy.getSeconds()+" creada.");
+                        console.log('CREO TABLA');
+                        this.crearResultadoNombreModificar(variable, hoy);
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    crearResultadoNombreModificar (variable, hoy) {
+        console.log('INICAR CREAR RESULTADO');
+        let mes = hoy.getMonth()+1;
+        if(mes.toString().length == 1)
+            mes = '0'+mes;
+        let dia = hoy.getDate();
+        if(dia.toString().length == 1)
+            dia = '0'+dia;
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("insert into ResultadosNombreVariables (nombreVariable, inicioVigencia, finVigencia) values ('"+variable.nombre+"', '"+hoy.getFullYear()+'-'+mes+'-'+dia+" "+hoy.getHours()+":"+hoy.getMinutes()+":"+hoy.getSeconds()+"', '1964-05-28')", (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        console.log('GUARDO RESULTADO');
+                        this.verificarPeriodicidadGuardarModificar(variable, "excel", hoy);
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    modificarResultadosNombre (resultado, variable, hoy)  {
+        console.log('MODIFICAR CREAR RESULTADO');
+        let mes = hoy.getMonth()+1;
+        if(mes.toString().length == 1)
+            mes = '0'+mes;
+        let dia = hoy.getDate();
+        if(dia.toString().length == 1)
+            dia = '0'+dia;
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("update ResultadosNombreVariables set finVigencia = '"+hoy.getFullYear()+'-'+mes+'-'+dia+" "+hoy.getHours()+"' where ID = "+resultado.ID, (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        console.log('GUARDO RESULTADO');
+                        this.crearTablaDeResultadoNombreModificar(variable);
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    verificarPeriodicidadGuardarModificar (variable, tabla, hoy) {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("select * from PeriodicidadCalculo where variableID = "+variable.ID+" and tablaVariable = '"+tabla+"'", (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        if(result.recordset.length > 0) {
+                            this.updatePeriodicidadModificar(variable, tabla, hoy);
+                        }/* else {
+                            this.guardarPeriodicidad(variable, tabla, hoy);
+                        }*/
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    updatePeriodicidadModificar (variable, tabla, hoy) {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("update PeriodicidadCalculo where variableID = "+variable.ID+" and tablaVariable = '"+tabla+"' set fechaUltimoCalculo = '1964-05-28'", (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                    });
+                }
+            });
+        }); // fin transaction
     }
 
     retornarCampo (campoNuevo) {
@@ -2965,6 +3204,120 @@ export default class EditarVariablesHome extends React.Component {
         }
     }
 
+    modificarFormula(formula, formulaArreglo) {
+        // 1. Make a shallow copy of the items
+        //let campos = [...this.state.camposDeTabla];
+        // 2. Make a shallow copy of the item you want to mutate
+        //let campo = [...campos[index]];
+        // 3. Replace the property you're intested in
+        //campo = {ID: campo.ID, idTabla: idTabla, nombre: campoNombre, tipo: tipoCampo, guardar: guardarCampo};
+        // 4. Put it back into our array. N.B. we *are* mutating the array here, but that's why we made a copy first
+        //campos[index] = campo;
+        // 5. Set the state to our new copy
+        var posicionSel = posicionAtributoSeleccionado;
+        //indice = -1 cuando se va a condiciones de un campo nuevo
+        //cuando se presiona NavBar indice es igual indice anterior
+        //cuando se selecciona un campo existente indice = posicion campo
+        if(posicionAtributoSeleccionado == -1) {
+            posicionSel = this.state.atributos.length;
+        }
+        //copia antigua formulas
+        var elementosFormulas, copiaAntiguaFormulas;
+        if(banderaEsObjeto) {
+            copiaAntiguaFormulas = formulasVariosAtributos;
+            elementosFormulas = elementosFormulasVariosAtributos;
+        } else {
+            copiaAntiguaFormulas = formulasUnAtributo;
+            elementosFormulas = elementosFormulasUnAtributos;
+        }
+        if(copiaAntiguaFormulas[posicionSel] == undefined)
+            copiaAntiguaFormulas[posicionSel] = [];
+        copiaAntiguaFormulas[posicionSel][indiceFormulaSeleccionadaEdit] = formula;
+        this.setState({
+            formulas: copiaAntiguaFormulas[posicionSel]
+        });
+        if(elementosFormulas[posicionSel] == undefined)
+            elementosFormulas[posicionSel] = [];
+        var posicionFormulaEnCampo = indiceFormulaSeleccionadaEdit;
+        //indiceSeleccionadoFormula es el indice de la formula seleccionada, las formula se asocian por campo (1 campo => muchas formulas)
+        if(elementosFormulas[posicionSel][posicionFormulaEnCampo] == undefined)
+            elementosFormulas[posicionSel][posicionFormulaEnCampo] = [];
+        var arregloDeElementos = [];
+        this.getElementsFromFormula(formulaArreglo, arregloDeElementos);
+        elementosFormulas[posicionSel][posicionFormulaEnCampo] = arregloDeElementos;
+        if(banderaEsObjeto) {
+            formulasVariosAtributos = copiaAntiguaFormulas;
+            elementosFormulasVariosAtributos = elementosFormulas;
+        } else {
+            formulasUnAtributo = copiaAntiguaFormulas;
+            elementosFormulasUnAtributos = elementosFormulas;
+        }
+        console.log('elementosFormulas');
+        console.log(elementosFormulas);
+        console.log('copiaAntiguaFormulas[posicionSel]');
+        console.log(copiaAntiguaFormulas[posicionSel]);
+        console.log('copiaAntiguaFormulas');
+        console.log(copiaAntiguaFormulas);
+        console.log('posicionSel');
+        console.log(posicionSel);
+        console.log('posicionFormulaEnCampo');
+        console.log(posicionFormulaEnCampo);
+        var self = this;
+        setTimeout(function(){
+            console.log(self.state.formulas)
+        }, 2000);
+    }
+
+    eliminarFormula() {
+        // 1. Make a shallow copy of the items
+        //let campos = [...this.state.camposDeTabla];
+        // 2. Make a shallow copy of the item you want to mutate
+        //let campo = [...campos[index]];
+        // 3. Replace the property you're intested in
+        //campo = {ID: campo.ID, idTabla: idTabla, nombre: campoNombre, tipo: tipoCampo, guardar: guardarCampo};
+        // 4. Put it back into our array. N.B. we *are* mutating the array here, but that's why we made a copy first
+        //campos[index] = campo;
+        // 5. Set the state to our new copy
+        var posicionSel = posicionAtributoSeleccionado;
+        //indice = -1 cuando se va a condiciones de un campo nuevo
+        //cuando se presiona NavBar indice es igual indice anterior
+        //cuando se selecciona un campo existente indice = posicion campo
+        if(posicionAtributoSeleccionado == -1) {
+            posicionSel = this.state.atributos.length;
+        }
+        //copia antigua formulas
+        var elementosFormulas, copiaAntiguaFormulas;
+        if(banderaEsObjeto) {
+            copiaAntiguaFormulas = formulasVariosAtributos;
+            elementosFormulas = elementosFormulasVariosAtributos;
+        } else {
+            copiaAntiguaFormulas = formulasUnAtributo;
+            elementosFormulas = elementosFormulasUnAtributos;
+        }
+        if(copiaAntiguaFormulas[posicionSel] == undefined)
+            copiaAntiguaFormulas[posicionSel] = [];
+        copiaAntiguaFormulas[posicionSel].splice(indiceFormulaSeleccionadaEdit, 1);
+        this.setState({
+            formulas: copiaAntiguaFormulas[posicionSel]
+        });
+        var posicionFormulaEnCampo = indiceFormulaSeleccionadaEdit;
+        elementosFormulas[posicionSel].splice(posicionFormulaEnCampo, 1);
+        console.log('elementosFormulas');
+        console.log(elementosFormulas);
+        console.log('copiaAntiguaFormulas[posicionSel]');
+        console.log(copiaAntiguaFormulas[posicionSel]);
+        console.log('copiaAntiguaFormulas');
+        console.log(copiaAntiguaFormulas);
+        console.log('posicionSel');
+        console.log(posicionSel);
+        console.log('posicionFormulaEnCampo');
+        console.log(posicionFormulaEnCampo);
+        var self = this;
+        setTimeout(function(){
+            console.log(self.state.formulas)
+        }, 2000);
+    }
+
     retornoCampoFormula (tipoVariableOriginal) {
         tipoDeAsignacionSeleccionado = tipoVariableOriginal;
     }
@@ -3001,6 +3354,16 @@ export default class EditarVariablesHome extends React.Component {
             if(nivelNuevoAtributoUnico < nivel)
                 nivelNuevoAtributoUnico = nivel;
         }
+    }
+
+    actualizarSeleccionFormula (formula, indice) {
+        var condicionFormula = " ID = "+formula.ID, condicionElemento = " formulaID = "+formula.ID;
+        this.setState({
+            formulaSeleccionadaEdit: formula,
+            condicionFormula: condicionFormula,
+            condicionElemento: condicionElemento
+        });
+        indiceFormulaSeleccionadaEdit =  indice;
     }
 
     actualizarNombreVariable () {
@@ -3382,7 +3745,6 @@ export default class EditarVariablesHome extends React.Component {
                     }
                 } else {
                     transaction7.commit(err => {
-                        this.limpiarArreglos();
                     });
                 }
             });
@@ -3416,7 +3778,7 @@ export default class EditarVariablesHome extends React.Component {
             return (
                 <div style={{width: "100%", height: "100%"}}>
                     <EditarVariable pool={this.props.pool}
-                                                tipoVariableOriginal={this.state.tipoVariableOriginal}
+                                                tipoVariableOriginal={this.props.tipoVariable}
                                                 idVariable={this.props.idVariable}
                                                 esObjetoVariable={this.props.esObjetoVariable}
                                                 esInstruccionSQLVariable={this.props.esInstruccionSQLVariable}
@@ -3471,13 +3833,20 @@ export default class EditarVariablesHome extends React.Component {
                                                 retornoCampo={this.retornoCampoCondicion}
                                                 retornarValor={this.retornarValor}
                                                 retornoOperacion={this.retornoOperacion}
+                                                actualizarSeleccionFormula={this.actualizarSeleccionFormula}
                                                 reglas={this.state.reglas}
                                                 navbar={this.state.navbar}
                                                 goToCreateFormula={this.goToCreateFormula}
                                                 configuracionHome={this.props.configuracionHome}
                                                 goOptions={this.props.goOptions}
                                                 actualizarNivelNuevaRegla={this.actualizarNivelNuevaRegla}
-                                                retornoSeleccionVariables={this.props.retornoSeleccionVariables}>
+                                                retornoSeleccionVariables={this.props.retornoSeleccionVariables}
+                                                eliminarFormula={this.eliminarFormula}
+                                                esEditarVar={true}
+                                                tablaBorrarFormulas={"FormulasVariablesCampos"}
+                                                tablaBorrarElementos={"ElementoFormulasVariablesCampos"}
+                                                condicionFormula={this.state.condicionFormula}
+                                                condicionElemento={this.state.condicionElemento}>
                     </InstruccionVariable>
                 </div>
             );
@@ -3485,7 +3854,12 @@ export default class EditarVariablesHome extends React.Component {
             return (
                 <div style={{width: "100%", height: "100%"}}>
                     <Formula pool={this.props.pool}
+                                            esEditarVar={this.state.esEditarVar}
+                                            esOperacionSQL={this.state.esOperacionSQL}
+                                            operacionSQL={this.state.operacionSQL}
+                                            formulaSeleccionadaEdit={this.state.formulaSeleccionadaEdit}
                                             anadirFormula={this.anadirFormula}
+                                            modificarFormula={this.modificarFormula}
                                             retornoCampo={this.retornoCampoFormula}
                                             retornoOperacion={this.retornoOperacion}
                                             actualizarNivelNuevaRegla={this.actualizarNivelNuevaRegla}

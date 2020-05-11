@@ -1545,7 +1545,7 @@ export default class Calculo extends React.Component {
                 console.log('window["'+arregloDeVariables[a].nombre+'"]');
                 console.log(window[arregloDeVariables[a].nombre]);
             };
-            //this.iniciarCalculoExcel();
+            this.iniciarCalculoExcel();
         }
     }
 
@@ -2301,7 +2301,7 @@ export default class Calculo extends React.Component {
                                 codigoIniciacionVarPrimitiva += '\n\t//INICIACION VARIABLE: '+arregloAgrupacionElementosFormulaPorVariables[i][j].variable.nombre;
                                 for (var p = 0; p < arregloAgrupacionElementosFormulaPorVariables[i][j].variable.atributos.length; p++) {
                                     var esPromedio = false;
-                                    if( arregloAgrupacionElementosFormulaPorConexionATabla[i][j].segmentoRegla.reglas[arregloAgrupacionElementosFormulaPorConexionATabla[i][j].segmentoRegla.reglas.length-1].operacion.localeCompare("PROM") == 0 )
+                                    if( arregloAgrupacionElementosFormulaPorVariables[i][j].segmentoRegla.reglas[arregloAgrupacionElementosFormulaPorVariables[i][j].segmentoRegla.reglas.length-1].operacion.localeCompare("PROM") == 0 )
                                         esPromedio = true;
                                     codigoIniciacionVarPrimitiva += '\n' + this.codigoIniciacion(arregloAgrupacionElementosFormulaPorVariables[i][j].variable, "atributo", arregloAgrupacionElementosFormulaPorVariables[i][j].variable.atributos[p], '\t', false, esPromedio);
                                 };
@@ -2926,25 +2926,10 @@ export default class Calculo extends React.Component {
                 var stringValores = regla.valor.substring(regla.valor.indexOf("[")+1, regla.valor.lastIndexOf("]"));
                 var diasAgregarCadena = stringValores.split(",")[0], mesesAgregarCadena = stringValores.split(",")[1], aniosAgregarCadena = stringValores.split(",")[2];
                 var diasAgregar = parseInt(diasAgregarCadena.indexOf("=")+1), mesesAgregar = parseInt(mesesAgregarCadena.indexOf("=")+1), aniosAgregar = parseInt(aniosAgregarCadena.indexOf("=")+1);
-                Date.prototype.addDays = function(days) {
-                    var date = new Date(this.valueOf());
-                    date.setDate(date.getDate() + days);
-                    return date;
-                }
-                Date.prototype.addMonths = function(months) {
-                    var date = new Date(this.valueOf());
-                    date.setMonth(date.getMonth() + months);
-                    return date;
-                }
-                Date.prototype.addYears = function(years) {
-                    var date = new Date(this.valueOf());
-                    date.setYear(date.getYear() + years);
-                    return date;
-                }
                 var hoy = new Date();
-                hoy.addYears(aniosAgregar);
-                hoy.addMonths(mesesAgregar);
-                hoy.addDays(diasAgregar);
+                hoy = this.addYears(hoy, aniosAgregar);
+                hoy = this.addMonths(hoy, mesesAgregar);
+                hoy = this.addDays(hoy, diasAgregar);
                 arregloValoresAComparar = ["new Date("+hoy.getFullYear()+", "+hoy.getMonth()+", "+hoy.getDate()+").getTime()"];
             } else if(regla.valor.indexOf("MANUAL") == 0) {
                 arregloValoresAComparar = [regla.valor.substring(regla.valor.indexOf("[")+1, regla.valor.lastIndexOf("]"))];
@@ -3507,12 +3492,12 @@ export default class Calculo extends React.Component {
         };
         console.log('arregloDeRiesgos')
         console.log(arregloDeRiesgos)
-        this.guardarVariablesCalculadas();
+        //this.guardarVariablesCalculadas();
     }
 
     guardarVariablesCalculadas () {
         for (var a = 0; a < arregloDeVariables.length; a++) {
-            if(arregloDeVariables[a].guardar)
+            //if(arregloDeVariables[a].realizarCalculo && )
                 this.verificarSiExisteVariableEnResultadosHistoricos(arregloDeVariables[a]);
         };
         for (var a = 0; a < arregloDeIndicadores.length; a++) {
@@ -3608,7 +3593,7 @@ export default class Calculo extends React.Component {
             mes = '0'+mes;
         let dia = hoy.getDate();
         if(dia.toString().length == 1)
-            mes = '0'+mes;
+            dia = '0'+dia;
         const transaction = new sql.Transaction( this.props.pool );
         transaction.begin(err => {
             var rolledBack = false;
@@ -3658,7 +3643,7 @@ export default class Calculo extends React.Component {
             textoInsertPrincipio += variable.atributos[i].nombre;
         };
         textoInsertPrincipio += ', f3ch4Gu4rd4do ) values ( ';
-        var instruccionSQLBorrar = "DELETE FROM "+variable.nombre+"_"+fechaNombreTabla.getFullYear()+"_"+(fechaNombreTabla.getMonth()+1)+"_"+fechaNombreTabla.getDate()+"_"+fechaNombreTabla.getHours()+"_"+fechaNombreTabla.getMinutes()+"_"+fechaNombreTabla.getSeconds()+ " WHERE f3ch4Gu4rd4do = '"+hoy.getFullYear()+"-"+hoy.getMonth()+"-"+hoy.getDate()+"' ";
+        var instruccionSQLBorrar = "DELETE FROM "+variable.nombre+"_"+fechaNombreTabla.getFullYear()+"_"+(fechaNombreTabla.getMonth()+1)+"_"+fechaNombreTabla.getDate()+"_"+fechaNombreTabla.getHours()+"_"+fechaNombreTabla.getMinutes()+"_"+fechaNombreTabla.getSeconds()+ " WHERE f3ch4Gu4rd4do = '"+hoy.getFullYear()+"-"+(hoy.getMonth()+1)+"-"+hoy.getDate()+"' ";
         console.log('instruccionSQLBorrar');
         console.log(instruccionSQLBorrar);
         this.borrarVariable(instruccionSQLBorrar);
@@ -3677,10 +3662,10 @@ export default class Calculo extends React.Component {
                     } else if(variable.atributos[j].tipo.localeCompare("bit") == 0) {
                         instruccionSQLFinal += "'"+window[variable.nombre][i][variable.atributos[j].nombre]+"'";
                     } else if(variable.atributos[j].tipo.localeCompare("date") == 0) {
-                        instruccionSQLFinal += "'"+window[variable.nombre][i][variable.atributos[j].nombre].getFullYear()+"-"+window[variable.nombre][i][variable.atributos[j].nombre].getMonth()+"-"+window[variable.nombre][i][variable.atributos[j].nombre].getDate()+"'";
+                        instruccionSQLFinal += "'"+window[variable.nombre][i][variable.atributos[j].nombre].getFullYear()+"-"+(window[variable.nombre][i][variable.atributos[j].nombre].getMonth()+1)+"-"+window[variable.nombre][i][variable.atributos[j].nombre].getDate()+"'";
                     }
                 };
-                instruccionSQLFinal += ", '"+hoy.getFullYear()+"-"+hoy.getMonth()+"-"+hoy.getDate()+"' )";
+                instruccionSQLFinal += ", '"+hoy.getFullYear()+"-"+(hoy.getMonth()+1)+"-"+hoy.getDate()+"' )";
                 console.log('instruccionSQLFinal 1');
                 console.log(instruccionSQLFinal);
                 var self = this;
@@ -3702,10 +3687,10 @@ export default class Calculo extends React.Component {
                 } else if(variable.atributos[j].tipo.localeCompare("bit") == 0) {
                     instruccionSQLFinal += "'"+window[variable.nombre]+"'";
                 } else if(variable.atributos[j].tipo.localeCompare("date") == 0) {
-                    instruccionSQLFinal += "'"+window[variable.nombre].getFullYear()+"-"+window[variable.nombre].getMonth()+"-"+window[variable.nombre].getDate()+"'";
+                    instruccionSQLFinal += "'"+window[variable.nombre].getFullYear()+"-"+(window[variable.nombre].getMonth()+1)+"-"+window[variable.nombre].getDate()+"'";
                 }
             };
-            instruccionSQLFinal += ", '"+hoy.getFullYear()+"-"+hoy.getMonth()+"-"+hoy.getDate()+"' )";
+            instruccionSQLFinal += ", '"+hoy.getFullYear()+"-"+(hoy.getMonth()+1)+"-"+hoy.getDate()+"' )";
             console.log('instruccionSQLFinal 2');
             console.log(instruccionSQLFinal);
             var self = this;
@@ -3869,7 +3854,7 @@ export default class Calculo extends React.Component {
             mes = '0'+mes;
         let dia = hoy.getDate();
         if(dia.toString().length == 1)
-            mes = '0'+mes;
+            dia = '0'+dia;
         const transaction = new sql.Transaction( this.props.pool );
         transaction.begin(err => {
             var rolledBack = false;
@@ -3933,7 +3918,7 @@ export default class Calculo extends React.Component {
         instruccionSQLFinal += ", '"+indicador.tipoIndicador+"'";
         instruccionSQLFinal += ", '"+indicador.analista+"'";
         instruccionSQLFinal += ", "+indicador.idRiesgoPadre;
-        var instruccionSQLBorrar = "DELETE FROM "+indicador.nombre+"_"+fechaNombreTabla.getFullYear()+"_"+(fechaNombreTabla.getMonth()+1)+"_"+fechaNombreTabla.getDate()+"_"+fechaNombreTabla.getHours()+"_"+fechaNombreTabla.getMinutes()+"_"+fechaNombreTabla.getSeconds()+ " WHERE f3ch4Gu4rd4do = '"+hoy.getFullYear()+"-"+hoy.getMonth()+"-"+hoy.getDate()+"' ";
+        var instruccionSQLBorrar = "DELETE FROM "+indicador.nombre+"_"+fechaNombreTabla.getFullYear()+"_"+(fechaNombreTabla.getMonth()+1)+"_"+fechaNombreTabla.getDate()+"_"+fechaNombreTabla.getHours()+"_"+fechaNombreTabla.getMinutes()+"_"+fechaNombreTabla.getSeconds()+ " WHERE f3ch4Gu4rd4do = '"+hoy.getFullYear()+"-"+(hoy.getMonth()+1)+"-"+hoy.getDate()+"' ";
         console.log('instruccionSQLBorrar');
         console.log(instruccionSQLBorrar);
         this.borrarIndicador(instruccionSQLBorrar);
@@ -3949,11 +3934,11 @@ export default class Calculo extends React.Component {
                 } else if(indicador.atributos[j].tipo.localeCompare("bit") == 0) {
                     instruccionSQLFinal += "'"+window[indicador.nombre][i][indicador.atributos[j].nombre]+"'";
                 } else if(indicador.atributos[j].tipo.localeCompare("date") == 0) {
-                    instruccionSQLFinal += "'"+window[indicador.nombre][i][indicador.atributos[j].nombre].getFullYear()+"-"+window[indicador.nombre][i][indicador.atributos[j].nombre].getMonth()+"-"+window[indicador.nombre][i][indicador.atributos[j].nombre].getDate()+"'";
+                    instruccionSQLFinal += "'"+window[indicador.nombre][i][indicador.atributos[j].nombre].getFullYear()+"-"+(window[indicador.nombre][i][indicador.atributos[j].nombre].getMonth()+1)+"-"+window[indicador.nombre][i][indicador.atributos[j].nombre].getDate()+"'";
                 }
             };
         }
-        instruccionSQLFinal += ", '"+hoy.getFullYear()+"-"+hoy.getMonth()+"-"+hoy.getDate()+"' )";
+        instruccionSQLFinal += ", '"+hoy.getFullYear()+"-"+(hoy.getMonth()+1)+"-"+hoy.getDate()+"' )";
         console.log('instruccionSQLFinal 1');
         console.log(instruccionSQLFinal);
         var self = this;
@@ -4101,7 +4086,7 @@ export default class Calculo extends React.Component {
             mes = '0'+mes;
         let dia = hoy.getDate();
         if(dia.toString().length == 1)
-            mes = '0'+mes;
+            dia = '0'+dia;
         const transaction = new sql.Transaction( this.props.pool );
         transaction.begin(err => {
             var rolledBack = false;
@@ -4157,8 +4142,8 @@ export default class Calculo extends React.Component {
         instruccionSQLFinal += ", "+riesgo.nivelRiesgoHijo;
         instruccionSQLFinal += ", '"+riesgo.color+"'";
         instruccionSQLFinal += ", "+riesgo.total;
-        instruccionSQLFinal += ", '"+hoy.getFullYear()+"-"+hoy.getMonth()+"-"+hoy.getDate()+"' )";
-        var instruccionSQLBorrar = "DELETE FROM "+riesgo.nombre+"_"+fechaNombreTabla.getFullYear()+"_"+(fechaNombreTabla.getMonth()+1)+"_"+fechaNombreTabla.getDate()+"_"+fechaNombreTabla.getHours()+"_"+fechaNombreTabla.getMinutes()+"_"+fechaNombreTabla.getSeconds()+ " WHERE f3ch4Gu4rd4do = '"+hoy.getFullYear()+"-"+hoy.getMonth()+"-"+hoy.getDate()+"' ";
+        instruccionSQLFinal += ", '"+hoy.getFullYear()+"-"+(hoy.getMonth()+1)+"-"+hoy.getDate()+"' )";
+        var instruccionSQLBorrar = "DELETE FROM "+riesgo.nombre+"_"+fechaNombreTabla.getFullYear()+"_"+(fechaNombreTabla.getMonth()+1)+"_"+fechaNombreTabla.getDate()+"_"+fechaNombreTabla.getHours()+"_"+fechaNombreTabla.getMinutes()+"_"+fechaNombreTabla.getSeconds()+ " WHERE f3ch4Gu4rd4do = '"+hoy.getFullYear()+"-"+(hoy.getMonth()+1)+"-"+hoy.getDate()+"' ";
         console.log('instruccionSQLBorrar');
         console.log(instruccionSQLBorrar);
         this.borrarRiesgo(instruccionSQLBorrar);
@@ -4310,7 +4295,7 @@ export default class Calculo extends React.Component {
             mes = '0'+mes;
         let dia = hoy.getDate();
         if(dia.toString().length == 1)
-            mes = '0'+mes;
+            dia = '0'+dia;
         const transaction = new sql.Transaction( this.props.pool );
         transaction.begin(err => {
             var rolledBack = false;
@@ -4360,7 +4345,7 @@ export default class Calculo extends React.Component {
             textoInsertPrincipio += variable.variables[i].nombre;
         };
         textoInsertPrincipio += ', f3ch4Gu4rd4do ) values ( ';
-        var instruccionSQLBorrar = "DELETE FROM "+variable.nombre+"_"+fechaNombreTabla.getFullYear()+"_"+(fechaNombreTabla.getMonth()+1)+"_"+fechaNombreTabla.getDate()+"_"+fechaNombreTabla.getHours()+"_"+fechaNombreTabla.getMinutes()+"_"+fechaNombreTabla.getSeconds()+ " WHERE f3ch4Gu4rd4do = '"+hoy.getFullYear()+"-"+hoy.getMonth()+"-"+hoy.getDate()+"' ";
+        var instruccionSQLBorrar = "DELETE FROM "+variable.nombre+"_"+fechaNombreTabla.getFullYear()+"_"+(fechaNombreTabla.getMonth()+1)+"_"+fechaNombreTabla.getDate()+"_"+fechaNombreTabla.getHours()+"_"+fechaNombreTabla.getMinutes()+"_"+fechaNombreTabla.getSeconds()+ " WHERE f3ch4Gu4rd4do = '"+hoy.getFullYear()+"-"+(hoy.getMonth()+1)+"-"+hoy.getDate()+"' ";
         console.log('instruccionSQLBorrar');
         console.log(instruccionSQLBorrar);
         this.borrarExcel(instruccionSQLBorrar);
@@ -4376,10 +4361,10 @@ export default class Calculo extends React.Component {
                 } else if(variable.variables[j].tipo.localeCompare("bit") == 0) {
                     instruccionSQLFinal += "'"+window[variable.nombre][i][variable.variables[j].nombre]+"'";
                 } else if(variable.variables[j].tipo.localeCompare("date") == 0) {
-                    instruccionSQLFinal += "'"+window[variable.nombre][i][variable.variables[j].nombre].getFullYear()+"-"+window[variable.nombre][i][variable.atributos[j].nombre].getMonth()+"-"+window[variable.nombre][i][variable.atributos[j].nombre].getDate()+"'";
+                    instruccionSQLFinal += "'"+window[variable.nombre][i][variable.variables[j].nombre].getFullYear()+"-"+(window[variable.nombre][i][variable.atributos[j].nombre].getMonth()+1)+"-"+window[variable.nombre][i][variable.atributos[j].nombre].getDate()+"'";
                 }
             };
-            instruccionSQLFinal += ", '"+hoy.getFullYear()+"-"+hoy.getMonth()+"-"+hoy.getDate()+"' )";
+            instruccionSQLFinal += ", '"+hoy.getFullYear()+"-"+(hoy.getMonth()+1)+"-"+hoy.getDate()+"' )";
             console.log('instruccionSQLFinal 1');
             console.log(instruccionSQLFinal);
             var self = this;
@@ -4527,7 +4512,7 @@ export default class Calculo extends React.Component {
             mes = '0'+mes;
         let dia = hoy.getDate();
         if(dia.toString().length == 1)
-            mes = '0'+mes;
+            dia = '0'+dia;
         const transaction = new sql.Transaction( this.props.pool );
         transaction.begin(err => {
             var rolledBack = false;
@@ -4577,7 +4562,7 @@ export default class Calculo extends React.Component {
             textoInsertPrincipio += variable.variables[i].nombre;
         };
         textoInsertPrincipio += ', f3ch4Gu4rd4do ) values ( ';
-        var instruccionSQLBorrar = "DELETE FROM "+variable.nombre+"_"+fechaNombreTabla.getFullYear()+"_"+(fechaNombreTabla.getMonth()+1)+"_"+fechaNombreTabla.getDate()+"_"+fechaNombreTabla.getHours()+"_"+fechaNombreTabla.getMinutes()+"_"+fechaNombreTabla.getSeconds()+ " WHERE f3ch4Gu4rd4do = '"+hoy.getFullYear()+"-"+hoy.getMonth()+"-"+hoy.getDate()+"' ";
+        var instruccionSQLBorrar = "DELETE FROM "+variable.nombre+"_"+fechaNombreTabla.getFullYear()+"_"+(fechaNombreTabla.getMonth()+1)+"_"+fechaNombreTabla.getDate()+"_"+fechaNombreTabla.getHours()+"_"+fechaNombreTabla.getMinutes()+"_"+fechaNombreTabla.getSeconds()+ " WHERE f3ch4Gu4rd4do = '"+hoy.getFullYear()+"-"+(hoy.getMonth()+1)+"-"+hoy.getDate()+"' ";
         console.log('instruccionSQLBorrar');
         console.log(instruccionSQLBorrar);
         this.borrarForma(instruccionSQLBorrar);
@@ -4590,9 +4575,9 @@ export default class Calculo extends React.Component {
         } else if(variable.tipo.localeCompare("bit") == 0) {
             instruccionSQLFinal += "'"+window[variable.nombre]+"'";
         } else if(variable.tipo.localeCompare("date") == 0) {
-            instruccionSQLFinal += "'"+window[variable.nombre].getFullYear()+"-"+window[variable.nombre].getMonth()+"-"+window[variable.nombre].getDate()+"'";
+            instruccionSQLFinal += "'"+window[variable.nombre].getFullYear()+"-"+(window[variable.nombre].getMonth()+1)+"-"+window[variable.nombre].getDate()+"'";
         }
-        instruccionSQLFinal += ", '"+hoy.getFullYear()+"-"+hoy.getMonth()+"-"+hoy.getDate()+"' )";
+        instruccionSQLFinal += ", '"+hoy.getFullYear()+"-"+(hoy.getMonth()+1)+"-"+hoy.getDate()+"' )";
         console.log('instruccionSQLFinal 1');
         console.log(instruccionSQLFinal);
         var self = this;
@@ -4685,7 +4670,7 @@ export default class Calculo extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("update PeriodicidadCalculo where variableID = "+variable.ID+" and tablaVariable = '"+tabla+"' set fechaUltimoCalculo = '"+hoy.getFullYear()+"-"+hoy.getMonth()+"-"+hoy.getDate()+"'", (err, result) => {
+            request.query("update PeriodicidadCalculo where variableID = "+variable.ID+" and tablaVariable = '"+tabla+"' set fechaUltimoCalculo = '"+hoy.getFullYear()+"-"+(hoy.getMonth()+1)+"-"+hoy.getDate()+"'", (err, result) => {
                 if (err) {
                     console.log(err);
                     if (!rolledBack) {
@@ -4708,7 +4693,7 @@ export default class Calculo extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("insert into PeriodicidadCalculo (variableID, tablaVariable, fechaInicio, fechaUltimoCalculo) values ("+variable.ID+", '"+tabla+"', '"+hoy.getFullYear()+"-"+hoy.getMonth()+"-"+hoy.getDate()+"', '"+hoy.getFullYear()+"-"+hoy.getMonth()+"-"+hoy.getDate()+"') ", (err, result) => {
+            request.query("insert into PeriodicidadCalculo (variableID, tablaVariable, fechaInicio, fechaUltimoCalculo) values ("+variable.ID+", '"+tabla+"', '"+hoy.getFullYear()+"-"+(hoy.getMonth()+1)+"-"+hoy.getDate()+"', '"+hoy.getFullYear()+"-"+hoy.getMonth()+"-"+hoy.getDate()+"') ", (err, result) => {
                 if (err) {
                     console.log(err);
                     if (!rolledBack) {

@@ -139,12 +139,10 @@ export default class Umbral extends React.Component {
         for (var i = 0; i < seccionesConRango.length; i++) {
             for (var j = 0; j < seccionesConRango[i].length; j++) {
                 for (var k = 0; k < seccionesConRango[i][j].rangos.length; k++) {
-                    this.ingresarSeccion(seccionesConRango[i][j].rangos[k], arrOrdenado);
+                    this.ingresarSeccion(seccionesConRango[i][j].rangos[k], arrOrdenado, seccionesConRango[i][j].nombre, seccionesConRango[i][j].color);
                 };
             };
         };
-        console.log('arrOrdenado');
-        console.log(arrOrdenado);
         //calculando porcentaje dentro del total
         //suma del total
         var sumTot = 0;
@@ -154,13 +152,20 @@ export default class Umbral extends React.Component {
         };
         for (var i = 0; i < arrOrdenado.length; i++) {
             var totSec = arrOrdenado[i].valorMaximo - arrOrdenado[i].valorMinimo;
-            arrOrdenado[i].valorMaximo.width = totSec / sumTot;
+            arrOrdenado[i].width = (totSec / sumTot) * 100;
         };
+        console.log('arrOrdenado');
+        console.log(arrOrdenado);
+        this.setState({
+            secciones: arrOrdenado
+        });
     }
 
-    ingresarSeccion (seccionNueva, arrSecciones) {
+    ingresarSeccion (seccionNueva, arrSecciones, nombre, color) {
         if(arrSecciones.length == 0) {
             arrSecciones.push(seccionNueva);
+            arrSecciones[arrSecciones.length-1].nombre = nombre;
+            arrSecciones[arrSecciones.length-1].color = color;
             return;
         }
         var encontroPos = false;
@@ -171,13 +176,15 @@ export default class Umbral extends React.Component {
             }
         };
         arrSecciones.splice(i, 0, seccionNueva);
+        arrSecciones[i].nombre = nombre;
+        arrSecciones[i].color = color;
     }
 
     render() {
         return (
             <div>
                 {this.props.navbar}
-                <VistaUmbral umbrales={secciones}> </VistaUmbral>
+                <VistaUmbral umbrales={this.state.secciones}> </VistaUmbral>
                 <CrearUmbral idVariable={this.props.idVariable} pool={this.props.pool}
                                                         tablaVariable={this.props.tablaVariable}
                                                         tituloUmbral={this.props.tituloUmbral}> </CrearUmbral>

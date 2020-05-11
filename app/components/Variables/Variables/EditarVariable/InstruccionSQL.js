@@ -61,6 +61,7 @@ function (_React$Component) {
     _this.mostrarCampos = _this.mostrarCampos.bind(_assertThisInitialized(_this));
     _this.actualizarCampo = _this.actualizarCampo.bind(_assertThisInitialized(_this));
     _this.closeModal = _this.closeModal.bind(_assertThisInitialized(_this));
+    _this.agregarInstruccionSQL = _this.agregarInstruccionSQL.bind(_assertThisInitialized(_this));
     return _this;
   }
 
@@ -111,96 +112,72 @@ function (_React$Component) {
         mostrarModal: false
       });
     }
-    /*getCampos () {
-        const transaction = new sql.Transaction( this.props.pool );
-        transaction.begin(err => {
-            var rolledBack = false;
-            transaction.on('rollback', aborted => {
-                rolledBack = true;
-            });
-            const request = new sql.Request(transaction);
-            request.query("select * from InstruccionSQLCampos where variableID = "+this.props.variableID, (err, result) => {
-                if (err) {
-                    if (!rolledBack) {
-                        console.log(err);
-                        transaction.rollback(err => {
-                        });
-                    }
-                } else {
-                    transaction.commit(err => {
-                        this.setState({
-                            camposInstruccionSQL: result.recordset
-                        });
-                    });
-                }
-            });
-        }); // fin transaction
-    }
-     agregarCampo () {
-        var nombreCampo = $("#nuevoCampo").val();
-        var variableID = this.props.variableID;
-        var tipo = $("#tipo").val();
-        if(nombreCampo.length < 101) {
-            const transaction = new sql.Transaction( this.props.pool );
-            transaction.begin(err => {
-                var rolledBack = false;
-                transaction.on('rollback', aborted => {
-                    rolledBack = true;
-                });
-                const request = new sql.Request(transaction);
-                request.query("insert into InstruccionSQLCampos (variableID, nombre, tipo) values ("+variableID+", '"+nombreCampo+"', '"+tipo+"')", (err, result) => {
-                    if (err) {
-                        if (!rolledBack) {
-                            console.log(err);
-                            transaction.rollback(err => {
-                            });
-                        }
-                    } else {
-                        transaction.commit(err => {
-                            alert("Campo creado.");
-                            this.getCampos();
-                        });
-                    }
-                });
-            }); // fin transaction
-        } else {
-            alert("El nombre del campo debe tener una longitud menor a 101 caracteres.");
-        }
-    }
-     agregarInstruccionSQL () {
-        var instruccionSQL = $("#comandoSQL").val();
-        var variableID = this.props.variableID;
-        if(instruccionSQL.length < 1001) {
-            const transaction = new sql.Transaction( this.props.pool );
-            transaction.begin(err => {
-                var rolledBack = false;
-                transaction.on('rollback', aborted => {
-                    rolledBack = true;
-                });
-                const request = new sql.Request(transaction);
-                request.query("insert into InstruccionSQL (variableID, instruccionSQL) values ("+variableID+", '"+instruccionSQL+"')", (err, result) => {
-                    if (err) {
-                        if (!rolledBack) {
-                            console.log(err);
-                            transaction.rollback(err => {
-                            });
-                        }
-                    } else {
-                        transaction.commit(err => {
-                            alert("Instrucción SQL creado.");
-                        });
-                    }
-                });
-            }); // fin transaction
-        } else {
-            alert("El nombre del campo debe tener una longitud menor a 1001 caracteres.");
-        }
-    }*/
+  }, {
+    key: "agregarInstruccionSQL",
+    value: function agregarInstruccionSQL() {
+      var _this2 = this;
 
+      var camposError = [];
+      var instruccionSQL = $("#comandoSQL").val();
+
+      if (instruccionSQL.length > 0) {
+        if (this.props.camposInstruccionSQL.length > 0) {
+          var transaction = new sql.Transaction(this.props.pool);
+          transaction.begin(function (err) {
+            var rolledBack = false;
+            transaction.on('rollback', function (aborted) {
+              rolledBack = true;
+            });
+            var request = new sql.Request(transaction);
+            request.query(instruccionSQL, function (err, result) {
+              if (err) {
+                console.log(err);
+                alert("Error al ejecutar la instruccionSQL.");
+
+                if (!rolledBack) {
+                  transaction.rollback(function (err) {});
+                }
+              } else {
+                transaction.commit(function (err) {
+                  if (result.recordset.length > 0) {
+                    for (var i = 0; i < _this2.props.camposInstruccionSQL.length; i++) {
+                      if (result.recordset[0][_this2.props.camposInstruccionSQL[i].nombre] == undefined) {
+                        camposError.push(_this2.props.camposInstruccionSQL[i].nombre);
+                      }
+                    }
+
+                    ;
+
+                    if (camposError.length > 0) {
+                      var textoCamposErrores = '';
+
+                      for (var i = 0; i < camposError.length; i++) {
+                        textoCamposErrores += camposError[i];
+                      }
+
+                      ;
+                      alert("Se encontraron errores al intentar acceder a los campos: " + textoCamposErrores + ". No se guardo la instruccionSQL.");
+                    } else {
+                      _this2.props.agregarInstruccionSQL();
+                    }
+                  } else {
+                    alert("La instruccionSQL no retorno ningun valor.");
+                  }
+                });
+              }
+            });
+          }); // fin transaction
+        } else {
+          alert("Ingrese campos para tomar de la InstruccionSQL.");
+        }
+      } else {
+        alert("Ingrese un valor para la InstruccionSQL.");
+      }
+    }
   }, {
     key: "render",
     value: function render() {
-      var _this2 = this;
+      var _this3 = this;
 
       return _react["default"].createElement("div", null, this.props.navbar, _react["default"].createElement("div", {
         className: "row",
@@ -247,7 +224,7 @@ function (_React$Component) {
           }
         }, _react["default"].createElement("img", {
           onClick: function onClick() {
-            return _this2.openModal(i);
+            return _this3.openModal(i);
           },
           src: "../assets/edit.png",
           style: {
@@ -309,7 +286,7 @@ function (_React$Component) {
         style: {
           color: "#fafafa"
         },
-        onClick: this.props.agregarInstruccionSQL
+        onClick: this.agregarInstruccionSQL
       }, "Guardar Comando SQL")), _react["default"].createElement("br", null))), _react["default"].createElement(_Modal["default"], {
         show: this.state.mostrarModal,
         titulo: this.state.tituloModal,
@@ -374,7 +351,7 @@ function (_React$Component) {
         className: "col-xs-1 col-1"
       }), _react["default"].createElement("a", {
         onClick: function onClick() {
-          return _this2.props.eliminarCampo(_this2.state.indexVarSeleccionado);
+          return _this3.props.eliminarCampo(_this3.state.indexVarSeleccionado);
         },
         className: "btn btn-primary col-xs-5 col-5",
         style: {

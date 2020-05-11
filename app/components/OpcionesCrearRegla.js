@@ -140,10 +140,17 @@ function (_React$Component) {
       }) : _react["default"].createElement(_ContenedorFormulas["default"], {
         asignaciones: this.props.asignaciones,
         reglas: this.props.reglas,
+        actualizarSeleccionFormula: this.props.actualizarSeleccionFormula,
         callbackCrearRegla: this.props.callbackCrearRegla,
         callbackModificarRegla: this.props.callbackModificarRegla,
         callbackEliminarRegla: this.props.callbackEliminarRegla,
-        goToCreateFormula: this.props.goToCreateFormula
+        goToCreateFormula: this.props.goToCreateFormula,
+        eliminarFormula: this.props.eliminarFormula,
+        esEditarVar: this.props.esEditarVar,
+        tablaBorrarFormulas: this.props.tablaBorrarFormulas,
+        tablaBorrarElementos: this.props.tablaBorrarElementos,
+        condicionFormula: this.props.condicionFormula,
+        condicionElemento: this.props.condicionElemento
       })));
     }
   }]);

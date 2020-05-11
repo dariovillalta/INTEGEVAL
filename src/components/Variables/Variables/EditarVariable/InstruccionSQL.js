@@ -16,6 +16,7 @@ export default class InstruccionSQL extends React.Component {
         this.mostrarCampos = this.mostrarCampos.bind(this);
         this.actualizarCampo = this.actualizarCampo.bind(this);
         this.closeModal = this.closeModal.bind(this);
+        this.agregarInstruccionSQL = this.agregarInstruccionSQL.bind(this);
     }
 
     componentDidMount() {
@@ -60,93 +61,57 @@ export default class InstruccionSQL extends React.Component {
         });
     }
 
-    /*getCampos () {
-        const transaction = new sql.Transaction( this.props.pool );
-        transaction.begin(err => {
-            var rolledBack = false;
-            transaction.on('rollback', aborted => {
-                rolledBack = true;
-            });
-            const request = new sql.Request(transaction);
-            request.query("select * from InstruccionSQLCampos where variableID = "+this.props.variableID, (err, result) => {
-                if (err) {
-                    if (!rolledBack) {
-                        console.log(err);
-                        transaction.rollback(err => {
-                        });
-                    }
-                } else {
-                    transaction.commit(err => {
-                        this.setState({
-                            camposInstruccionSQL: result.recordset
-                        });
-                    });
-                }
-            });
-        }); // fin transaction
-    }
-
-    agregarCampo () {
-        var nombreCampo = $("#nuevoCampo").val();
-        var variableID = this.props.variableID;
-        var tipo = $("#tipo").val();
-        if(nombreCampo.length < 101) {
-            const transaction = new sql.Transaction( this.props.pool );
-            transaction.begin(err => {
-                var rolledBack = false;
-                transaction.on('rollback', aborted => {
-                    rolledBack = true;
-                });
-                const request = new sql.Request(transaction);
-                request.query("insert into InstruccionSQLCampos (variableID, nombre, tipo) values ("+variableID+", '"+nombreCampo+"', '"+tipo+"')", (err, result) => {
-                    if (err) {
-                        if (!rolledBack) {
-                            console.log(err);
-                            transaction.rollback(err => {
-                            });
-                        }
-                    } else {
-                        transaction.commit(err => {
-                            alert("Campo creado.");
-                            this.getCampos();
-                        });
-                    }
-                });
-            }); // fin transaction
-        } else {
-            alert("El nombre del campo debe tener una longitud menor a 101 caracteres.");
-        }
-    }
-
     agregarInstruccionSQL () {
+        var camposError = [];
         var instruccionSQL = $("#comandoSQL").val();
-        var variableID = this.props.variableID;
-        if(instruccionSQL.length < 1001) {
-            const transaction = new sql.Transaction( this.props.pool );
-            transaction.begin(err => {
-                var rolledBack = false;
-                transaction.on('rollback', aborted => {
-                    rolledBack = true;
-                });
-                const request = new sql.Request(transaction);
-                request.query("insert into InstruccionSQL (variableID, instruccionSQL) values ("+variableID+", '"+instruccionSQL+"')", (err, result) => {
-                    if (err) {
-                        if (!rolledBack) {
+        if(instruccionSQL.length > 0) {
+            if(this.props.camposInstruccionSQL.length > 0) {
+                const transaction = new sql.Transaction( this.props.pool );
+                transaction.begin(err => {
+                    var rolledBack = false;
+                    transaction.on('rollback', aborted => {
+                        rolledBack = true;
+                    });
+                    const request = new sql.Request(transaction);
+                    request.query(instruccionSQL, (err, result) => {
+                        if (err) {
                             console.log(err);
-                            transaction.rollback(err => {
+                            alert("Error al ejecutar la instruccionSQL.");
+                            if (!rolledBack) {
+                                transaction.rollback(err => {
+                                });
+                            }
+                        } else {
+                            transaction.commit(err => {
+                                if(result.recordset.length > 0) {
+                                    for (var i = 0; i < this.props.camposInstruccionSQL.length; i++) {
+                                        if(result.recordset[0][this.props.camposInstruccionSQL[i].nombre] == undefined) {
+                                            camposError.push(this.props.camposInstruccionSQL[i].nombre);
+                                        }
+                                    };
+                                    if(camposError.length > 0){
+                                        var textoCamposErrores = '';
+                                        for (var i = 0; i < camposError.length; i++) {
+                                            textoCamposErrores += camposError[i];
+                                        };
+                                        alert("Se encontraron errores al intentar acceder a los campos: "+textoCamposErrores+". No se guardo la instruccionSQL.");
+                                    } else {
+                                        this.props.agregarInstruccionSQL();
+                                    }
+                                } else {
+                                    alert("La instruccionSQL no retorno ningun valor.");
+                                }
                             });
                         }
-                    } else {
-                        transaction.commit(err => {
-                            alert("Instrucción SQL creado.");
-                        });
-                    }
-                });
-            }); // fin transaction
+                    });
+                }); // fin transaction
+            } else {
+                alert("Ingrese campos para tomar de la InstruccionSQL.")
+            }
         } else {
-            alert("El nombre del campo debe tener una longitud menor a 1001 caracteres.");
+            alert("Ingrese un valor para la InstruccionSQL.")
         }
-    }*/
+    }
     
     render() {
         return (
@@ -208,7 +173,7 @@ export default class InstruccionSQL extends React.Component {
                         </div>
                         <hr/>
                         <div className={"row"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
-                            <a className={"btn btn-primary btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.props.agregarInstruccionSQL}>Guardar Comando SQL</a>
+                            <a className={"btn btn-primary btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.agregarInstruccionSQL}>Guardar Comando SQL</a>
                         </div>
                         <br/>
                     </div>

@@ -48,6 +48,7 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 var campoSeleccionado, operacionSeleccionada, objetoConexionSeleccionada;
 var tipoDeAsignacionSeleccionado; //para saber el tipo de asignacion que se debera hacer al atributo / campo
 
+var indiceFormulaSeleccionadaEdit = -1;
 /*COMPONENTE PARA MANEJRA CAMBIO DE VISTA ENTRE CREAR VARIABLE Y VISTA DE CONDICIONES / INSTRUCIONES*/
 
 /*MANEJA TODA LA LOGICA CREAR FUENTE DATO VARIABLE (OBJETO)*/
@@ -160,11 +161,16 @@ function (_React$Component) {
       variables: [],
       excel: [],
       formas: [],
-      tipoVariableOriginal: _this.props.tipoVariable,
       nombreVariable: "",
       descripcionVariable: "",
       objetoPadreIDVariable: -1,
-      guardarVariable: ""
+      guardarVariable: "",
+      esEditarVar: false,
+      esOperacionSQL: false,
+      operacionSQL: "",
+      formulaSeleccionadaEdit: null,
+      condicionFormula: "",
+      condicionElemento: ""
     };
     _this.traerInstruccionSQLVariable = _this.traerInstruccionSQLVariable.bind(_assertThisInitialized(_this));
     _this.traerInstruccionSQL = _this.traerInstruccionSQL.bind(_assertThisInitialized(_this));
@@ -194,6 +200,13 @@ function (_React$Component) {
     _this.createVariableFieldFormula = _this.createVariableFieldFormula.bind(_assertThisInitialized(_this));
     _this.getVariableFieldFormulaID = _this.getVariableFieldFormulaID.bind(_assertThisInitialized(_this));
     _this.createVariableFieldFormulaElement = _this.createVariableFieldFormulaElement.bind(_assertThisInitialized(_this));
+    _this.limpiarArreglos = _this.limpiarArreglos.bind(_assertThisInitialized(_this));
+    _this.verificarSiExisteExcelEnResultadosHistoricosModificar = _this.verificarSiExisteExcelEnResultadosHistoricosModificar.bind(_assertThisInitialized(_this));
+    _this.crearTablaDeResultadoNombreModificar = _this.crearTablaDeResultadoNombreModificar.bind(_assertThisInitialized(_this));
+    _this.crearResultadoNombreModificar = _this.crearResultadoNombreModificar.bind(_assertThisInitialized(_this));
+    _this.modificarResultadosNombre = _this.modificarResultadosNombre.bind(_assertThisInitialized(_this));
+    _this.verificarPeriodicidadGuardarModificar = _this.verificarPeriodicidadGuardarModificar.bind(_assertThisInitialized(_this));
+    _this.updatePeriodicidadModificar = _this.updatePeriodicidadModificar.bind(_assertThisInitialized(_this));
     _this.retornarCampo = _this.retornarCampo.bind(_assertThisInitialized(_this));
     _this.retornarValor = _this.retornarValor.bind(_assertThisInitialized(_this));
     _this.actualizarCondicion = _this.actualizarCondicion.bind(_assertThisInitialized(_this));
@@ -210,6 +223,8 @@ function (_React$Component) {
     _this.getElementsFromFormula = _this.getElementsFromFormula.bind(_assertThisInitialized(_this));
     _this.modificarRegla = _this.modificarRegla.bind(_assertThisInitialized(_this));
     _this.eliminarRegla = _this.eliminarRegla.bind(_assertThisInitialized(_this));
+    _this.modificarFormula = _this.modificarFormula.bind(_assertThisInitialized(_this));
+    _this.eliminarFormula = _this.eliminarFormula.bind(_assertThisInitialized(_this));
     _this.retornoCampoFormula = _this.retornoCampoFormula.bind(_assertThisInitialized(_this));
     _this.retornoCampoCondicion = _this.retornoCampoCondicion.bind(_assertThisInitialized(_this));
     _this.retornoOperacion = _this.retornoOperacion.bind(_assertThisInitialized(_this));
@@ -217,6 +232,7 @@ function (_React$Component) {
     _this.actualizarEstadoSiEsObjeto = _this.actualizarEstadoSiEsObjeto.bind(_assertThisInitialized(_this));
     _this.actualizarEstadoSiEsInstruccionSQL = _this.actualizarEstadoSiEsInstruccionSQL.bind(_assertThisInitialized(_this));
     _this.actualizarNivelNuevaRegla = _this.actualizarNivelNuevaRegla.bind(_assertThisInitialized(_this));
+    _this.actualizarSeleccionFormula = _this.actualizarSeleccionFormula.bind(_assertThisInitialized(_this));
     _this.actualizarNombreVariable = _this.actualizarNombreVariable.bind(_assertThisInitialized(_this));
     _this.actualizarDescripcionVariable = _this.actualizarDescripcionVariable.bind(_assertThisInitialized(_this));
     _this.actualizarFechaInicio = _this.actualizarFechaInicio.bind(_assertThisInitialized(_this));
@@ -292,18 +308,23 @@ function (_React$Component) {
                 if (_this2.props.esInstruccionSQLVariable) $("#esInstruccionSQL").prop('checked', true);else $("#esInstruccionSQL").prop('checked', false);
                 if (_this2.props.esObjetoVariable) $("#esObjetoFuenteDato").prop('checked', true);else $("#esObjetoFuenteDato").prop('checked', false);
                 if (result.recordset[0].guardar) $("#guardarFuenteDato").prop('checked', true);else $("#guardarFuenteDato").prop('checked', false);
-                fechaInicioVariable = result.recordset[0].nombre;
+                fechaInicioVariable = result.recordset[0].fechaInicioCalculo;
                 periodicidadVariable = result.recordset[0].nombre;
                 analistaVariable = result.recordset[0].nombre;
                 $("#periodicidad").val(periodicidadVariable);
                 $("#analista").val(analistaVariable);
-                if (fechaInicioVariable.getFullYear() != 1964 && fechaInicioVariable.getMonth() != 4 && fechaInicioVariable.getDate() != 28) $("#fecha").datepicker("setDate", fechaInicioVariable);
+
+                if (fechaInicioVariable.getFullYear() == 1964 && fechaInicioVariable.getMonth() == 4 && fechaInicioVariable.getDate() == 28) {//
+                } else {
+                  $("#fecha").datepicker("setDate", fechaInicioVariable);
+                }
                 /*this.setState({
                     nombreVariable: result.recordset[0].nombre,
                     descripcionVariable: result.recordset[0].descripcion,
                     objetoPadreIDVariable: result.recordset[0].objetoPadreID,
                     guardarVariable: result.recordset[0].guardar
                 });*/
+
 
                 _this2.traerInstruccionSQL();
               }
@@ -349,7 +370,7 @@ function (_React$Component) {
       var transaction1 = new _mssql["default"].Transaction(this.props.pool);
       transaction1.begin(function (err) {
         var rolledBack = false;
-        transaction.on('rollback', function (aborted) {
+        transaction1.on('rollback', function (aborted) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction1);
@@ -822,14 +843,38 @@ function (_React$Component) {
       }, "Condiciones")), _react["default"].createElement("li", {
         className: "breadcrumb-item active font-16",
         "aria-current": "page"
-      }, "Crear F\xF3rmula"))))))); //deseleccionado regla seleccionada
+      }, "Crear F\xF3rmula")))))));
+
+      var esOperacionSQL, operacionSQL;
+
+      if (posicionAtributoSeleccionado == -1) {
+        esOperacionSQL = false;
+        operacionSQL = "";
+      }
+
+      var esEditarVar = false;
+
+      if (this.state.formulaSeleccionadaEdit != null) {
+        if (this.state.formulaSeleccionadaEdit.operacion.localeCompare("ASIG") == 0 || this.state.formulaSeleccionadaEdit.operacion.localeCompare("COUNT") == 0 || this.state.formulaSeleccionadaEdit.operacion.localeCompare("PROM") == 0 || this.state.formulaSeleccionadaEdit.operacion.localeCompare("MAX") == 0 || this.state.formulaSeleccionadaEdit.operacion.localeCompare("MIN") == 0 || this.state.formulaSeleccionadaEdit.operacion.localeCompare("SUM") == 0 || this.state.formulaSeleccionadaEdit.operacion.localeCompare("AUTOSUM") == 0) {
+          esOperacionSQL = true;
+          operacionSQL = formulas[posicionAtributoSeleccionado][indice].operacion;
+        } else {
+          esOperacionSQL = false;
+          operacionSQL = "";
+        }
+
+        esEditarVar = true;
+      } //deseleccionado regla seleccionada
 
 
       indiceSeleccionadoReglas = -1;
       indiceSeleccionadoFormula = indice;
       this.setState({
         componenteActual: "variableFormula",
-        navbar: navbar
+        navbar: navbar,
+        esEditarVar: esEditarVar,
+        esOperacionSQL: esOperacionSQL,
+        operacionSQL: operacionSQL
       });
     }
   }, {
@@ -900,7 +945,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("insert into Variables (nombre, descripcion, esObjeto, objetoPadreID, esInstruccionSQL, guardar) values ('" + variable.nombre + "', '" + variable.descripcion + "', '" + variable.esObjeto + "', " + variable.objetoPadreID + ", '" + variable.esInstruccionSQL + "', '" + variable.guardar + "')", function (err, result) {
+        request.query("insert into Variables (nombre, descripcion, esObjeto, objetoPadreID, esInstruccionSQL, periodicidad, fechaInicioCalculo, analista, guardar) values ('" + variable.nombre + "', '" + variable.descripcion + "', '" + variable.esObjeto + "', " + variable.objetoPadreID + ", '" + variable.esInstruccionSQL + "', '" + periodicidad + "', '" + fechaInicioCalculo.getFullYear() + "-" + (fechaInicioCalculo.getMonth() + 1) + "-" + fechaInicioCalculo.getDate() + "', '" + analista + "', '" + variable.guardar + "')", function (err, result) {
           if (err) {
             if (!rolledBack) {
               console.log(err);
@@ -933,7 +978,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("update Variables set nombre = '" + variable.nombre + "', descripcion = '" + variable.descripcion + "', esObjeto = '" + variable.esObjeto + "', objetoPadreID = " + variable.objetoPadreID + ", esInstruccionSQL = '" + variable.esInstruccionSQL + "', guardar = '" + variable.guardar + "' where ID = " + _this10.props.idVariable, function (err, result) {
+        request.query("update Variables set nombre = '" + variable.nombre + "', descripcion = '" + variable.descripcion + "', esObjeto = '" + variable.esObjeto + "', objetoPadreID = " + variable.objetoPadreID + ", esInstruccionSQL = '" + variable.esInstruccionSQL + "', periodicidad = '" + periodicidad + "', fechaInicioCalculo = '" + fechaInicioCalculo.getFullYear() + "-" + (fechaInicioCalculo.getMonth() + 1) + "-" + fechaInicioCalculo.getDate() + "', analista = '" + analista + "', guardar = '" + variable.guardar + "' where ID = " + _this10.props.idVariable, function (err, result) {
           if (err) {
             if (!rolledBack) {
               console.log(err);
@@ -987,6 +1032,8 @@ function (_React$Component) {
 
                   ;
                 }
+
+                _this11.verificarSiExisteExcelEnResultadosHistoricosModificar(result.recordset[0]);
               }
             });
           }
@@ -1766,6 +1813,217 @@ function (_React$Component) {
           this.props.actualizarIDVariableModificada("variable");
         }
       }
+    }
+  }, {
+    key: "verificarSiExisteExcelEnResultadosHistoricosModificar",
+    value: function verificarSiExisteExcelEnResultadosHistoricosModificar(variable) {
+      var _this23 = this;
+
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("select * from ResultadosNombreVariables where nombreVariable = '" + variable.nombre + "' and finVigencia = '1964-05-28'", function (err, result) {
+          if (err) {
+            console.log(err);
+
+            if (!rolledBack) {
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              if (result.recordset.length == 0) {
+                _this23.crearTablaDeResultadoNombreModificar(variable);
+              } else {
+                console.log("ENCONTRO");
+                console.log(result.recordset[0]);
+
+                _this23.modificarResultadosNombre(variable, result.recordset[0].inicioVigencia);
+              }
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
+    key: "crearTablaDeResultadoNombreModificar",
+    value: function crearTablaDeResultadoNombreModificar(variable) {
+      var _this24 = this;
+
+      //NOMBRE TABLA: NOMBREVARIABLE_AÑOVIGENCIA_MESVIGENCIA_DIAVIGENCIA_HORAVIGENCIA_MINUTOSVIGENCIA_SEGUNDOSVIGENCIA
+      //VIGENCIA: DIA CREACION
+      var hoy = new Date();
+      var textoCreacionTabla = 'CREATE TABLE ' + variable.nombre + '_' + hoy.getFullYear() + '_' + (hoy.getMonth() + 1) + '_' + hoy.getDate() + '_' + hoy.getHours() + '_' + hoy.getMinutes() + '_' + hoy.getSeconds() + ' ( ID int IDENTITY(1,1) PRIMARY KEY, ';
+
+      for (var i = 0; i < variable.variables.length; i++) {
+        if (i != 0) textoCreacionTabla += ', ';
+
+        if (variable.variables[i].tipo.localeCompare("numero") == 0) {
+          textoCreacionTabla += variable.variables[i].nombre + ' decimal(22,4)';
+        } else if (variable.variables[i].tipo.localeCompare("varchar") == 0) {
+          textoCreacionTabla += variable.variables[i].nombre + ' varchar(1000)';
+        } else if (variable.variables[i].tipo.localeCompare("bit") == 0) {
+          textoCreacionTabla += variable.variables[i].nombre + ' bit';
+        } else if (variable.variables[i].tipo.localeCompare("date") == 0) {
+          textoCreacionTabla += variable.variables[i].nombre + ' date';
+        }
+      }
+
+      ;
+      textoCreacionTabla += ', f3ch4Gu4rd4do date )';
+      console.log('textoCreacionTabla');
+      console.log(textoCreacionTabla);
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query(textoCreacionTabla, function (err, result) {
+          if (err) {
+            console.log(err);
+
+            if (!rolledBack) {
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              //console.log("Tabla "+variable.nombre+'_'+hoy.getFullYear()+'_'+hoy.getMonth()+'_'+hoy.getDate()+'_'+hoy.getHours()+'_'+hoy.getMinutes()+'_'+hoy.getSeconds()+" creada.");
+              console.log('CREO TABLA');
+
+              _this24.crearResultadoNombreModificar(variable, hoy);
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
+    key: "crearResultadoNombreModificar",
+    value: function crearResultadoNombreModificar(variable, hoy) {
+      var _this25 = this;
+
+      console.log('INICAR CREAR RESULTADO');
+      var mes = hoy.getMonth() + 1;
+      if (mes.toString().length == 1) mes = '0' + mes;
+      var dia = hoy.getDate();
+      if (dia.toString().length == 1) dia = '0' + dia;
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("insert into ResultadosNombreVariables (nombreVariable, inicioVigencia, finVigencia) values ('" + variable.nombre + "', '" + hoy.getFullYear() + '-' + mes + '-' + dia + " " + hoy.getHours() + ":" + hoy.getMinutes() + ":" + hoy.getSeconds() + "', '1964-05-28')", function (err, result) {
+          if (err) {
+            console.log(err);
+
+            if (!rolledBack) {
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              console.log('GUARDO RESULTADO');
+
+              _this25.verificarPeriodicidadGuardarModificar(variable, "excel", hoy);
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
+    key: "modificarResultadosNombre",
+    value: function modificarResultadosNombre(resultado, variable, hoy) {
+      var _this26 = this;
+
+      console.log('MODIFICAR CREAR RESULTADO');
+      var mes = hoy.getMonth() + 1;
+      if (mes.toString().length == 1) mes = '0' + mes;
+      var dia = hoy.getDate();
+      if (dia.toString().length == 1) dia = '0' + dia;
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("update ResultadosNombreVariables set finVigencia = '" + hoy.getFullYear() + '-' + mes + '-' + dia + " " + hoy.getHours() + "' where ID = " + resultado.ID, function (err, result) {
+          if (err) {
+            console.log(err);
+
+            if (!rolledBack) {
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              console.log('GUARDO RESULTADO');
+
+              _this26.crearTablaDeResultadoNombreModificar(variable);
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
+    key: "verificarPeriodicidadGuardarModificar",
+    value: function verificarPeriodicidadGuardarModificar(variable, tabla, hoy) {
+      var _this27 = this;
+
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("select * from PeriodicidadCalculo where variableID = " + variable.ID + " and tablaVariable = '" + tabla + "'", function (err, result) {
+          if (err) {
+            console.log(err);
+
+            if (!rolledBack) {
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              if (result.recordset.length > 0) {
+                _this27.updatePeriodicidadModificar(variable, tabla, hoy);
+              }
+              /* else {
+                 this.guardarPeriodicidad(variable, tabla, hoy);
+              }*/
+
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
+    key: "updatePeriodicidadModificar",
+    value: function updatePeriodicidadModificar(variable, tabla, hoy) {
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("update PeriodicidadCalculo where variableID = " + variable.ID + " and tablaVariable = '" + tabla + "' set fechaUltimoCalculo = '1964-05-28'", function (err, result) {
+          if (err) {
+            console.log(err);
+
+            if (!rolledBack) {
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {});
+          }
+        });
+      }); // fin transaction
     }
   }, {
     key: "retornarCampo",
@@ -3457,6 +3715,126 @@ function (_React$Component) {
       }
     }
   }, {
+    key: "modificarFormula",
+    value: function modificarFormula(formula, formulaArreglo) {
+      // 1. Make a shallow copy of the items
+      //let campos = [...this.state.camposDeTabla];
+      // 2. Make a shallow copy of the item you want to mutate
+      //let campo = [...campos[index]];
+      // 3. Replace the property you're intested in
+      //campo = {ID: campo.ID, idTabla: idTabla, nombre: campoNombre, tipo: tipoCampo, guardar: guardarCampo};
+      // 4. Put it back into our array. N.B. we *are* mutating the array here, but that's why we made a copy first
+      //campos[index] = campo;
+      // 5. Set the state to our new copy
+      var posicionSel = posicionAtributoSeleccionado; //indice = -1 cuando se va a condiciones de un campo nuevo
+      //cuando se presiona NavBar indice es igual indice anterior
+      //cuando se selecciona un campo existente indice = posicion campo
+
+      if (posicionAtributoSeleccionado == -1) {
+        posicionSel = this.state.atributos.length;
+      } //copia antigua formulas
+
+
+      var elementosFormulas, copiaAntiguaFormulas;
+
+      if (banderaEsObjeto) {
+        copiaAntiguaFormulas = formulasVariosAtributos;
+        elementosFormulas = elementosFormulasVariosAtributos;
+      } else {
+        copiaAntiguaFormulas = formulasUnAtributo;
+        elementosFormulas = elementosFormulasUnAtributos;
+      }
+
+      if (copiaAntiguaFormulas[posicionSel] == undefined) copiaAntiguaFormulas[posicionSel] = [];
+      copiaAntiguaFormulas[posicionSel][indiceFormulaSeleccionadaEdit] = formula;
+      this.setState({
+        formulas: copiaAntiguaFormulas[posicionSel]
+      });
+      if (elementosFormulas[posicionSel] == undefined) elementosFormulas[posicionSel] = [];
+      var posicionFormulaEnCampo = indiceFormulaSeleccionadaEdit; //indiceSeleccionadoFormula es el indice de la formula seleccionada, las formula se asocian por campo (1 campo => muchas formulas)
+
+      if (elementosFormulas[posicionSel][posicionFormulaEnCampo] == undefined) elementosFormulas[posicionSel][posicionFormulaEnCampo] = [];
+      var arregloDeElementos = [];
+      this.getElementsFromFormula(formulaArreglo, arregloDeElementos);
+      elementosFormulas[posicionSel][posicionFormulaEnCampo] = arregloDeElementos;
+
+      if (banderaEsObjeto) {
+        formulasVariosAtributos = copiaAntiguaFormulas;
+        elementosFormulasVariosAtributos = elementosFormulas;
+      } else {
+        formulasUnAtributo = copiaAntiguaFormulas;
+        elementosFormulasUnAtributos = elementosFormulas;
+      }
+
+      console.log('elementosFormulas');
+      console.log(elementosFormulas);
+      console.log('copiaAntiguaFormulas[posicionSel]');
+      console.log(copiaAntiguaFormulas[posicionSel]);
+      console.log('copiaAntiguaFormulas');
+      console.log(copiaAntiguaFormulas);
+      console.log('posicionSel');
+      console.log(posicionSel);
+      console.log('posicionFormulaEnCampo');
+      console.log(posicionFormulaEnCampo);
+      var self = this;
+      setTimeout(function () {
+        console.log(self.state.formulas);
+      }, 2000);
+    }
+  }, {
+    key: "eliminarFormula",
+    value: function eliminarFormula() {
+      // 1. Make a shallow copy of the items
+      //let campos = [...this.state.camposDeTabla];
+      // 2. Make a shallow copy of the item you want to mutate
+      //let campo = [...campos[index]];
+      // 3. Replace the property you're intested in
+      //campo = {ID: campo.ID, idTabla: idTabla, nombre: campoNombre, tipo: tipoCampo, guardar: guardarCampo};
+      // 4. Put it back into our array. N.B. we *are* mutating the array here, but that's why we made a copy first
+      //campos[index] = campo;
+      // 5. Set the state to our new copy
+      var posicionSel = posicionAtributoSeleccionado; //indice = -1 cuando se va a condiciones de un campo nuevo
+      //cuando se presiona NavBar indice es igual indice anterior
+      //cuando se selecciona un campo existente indice = posicion campo
+
+      if (posicionAtributoSeleccionado == -1) {
+        posicionSel = this.state.atributos.length;
+      } //copia antigua formulas
+
+
+      var elementosFormulas, copiaAntiguaFormulas;
+
+      if (banderaEsObjeto) {
+        copiaAntiguaFormulas = formulasVariosAtributos;
+        elementosFormulas = elementosFormulasVariosAtributos;
+      } else {
+        copiaAntiguaFormulas = formulasUnAtributo;
+        elementosFormulas = elementosFormulasUnAtributos;
+      }
+
+      if (copiaAntiguaFormulas[posicionSel] == undefined) copiaAntiguaFormulas[posicionSel] = [];
+      copiaAntiguaFormulas[posicionSel].splice(indiceFormulaSeleccionadaEdit, 1);
+      this.setState({
+        formulas: copiaAntiguaFormulas[posicionSel]
+      });
+      var posicionFormulaEnCampo = indiceFormulaSeleccionadaEdit;
+      elementosFormulas[posicionSel].splice(posicionFormulaEnCampo, 1);
+      console.log('elementosFormulas');
+      console.log(elementosFormulas);
+      console.log('copiaAntiguaFormulas[posicionSel]');
+      console.log(copiaAntiguaFormulas[posicionSel]);
+      console.log('copiaAntiguaFormulas');
+      console.log(copiaAntiguaFormulas);
+      console.log('posicionSel');
+      console.log(posicionSel);
+      console.log('posicionFormulaEnCampo');
+      console.log(posicionFormulaEnCampo);
+      var self = this;
+      setTimeout(function () {
+        console.log(self.state.formulas);
+      }, 2000);
+    }
+  }, {
     key: "retornoCampoFormula",
     value: function retornoCampoFormula(tipoVariableOriginal) {
       tipoDeAsignacionSeleccionado = tipoVariableOriginal;
@@ -3498,6 +3876,18 @@ function (_React$Component) {
       } else {
         if (nivelNuevoAtributoUnico < nivel) nivelNuevoAtributoUnico = nivel;
       }
+    }
+  }, {
+    key: "actualizarSeleccionFormula",
+    value: function actualizarSeleccionFormula(formula, indice) {
+      var condicionFormula = " ID = " + formula.ID,
+          condicionElemento = " formulaID = " + formula.ID;
+      this.setState({
+        formulaSeleccionadaEdit: formula,
+        condicionFormula: condicionFormula,
+        condicionElemento: condicionElemento
+      });
+      indiceFormulaSeleccionadaEdit = indice;
     }
   }, {
     key: "actualizarNombreVariable",
@@ -3568,7 +3958,7 @@ function (_React$Component) {
   }, {
     key: "getVariables",
     value: function getVariables() {
-      var _this23 = this;
+      var _this28 = this;
 
       var transaction = new _mssql["default"].Transaction(this.props.pool);
       transaction.begin(function (err) {
@@ -3586,7 +3976,7 @@ function (_React$Component) {
             }
           } else {
             transaction.commit(function (err) {
-              _this23.setState({
+              _this28.setState({
                 variables: result.recordset
               });
             });
@@ -3597,7 +3987,7 @@ function (_React$Component) {
   }, {
     key: "getExcel",
     value: function getExcel() {
-      var _this24 = this;
+      var _this29 = this;
 
       var transaction = new _mssql["default"].Transaction(this.props.pool);
       transaction.begin(function (err) {
@@ -3615,7 +4005,7 @@ function (_React$Component) {
             }
           } else {
             transaction.commit(function (err) {
-              _this24.setState({
+              _this29.setState({
                 excel: result.recordset
               });
             });
@@ -3626,7 +4016,7 @@ function (_React$Component) {
   }, {
     key: "getFormas",
     value: function getFormas() {
-      var _this25 = this;
+      var _this30 = this;
 
       var transaction = new _mssql["default"].Transaction(this.props.pool);
       transaction.begin(function (err) {
@@ -3644,7 +4034,7 @@ function (_React$Component) {
             }
           } else {
             transaction.commit(function (err) {
-              _this25.setState({
+              _this30.setState({
                 formas: result.recordset
               });
             });
@@ -3742,7 +4132,7 @@ function (_React$Component) {
   }, {
     key: "eliminarVarForma",
     value: function eliminarVarForma() {
-      var _this26 = this;
+      var _this31 = this;
 
       var transaction = new _mssql["default"].Transaction(this.props.pool);
       transaction.begin(function (err) {
@@ -3751,7 +4141,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("DELETE FROM FormasVariables WHERE ID = " + _this26.props.idVariable, function (err, result) {
+        request.query("DELETE FROM FormasVariables WHERE ID = " + _this31.props.idVariable, function (err, result) {
           if (err) {
             console.log(err);
 
@@ -3767,7 +4157,7 @@ function (_React$Component) {
   }, {
     key: "eliminarVarExcel",
     value: function eliminarVarExcel() {
-      var _this27 = this;
+      var _this32 = this;
 
       var transaction1 = new _mssql["default"].Transaction(this.props.pool);
       transaction1.begin(function (err) {
@@ -3776,7 +4166,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request1 = new _mssql["default"].Request(transaction1);
-        request1.query("DELETE FROM ExcelArchivos WHERE ID = " + _this27.props.idVariable, function (err, result) {
+        request1.query("DELETE FROM ExcelArchivos WHERE ID = " + _this32.props.idVariable, function (err, result) {
           if (err) {
             console.log(err);
 
@@ -3796,7 +4186,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request2 = new _mssql["default"].Request(transaction2);
-        request2.query("DELETE FROM ExcelVariables WHERE excelArchivoID = " + _this27.props.idVariable, function (err, result) {
+        request2.query("DELETE FROM ExcelVariables WHERE excelArchivoID = " + _this32.props.idVariable, function (err, result) {
           if (err) {
             console.log(err);
 
@@ -3812,7 +4202,7 @@ function (_React$Component) {
   }, {
     key: "eliminarVariable",
     value: function eliminarVariable() {
-      var _this28 = this;
+      var _this33 = this;
 
       var transaction2 = new _mssql["default"].Transaction(this.props.pool);
       transaction2.begin(function (err) {
@@ -3821,7 +4211,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request2 = new _mssql["default"].Request(transaction2);
-        request2.query("DELETE FROM VariablesCampos WHERE variableID = " + _this28.props.idVariable, function (err, result) {
+        request2.query("DELETE FROM VariablesCampos WHERE variableID = " + _this33.props.idVariable, function (err, result) {
           if (err) {
             console.log(err);
 
@@ -3841,7 +4231,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request3 = new _mssql["default"].Request(transaction3);
-        request3.query("DELETE FROM FormulasVariablesCampos WHERE variableID = " + _this28.props.idVariable, function (err, result) {
+        request3.query("DELETE FROM FormulasVariablesCampos WHERE variableID = " + _this33.props.idVariable, function (err, result) {
           if (err) {
             console.log(err);
 
@@ -3861,7 +4251,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request4 = new _mssql["default"].Request(transaction4);
-        request4.query("DELETE FROM ElementoFormulasVariablesCampos WHERE variableID = " + _this28.props.idVariable, function (err, result) {
+        request4.query("DELETE FROM ElementoFormulasVariablesCampos WHERE variableID = " + _this33.props.idVariable, function (err, result) {
           if (err) {
             console.log(err);
 
@@ -3881,7 +4271,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request5 = new _mssql["default"].Request(transaction5);
-        request5.query("DELETE FROM SegmentoReglasVariables WHERE variableID = " + _this28.props.idVariable, function (err, result) {
+        request5.query("DELETE FROM SegmentoReglasVariables WHERE variableID = " + _this33.props.idVariable, function (err, result) {
           if (err) {
             console.log(err);
 
@@ -3901,7 +4291,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request6 = new _mssql["default"].Request(transaction6);
-        request6.query("DELETE FROM ReglasVariables WHERE variableID = " + _this28.props.idVariable, function (err, result) {
+        request6.query("DELETE FROM ReglasVariables WHERE variableID = " + _this33.props.idVariable, function (err, result) {
           if (err) {
             console.log(err);
 
@@ -3921,7 +4311,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request7 = new _mssql["default"].Request(transaction7);
-        request7.query("DELETE FROM InstruccionSQL WHERE variableID = " + _this28.props.idVariable, function (err, result) {
+        request7.query("DELETE FROM InstruccionSQL WHERE variableID = " + _this33.props.idVariable, function (err, result) {
           if (err) {
             console.log(err);
 
@@ -3929,9 +4319,7 @@ function (_React$Component) {
               transaction7.rollback(function (err) {});
             }
           } else {
-            transaction7.commit(function (err) {
-              _this28.limpiarArreglos();
-            });
+            transaction7.commit(function (err) {});
           }
         });
       }); // fin transaction7
@@ -3943,7 +4331,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request8 = new _mssql["default"].Request(transaction8);
-        request8.query("DELETE FROM InstruccionSQLCampos WHERE variableID = " + _this28.props.idVariable, function (err, result) {
+        request8.query("DELETE FROM InstruccionSQLCampos WHERE variableID = " + _this33.props.idVariable, function (err, result) {
           if (err) {
             console.log(err);
 
@@ -3961,7 +4349,7 @@ function (_React$Component) {
   }, {
     key: "render",
     value: function render() {
-      var _this29 = this;
+      var _this34 = this;
 
       if (this.state.componenteActual.localeCompare("editarVariable") == 0) {
         return _react["default"].createElement("div", {
@@ -3971,7 +4359,7 @@ function (_React$Component) {
           }
         }, _react["default"].createElement(_EditarVariable["default"], {
           pool: this.props.pool,
-          tipoVariableOriginal: this.state.tipoVariableOriginal,
+          tipoVariableOriginal: this.props.tipoVariable,
           idVariable: this.props.idVariable,
           esObjetoVariable: this.props.esObjetoVariable,
           esInstruccionSQLVariable: this.props.esInstruccionSQLVariable,
@@ -4028,18 +4416,25 @@ function (_React$Component) {
           callbackEliminarRegla: this.eliminarRegla,
           retornarIndiceSeleccionado: this.actualizarIndiceSeleccionadoReglas,
           retornarEstadoVistaEsCondicion: function retornarEstadoVistaEsCondicion() {
-            _this29.actualizarCondicion;
+            _this34.actualizarCondicion;
           },
           retornoCampo: this.retornoCampoCondicion,
           retornarValor: this.retornarValor,
           retornoOperacion: this.retornoOperacion,
+          actualizarSeleccionFormula: this.actualizarSeleccionFormula,
           reglas: this.state.reglas,
           navbar: this.state.navbar,
           goToCreateFormula: this.goToCreateFormula,
           configuracionHome: this.props.configuracionHome,
           goOptions: this.props.goOptions,
           actualizarNivelNuevaRegla: this.actualizarNivelNuevaRegla,
-          retornoSeleccionVariables: this.props.retornoSeleccionVariables
+          retornoSeleccionVariables: this.props.retornoSeleccionVariables,
+          eliminarFormula: this.eliminarFormula,
+          esEditarVar: true,
+          tablaBorrarFormulas: "FormulasVariablesCampos",
+          tablaBorrarElementos: "ElementoFormulasVariablesCampos",
+          condicionFormula: this.state.condicionFormula,
+          condicionElemento: this.state.condicionElemento
         }));
       } else if (this.state.componenteActual.localeCompare("variableFormula") == 0) {
         return _react["default"].createElement("div", {
@@ -4049,7 +4444,12 @@ function (_React$Component) {
           }
         }, _react["default"].createElement(_Formula["default"], {
           pool: this.props.pool,
+          esEditarVar: this.state.esEditarVar,
+          esOperacionSQL: this.state.esOperacionSQL,
+          operacionSQL: this.state.operacionSQL,
+          formulaSeleccionadaEdit: this.state.formulaSeleccionadaEdit,
           anadirFormula: this.anadirFormula,
+          modificarFormula: this.modificarFormula,
           retornoCampo: this.retornoCampoFormula,
           retornoOperacion: this.retornoOperacion,
           actualizarNivelNuevaRegla: this.actualizarNivelNuevaRegla,

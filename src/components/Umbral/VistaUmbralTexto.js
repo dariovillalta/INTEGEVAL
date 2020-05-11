@@ -13,15 +13,11 @@ export default class VistaUmbralTexto extends React.Component {
     }
 
     mouseOver(nombre) {
-        console.log("EMTRE")
-        console.log(nombre)
         $("."+nombre.replace(/ /g,'')+"Slider").addClass("highlightSeccionUmbralSlider");
         $("."+nombre.replace(/ /g,'')+"Texto").addClass("highlightSeccionUmbralTexto");
     }
 
     mouseExit(nombre) {
-        console.log("ADIOS")
-        console.log(nombre)
         $("."+nombre.replace(/ /g,'')+"Slider").removeClass("highlightSeccionUmbralSlider");
         $("."+nombre.replace(/ /g,'')+"Texto").removeClass("highlightSeccionUmbralTexto");
     }

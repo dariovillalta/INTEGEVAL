@@ -19,6 +19,7 @@ export default class FuenteDatoForma extends React.Component {
         this.getFormas = this.getFormas.bind(this);
         this.verificarNoExisteNombreVar = this.verificarNoExisteNombreVar.bind(this);
         this.actualizarPeriodicidad = this.actualizarPeriodicidad.bind(this);
+        this.cargarDatePicker = this.cargarDatePicker.bind(this);
         this.isValidDate = this.isValidDate.bind(this);
     }
 
@@ -56,7 +57,7 @@ export default class FuenteDatoForma extends React.Component {
                                         rolledBack = true;
                                     });
                                     const request = new sql.Request(transaction);
-                                    request.query("insert into FormasVariables (nombre, tipo, periodicidad, fechaInicioCalculo, analista, guardar) values ('"+nombreVariable+"', '"+tipo+"', '"+periodicidad+"', '"+fechaInicioCalculo+"', '"+analista+"', '"+guardarVariable+"')", (err, result) => {
+                                    request.query("insert into FormasVariables (nombre, tipo, periodicidad, fechaInicioCalculo, analista, guardar) values ('"+nombreVariable+"', '"+tipo+"', '"+periodicidad+"', '"+fecha.getFullYear()+"-"+(fecha.getMonth()+1)+"-"+fecha.getDate()+"', '"+analista+"', '"+guardarVariable+"')", (err, result) => {
                                         if (err) {
                                             console.log(err);
                                             if (!rolledBack) {
@@ -68,7 +69,7 @@ export default class FuenteDatoForma extends React.Component {
                                                 alert("Variable Creada");
                                                 $("#nombreVariable").val("");
                                                 $("#tipo").val("numero");
-                                                $("#periodicidad").val("");
+                                                //$("#periodicidad").val("");
                                                 $("#analista").val("");
                                                 this.getFormas();
                                             });
@@ -170,14 +171,14 @@ export default class FuenteDatoForma extends React.Component {
     verificarNoExisteNombreVar (nombre) {
         var noExiste = true;
         for (var i = 0; i < variables.length; i++) {
-            if (this.state.variables[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
+            if (variables[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
                 noExiste = false;
                 break;
             }
         };
         if(noExiste) {
             for (var i = 0; i < excel.length; i++) {
-                if (this.state.excel[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
+                if (excel[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
                     noExiste = false;
                     break;
                 }
@@ -185,7 +186,7 @@ export default class FuenteDatoForma extends React.Component {
         }
         if(noExiste) {
             for (var i = 0; i < formas.length; i++) {
-                if (this.state.formas[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
+                if (formas[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
                     noExiste = false;
                     break;
                 }
@@ -199,6 +200,16 @@ export default class FuenteDatoForma extends React.Component {
         this.setState({
             valorPeriodicidad: periodicidad
         }, this.cargarDatePicker );
+    }
+
+    cargarDatePicker () {
+        $('#fecha').datepicker({
+            format: "dd-mm-yyyy",
+            todayHighlight: true,
+            viewMode: "days", 
+            minViewMode: "days",
+            language: 'es'
+        });
     }
 
     isValidDate (fecha) {

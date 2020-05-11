@@ -187,6 +187,8 @@ function (_React$Component) {
             } else {
               _transaction.commit(function (err) {
                 if (result.recordset.length > 0) {
+                  console.log("yeah");
+
                   _this3.editarVariables(result.recordset[0].ID, false, false, "forma");
                 }
               });
@@ -250,6 +252,7 @@ function (_React$Component) {
       } else if (this.state.componenteActual.localeCompare("editarVariables") == 0) {
         return _react["default"].createElement("div", null, _react["default"].createElement(_EditarVariablesHome["default"], {
           pool: this.props.pool,
+          goOptions: this.props.goOptions,
           idVariable: this.state.idVariable,
           tipoVariable: this.state.tipoVariable,
           esObjetoVariable: this.state.esObjetoVariable,

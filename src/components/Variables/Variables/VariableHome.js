@@ -135,6 +135,7 @@ export default class VariableHome extends React.Component {
                     } else {
                         transaction.commit(err => {
                             if(result.recordset.length > 0) {
+                                console.log("yeah");
                                 this.editarVariables(result.recordset[0].ID, false, false, "forma");
                             }
                         });
@@ -199,6 +200,7 @@ export default class VariableHome extends React.Component {
             return (
                 <div>
                     <EditarVariablesHome pool={this.props.pool}
+                                    goOptions={this.props.goOptions}
                                     idVariable={this.state.idVariable}
                                     tipoVariable={this.state.tipoVariable}
                                     esObjetoVariable={this.state.esObjetoVariable}

@@ -28,6 +28,7 @@ export default class FuenteDatoExcel extends React.Component {
         this.getExcel = this.getExcel.bind(this);
         this.getFormas = this.getFormas.bind(this);
         this.verificarNoExisteNombreVar = this.verificarNoExisteNombreVar.bind(this);
+        this.verificarNoExisteNombreVarUpdate = this.verificarNoExisteNombreVarUpdate.bind(this);
         this.actualizarPeriodicidad = this.actualizarPeriodicidad.bind(this);
         this.cargarDatePicker = this.cargarDatePicker.bind(this);
         this.actualizarPeriodicidadUpdate = this.actualizarPeriodicidadUpdate.bind(this);
@@ -169,7 +170,7 @@ export default class FuenteDatoExcel extends React.Component {
                     rolledBack = true;
                 });
                 const request = new sql.Request(transaction);
-                request.query("insert into ExcelVariables (excelArchivoID, nombreHoja, nombre, operacion, celdas, tipo, periodicidad, fechaInicioCalculo, analista, guardar) values ("+archivoExcelID+", '"+nombreHoja+"', '"+nombre+"', '"+operacion+"', '"+celdas+"', '"+tipo+"', '"+periodicidad+"', '"+fechaInicioCalculo+"', '"+analista+"', '"+guardarVariable+"')", (err, result) => {
+                request.query("insert into ExcelVariables (excelArchivoID, nombreHoja, nombre, operacion, celdas, tipo, periodicidad, fechaInicioCalculo, analista, guardar) values ("+archivoExcelID+", '"+nombreHoja+"', '"+nombre+"', '"+operacion+"', '"+celdas+"', '"+tipo+"', '"+periodicidad+"', '"+fechaInicioCalculo.getFullYear()+"-"+(fechaInicioCalculo.getMonth()+1)+"-"+fechaInicioCalculo.getDate()+"', '"+analista+"', '"+guardarVariable+"')", (err, result) => {
                     if (err) {
                         console.log(err);
                         if (!rolledBack) {
@@ -232,7 +233,7 @@ export default class FuenteDatoExcel extends React.Component {
                                             $("#hojaExcelVariable").val("");
                                             $("#tipoVariable").val("numero");
                                             $("#celdasVariable").val("");
-                                            $("#periodicidad").val("");
+                                            //$("#periodicidad").val("");
                                             $("#analista").val("");
                                         } else {
                                             alert('Ingrese un valor para el valor de analista que debe ser menor a 101 caracteres');
@@ -274,10 +275,12 @@ export default class FuenteDatoExcel extends React.Component {
                                 if($("#periodicidad"+index).val().localeCompare("-1") == 0)
                                     fecha = new Date(1964, 4, 28);
                                 else
-                                    fecha = $("#fecha").datepicker('getDate');
+                                    fecha = $("#fecha"+index).datepicker('getDate');
+                                console.log('fecha')
+                                console.log(fecha)
                                 if(this.isValidDate(fecha)) {
                                     if($("#analista"+index).val().length > 0 && $("#analista"+index).val().length < 101) {
-                                        if(this.verificarNoExisteNombreVar($("#nombreVariable"+index).val())) {
+                                        if(this.verificarNoExisteNombreVarUpdate($("#nombreVariable"+index).val(), index)) {
                                             var copyTemp = [...this.state.variables];
                                             copyTemp[index].nombre = $("#nombreVariable"+index).val();
                                             copyTemp[index].operacion = $("#operacion"+index).val();
@@ -294,7 +297,7 @@ export default class FuenteDatoExcel extends React.Component {
                                                 guardarVariable = false;
                                             copyTemp[index].guardar = guardarVariable;
                                             var copyTempPeriodicidad = [...this.state.valoresPeriodicidad];
-                                            copyTempPeriodicidad[index] = periodicidad;
+                                            copyTempPeriodicidad[index] = $("#periodicidad"+index).val();
                                             this.setState({
                                                 variables: copyTemp,
                                                 valoresPeriodicidad: copyTempPeriodicidad
@@ -409,10 +412,6 @@ export default class FuenteDatoExcel extends React.Component {
     }
 
     verificarNoExisteNombreVar (nombre) {
-        console.log('nombre')
-        console.log(nombre)
-        console.log('this.state.variables')
-        console.log(this.state.variables)
         var noExiste = true;
         for (var i = 0; i < variables.length; i++) {
             if (variables[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
@@ -423,6 +422,49 @@ export default class FuenteDatoExcel extends React.Component {
         if(noExiste) {
             for (var i = 0; i < excel.length; i++) {
                 if (excel[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
+                    noExiste = false;
+                    break;
+                }
+            };
+        }
+        if(noExiste) {
+            for (var i = 0; i < this.state.variables.length; i++) {
+                if (this.state.variables[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
+                    noExiste = false;
+                    break;
+                }
+            };
+        }
+        if(noExiste) {
+            for (var i = 0; i < formas.length; i++) {
+                if (formas[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
+                    noExiste = false;
+                    break;
+                }
+            };
+        }
+        return noExiste;
+    }
+
+    verificarNoExisteNombreVarUpdate (nombre, index) {
+        var noExiste = true;
+        for (var i = 0; i < variables.length; i++) {
+            if (variables[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
+                noExiste = false;
+                break;
+            }
+        };
+        if(noExiste) {
+            for (var i = 0; i < excel.length; i++) {
+                if (excel[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
+                    noExiste = false;
+                    break;
+                }
+            };
+        }
+        if(noExiste) {
+            for (var i = 0; i < this.state.variables.length; i++) {
+                if (this.state.variables[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0 && index != i) {
                     noExiste = false;
                     break;
                 }
@@ -463,11 +505,11 @@ export default class FuenteDatoExcel extends React.Component {
         this.setState({
             valorPeriodicidad: periodicidad,
             valoresPeriodicidad: copyTempPeriodicidad
-        } );
+        });
     }
 
-    inicializarFecha (periodicidad, index, fecha) {
-        if(periodicidad.localeCompare("-1") != 0) {
+    inicializarFecha (index, fecha) {
+        if(this.state.valoresPeriodicidad[index].localeCompare("-1") != 0) {
             setTimeout(function () {
                 $('#fecha'+index).datepicker({
                     format: "dd-mm-yyyy",
@@ -476,7 +518,12 @@ export default class FuenteDatoExcel extends React.Component {
                     minViewMode: "days",
                     language: 'es'
                 });
-                $("#fecha"+index).datepicker("setDate", fecha);
+                if(fecha.getFullYear() == 1964 && fecha.getMonth() == 4 && fecha.getDate() == 28) {
+                    //
+                } else {
+                    console.log('YEAAAH')
+                    $("#fecha"+index).datepicker("setDate", fecha);
+                }
             }, 500);
             return true;
         }
@@ -486,13 +533,11 @@ export default class FuenteDatoExcel extends React.Component {
     isValidDate (fecha) {
         if (Object.prototype.toString.call(fecha) === "[object Date]") {
             if (isNaN(fecha.getTime())) {
-                alert("Ingrese una fecha valida.");
                 return false;
             } else {
                 return true;
             }
         } else {
-            alert("Ingrese una fecha valida.");
             return false;
         }
     }
@@ -696,7 +741,7 @@ export default class FuenteDatoExcel extends React.Component {
                             </div>
                         </div>
                         {
-                            this.state.valoresPeriodicidad[i].localeCompare("-1") != 0 && this.inicializarFecha(variable.periodicidad, i, variable.fechaInicioCalculo)
+                            this.state.valoresPeriodicidad[i].localeCompare("-1") != 0 && this.inicializarFecha(i, variable.fechaInicioCalculo)
                             ?
                                 <div className={"row"} style={{width: "100%"}}>
                                     <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>

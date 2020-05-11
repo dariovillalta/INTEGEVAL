@@ -92,7 +92,10 @@ var nombreIndicador = '',
     periodicidadIndicador = '',
     tipoIndicador = '',
     nombreEncargadoIndicador = '';
-var banderaEsFormulaIndicador = false;
+var banderaEsFormulaIndicador = false,
+    mostrarToleranciaPorcentaje = false,
+    periodicidadIndicador = "-1",
+    fecha = '';
 var contadorObjetosGuardados = 0,
     contadorObjetosAGuardar = 0;
 
@@ -113,7 +116,9 @@ function (_React$Component) {
       x: 0,
       atributos: [],
       tipoNuevaVariable: "",
-      reglas: []
+      reglas: [],
+      mostrarToleranciaPorcentaje: mostrarToleranciaPorcentaje,
+      periodicidadIndicador: periodicidadIndicador
     };
     _this.crearIndicador = _this.crearIndicador.bind(_assertThisInitialized(_this));
     _this.getIndicadorID = _this.getIndicadorID.bind(_assertThisInitialized(_this));
@@ -139,8 +144,16 @@ function (_React$Component) {
     _this.getElementsFromFormula = _this.getElementsFromFormula.bind(_assertThisInitialized(_this));
     _this.modificarRegla = _this.modificarRegla.bind(_assertThisInitialized(_this));
     _this.eliminarRegla = _this.eliminarRegla.bind(_assertThisInitialized(_this));
-    console.log('this.props');
-    console.log(_this.props);
+    _this.updateNombreIndicador = _this.updateNombreIndicador.bind(_assertThisInitialized(_this));
+    _this.updateCodigoIndicador = _this.updateCodigoIndicador.bind(_assertThisInitialized(_this));
+    _this.updateValorIdealIndicador = _this.updateValorIdealIndicador.bind(_assertThisInitialized(_this));
+    _this.updateTipoValorIdealIndicador = _this.updateTipoValorIdealIndicador.bind(_assertThisInitialized(_this));
+    _this.updateToleranciaIndicador = _this.updateToleranciaIndicador.bind(_assertThisInitialized(_this));
+    _this.updatePeriodicidadIndicador = _this.updatePeriodicidadIndicador.bind(_assertThisInitialized(_this));
+    _this.cargarDatePicker = _this.cargarDatePicker.bind(_assertThisInitialized(_this));
+    _this.updateTipoIndicador = _this.updateTipoIndicador.bind(_assertThisInitialized(_this));
+    _this.updateNombreEncargadoIndicador = _this.updateNombreEncargadoIndicador.bind(_assertThisInitialized(_this));
+    _this.isValidDate = _this.isValidDate.bind(_assertThisInitialized(_this));
     return _this;
   }
 
@@ -156,9 +169,9 @@ function (_React$Component) {
       var valorIdeal = parseInt($("#valorIdeal").val());
       var tipoValorIdeal = $("#tipoValorIdeal").val();
       var tolerancia = parseInt($("#tolerancia").val());
-      var tipoTolerancia = $("#tipoTolerancia").val();
       var tipoIndicador = $("#tipoIndicador").val();
       var periodicidad = $("#periodicidad").val();
+      var fecha = $("#fecha").datepicker('getDate');
       var analista = $("#analista").val();
       var riesgoPadre = this.props.riesgoPadre;
       console.log('nombre');
@@ -175,8 +188,6 @@ function (_React$Component) {
       console.log(tipoValorIdeal);
       console.log('tolerancia');
       console.log(tolerancia);
-      console.log('tipoTolerancia');
-      console.log(tipoTolerancia);
       console.log('periodicidad');
       console.log(periodicidad);
       console.log('tipoIndicador');
@@ -192,7 +203,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("insert into Indicadores (nombre, codigo, formula, peso, tolerancia, tipoTolerancia, valorIdeal, tipoValorIdeal, periodicidad, tipoIndicador, analista, idRiesgoPadre) values ('" + nombre + "', '" + codigo + "', '" + formula + "', " + peso + ", " + tolerancia + ", '" + tipoTolerancia + "', " + valorIdeal + ", '" + tipoValorIdeal + "', '" + periodicidad + "', '" + tipoIndicador + "', '" + analista + "', " + riesgoPadre + ")", function (err, result) {
+        request.query("insert into Indicadores (nombre, codigo, formula, peso, tolerancia, valorIdeal, tipoValorIdeal, periodicidad, tipoIndicador, analista, idRiesgoPadre, fechaInicioCalculo) values ('" + nombre + "', '" + codigo + "', '" + formula + "', " + peso + ", " + tolerancia + ", " + valorIdeal + ", '" + tipoValorIdeal + "', '" + periodicidad + "', '" + tipoIndicador + "', '" + analista + "', " + riesgoPadre + ", '" + fecha.getFullYear() + "-" + (fecha.getMonth() + 1) + "-" + fecha.getDate() + "')", function (err, result) {
           if (err) {
             console.log(err);
 
@@ -2309,6 +2320,16 @@ function (_React$Component) {
     key: "updateTipoValorIdealIndicador",
     value: function updateTipoValorIdealIndicador() {
       tipoValorIdealIndicador = $("#tipoValorIdeal").val();
+
+      if (tipoValorIdealIndicador.localeCompare("numerico") == 0) {
+        mostrarToleranciaPorcentaje = false;
+      } else {
+        mostrarToleranciaPorcentaje = true;
+      }
+
+      this.setState({
+        mostrarToleranciaPorcentaje: mostrarToleranciaPorcentaje
+      });
     }
   }, {
     key: "updateToleranciaIndicador",
@@ -2316,14 +2337,34 @@ function (_React$Component) {
       toleranciaIndicador = $("#tolerancia").val();
     }
   }, {
-    key: "updateTipoTolerancia",
-    value: function updateTipoTolerancia() {
-      tipoToleranciaIndicador = $("#tipoTolerancia").val();
-    }
-  }, {
     key: "updatePeriodicidadIndicador",
     value: function updatePeriodicidadIndicador() {
       periodicidadIndicador = $("#periodicidad").val();
+      this.setState({
+        periodicidadIndicador: periodicidadIndicador
+      }, this.cargarDatePicker);
+    }
+  }, {
+    key: "cargarDatePicker",
+    value: function cargarDatePicker() {
+      $('#fecha').datepicker({
+        format: "dd-mm-yyyy",
+        todayHighlight: true,
+        viewMode: "days",
+        minViewMode: "days",
+        language: 'es'
+      });
+
+      if (this.isValidDate(fecha)) {
+        $("#fecha").datepicker("setDate", fecha);
+      }
+
+      var self = this;
+      $('#fecha').datepicker().on('changeDate', function () {
+        if (self.isValidDate(fecha)) {
+          fecha = $("#fecha").datepicker('getDate');
+        }
+      });
     }
   }, {
     key: "updateTipoIndicador",
@@ -2334,6 +2375,19 @@ function (_React$Component) {
     key: "updateNombreEncargadoIndicador",
     value: function updateNombreEncargadoIndicador() {
       nombreEncargadoIndicador = $("#analista").val();
+    }
+  }, {
+    key: "isValidDate",
+    value: function isValidDate(fecha) {
+      if (Object.prototype.toString.call(fecha) === "[object Date]") {
+        if (isNaN(fecha.getTime())) {
+          return false;
+        } else {
+          return true;
+        }
+      } else {
+        return false;
+      }
     }
   }, {
     key: "render",
@@ -2466,12 +2520,33 @@ function (_React$Component) {
           className: "col-form-label"
         }, "Valor Ideal")), _react["default"].createElement("div", {
           className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
-        }, _react["default"].createElement("input", {
+        }, this.state.mostrarToleranciaPorcentaje ? _react["default"].createElement("input", {
           id: "valorIdeal",
+          name: "tolerancia",
+          step: "1",
+          min: "0",
+          type: "number",
           defaultValue: valorIdealIndicador,
-          onKeyUp: this.updateValorIdealIndicador,
-          type: "text",
-          className: "form-control form-control-sm"
+          onChange: this.updateValorIdealIndicador,
+          style: {
+            textAlign: "left",
+            background: "url(../assets/percentage.png) no-repeat left",
+            backgroundSize: "10px",
+            backgroundPosition: "right center",
+            width: "100%"
+          }
+        }) : _react["default"].createElement("input", {
+          id: "valorIdeal",
+          name: "tolerancia",
+          step: "1",
+          min: "0",
+          type: "number",
+          defaultValue: valorIdealIndicador,
+          onChange: this.updateValorIdealIndicador,
+          style: {
+            textAlign: "left",
+            width: "100%"
+          }
         }))), _react["default"].createElement("div", {
           className: "row",
           style: {
@@ -2505,34 +2580,34 @@ function (_React$Component) {
           className: "col-form-label"
         }, "Tolerancia")), _react["default"].createElement("div", {
           className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
-        }, _react["default"].createElement("input", {
+        }, this.state.mostrarToleranciaPorcentaje ? _react["default"].createElement("input", {
           id: "tolerancia",
+          name: "tolerancia",
+          step: "1",
+          min: "0",
+          type: "number",
           defaultValue: toleranciaIndicador,
-          onKeyUp: this.updateToleranciaIndicador,
-          type: "text",
-          className: "form-control form-control-sm"
-        }))), _react["default"].createElement("div", {
-          className: "row",
+          onChange: this.updateToleranciaIndicador,
           style: {
+            textAlign: "left",
+            background: "url(../assets/percentage.png) no-repeat left",
+            backgroundSize: "10px",
+            backgroundPosition: "right center",
             width: "100%"
           }
-        }, _react["default"].createElement("div", {
-          className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
-        }, _react["default"].createElement("label", {
-          htmlFor: "tipoTolerancia",
-          className: "col-form-label"
-        }, "Tipo de Tolerancia")), _react["default"].createElement("div", {
-          className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
-        }, _react["default"].createElement("select", {
-          id: "tipoTolerancia",
-          defaultValue: tipoToleranciaIndicador,
-          onChange: this.updateTipoTolerancia,
-          className: "form-control"
-        }, _react["default"].createElement("option", {
-          value: "numerico"
-        }, "Num\xE9rico"), _react["default"].createElement("option", {
-          value: "porcentual"
-        }, "Porcentual")))), _react["default"].createElement("div", {
+        }) : _react["default"].createElement("input", {
+          id: "tolerancia",
+          name: "tolerancia",
+          step: "1",
+          min: "0",
+          type: "number",
+          defaultValue: toleranciaIndicador,
+          onChange: this.updateToleranciaIndicador,
+          style: {
+            textAlign: "left",
+            width: "100%"
+          }
+        }))), _react["default"].createElement("div", {
           className: "row",
           style: {
             width: "100%"
@@ -2556,7 +2631,23 @@ function (_React$Component) {
             value: periodicidad.nombre,
             key: periodicidad.nombre
           }, periodicidad.nombre);
-        })))), _react["default"].createElement("div", {
+        })))), this.state.periodicidadIndicador.localeCompare("-1") != 0 ? _react["default"].createElement("div", {
+          className: "row",
+          style: {
+            width: "100%"
+          }
+        }, _react["default"].createElement("div", {
+          className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
+        }, _react["default"].createElement("label", {
+          htmlFor: "fecha",
+          className: "col-form-label"
+        }, "Fecha de Inicio de C\xE1lculo:")), _react["default"].createElement("div", {
+          className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
+        }, _react["default"].createElement("input", {
+          type: "text",
+          className: "form-control",
+          id: "fecha"
+        }))) : null, _react["default"].createElement("div", {
           className: "row",
           style: {
             width: "100%"

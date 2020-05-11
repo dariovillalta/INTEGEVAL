@@ -9,6 +9,8 @@ var _react = _interopRequireDefault(require("react"));
 
 var _mssql = _interopRequireDefault(require("mssql"));
 
+var _Modal = _interopRequireDefault(require("../../../Modal/Modal.js"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -45,6 +47,24 @@ var periodicidad = [{
 }, {
   nombre: "anual"
 }];
+/*
+    **************************************
+    **************************************
+                VARIABLES CALCULO 
+    **************************************
+    **************************************
+*/
+
+window.arregloDeErroresFormas = [];
+window.arregloHTMLFormas = []; //Arreglo que contiene el codigo html de las formas
+
+/*
+    **************************************
+    **************************************
+            VARIABLES CALCULO FIN
+    **************************************
+    **************************************
+*/
 
 var FuenteDatoForma =
 /*#__PURE__*/
@@ -61,7 +81,11 @@ function (_React$Component) {
       nombre: "",
       tipo: "",
       guardar: "",
-      valorPeriodicidad: '-1'
+      valorPeriodicidad: '-1',
+      forma: null,
+      showModalForma: true,
+      tituloVariableForma: "",
+      htmlForma: ''
     };
     _this.crearVariable = _this.crearVariable.bind(_assertThisInitialized(_this));
     _this.traerForma = _this.traerForma.bind(_assertThisInitialized(_this));
@@ -72,7 +96,33 @@ function (_React$Component) {
     _this.getFormas = _this.getFormas.bind(_assertThisInitialized(_this));
     _this.verificarNoExisteNombreVar = _this.verificarNoExisteNombreVar.bind(_assertThisInitialized(_this));
     _this.actualizarPeriodicidad = _this.actualizarPeriodicidad.bind(_assertThisInitialized(_this));
+    _this.cargarDatePicker = _this.cargarDatePicker.bind(_assertThisInitialized(_this));
     _this.isValidDate = _this.isValidDate.bind(_assertThisInitialized(_this));
+    _this.verificarSiExisteExcelEnResultadosHistoricosModificar = _this.verificarSiExisteExcelEnResultadosHistoricosModificar.bind(_assertThisInitialized(_this));
+    _this.crearTablaDeResultadoNombreModificar = _this.crearTablaDeResultadoNombreModificar.bind(_assertThisInitialized(_this));
+    _this.crearResultadoNombreModificar = _this.crearResultadoNombreModificar.bind(_assertThisInitialized(_this));
+    _this.modificarResultadosNombre = _this.modificarResultadosNombre.bind(_assertThisInitialized(_this));
+    _this.verificarPeriodicidadGuardarModificar = _this.verificarPeriodicidadGuardarModificar.bind(_assertThisInitialized(_this));
+    _this.updatePeriodicidadModificar = _this.updatePeriodicidadModificar.bind(_assertThisInitialized(_this));
+    _this.verificarPeriodicidad = _this.verificarPeriodicidad.bind(_assertThisInitialized(_this));
+    _this.addDays = _this.addDays.bind(_assertThisInitialized(_this));
+    _this.addMonths = _this.addMonths.bind(_assertThisInitialized(_this));
+    _this.addYears = _this.addYears.bind(_assertThisInitialized(_this));
+    _this.traerPeriodicidadVariable = _this.traerPeriodicidadVariable.bind(_assertThisInitialized(_this));
+    _this.formaCrearVariable = _this.formaCrearVariable.bind(_assertThisInitialized(_this));
+    _this.iniciarMostrarFormas = _this.iniciarMostrarFormas.bind(_assertThisInitialized(_this));
+    _this.updateForm = _this.updateForm.bind(_assertThisInitialized(_this));
+    _this.loadFechas = _this.loadFechas.bind(_assertThisInitialized(_this));
+    _this.closeModalForma = _this.closeModalForma.bind(_assertThisInitialized(_this));
+    _this.verificarSiExisteFormaEnResultadosHistoricos = _this.verificarSiExisteFormaEnResultadosHistoricos.bind(_assertThisInitialized(_this));
+    _this.crearTablaDeResultadoNombreForma = _this.crearTablaDeResultadoNombreForma.bind(_assertThisInitialized(_this));
+    _this.crearResultadoNombreForma = _this.crearResultadoNombreForma.bind(_assertThisInitialized(_this));
+    _this.guardarResultadosNombreForma = _this.guardarResultadosNombreForma.bind(_assertThisInitialized(_this));
+    _this.guardarForma = _this.guardarForma.bind(_assertThisInitialized(_this));
+    _this.borrarForma = _this.borrarForma.bind(_assertThisInitialized(_this));
+    _this.verificarPeriodicidadGuardar = _this.verificarPeriodicidadGuardar.bind(_assertThisInitialized(_this));
+    _this.updatePeriodicidad = _this.updatePeriodicidad.bind(_assertThisInitialized(_this));
+    _this.guardarPeriodicidad = _this.guardarPeriodicidad.bind(_assertThisInitialized(_this));
     return _this;
   }
 
@@ -112,12 +162,21 @@ function (_React$Component) {
                 _this2.setState({
                   nombre: result.recordset[0].nombre,
                   tipo: result.recordset[0].tipo,
-                  guardar: result.recordset[0].guardar
+                  guardar: result.recordset[0].guardar,
+                  valorPeriodicidad: result.recordset[0].periodicidad,
+                  forma: result.recordset[0]
                 });
 
                 $("#nombreVariable").val(result.recordset[0].nombre);
                 $("#tipo").val(result.recordset[0].tipo);
                 if (result.recordset[0].guardar) $("#guardarVariable").prop('checked', true);else $("#guardarVariable").prop('checked', false);
+                $("#periodicidad").val(result.recordset[0].periodicidad);
+                $("#analista").val(result.recordset[0].analista);
+
+                if (result.recordset[0].fechaInicioCalculo.getFullYear() == 1964 && result.recordset[0].fechaInicioCalculo.getMonth() == 4 && result.recordset[0].fechaInicioCalculo.getDate() == 28) {//
+                } else {
+                  $("#fecha").datepicker("setDate", result.recordset[0].fechaInicioCalculo);
+                }
               }
             });
           }
@@ -160,7 +219,7 @@ function (_React$Component) {
                         rolledBack = true;
                       });
                       var request = new _mssql["default"].Request(transaction);
-                      request.query("insert into FormasVariables (nombre, tipo, periodicidad, fechaInicioCalculo, analista, guardar) values ('" + nombreVariable + "', '" + tipo + "', '" + periodicidad + "', '" + fechaInicioCalculo + "', '" + analista + "', '" + guardarVariable + "')", function (err, result) {
+                      request.query("insert into FormasVariables (nombre, tipo, periodicidad, fechaInicioCalculo, analista, guardar) values ('" + nombreVariable + "', '" + tipo + "', '" + periodicidad + "', '" + fecha.getFullYear() + "-" + (fecha.getMonth() + 1) + "-" + fecha.getDate() + "', '" + analista + "', '" + guardarVariable + "')", function (err, result) {
                         if (err) {
                           console.log(err);
 
@@ -174,6 +233,17 @@ function (_React$Component) {
                             _this3.getFormas();
 
                             _this3.props.actualizarIDVariableModificada("forma");
+
+                            var forma = {
+                              nombreVariable: nombreVariable,
+                              tipo: tipo,
+                              guardarVariable: guardarVariable,
+                              periodicidad: periodicidad,
+                              fecha: fecha,
+                              analista: analista
+                            };
+
+                            _this3.verificarSiExisteExcelEnResultadosHistoricosModificar(forma);
                           });
                         }
                       });
@@ -189,7 +259,7 @@ function (_React$Component) {
                       });
 
                       var request = new _mssql["default"].Request(_transaction);
-                      request.query("update FormasVariables set nombre = '" + nombreVariable + "', tipo = '" + tipo + "', periodicidad = '" + periodicidad + "', guardar = '" + guardarVariable + "', fechaInicioCalculo = '" + fechaInicioCalculo + "', analista = '" + analista + "' where ID = " + _this3.props.idVariable, function (err, result) {
+                      request.query("update FormasVariables set nombre = '" + nombreVariable + "', tipo = '" + tipo + "', periodicidad = '" + periodicidad + "', guardar = '" + guardarVariable + "', fechaInicioCalculo = '" + fecha.getFullYear() + "-" + (fecha.getMonth() + 1) + "-" + fecha.getDate() + "', analista = '" + analista + "' where ID = " + _this3.props.idVariable, function (err, result) {
                         if (err) {
                           console.log(err);
 
@@ -201,6 +271,17 @@ function (_React$Component) {
                             alert("Variable Modificada");
 
                             _this3.getFormas();
+
+                            var forma = {
+                              nombreVariable: nombreVariable,
+                              tipo: tipo,
+                              guardarVariable: guardarVariable,
+                              periodicidad: periodicidad,
+                              fecha: fecha,
+                              analista: analista
+                            };
+
+                            _this3.verificarSiExisteExcelEnResultadosHistoricosModificar(forma);
                           });
                         }
                       });
@@ -411,9 +492,7 @@ function (_React$Component) {
               transaction7.rollback(function (err) {});
             }
           } else {
-            transaction7.commit(function (err) {
-              _this5.limpiarArreglos();
-            });
+            transaction7.commit(function (err) {});
           }
         });
       }); // fin transaction7
@@ -542,9 +621,16 @@ function (_React$Component) {
 
       if (noExiste) {
         for (var i = 0; i < formas.length; i++) {
-          if (formas[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
-            noExiste = false;
-            break;
+          if (this.props.tipoVariableOriginal.localeCompare("forma") == 0) {
+            if (formas[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0 && formas[i].ID != this.props.idVariable) {
+              noExiste = false;
+              break;
+            }
+          } else {
+            if (formas[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
+              noExiste = false;
+              break;
+            }
           }
         }
 
@@ -562,6 +648,17 @@ function (_React$Component) {
       }, this.cargarDatePicker);
     }
   }, {
+    key: "cargarDatePicker",
+    value: function cargarDatePicker() {
+      $('#fecha').datepicker({
+        format: "dd-mm-yyyy",
+        todayHighlight: true,
+        viewMode: "days",
+        minViewMode: "days",
+        language: 'es'
+      });
+    }
+  }, {
     key: "isValidDate",
     value: function isValidDate(fecha) {
       if (Object.prototype.toString.call(fecha) === "[object Date]") {
@@ -577,8 +674,901 @@ function (_React$Component) {
       }
     }
   }, {
+    key: "verificarSiExisteExcelEnResultadosHistoricosModificar",
+    value: function verificarSiExisteExcelEnResultadosHistoricosModificar(variable) {
+      var _this6 = this;
+
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("select * from ResultadosNombreVariables where nombreVariable = '" + variable.nombre + "' and finVigencia = '1964-05-28'", function (err, result) {
+          if (err) {
+            console.log(err);
+
+            if (!rolledBack) {
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              if (result.recordset.length == 0) {
+                _this6.crearTablaDeResultadoNombreModificar(variable);
+              } else {
+                console.log("ENCONTRO");
+                console.log(result.recordset[0]);
+
+                _this6.modificarResultadosNombre(variable, result.recordset[0].inicioVigencia);
+              }
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
+    key: "crearTablaDeResultadoNombreModificar",
+    value: function crearTablaDeResultadoNombreModificar(variable) {
+      var _this7 = this;
+
+      //NOMBRE TABLA: NOMBREVARIABLE_AÑOVIGENCIA_MESVIGENCIA_DIAVIGENCIA_HORAVIGENCIA_MINUTOSVIGENCIA_SEGUNDOSVIGENCIA
+      //VIGENCIA: DIA CREACION
+      var hoy = new Date();
+      var textoCreacionTabla = 'CREATE TABLE ' + variable.nombre + '_' + hoy.getFullYear() + '_' + (hoy.getMonth() + 1) + '_' + hoy.getDate() + '_' + hoy.getHours() + '_' + hoy.getMinutes() + '_' + hoy.getSeconds() + ' ( ID int IDENTITY(1,1) PRIMARY KEY, ';
+
+      for (var i = 0; i < variable.variables.length; i++) {
+        if (i != 0) textoCreacionTabla += ', ';
+
+        if (variable.variables[i].tipo.localeCompare("numero") == 0) {
+          textoCreacionTabla += variable.variables[i].nombre + ' decimal(22,4)';
+        } else if (variable.variables[i].tipo.localeCompare("varchar") == 0) {
+          textoCreacionTabla += variable.variables[i].nombre + ' varchar(1000)';
+        } else if (variable.variables[i].tipo.localeCompare("bit") == 0) {
+          textoCreacionTabla += variable.variables[i].nombre + ' bit';
+        } else if (variable.variables[i].tipo.localeCompare("date") == 0) {
+          textoCreacionTabla += variable.variables[i].nombre + ' date';
+        }
+      }
+
+      ;
+      textoCreacionTabla += ', f3ch4Gu4rd4do date )';
+      console.log('textoCreacionTabla');
+      console.log(textoCreacionTabla);
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query(textoCreacionTabla, function (err, result) {
+          if (err) {
+            console.log(err);
+
+            if (!rolledBack) {
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              //console.log("Tabla "+variable.nombre+'_'+hoy.getFullYear()+'_'+hoy.getMonth()+'_'+hoy.getDate()+'_'+hoy.getHours()+'_'+hoy.getMinutes()+'_'+hoy.getSeconds()+" creada.");
+              console.log('CREO TABLA');
+
+              _this7.crearResultadoNombreModificar(variable, hoy);
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
+    key: "crearResultadoNombreModificar",
+    value: function crearResultadoNombreModificar(variable, hoy) {
+      var _this8 = this;
+
+      console.log('INICAR CREAR RESULTADO');
+      var mes = hoy.getMonth() + 1;
+      if (mes.toString().length == 1) mes = '0' + mes;
+      var dia = hoy.getDate();
+      if (dia.toString().length == 1) dia = '0' + dia;
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("insert into ResultadosNombreVariables (nombreVariable, inicioVigencia, finVigencia) values ('" + variable.nombre + "', '" + hoy.getFullYear() + '-' + mes + '-' + dia + " " + hoy.getHours() + ":" + hoy.getMinutes() + ":" + hoy.getSeconds() + "', '1964-05-28')", function (err, result) {
+          if (err) {
+            console.log(err);
+
+            if (!rolledBack) {
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              console.log('GUARDO RESULTADO');
+
+              _this8.verificarPeriodicidadGuardarModificar(variable, "excel", hoy);
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
+    key: "modificarResultadosNombre",
+    value: function modificarResultadosNombre(resultado, variable, hoy) {
+      var _this9 = this;
+
+      console.log('MODIFICAR CREAR RESULTADO');
+      var mes = hoy.getMonth() + 1;
+      if (mes.toString().length == 1) mes = '0' + mes;
+      var dia = hoy.getDate();
+      if (dia.toString().length == 1) dia = '0' + dia;
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("update ResultadosNombreVariables set finVigencia = '" + hoy.getFullYear() + '-' + mes + '-' + dia + " " + hoy.getHours() + "' where ID = " + resultado.ID, function (err, result) {
+          if (err) {
+            console.log(err);
+
+            if (!rolledBack) {
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              console.log('GUARDO RESULTADO');
+
+              _this9.crearTablaDeResultadoNombreModificar(variable);
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
+    key: "verificarPeriodicidadGuardarModificar",
+    value: function verificarPeriodicidadGuardarModificar(variable, tabla, hoy) {
+      var _this10 = this;
+
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("select * from PeriodicidadCalculo where variableID = " + variable.ID + " and tablaVariable = '" + tabla + "'", function (err, result) {
+          if (err) {
+            console.log(err);
+
+            if (!rolledBack) {
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              if (result.recordset.length > 0) {
+                _this10.updatePeriodicidadModificar(variable, tabla, hoy);
+              }
+              /* else {
+                 this.guardarPeriodicidad(variable, tabla, hoy);
+              }*/
+
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
+    key: "updatePeriodicidadModificar",
+    value: function updatePeriodicidadModificar(variable, tabla, hoy) {
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("update PeriodicidadCalculo where variableID = " + variable.ID + " and tablaVariable = '" + tabla + "' set fechaUltimoCalculo = '1964-05-28'", function (err, result) {
+          if (err) {
+            console.log(err);
+
+            if (!rolledBack) {
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {});
+          }
+        });
+      }); // fin transaction
+    }
+    /*
+        **************************************
+        **************************************
+                    CALCULO CODIGO
+        **************************************
+        **************************************
+    */
+
+  }, {
+    key: "verificarPeriodicidad",
+    value: function verificarPeriodicidad() {
+      var copiedObject = jQuery.extend(true, {}, this.state.forma);
+      this.traerPeriodicidadVariable(copiedObject, "forma");
+    }
+  }, {
+    key: "addDays",
+    value: function addDays(fecha, days) {
+      var date = new Date(fecha);
+      date.setDate(date.getDate() + days);
+      return date;
+    }
+  }, {
+    key: "addMonths",
+    value: function addMonths(fecha, months) {
+      var date = new Date(fecha);
+      date.setMonth(date.getMonth() + months);
+      return date;
+    }
+  }, {
+    key: "addYears",
+    value: function addYears(fecha, years) {
+      var date = new Date(fecha);
+      date.setYear(date.getYear() + years);
+      return date;
+    }
+  }, {
+    key: "traerPeriodicidadVariable",
+    value: function traerPeriodicidadVariable(variable, tabla) {
+      var _this11 = this;
+
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("select * from PeriodicidadCalculo where variableID = " + variable.ID + " and tablaVariable = '" + tabla + "'", function (err, result) {
+          if (err) {
+            console.log(err);
+
+            _this11.verificarFinPeriodicidad();
+
+            if (!rolledBack) {
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              if (result.recordset.length > 0) {
+                var fechaInicioCalculo = variable.fechaInicioCalculo;
+                var fechaUltimoCalculo = result.recordset[0].fechaUltimoCalculo;
+                var tieneUltimoCalculo = false; //si la fecha es null, realizar calculo (28, 4, 1964) POPS BIRTHDAY
+
+                if (fechaUltimoCalculo.getFullYear() != 1964 && fechaUltimoCalculo.getMonth() != 4 && fechaUltimoCalculo.getDate() != 28) {
+                  tieneUltimoCalculo = true;
+                }
+
+                if (!tieneUltimoCalculo) {
+                  variable.realizarCalculo = true;
+                } else {
+                  var ultimoCalculoVigente = false;
+                  var periodicidad = variable.periodicidad;
+                  var fechaSiguienteCalculo = new Date(fechaInicioCalculo);
+
+                  while (fechaSiguienteCalculo.getFullYear() < fechaUltimoCalculo.getFullYear() && fechaSiguienteCalculo.getMonth() < fechaUltimoCalculo.getMonth() && fechaSiguienteCalculo.getDate() < fechaUltimoCalculo.getDate()) {
+                    if (periodicidad.localeCompare("diario") == 0) {
+                      fechaSiguienteCalculo = _this11.addDays(fechaSiguienteCalculo, 1);
+                    } else if (periodicidad.localeCompare("semanal") == 0) {
+                      fechaSiguienteCalculo = _this11.addDays(fechaSiguienteCalculo, 7);
+                    } else if (periodicidad.localeCompare("mensual") == 0) {
+                      fechaSiguienteCalculo = _this11.addMonths(fechaSiguienteCalculo, 1);
+                    } else if (periodicidad.localeCompare("trimestral") == 0) {
+                      fechaSiguienteCalculo = _this11.addMonths(fechaSiguienteCalculo, 3);
+                    } else if (periodicidad.localeCompare("bi-anual") == 0) {
+                      fechaSiguienteCalculo = _this11.addMonths(fechaSiguienteCalculo, 6);
+                    } else if (periodicidad.localeCompare("anual") == 0) {
+                      fechaSiguienteCalculo = _this11.addYears(fechaSiguienteCalculo, 1);
+                    }
+                  }
+
+                  var tocaNuevoCalculo = false;
+
+                  if (periodicidad.localeCompare("diario") == 0) {
+                    if (fechaSiguienteCalculo.getDate() >= fechaUltimoCalculo.getDate() + 1) {
+                      tocaNuevoCalculo = true;
+                    }
+                  } else if (periodicidad.localeCompare("semanal") == 0) {
+                    if (fechaSiguienteCalculo.getDate() >= fechaUltimoCalculo.getDate() + 7) {
+                      tocaNuevoCalculo = true;
+                    }
+                  } else if (periodicidad.localeCompare("mensual") == 0) {
+                    if (fechaSiguienteCalculo.getMonth() >= fechaUltimoCalculo.getMonth() + 1) {
+                      tocaNuevoCalculo = true;
+                    }
+                  } else if (periodicidad.localeCompare("trimestral") == 0) {
+                    if (fechaSiguienteCalculo.getMonth() >= fechaUltimoCalculo.getMonth() + 3) {
+                      tocaNuevoCalculo = true;
+                    }
+                  } else if (periodicidad.localeCompare("bi-anual") == 0) {
+                    if (fechaSiguienteCalculo.getMonth() >= fechaUltimoCalculo.getMonth() + 6) {
+                      tocaNuevoCalculo = true;
+                    }
+                  } else if (periodicidad.localeCompare("anual") == 0) {
+                    if (fechaSiguienteCalculo.getFullYear() >= fechaUltimoCalculo.getFullYear() + 1) {
+                      tocaNuevoCalculo = true;
+                    }
+                  }
+
+                  if (tocaNuevoCalculo) {
+                    variable.realizarCalculo = true;
+                  } else {
+                    variable.realizarCalculo = false;
+                  }
+                }
+              } else {
+                if (indexJ != null) variable.realizarCalculo = true;else variable.realizarCalculo = true;
+              }
+
+              _this11.crearVariablesExcel(variable);
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
+    key: "formaCrearVariable",
+    value: function formaCrearVariable(id, nombreVariable, tipoVariable, variable) {
+      //variableForma
+      if (tipoVariable.localeCompare("numero") == 0) {
+        var variable = parseFloat($("#variableForma").val());
+        window[nombreVariable] = variable;
+      } else if (tipoVariable.localeCompare("bit") == 0) {
+        if ($("#variableForma").is(':checked')) {
+          window[nombreVariable] = true;
+        } else {
+          window[nombreVariable] = false;
+        }
+      } else if (tipoVariable.localeCompare("varchar") == 0) {
+        var variable = $("#variableForma").val();
+        window[nombreVariable] = variable;
+      } else if (tipoVariable.localeCompare("date") == 0) {
+        var variable = $("#variableForma").datepicker('getDate');
+        window[nombreVariable] = variable;
+      }
+
+      if (nombreSiguiente != undefined) {
+        this.updateForm(nombreSiguiente, indexSiguiente, tipoSiguiente, inputSiguiente);
+      } else {
+        this.closeModalForma();
+        this.verificarSiExisteFormaEnResultadosHistoricos(variable);
+      }
+    }
+  }, {
+    key: "iniciarMostrarFormas",
+    value: function iniciarMostrarFormas(variable) {
+      var _this12 = this;
+
+      var HTMLFormas = '';
+
+      if (variable.tipo.localeCompare("numero") == 0) {
+        var nombre = variable.nombre;
+        var id = variable.ID;
+        var tipo = variable.tipo;
+        HTMLFormas = _react["default"].createElement("div", {
+          style: {
+            width: "100%"
+          }
+        }, _react["default"].createElement("br", null), _react["default"].createElement("div", {
+          className: "row",
+          style: {
+            width: "100%"
+          }
+        }, _react["default"].createElement("div", {
+          className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
+        }, _react["default"].createElement("label", {
+          htmlFor: "variableForma",
+          className: "col-form-label"
+        }, "Valor:")), _react["default"].createElement("div", {
+          className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group",
+          style: {
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center"
+          }
+        }, _react["default"].createElement("input", {
+          id: "variableForma",
+          type: "text",
+          className: "form-control form-control-sm"
+        }))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
+          className: "text-center",
+          style: {
+            width: "100%"
+          }
+        }, _react["default"].createElement("a", {
+          href: "#",
+          className: "btn btn-brand active",
+          onClick: function onClick() {
+            return _this12.formaCrearVariable(id, nombre, tipo, variable);
+          }
+        }, "Guardar")), _react["default"].createElement("br", null));
+      } else if (variable.tipo.localeCompare("bit") == 0) {
+        var _nombre = variable.nombre;
+        var _id = variable.ID;
+        var _tipo = variable.tipo;
+        HTMLFormas = _react["default"].createElement("div", {
+          style: {
+            width: "100%"
+          }
+        }, _react["default"].createElement("br", null), _react["default"].createElement("div", {
+          className: "row",
+          style: {
+            width: "100%"
+          }
+        }, _react["default"].createElement("div", {
+          className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
+        }, _react["default"].createElement("label", {
+          htmlFor: "variableForma",
+          className: "col-form-label"
+        }, "Valor:")), _react["default"].createElement("div", {
+          className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
+        }, _react["default"].createElement("br", null), _react["default"].createElement("div", {
+          className: "switch-button switch-button-bool",
+          style: {
+            margin: "0 auto",
+            display: "block"
+          }
+        }, _react["default"].createElement("input", {
+          type: "checkbox",
+          defaultChecked: true,
+          name: "guardarFuenteDato",
+          id: "variableForma"
+        }), _react["default"].createElement("span", null, _react["default"].createElement("label", {
+          htmlFor: "guardarFuenteDato"
+        }))))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
+          className: "text-center",
+          style: {
+            width: "100%"
+          }
+        }, _react["default"].createElement("a", {
+          href: "#",
+          className: "btn btn-brand active",
+          onClick: function onClick() {
+            return _this12.formaCrearVariable(_id, _nombre, _tipo, variable);
+          }
+        }, "Guardar")), _react["default"].createElement("br", null));
+      } else if (variable.tipo.localeCompare("varchar") == 0) {
+        var _nombre2 = variable.nombre;
+        var _id2 = variable.ID;
+        var _tipo2 = variable.tipo;
+        HTMLFormas = _react["default"].createElement("div", {
+          style: {
+            width: "100%"
+          }
+        }, _react["default"].createElement("br", null), _react["default"].createElement("div", {
+          className: "row",
+          style: {
+            width: "100%"
+          }
+        }, _react["default"].createElement("div", {
+          className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
+        }, _react["default"].createElement("label", {
+          htmlFor: "variableForma",
+          className: "col-form-label"
+        }, "Valor:")), _react["default"].createElement("div", {
+          className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group",
+          style: {
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center"
+          }
+        }, _react["default"].createElement("input", {
+          id: "variableForma",
+          type: "text",
+          className: "form-control form-control-sm"
+        }))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
+          className: "text-center",
+          style: {
+            width: "100%"
+          }
+        }, _react["default"].createElement("a", {
+          href: "#",
+          className: "btn btn-brand active",
+          onClick: function onClick() {
+            return _this12.formaCrearVariable(_id2, _nombre2, _tipo2, variable);
+          }
+        }, "Guardar")), _react["default"].createElement("br", null));
+      } else if (variable.tipo.localeCompare("date") == 0) {
+        var _nombre3 = variable.nombre;
+        var _id3 = variable.ID;
+        var _tipo3 = variable.tipo;
+        HTMLFormas = _react["default"].createElement("div", {
+          style: {
+            width: "100%"
+          }
+        }, _react["default"].createElement("br", null), _react["default"].createElement("div", {
+          className: "row",
+          style: {
+            width: "100%"
+          }
+        }, _react["default"].createElement("div", {
+          className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
+        }, _react["default"].createElement("label", {
+          htmlFor: "variableForma",
+          className: "col-form-label"
+        }, "Valor:")), _react["default"].createElement("div", {
+          className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group",
+          style: {
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center"
+          }
+        }, _react["default"].createElement("div", {
+          className: "row",
+          style: {
+            display: "flex",
+            justifyContent: "center"
+          }
+        }, _react["default"].createElement("div", {
+          id: "variableForma",
+          className: "center-block"
+        })))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
+          className: "text-center",
+          style: {
+            width: "100%"
+          }
+        }, _react["default"].createElement("a", {
+          href: "#",
+          className: "btn btn-brand active",
+          onClick: function onClick() {
+            return _this12.formaCrearVariable(_id3, _nombre3, _tipo3, variable);
+          }
+        }, "Guardar")), _react["default"].createElement("br", null));
+      }
+
+      this.updateForm(variable.nombre, HTMLFormas, variable.tipo, "variableForma");
+    }
+  }, {
+    key: "updateForm",
+    value: function updateForm(titulo, HTMLFormas, tipo, idInput) {
+      this.setState({
+        showModalForma: true,
+        tituloVariableForma: "Variable: " + titulo,
+        htmlForma: HTMLFormas
+      }, this.loadFechas(tipo, idInput));
+    }
+  }, {
+    key: "loadFechas",
+    value: function loadFechas(tipo, idInput) {
+      if (tipo.localeCompare("date") == 0) {
+        setTimeout(function () {
+          $('#' + idInput).datepicker({
+            format: "dd-mm-yyyy",
+            todayHighlight: true,
+            viewMode: "days",
+            minViewMode: "days",
+            language: 'es'
+          });
+        }, 250);
+      }
+    }
+  }, {
+    key: "closeModalForma",
+    value: function closeModalForma() {
+      this.setState({
+        showModalForma: false
+      });
+    }
+  }, {
+    key: "verificarSiExisteFormaEnResultadosHistoricos",
+    value: function verificarSiExisteFormaEnResultadosHistoricos(variable) {
+      var _this13 = this;
+
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("select * from ResultadosNombreVariables where nombreVariable = '" + variable.nombre + "' and finVigencia = '1964-05-28'", function (err, result) {
+          if (err) {
+            console.log(err);
+
+            if (!rolledBack) {
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              if (result.recordset.length == 0) {
+                _this13.crearTablaDeResultadoNombreForma(variable);
+              } else {
+                console.log("ENCONTRO");
+                console.log(result.recordset[0]);
+
+                _this13.guardarResultadosNombreForma(variable, result.recordset[0].inicioVigencia);
+              }
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
+    key: "crearTablaDeResultadoNombreForma",
+    value: function crearTablaDeResultadoNombreForma(variable) {
+      var _this14 = this;
+
+      //NOMBRE TABLA: NOMBREVARIABLE_AÑOVIGENCIA_MESVIGENCIA_DIAVIGENCIA_HORAVIGENCIA_MINUTOSVIGENCIA_SEGUNDOSVIGENCIA
+      //VIGENCIA: DIA CREACION
+      var hoy = new Date();
+      var textoCreacionTabla = 'CREATE TABLE ' + variable.nombre + '_' + hoy.getFullYear() + '_' + (hoy.getMonth() + 1) + '_' + hoy.getDate() + '_' + hoy.getHours() + '_' + hoy.getMinutes() + '_' + hoy.getSeconds() + ' ( ID int IDENTITY(1,1) PRIMARY KEY, ';
+
+      if (variable.tipo.localeCompare("numero") == 0) {
+        textoCreacionTabla += variable.nombre + ' decimal(22,4)';
+      } else if (variable.tipo.localeCompare("varchar") == 0) {
+        textoCreacionTabla += variable.nombre + ' varchar(1000)';
+      } else if (variable.tipo.localeCompare("bit") == 0) {
+        textoCreacionTabla += variable.nombre + ' bit';
+      } else if (variable.tipo.localeCompare("date") == 0) {
+        textoCreacionTabla += variable.nombre + ' date';
+      }
+
+      textoCreacionTabla += ', f3ch4Gu4rd4do date )';
+      console.log('textoCreacionTabla');
+      console.log(textoCreacionTabla);
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query(textoCreacionTabla, function (err, result) {
+          if (err) {
+            console.log(err);
+
+            if (!rolledBack) {
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              //console.log("Tabla "+variable.nombre+'_'+hoy.getFullYear()+'_'+hoy.getMonth()+'_'+hoy.getDate()+'_'+hoy.getHours()+'_'+hoy.getMinutes()+'_'+hoy.getSeconds()+" creada.");
+              console.log('CREO TABLA');
+
+              _this14.crearResultadoNombreForma(variable, hoy);
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
+    key: "crearResultadoNombreForma",
+    value: function crearResultadoNombreForma(variable, hoy) {
+      var _this15 = this;
+
+      console.log('INICAR CREAR RESULTADO');
+      var mes = hoy.getMonth() + 1;
+      if (mes.toString().length == 1) mes = '0' + mes;
+      var dia = hoy.getDate();
+      if (dia.toString().length == 1) dia = '0' + dia;
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("insert into ResultadosNombreVariables (nombreVariable, inicioVigencia, finVigencia) values ('" + variable.nombre + "', '" + hoy.getFullYear() + '-' + mes + '-' + dia + " " + hoy.getHours() + ":" + hoy.getMinutes() + ":" + hoy.getSeconds() + "', '1964-05-28')", function (err, result) {
+          if (err) {
+            console.log(err);
+
+            if (!rolledBack) {
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              console.log('GUARDO RESULTADO');
+
+              _this15.guardarResultadosNombreForma(variable, hoy);
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
+    key: "guardarResultadosNombreForma",
+    value: function guardarResultadosNombreForma(variable, fechaNombreTabla) {
+      console.log('INICAR GUARDAR RESULTADO');
+      console.log('fechaNombreTabla');
+      console.log(fechaNombreTabla);
+      console.log('fechaNombreTabla.getFullYear()');
+      console.log(fechaNombreTabla.getFullYear());
+      console.log('fechaNombreTabla.getMonth()');
+      console.log(fechaNombreTabla.getMonth());
+      console.log('fechaNombreTabla.getDate()');
+      console.log(fechaNombreTabla.getDate());
+      console.log('fechaNombreTabla.getHours()');
+      console.log(fechaNombreTabla.getHours());
+      console.log('fechaNombreTabla.getMinutes()');
+      console.log(fechaNombreTabla.getMinutes());
+      console.log('fechaNombreTabla.getSeconds()');
+      console.log(fechaNombreTabla.getSeconds());
+      var hoy = new Date();
+      var textoInsertPrincipio = 'INSERT INTO ' + variable.nombre + '_' + fechaNombreTabla.getFullYear() + '_' + (fechaNombreTabla.getMonth() + 1) + '_' + fechaNombreTabla.getDate() + '_' + fechaNombreTabla.getHours() + '_' + fechaNombreTabla.getMinutes() + '_' + fechaNombreTabla.getSeconds() + ' ( ';
+
+      for (var i = 0; i < variable.variables.length; i++) {
+        if (i != 0) textoInsertPrincipio += ', ';
+        textoInsertPrincipio += variable.variables[i].nombre;
+      }
+
+      ;
+      textoInsertPrincipio += ', f3ch4Gu4rd4do ) values ( ';
+      var instruccionSQLBorrar = "DELETE FROM " + variable.nombre + "_" + fechaNombreTabla.getFullYear() + "_" + (fechaNombreTabla.getMonth() + 1) + "_" + fechaNombreTabla.getDate() + "_" + fechaNombreTabla.getHours() + "_" + fechaNombreTabla.getMinutes() + "_" + fechaNombreTabla.getSeconds() + " WHERE f3ch4Gu4rd4do = '" + hoy.getFullYear() + "-" + (hoy.getMonth() + 1) + "-" + hoy.getDate() + "' ";
+      console.log('instruccionSQLBorrar');
+      console.log(instruccionSQLBorrar);
+      this.borrarForma(instruccionSQLBorrar);
+      var instruccionSQLFinal = textoInsertPrincipio;
+
+      if (variable.tipo.localeCompare("numero") == 0) {
+        instruccionSQLFinal += window[variable.nombre];
+      } else if (variable.tipo.localeCompare("varchar") == 0) {
+        instruccionSQLFinal += "'" + window[variable.nombre] + "'";
+      } else if (variable.tipo.localeCompare("bit") == 0) {
+        instruccionSQLFinal += "'" + window[variable.nombre] + "'";
+      } else if (variable.tipo.localeCompare("date") == 0) {
+        instruccionSQLFinal += "'" + window[variable.nombre].getFullYear() + "-" + (window[variable.nombre].getMonth() + 1) + "-" + window[variable.nombre].getDate() + "'";
+      }
+
+      instruccionSQLFinal += ", '" + hoy.getFullYear() + "-" + (hoy.getMonth() + 1) + "-" + hoy.getDate() + "' )";
+      console.log('instruccionSQLFinal 1');
+      console.log(instruccionSQLFinal);
+      var self = this;
+      setTimeout(function () {
+        self.guardarForma(instruccionSQLFinal, variable, 'forma', hoy);
+      }, 600);
+    }
+  }, {
+    key: "guardarForma",
+    value: function guardarForma(instruccionSQL, variable, tabla, hoy) {
+      var _this16 = this;
+
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query(instruccionSQL, function (err, result) {
+          if (err) {
+            console.log(err);
+
+            if (!rolledBack) {
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              if (variable.periodicidad.localeCompare("-1") != 0) _this16.verificarPeriodicidadGuardar(variable, tabla, hoy);
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
+    key: "borrarForma",
+    value: function borrarForma(instruccionSQL) {
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query(instruccionSQL, function (err, result) {
+          if (err) {
+            console.log(err);
+
+            if (!rolledBack) {
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {});
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
+    key: "verificarPeriodicidadGuardar",
+    value: function verificarPeriodicidadGuardar(variable, tabla, hoy) {
+      var _this17 = this;
+
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("select * from PeriodicidadCalculo where variableID = " + variable.ID + " and tablaVariable = '" + tabla + "'", function (err, result) {
+          if (err) {
+            console.log(err);
+
+            if (!rolledBack) {
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              if (result.recordset.length > 0) {
+                _this17.updatePeriodicidad(variable, tabla, hoy);
+              } else {
+                _this17.guardarPeriodicidad(variable, tabla, hoy);
+              }
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
+    key: "updatePeriodicidad",
+    value: function updatePeriodicidad(variable, tabla, hoy) {
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("update PeriodicidadCalculo where variableID = " + variable.ID + " and tablaVariable = '" + tabla + "' set fechaUltimoCalculo = '" + hoy.getFullYear() + "-" + (hoy.getMonth() + 1) + "-" + hoy.getDate() + "'", function (err, result) {
+          if (err) {
+            console.log(err);
+
+            if (!rolledBack) {
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {});
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
+    key: "guardarPeriodicidad",
+    value: function guardarPeriodicidad(variable, tabla, hoy) {
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("insert into PeriodicidadCalculo (variableID, tablaVariable, fechaInicio, fechaUltimoCalculo) values (" + variable.ID + ", '" + tabla + "', '" + hoy.getFullYear() + "-" + (hoy.getMonth() + 1) + "-" + hoy.getDate() + "', '" + hoy.getFullYear() + "-" + hoy.getMonth() + "-" + hoy.getDate() + "') ", function (err, result) {
+          if (err) {
+            console.log(err);
+
+            if (!rolledBack) {
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {});
+          }
+        });
+      }); // fin transaction
+    }
+    /*
+        **************************************
+        **************************************
+                FIN CALCULO CODIGO
+        **************************************
+        **************************************
+    */
+
+  }, {
     key: "render",
     value: function render() {
+      var _this18 = this;
+
       return _react["default"].createElement("div", null, _react["default"].createElement("br", null), _react["default"].createElement("div", {
         className: "row",
         style: {
@@ -735,8 +1725,14 @@ function (_React$Component) {
         style: {
           marginLeft: "10px"
         },
-        onClick: this.calculoVariable
-      }, "Realizar C\xE1lculo") : null), _react["default"].createElement("br", null));
+        onClick: this.verificarPeriodicidad
+      }, "Realizar C\xE1lculo") : null), _react["default"].createElement("br", null), _react["default"].createElement(_Modal["default"], {
+        show: this.state.showModalForma,
+        titulo: this.state.tituloVariableForma,
+        onClose: function onClose() {
+          return _this18.closeModalForma;
+        }
+      }, this.state.htmlForma));
     }
   }]);
 

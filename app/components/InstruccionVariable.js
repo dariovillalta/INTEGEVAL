@@ -753,10 +753,17 @@ function (_React$Component) {
         variablesSQL: this.state.variablesSQL,
         camposVariablesSQL: this.state.camposVariablesSQL,
         mostrarCrearCondicion: this.state.mostrarCrearCondicion,
+        actualizarSeleccionFormula: this.props.actualizarSeleccionFormula,
         callbackModificarRegla: this.props.callbackModificarRegla,
         callbackEliminarRegla: this.props.callbackEliminarRegla,
         actualizarNivelNuevaRegla: this.props.actualizarNivelNuevaRegla,
-        actualizarEstadoVistaEsCondicion: this.actualizarEstadoVistaEsCondicion
+        actualizarEstadoVistaEsCondicion: this.actualizarEstadoVistaEsCondicion,
+        eliminarFormula: this.props.eliminarFormula,
+        esEditarVar: this.props.esEditarVar,
+        tablaBorrarFormulas: this.props.tablaBorrarFormulas,
+        tablaBorrarElementos: this.props.tablaBorrarElementos,
+        condicionFormula: this.props.condicionFormula,
+        condicionElemento: this.props.condicionElemento
       }))), _react["default"].createElement("hr", null), _react["default"].createElement("div", {
         className: "row"
       }, _react["default"].createElement("div", {

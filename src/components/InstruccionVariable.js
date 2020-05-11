@@ -548,10 +548,17 @@ export default class InstruccionVariable extends React.Component {
                                             variablesSQL={this.state.variablesSQL}
                                             camposVariablesSQL={this.state.camposVariablesSQL}
                                             mostrarCrearCondicion={this.state.mostrarCrearCondicion}
+                                            actualizarSeleccionFormula={this.props.actualizarSeleccionFormula}
                                             callbackModificarRegla={this.props.callbackModificarRegla}
                                             callbackEliminarRegla={this.props.callbackEliminarRegla}
                                             actualizarNivelNuevaRegla={this.props.actualizarNivelNuevaRegla}
-                                            actualizarEstadoVistaEsCondicion={this.actualizarEstadoVistaEsCondicion}>
+                                            actualizarEstadoVistaEsCondicion={this.actualizarEstadoVistaEsCondicion}
+                                            eliminarFormula={this.props.eliminarFormula}
+                                            esEditarVar={this.props.esEditarVar}
+                                            tablaBorrarFormulas={this.props.tablaBorrarFormulas}
+                                            tablaBorrarElementos={this.props.tablaBorrarElementos}
+                                            condicionFormula={this.props.condicionFormula}
+                                            condicionElemento={this.props.condicionElemento}>
                         </OpcionesCrearRegla>
                     </div>
                 </div>

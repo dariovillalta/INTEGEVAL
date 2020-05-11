@@ -8,6 +8,7 @@ import InstruccionSQL from './InstruccionSQL.js';
 
 var campoSeleccionado, valorSeleccionado, valorSeleccionadoTexto, operacionSeleccionada, objetoConexionSeleccionada;
 var tipoDeAsignacionSeleccionado = '';   //para saber el tipo de asignacion que se debera hacer al atributo / campo
+var indiceFormulaSeleccionadaEdit = -1;
 
 /*COMPONENTE PARA MANEJRA CAMBIO DE VISTA ENTRE CREAR VARIABLE Y VISTA DE CONDICIONES / INSTRUCIONES*/
 /*MANEJA TODA LA LOGICA CREAR FUENTE DATO VARIABLE (OBJETO)*/
@@ -92,7 +93,13 @@ export default class CrearVariablesHome extends React.Component {
             comandoSQL: "",
             variables: [],
             excel: [],
-            formas: []
+            formas: [],
+            esEditarVar: false,
+            esOperacionSQL: false,
+            operacionSQL: "",
+            formulaSeleccionadaEdit: null,
+            condicionFormula: "",
+            condicionElemento: ""
         }
         this.loadRules = this.loadRules.bind(this);
         this.sortRules = this.sortRules.bind(this);
@@ -129,6 +136,8 @@ export default class CrearVariablesHome extends React.Component {
         this.getElementsFromFormula = this.getElementsFromFormula.bind(this);
         this.modificarRegla = this.modificarRegla.bind(this);
         this.eliminarRegla = this.eliminarRegla.bind(this);
+        this.modificarFormula = this.modificarFormula.bind(this);
+        this.eliminarFormula = this.eliminarFormula.bind(this);
         this.retornoCampoFormula = this.retornoCampoFormula.bind(this);
         this.retornoCampoCondicion = this.retornoCampoCondicion.bind(this);
         this.retornarValor = this.retornarValor.bind(this);
@@ -137,6 +146,7 @@ export default class CrearVariablesHome extends React.Component {
         this.actualizarEstadoSiEsObjeto = this.actualizarEstadoSiEsObjeto.bind(this);
         this.actualizarEstadoSiEsInstruccionSQL = this.actualizarEstadoSiEsInstruccionSQL.bind(this);
         this.actualizarNivelNuevaRegla = this.actualizarNivelNuevaRegla.bind(this);
+        this.actualizarSeleccionFormula = this.actualizarSeleccionFormula.bind(this);
         this.actualizarNombreVariable = this.actualizarNombreVariable.bind(this);
         this.actualizarDescripcionVariable = this.actualizarDescripcionVariable.bind(this);
         this.actualizarFechaInicio = this.actualizarFechaInicio.bind(this);
@@ -230,7 +240,7 @@ export default class CrearVariablesHome extends React.Component {
         this.goToCreateConditions(posicionAtributoSeleccionado);
     }
 
-    goToCreateFormula (indice) {
+    goToCreateFormula (indice, esEditarVarN) {
         var navbar = <div className={"row"}>
             <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
                 <div className={"page-header"}>
@@ -250,12 +260,38 @@ export default class CrearVariablesHome extends React.Component {
                 </div>
             </div>
         </div>;
+
+        var esOperacionSQL, operacionSQL;
+        if(posicionAtributoSeleccionado == -1) {
+            esOperacionSQL = false;
+            operacionSQL = "";
+        }
+        if (this.state.formulaSeleccionadaEdit != null) {
+            if(this.state.formulaSeleccionadaEdit.operacion.localeCompare("ASIG") == 0 ||
+                this.state.formulaSeleccionadaEdit.operacion.localeCompare("COUNT") == 0 ||
+                this.state.formulaSeleccionadaEdit.operacion.localeCompare("PROM") == 0 ||
+                this.state.formulaSeleccionadaEdit.operacion.localeCompare("MAX") == 0 ||
+                this.state.formulaSeleccionadaEdit.operacion.localeCompare("MIN") == 0 ||
+                this.state.formulaSeleccionadaEdit.operacion.localeCompare("SUM") == 0 || 
+                this.state.formulaSeleccionadaEdit.operacion.localeCompare("AUTOSUM") == 0 ) {
+
+                esOperacionSQL = true;
+                operacionSQL = this.state.formulaSeleccionadaEdit.operacion;
+            } else {
+                esOperacionSQL = false;
+                operacionSQL = "";
+            }
+        }
+
         //deseleccionado regla seleccionada
         indiceSeleccionadoReglas = -1;
         indiceSeleccionadoFormula = indice;
         this.setState({
             componenteActual: "variableFormula",
-            navbar: navbar
+            navbar: navbar,
+            esEditarVar: esEditarVarN,
+            esOperacionSQL: esOperacionSQL,
+            operacionSQL: operacionSQL
         });
     }
 
@@ -293,7 +329,7 @@ export default class CrearVariablesHome extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("insert into Variables (nombre, descripcion, esObjeto, objetoPadreID, esInstruccionSQL, guardar, periodicidad, analista, fechaInicioCalculo) values ('"+variable.nombre+"', '"+variable.descripcion+"', '"+variable.esObjeto+"', "+variable.objetoPadreID+", '"+variable.esInstruccionSQL+"', '"+variable.guardar+"', '"+variable.periodicidad+"', '"+variable.analista+"', '"+variable.fechaInicioCalculo.getFullYear()+"-"+variable.fechaInicioCalculo.getMonth()+"-"+variable.fechaInicioCalculo.getDate()+"')", (err, result) => {
+            request.query("insert into Variables (nombre, descripcion, esObjeto, objetoPadreID, esInstruccionSQL, guardar, periodicidad, analista, fechaInicioCalculo) values ('"+variable.nombre+"', '"+variable.descripcion+"', '"+variable.esObjeto+"', "+variable.objetoPadreID+", '"+variable.esInstruccionSQL+"', '"+variable.guardar+"', '"+variable.periodicidad+"', '"+variable.analista+"', '"+variable.fechaInicioCalculo.getFullYear()+"-"+(variable.fechaInicioCalculo.getMonth()+1)+"-"+variable.fechaInicioCalculo.getDate()+"')", (err, result) => {
                 if (err) {
                     if (!rolledBack) {
                         console.log(err);
@@ -911,16 +947,22 @@ export default class CrearVariablesHome extends React.Component {
                             //llamado al final para que hasta que haya traido todos los ids de formula llamar crear segmento
                             if(posicionFormula == 0) {
                                 var arregloDeSegmentosALlamar = [], arregloReglasDeSegmentosALlamar = [];
-                                for (var j = 0; j < segmentoRegla[posicionAtributo].length; j++) {
-                                    if(arregloDeSegmentosALlamar[posicionAtributo] == undefined)
-                                        arregloDeSegmentosALlamar[posicionAtributo] = [];
-                                    arregloDeSegmentosALlamar[posicionAtributo].push(j);
-                                    if(arregloReglasDeSegmentosALlamar[posicionAtributo] == undefined)
-                                        arregloReglasDeSegmentosALlamar[posicionAtributo] = [];
-                                    contadorObjetosAGuardar++;
-                                    segmentoRegla[posicionAtributo][j].posicionSegmentoEnCampo = j;
-                                    this.createVariableFieldRuleSegments(variable, variableCampo, segmentoRegla[posicionAtributo][j], posicionAtributo, j, arregloDeSegmentosALlamar, arregloReglasDeSegmentosALlamar);
-                                };
+                                console.log('posicionAtributo');
+                                console.log(posicionAtributo);
+                                console.log('segmentoRegla');
+                                console.log(segmentoRegla);
+                                if(segmentoRegla.length > 0 ) {
+                                    for (var j = 0; j < segmentoRegla[posicionAtributo].length; j++) {
+                                        if(arregloDeSegmentosALlamar[posicionAtributo] == undefined)
+                                            arregloDeSegmentosALlamar[posicionAtributo] = [];
+                                        arregloDeSegmentosALlamar[posicionAtributo].push(j);
+                                        if(arregloReglasDeSegmentosALlamar[posicionAtributo] == undefined)
+                                            arregloReglasDeSegmentosALlamar[posicionAtributo] = [];
+                                        contadorObjetosAGuardar++;
+                                        segmentoRegla[posicionAtributo][j].posicionSegmentoEnCampo = j;
+                                        this.createVariableFieldRuleSegments(variable, variableCampo, segmentoRegla[posicionAtributo][j], posicionAtributo, j, arregloDeSegmentosALlamar, arregloReglasDeSegmentosALlamar);
+                                    };
+                                }
                                 /*for (var i = 0; i < segmentoRegla.length; i++) {
                                     for (var j = 0; j < segmentoRegla[i].length; j++) {
                                         if(arregloDeSegmentosALlamar[i] == undefined)
@@ -2628,6 +2670,120 @@ export default class CrearVariablesHome extends React.Component {
         }
     }
 
+    modificarFormula(formula, formulaArreglo) {
+        // 1. Make a shallow copy of the items
+        //let campos = [...this.state.camposDeTabla];
+        // 2. Make a shallow copy of the item you want to mutate
+        //let campo = [...campos[index]];
+        // 3. Replace the property you're intested in
+        //campo = {ID: campo.ID, idTabla: idTabla, nombre: campoNombre, tipo: tipoCampo, guardar: guardarCampo};
+        // 4. Put it back into our array. N.B. we *are* mutating the array here, but that's why we made a copy first
+        //campos[index] = campo;
+        // 5. Set the state to our new copy
+        var posicionSel = posicionAtributoSeleccionado;
+        //indice = -1 cuando se va a condiciones de un campo nuevo
+        //cuando se presiona NavBar indice es igual indice anterior
+        //cuando se selecciona un campo existente indice = posicion campo
+        if(posicionAtributoSeleccionado == -1) {
+            posicionSel = this.state.atributos.length;
+        }
+        //copia antigua formulas
+        var elementosFormulas, copiaAntiguaFormulas;
+        if(banderaEsObjeto) {
+            copiaAntiguaFormulas = formulasVariosAtributos;
+            elementosFormulas = elementosFormulasVariosAtributos;
+        } else {
+            copiaAntiguaFormulas = formulasUnAtributo;
+            elementosFormulas = elementosFormulasUnAtributos;
+        }
+        if(copiaAntiguaFormulas[posicionSel] == undefined)
+            copiaAntiguaFormulas[posicionSel] = [];
+        copiaAntiguaFormulas[posicionSel][indiceFormulaSeleccionadaEdit] = formula;
+        this.setState({
+            formulas: copiaAntiguaFormulas[posicionSel]
+        });
+        if(elementosFormulas[posicionSel] == undefined)
+            elementosFormulas[posicionSel] = [];
+        var posicionFormulaEnCampo = indiceFormulaSeleccionadaEdit;
+        //indiceSeleccionadoFormula es el indice de la formula seleccionada, las formula se asocian por campo (1 campo => muchas formulas)
+        if(elementosFormulas[posicionSel][posicionFormulaEnCampo] == undefined)
+            elementosFormulas[posicionSel][posicionFormulaEnCampo] = [];
+        var arregloDeElementos = [];
+        this.getElementsFromFormula(formulaArreglo, arregloDeElementos);
+        elementosFormulas[posicionSel][posicionFormulaEnCampo] = arregloDeElementos;
+        if(banderaEsObjeto) {
+            formulasVariosAtributos = copiaAntiguaFormulas;
+            elementosFormulasVariosAtributos = elementosFormulas;
+        } else {
+            formulasUnAtributo = copiaAntiguaFormulas;
+            elementosFormulasUnAtributos = elementosFormulas;
+        }
+        console.log('elementosFormulas');
+        console.log(elementosFormulas);
+        console.log('copiaAntiguaFormulas[posicionSel]');
+        console.log(copiaAntiguaFormulas[posicionSel]);
+        console.log('copiaAntiguaFormulas');
+        console.log(copiaAntiguaFormulas);
+        console.log('posicionSel');
+        console.log(posicionSel);
+        console.log('posicionFormulaEnCampo');
+        console.log(posicionFormulaEnCampo);
+        var self = this;
+        setTimeout(function(){
+            console.log(self.state.formulas)
+        }, 2000);
+    }
+
+    eliminarFormula() {
+        // 1. Make a shallow copy of the items
+        //let campos = [...this.state.camposDeTabla];
+        // 2. Make a shallow copy of the item you want to mutate
+        //let campo = [...campos[index]];
+        // 3. Replace the property you're intested in
+        //campo = {ID: campo.ID, idTabla: idTabla, nombre: campoNombre, tipo: tipoCampo, guardar: guardarCampo};
+        // 4. Put it back into our array. N.B. we *are* mutating the array here, but that's why we made a copy first
+        //campos[index] = campo;
+        // 5. Set the state to our new copy
+        var posicionSel = posicionAtributoSeleccionado;
+        //indice = -1 cuando se va a condiciones de un campo nuevo
+        //cuando se presiona NavBar indice es igual indice anterior
+        //cuando se selecciona un campo existente indice = posicion campo
+        if(posicionAtributoSeleccionado == -1) {
+            posicionSel = this.state.atributos.length;
+        }
+        //copia antigua formulas
+        var elementosFormulas, copiaAntiguaFormulas;
+        if(banderaEsObjeto) {
+            copiaAntiguaFormulas = formulasVariosAtributos;
+            elementosFormulas = elementosFormulasVariosAtributos;
+        } else {
+            copiaAntiguaFormulas = formulasUnAtributo;
+            elementosFormulas = elementosFormulasUnAtributos;
+        }
+        if(copiaAntiguaFormulas[posicionSel] == undefined)
+            copiaAntiguaFormulas[posicionSel] = [];
+        copiaAntiguaFormulas[posicionSel].splice(indiceFormulaSeleccionadaEdit, 1);
+        this.setState({
+            formulas: copiaAntiguaFormulas[posicionSel]
+        });
+        var posicionFormulaEnCampo = indiceFormulaSeleccionadaEdit;
+        elementosFormulas[posicionSel].splice(posicionFormulaEnCampo, 1);
+        console.log('elementosFormulas');
+        console.log(elementosFormulas);
+        console.log('copiaAntiguaFormulas[posicionSel]');
+        console.log(copiaAntiguaFormulas[posicionSel]);
+        console.log('copiaAntiguaFormulas');
+        console.log(copiaAntiguaFormulas);
+        console.log('posicionSel');
+        console.log(posicionSel);
+        console.log('posicionFormulaEnCampo');
+        console.log(posicionFormulaEnCampo);
+        var self = this;
+        setTimeout(function(){
+            console.log(self.state.formulas)
+        }, 2000);
+    }
+
     retornoCampoFormula (tipoVariable) {
         tipoDeAsignacionSeleccionado = tipoVariable;
     }
@@ -2664,6 +2820,16 @@ export default class CrearVariablesHome extends React.Component {
             if(nivelNuevoAtributoUnico < nivel)
                 nivelNuevoAtributoUnico = nivel;
         }
+    }
+
+    actualizarSeleccionFormula (formula, indice) {
+        var condicionFormula = " ID = "+formula.ID, condicionElemento = " formulaID = "+formula.ID;
+        this.setState({
+            formulaSeleccionadaEdit: formula,
+            condicionFormula: condicionFormula,
+            condicionElemento: condicionElemento
+        });
+        indiceFormulaSeleccionadaEdit =  indice;
     }
 
     actualizarNombreVariable () {
@@ -2932,13 +3098,20 @@ export default class CrearVariablesHome extends React.Component {
                                                 retornoCampo={this.retornoCampoCondicion}
                                                 retornarValor={this.retornarValor}
                                                 retornoOperacion={this.retornoOperacion}
+                                                actualizarSeleccionFormula={this.actualizarSeleccionFormula}
                                                 reglas={this.state.reglas}
                                                 navbar={this.state.navbar}
                                                 goToCreateFormula={this.goToCreateFormula}
                                                 configuracionHome={this.props.configuracionHome}
                                                 goOptions={this.props.goOptions}
                                                 actualizarNivelNuevaRegla={this.actualizarNivelNuevaRegla}
-                                                retornoSeleccionVariables={this.props.retornoSeleccionVariables}>
+                                                retornoSeleccionVariables={this.props.retornoSeleccionVariables}
+                                                eliminarFormula={this.eliminarFormula}
+                                                esEditarVar={false}
+                                                tablaBorrarFormulas={"FormulasVariablesCampos"}
+                                                tablaBorrarElementos={"ElementoFormulasVariablesCampos"}
+                                                condicionFormula={this.state.condicionFormula}
+                                                condicionElemento={this.state.condicionElemento}>
                     </InstruccionVariable>
                 </div>
             );
@@ -2946,7 +3119,12 @@ export default class CrearVariablesHome extends React.Component {
             return (
                 <div style={{width: "100%", height: "100%"}}>
                     <Formula pool={this.props.pool}
+                                            esEditarVar={this.state.esEditarVar}
+                                            esOperacionSQL={this.state.esOperacionSQL}
+                                            operacionSQL={this.state.operacionSQL}
+                                            formulaSeleccionadaEdit={this.state.formulaSeleccionadaEdit}
                                             anadirFormula={this.anadirFormula}
+                                            modificarFormula={this.modificarFormula}
                                             retornoCampo={this.retornoCampoFormula}
                                             retornoOperacion={this.retornoOperacion}
                                             actualizarNivelNuevaRegla={this.actualizarNivelNuevaRegla}
