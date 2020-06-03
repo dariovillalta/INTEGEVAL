@@ -4,6 +4,8 @@ import sql from 'mssql';
 import Operacion from '../Regla/Operacion.js';
 import Valor from '../Regla/Valor.js';
 
+var textoOperacion = '', operacion = '', valor = '', valorTexto = '';
+
 export default class Filtro extends React.Component {
 
     constructor(props) {
@@ -19,9 +21,10 @@ export default class Filtro extends React.Component {
                 esBoolean: false,
                 esFecha: false,
                 esTexto: false
-            }
+            },
+            filtros: [],
+            textoValor: ""
         }
-        this.agregarFiltro = this.agregarFiltro.bind(this);
         this.getResultsVariables = this.getResultsVariables.bind(this);
         this.getResultsVariablesFieldsInit = this.getResultsVariablesFieldsInit.bind(this);
         this.getFieldAttributes = this.getFieldAttributes.bind(this);
@@ -44,16 +47,20 @@ export default class Filtro extends React.Component {
         this.retornarValorFecha = this.retornarValorFecha.bind(this);
         this.retornarValorTime = this.retornarValorTime.bind(this);
         this.isValidDate = this.isValidDate.bind(this);
+
+        this.agregarFiltro = this.agregarFiltro.bind(this);
+        this.eliminarFiltro = this.eliminarFiltro.bind(this);
+
+        textoOperacion = '';
+        operacion = '';
+        valor = '';
+        valorTexto = '';
     }
 
     componentDidMount () {
         this.getResultsVariables();
         this.getResultsIndicators();
         this.getResultsRisks();
-    }
-
-    agregarFiltro () {
-        //
     }
 
 	getResultsVariables () {
@@ -390,14 +397,17 @@ export default class Filtro extends React.Component {
         }
         console.log('copy.atributos[index]')
         console.log(copy.atributos[index])
+        console.log('copy.atributos')
+        console.log(copy.atributos)
         this.setState({
-            campoSeleccionado: copy,
+            variableSeleccionada: copy,
+            campoSeleccionado: copy.atributos[index],
             tipoCampo: tipoCampo
         }, console.log(this.state.tipoCampo) );
     }
 
-    retornoSeleccionOperacion () {
-        //
+    retornoSeleccionOperacion(textoOperacionNuevo, operacion) {
+        textoOperacion = textoOperacionNuevo;
     }
 
     actualizarValor (e) {
@@ -451,16 +461,14 @@ export default class Filtro extends React.Component {
         }
     }
 
-    retornarValorFecha(valorRegla, valorTexto) {
-        this.setState({
-            textoValor: valorTexto
-        });
+    retornarValorFecha(valorN, valorTextoN) {
+        valor = valorN;
+        valorTexto = valorTextoN;
     }
 
-    retornarValorTime(valorRegla, valorTexto) {
-        this.setState({
-            textoValor: valorTexto
-        });
+    retornarValorTime(valorN, valorTexto) {
+        valor = valorN;
+        valorTexto = valorTextoN;
     }
 
     isValidDate (fecha) {
@@ -474,6 +482,245 @@ export default class Filtro extends React.Component {
         } else {
             alert("Ingrese una fecha valida.");
             return false;
+        }
+    }
+
+    agregarFiltro() {
+        var variableID = this.state.variableSeleccionada.ID;
+        var nombreCampo = this.state.campoSeleccionado.nombre;
+        var tipoCampo = this.state.variableSeleccionada.tipo;
+        var nuevoFiltro = {
+            variableID: variableID,
+            nombreCampo: nombreCampo,
+            tipoCampoObjetivo: tipoCampo,
+            operacion: operacion,
+            operacionTexto: textoOperacion,
+            valor: valor,
+            texto: nombreCampo+" "+textoOperacion+" "+valorTexto
+        };
+        var copyFiltros = [...this.state.filtros];
+        copyFiltros.push(nuevoFiltro);
+        this.setState({
+            filtros: copyFiltros
+        });
+    }
+
+    eliminarFiltro(index) {
+        var copyFiltros = [...this.state.filtros];
+        copyFiltros.splice(index, 1);
+        this.setState({
+            filtros: copyFiltros
+        });
+    }
+
+    crearCodigoFiltros () {
+        //agregar filtros por variable
+        var filtrosAgrupadosPorVariables = [];
+        for (var i = 0; i < this.state.filtros.length; i++) {
+            if(this.state.filtros[i].esVariable) {
+                var agregoFiltro = false;
+                for (var i = 0; i < filtrosAgrupadosPorVariables.length; i++) {
+                    for (var j = 0; j < filtrosAgrupadosPorVariables[i].length; j++) {
+                        if (filtrosAgrupadosPorVariables[i][j].variableID == this.state.filtros[i].variableID) {
+                            filtrosAgrupadosPorVariables[i].push(this.state.filtros[i]);
+                            filtrosAgrupadosPorVariables[i][filtrosAgrupadosPorVariables[i].length-1].filtroPadre = filtrosAgrupadosPorVariables[i].length-2;
+                        }
+                    };
+                };
+                if(filtrosAgrupadosPorVariables.length == 0) {
+                    filtrosAgrupadosPorVariables.push(this.state.filtros[i]);
+                }
+            }
+        };
+        var filtrosAgrupadosPorIndicadores = [];
+        for (var i = 0; i < this.state.filtros.length; i++) {
+            if(this.state.filtros[i].esIndicador) {
+                var agregoFiltro = false;
+                for (var i = 0; i < filtrosAgrupadosPorIndicadores.length; i++) {
+                    for (var j = 0; j < filtrosAgrupadosPorIndicadores[i].length; j++) {
+                        if (filtrosAgrupadosPorIndicadores[i][j].variableID == this.state.filtros[i].variableID) {
+                            filtrosAgrupadosPorIndicadores[i].push(this.state.filtros[i]);
+                            filtrosAgrupadosPorIndicadores[i][filtrosAgrupadosPorIndicadores[i].length-1].filtroPadre = filtrosAgrupadosPorIndicadores[i].length-2;
+                        }
+                    };
+                };
+                if(filtrosAgrupadosPorIndicadores.length == 0) {
+                    filtrosAgrupadosPorIndicadores.push(this.state.filtros[i]);
+                }
+            }
+        };
+        var filtrosAgrupadosPorRiesgos = [];
+        for (var i = 0; i < this.state.filtros.length; i++) {
+            if(this.state.filtros[i].esRiesgo) {
+                var agregoFiltro = false;
+                for (var i = 0; i < filtrosAgrupadosPorRiesgos.length; i++) {
+                    for (var j = 0; j < filtrosAgrupadosPorRiesgos[i].length; j++) {
+                        if (filtrosAgrupadosPorRiesgos[i][j].variableID == this.state.filtros[i].variableID) {
+                            filtrosAgrupadosPorRiesgos[i].push(this.state.filtros[i]);
+                            filtrosAgrupadosPorRiesgos[i][filtrosAgrupadosPorRiesgos[i].length-1].filtroPadre = filtrosAgrupadosPorRiesgos[i].length-2;
+                        }
+                    };
+                };
+                if(filtrosAgrupadosPorRiesgos.length == 0) {
+                    filtrosAgrupadosPorRiesgos.push(this.state.filtros[i]);
+                }
+            }
+        };
+        //crearCodigo
+        var codigoVariables  = '';
+        for (var i = 0; i < filtrosAgrupadosPorVariables.length; i++) {
+            for (var j = 0; j < filtrosAgrupadosPorVariables[i].length; j++) {
+                codigoVariables += this.crearCodigoFiltro(filtrosAgrupadosPorVariables[i]);
+            };
+        };
+        console.log('codigoVariables')
+        console.log(codigoVariables)
+        this.props.retornoVariables(this.state.variables, this.state.indicadores, this.state.riesgos);
+    }
+
+    crearCodigoFiltro (filtros, tabs, nombreReferenciaArregloEnCodigo) {
+        var codigo = '';
+        var resultado = this.arregloCodigoFiltro(filtros[0], tabs, [], filtros, nombreReferenciaArregloEnCodigo);
+        if(resultado.length > 0)
+            resultado[0].codigo = "\n"+resultado[0].codigo;
+        //$.merge( prestamosCuerpo, resultado );
+        for (var i = 0; i < resultado.length; i++) {
+            codigo += resultado[i].codigo;
+        };
+        return codigo;
+    }
+
+    arregloCodigoFiltro (filtro, tabs, arreglo, arregloDeFiltros, nombreReferenciaArregloEnCodigo) {
+        var tabsText = '';
+        for (var i = 0; i < tabs; i++) {
+            tabsText+='\t';
+        };
+        var posicionesIF = [];
+        var newTabsTextFormula = '';
+        
+        //condiciones if
+        var arregloValoresAComparar = [];
+        if(filtro.valor.indexOf("LISTAID") == 0) {
+            //
+        } else if(filtro.valor.indexOf("FECHA") == 0) {
+            var fecha = filtro.valor.substring(filtro.valor.indexOf("[")+1, filtro.valor.lastIndexOf("]"));
+            arregloValoresAComparar = ["new Date("+fecha+").getTime()"];
+        } else if(filtro.valor.indexOf("TIEMPO") == 0) {
+            var stringValores = filtro.valor.substring(filtro.valor.indexOf("[")+1, filtro.valor.lastIndexOf("]"));
+            var diasAgregarCadena = stringValores.split(",")[0], mesesAgregarCadena = stringValores.split(",")[1], aniosAgregarCadena = stringValores.split(",")[2], futuro = stringValores.split(",")[3];
+            var diasAgregar = parseInt(diasAgregarCadena.indexOf("=")+1), mesesAgregar = parseInt(mesesAgregarCadena.indexOf("=")+1), aniosAgregar = parseInt(aniosAgregarCadena.indexOf("=")+1);
+            var esFuturo = true;
+            if(futuro.localeCompare("FUTURO") == 0)
+                esFuturo = true;
+            else
+                esFuturo = false;
+            var hoy = new Date();
+            if(esFuturo) {
+                hoy = this.addYears(hoy, aniosAgregar);
+                hoy = this.addMonths(hoy, mesesAgregar);
+                hoy = this.addDays(hoy, diasAgregar);
+            } else {
+                hoy = this.minusDays(hoy, aniosAgregar);
+                hoy = this.minusMonths(hoy, aniosAgregar);
+                hoy = this.minusYears(hoy, aniosAgregar);
+            }
+            arregloValoresAComparar = ["new Date("+hoy.getFullYear()+", "+hoy.getMonth()+", "+hoy.getDate()+").getTime()"];
+        } else if(filtro.valor.indexOf("MANUAL") == 0) {
+            arregloValoresAComparar = [filtro.valor.substring(filtro.valor.indexOf("[")+1, filtro.valor.lastIndexOf("]"))];
+        }
+        var tamArreglo = arreglo.length;
+        //for (var j = 0; j < tamArreglo; j++) {
+            for (var i = 0; i < arregloValoresAComparar.length; i++) {
+                var comparacion = "";
+                var inicioComparacion = "";
+                var operacion = "";
+                if(filtro.operacion.localeCompare("ES_MENOR") == 0) {
+                    operacion = "<";
+                } else if(filtro.operacion.localeCompare("ES_MENOR_O_IGUAL") == 0) {
+                    operacion = "<=";
+                } else if(filtro.operacion.localeCompare("ES_MAYOR_O_IGUAL") == 0) {
+                    operacion = ">=";
+                } else if(filtro.operacion.localeCompare("ES_MAYOR") == 0) {
+                    operacion = ">";
+                } else if(filtro.operacion.localeCompare("ES_IGUAL") == 0) {
+                    operacion = "==";
+                } else if(filtro.operacion.localeCompare("NO_ES_IGUAL") == 0) {
+                    operacion = "!=";
+                }
+                if (filtro.tipoCampoObjetivo.localeCompare("date") == 0) {
+                    if(filtro.operacion.localeCompare("encuentra") == 0) {
+                        //
+                    } else if(filtro.operacion.localeCompare("no_encuentra") == 0) {
+                        //
+                    } else {
+                        inicioComparacion = nombreReferenciaArregloEnCodigo+"[x]."+filtro.nombreCampo+" != undefined && isValidDate("+nombreReferenciaArregloEnCodigo+"[x]."+nombreCampoDeArregloEnCodigo+")";
+                        comparacion = nombreReferenciaArregloEnCodigo+"[x]."+filtro.nombreCampo+".getTime() "+operacion+" "+arregloValoresAComparar[i];
+                    }
+                } else if (filtro.tipoCampoObjetivo.localeCompare("varchar") == 0) {
+                    if(filtro.operacion.localeCompare("encuentra") == 0) {
+                        //
+                    } else if(filtro.operacion.localeCompare("no_encuentra") == 0) {
+                        //
+                    } else {
+                        inicioComparacion = nombreReferenciaArregloEnCodigo+"[x]."+filtro.nombreCampo+" != undefined";
+                        comparacion = nombreReferenciaArregloEnCodigo+"[x]."+filtro.nombreCampo+".localeCompare('"+arregloValoresAComparar[i]+"') "+operacion+" 0";
+                    }
+                } else if (filtro.tipoCampoObjetivo.localeCompare("int") == 0 || filtro.filtro.nombreCampo.localeCompare("decimal") == 0) {
+                    if(filtro.operacion.localeCompare("encuentra") == 0) {
+                        //
+                    } else if(filtro.operacion.localeCompare("no_encuentra") == 0) {
+                        //
+                    } else {
+                        inicioComparacion = nombreReferenciaArregloEnCodigo+"[x]."+filtro.nombreCampo+" != undefined && !isNaN("+nombreReferenciaArregloEnCodigo+"[x]."+nombreCampoDeArregloEnCodigo+")"
+                        comparacion = nombreReferenciaArregloEnCodigo+"[x]."+filtro.nombreCampo+" "+operacion+" "+arregloValoresAComparar[i];
+                    }
+                } else if (filtro.tipoCampoObjetivo.localeCompare("bit") == 0) {
+                    inicioComparacion = nombreReferenciaArregloEnCodigo+"[x]."+filtro.nombreCampo+" != undefined"
+                    comparacion = nombreReferenciaArregloEnCodigo+"[x]."+filtro.nombreCampo+" "+operacion+" "+arregloValoresAComparar[i];
+                }
+                if(i+1 == arregloValoresAComparar.length) {
+                    comparacion += " ) {";
+                }
+                if(i==0) {
+                    arreglo.push({codigo: '\n'+tabsText+"if ( "+inicioComparacion+" && "+comparacion, tipo: "COMPARACION"});
+                } else {
+                    arreglo[arreglo.length-1].codigo += " && "+comparacion;
+                }
+            };
+            /*console.log("ENTROOO j");
+        };*/
+        posicionesIF.push(arreglo.length);
+
+        var cuerpo = arregloDeFiltros.filter(function( object, index ) {
+            return object.filtroPadre == index;
+        });
+        if(cuerpo.length > 0) {
+            var arregloCuerpo = [];
+            for (var i = 0; i < cuerpo.length; i++) {
+                var retorno = this.arregloCodigoFiltro(cuerpo[i], tabs+1, [], arregloDeFiltros, nombreReferenciaArregloEnCodigo);
+                retorno[0].codigo = "\n"+retorno[0].codigo;
+                $.merge( arregloCuerpo, retorno );
+            };
+            for (var i = 0; i < posicionesIF.length; i++) {
+                arreglo.splice(posicionesIF[i], 0, ...arregloCuerpo);
+                if(filtro.esCondicion)
+                    arreglo.splice(posicionesIF[i]+arregloCuerpo.length, 0, {codigo: "\n"+tabsText+"}", filtro: regla.filtro});
+                for (var j = i; j < posicionesIF.length; j++) {
+                    posicionesIF[j]+=arregloCuerpo.length;
+                };
+            };
+            if(posicionesIF.length == 0)
+                $.merge( arreglo, arregloCuerpo );
+            return arreglo;
+        } else {
+            if(filtro.esCondicion || posicionesIF.length > 0){
+                for (var i = 0; i < posicionesIF.length; i++) {
+                    if (newTabsTextFormula.length > 0)
+                        newTabsTextFormula = newTabsTextFormula.substring(0, newTabsTextFormula.length - 1);
+                    arreglo.splice(posicionesIF[i], 0, {codigo: "\n"+tabsText+newTabsTextFormula+"}", filtro: regla.filtro})
+                };
+            }
+            return arreglo;
         }
     }
 
@@ -496,37 +743,57 @@ export default class Filtro extends React.Component {
                     </div>
                 </div>
 
-                <div className="row" style={{maxHeight: "60vh"}}>
-                    <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12" style={{height: "100%"}}>
-                        <div className="card" style={{height: "100%"}}>
-                            <div className="row" style={{borderBottom: "5px solid #d2d2e4", height: "90%"}}>
-                                <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3"} style={{borderRight: "5px solid #d2d2e4", height: "100%"}}>
-                                    <div style={{display: "flex", alignItems: "center", justifyContent: "center", height: "8%", width: "100%", paddingTop: "5px"}}>
+                <div className="row" style={{height: "70vh"}}>
+                    <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12" style={{height: "100%", width: "100%"}}>
+                        <div className="card" style={{height: "100%", width: "100%"}}>
+                            <div className="row" style={{borderBottom: "3px solid #d2d2e4", height: "90%", width: "100%"}}>
+                                <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3"} style={{borderRight: "3px solid #d2d2e4", height: "100%", overflowY: "scroll"}}>
+                                    <div style={{display: "flex", alignItems: "center", paddingTop: "1%", justifyContent: "center", height: "8%", width: "100%", paddingTop: "5px"}}>
                                         <h2>Variables</h2>
                                     </div>
-                                    <hr/>
-                                    <div style={{paddingLeft: "5px"}}>
+                                    <div style={{width: "100%", display: "flex", justifyContent: "center", alignItems: "center"}}>
+                                        <div style={{width: "100%", border: "1px solid #999297", borderRadius: "50px"}}>
+                                        </div>
+                                    </div>
+                                    <br/>
+                                    <div style={{paddingLeft: "5px", overflowX: "scroll"}}>
                                         {this.state.variables.map((variable, i) => (
-                                            <label key={variable.ID} className="custom-control custom-radio">
-                                                <input id={"varRad"+variable.ID} onClick={() => this.selVar(i, "variable")} type="radio" name="sinoRadio" className="custom-control-input"/><span className="custom-control-label">{variable.nombreVariable}</span>
-                                            </label>
+                                            <div key={variable.ID}>
+                                                <label className="custom-control custom-radio">
+                                                    <input id={"varRad"+variable.ID} onClick={() => this.selVar(i, "variable")} type="radio" name="sinoRadio" className="custom-control-input"/><span className="custom-control-label">{variable.nombreVariable}</span>
+                                                </label>
+                                                {
+                                                    i != this.state.variables.length-1
+                                                    ?   <div style={{width: "100%", display: "flex", justifyContent: "center", alignItems: "center"}}>
+                                                            <div style={{width: "80%", border: "1px solid #d2d2e4", borderRadius: "50px"}}>
+                                                            </div>
+                                                        </div>
+                                                    : null
+                                                }
+                                            </div>
                                         ))}
                                     </div>
                                 </div>
 
-                                <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9"} style={{height: "100%"}}>
+                                <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9"} style={{height: "100%", width: "100%", padding: "0px"}}>
                                     <div className="row" style={{display: (this.state.variableSeleccionada != null ? "" : "none"), borderBottom: "3px solid #d2d2e4", height: "30%", width: "100%"}}>
                                         {
                                             this.state.variableSeleccionada != null
-                                            ?   <div className="text-center" style={{height: "100%", width: "100%", overflowX: "scroll"}}>
+                                            ?   <div className="text-center" style={{height: "100%", width: "100%", overflowX: "scroll", whiteSpace: "nowrap"}}>
                                                     {this.state.variableSeleccionada.atributos.map((atributo, i) => (
-                                                        <a key={this.state.variableSeleccionada.nombre+atributo.nombre+atributo.ID} href="#" onClick={() => this.selCampo(i)} className={"btn " + (atributo.activa ? "" : "btn-outline-secondary")} style={{margin: "1% 3%"}}>{atributo.nombre}</a>
+                                                        <div key={this.state.variableSeleccionada.nombre+atributo.nombre+atributo.ID} style={{height: "100%", width: "33%", display: "inline-block", lineHeight: "100%", borderRight: "1px solid #d2d2e4", backgroundColor: (atributo.activa ? "rgba(210, 210, 228, 0.4)" : "") }} onClick={() => this.selCampo(i)} className="addPointer">
+                                                            <div style={{height: "100%", width: "100%", display: "flex", alignItems: "center", justifyContent: "center"}}>
+                                                                <p className="lead">
+                                                                    {atributo.nombre}
+                                                                </p>
+                                                            </div>
+                                                        </div>
                                                     ))}
                                                 </div>
                                             : null
                                         }
                                     </div>
-                                    <div className="row" style={{display: (this.state.campoSeleccionado != null ? "" : "none"), borderBottom: "3px solid #d2d2e4", height: "40%"}}>
+                                    <div className="row" style={{display: (this.state.campoSeleccionado != null ? "" : "none"), borderBottom: "3px solid #d2d2e4", height: "30%"}}>
                                         <Operacion esNumero={this.state.tipoCampo.esNumero}
                                             esBoolean={this.state.tipoCampo.esBoolean}
                                             esFecha={this.state.tipoCampo.esFecha}
@@ -534,7 +801,7 @@ export default class Filtro extends React.Component {
                                             retornoSeleccionOperacion={this.retornoSeleccionOperacion}>
                                         </Operacion>
                                     </div>
-                                    <div className="row" style={{display: (this.state.campoSeleccionado != null ? "" : "none"), height: "30%"}}>
+                                    <div className="row" style={{display: (this.state.campoSeleccionado != null ? "" : "none"), height: "40%", overflowY: "scroll"}}>
                                         <Valor esNumero={this.state.tipoCampo.esNumero}
                                             esBoolean={this.state.tipoCampo.esBoolean}
                                             esFecha={this.state.tipoCampo.esFecha}
@@ -561,6 +828,36 @@ export default class Filtro extends React.Component {
                     <a className={"btn btn-success btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={() => this.props.retornoVariables(this.state.variables, this.state.indicadores, this.state.riesgos)}>Visualizar Variables</a>
                 </div>
                 <br/>
+
+                <div className="row">
+                    <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                        <div className="card">
+                            <table className="table table-striped table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">#</th>
+                                        <th scope="col">Instrucción</th>
+                                        <th scope="col">Borrar</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {this.state.filtros.map((filtro, i) => (
+                                        <tr key={filtro.instruccion+""+j}>
+                                            <td scope="row">{i+1}</td>
+                                            <td scope="row">
+                                                {filtro.texto}
+                                            </td>
+                                            <td scope="row">
+                                                <img className="addPointer" onClick={() => this.eliminarFiltro(i) } src={"../assets/trash.png"} style={{height: "20px", width: "20px", display: "block"}}></img>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         );
     }

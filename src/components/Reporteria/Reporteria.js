@@ -28,7 +28,8 @@ export default class Reporteria extends React.Component {
                             <div className={"page-breadcrumb"}>
                                 <nav aria-label="breadcrumb">
                                     <ol className={"breadcrumb"}>
-                                        <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.props.returnImportResults}><a href="#" className={"breadcrumb-link"}>Crear Filtro</a></li>
+                                        <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.props.returnChooseDates}><a href="#" className={"breadcrumb-link"}>Seleccionar Fechas</a></li>
+                                        <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.props.returnChooseFilter}><a href="#" className={"breadcrumb-link"}>Crear Filtro</a></li>
                                         <li className={"breadcrumb-item active font-16"} aria-current="page">Visualizar Variables</li>
                                     </ol>
                                 </nav>
@@ -49,7 +50,13 @@ export default class Reporteria extends React.Component {
                                     <tr>
                                         <th scope="col">#</th>
                                         {variable.atributos.map((campo, j) => (
-                                            <th scope="col" key={campo.nombre+""+variable.ID}>{campo.nombre}</th>
+                                            <th scope="col" key={campo.nombre+""+variable.ID}>
+                                                {
+                                                    campo.nombre.localeCompare("f3ch4Gu4rd4do") == 0
+                                                    ? "Fecha Creación"
+                                                    : campo.nombre
+                                                }
+                                            </th>
                                         ))}
                                     </tr>
                                 </thead>
@@ -87,7 +94,13 @@ export default class Reporteria extends React.Component {
                                     <tr>
                                         <th scope="col">#</th>
                                         {indicador.atributos.map((campo, j) => (
-                                            <th scope="col" key={campo.nombre+""+indicador.ID}>{campo.nombre}</th>
+                                            <th scope="col" key={campo.nombre+""+indicador.ID}>
+                                                {
+                                                    campo.nombre.localeCompare("f3ch4Gu4rd4do") == 0
+                                                    ? "Fecha Creación"
+                                                    : campo.nombre
+                                                }
+                                            </th>
                                         ))}
                                     </tr>
                                 </thead>
@@ -125,7 +138,13 @@ export default class Reporteria extends React.Component {
                                     <tr>
                                         <th scope="col">#</th>
                                         {riesgo.atributos.map((campo, j) => (
-                                            <th scope="col" key={campo.nombre+""+riesgo.ID}>{campo.nombre}</th>
+                                            <th scope="col" key={campo.nombre+""+riesgo.ID}>
+                                                {
+                                                    campo.nombre.localeCompare("f3ch4Gu4rd4do") == 0
+                                                    ? "Fecha Creación"
+                                                    : campo.nombre
+                                                }
+                                            </th>
                                         ))}
                                     </tr>
                                 </thead>

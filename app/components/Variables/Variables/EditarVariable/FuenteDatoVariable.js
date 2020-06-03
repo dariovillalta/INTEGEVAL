@@ -43,8 +43,10 @@ const operacionesFecha = [{valor: "Asignar Valor Único"}, {valor: "Asignar Valo
 const operacionesBoolean = [{valor: "Asignar Valor Único"}, {valor: "Asignar Valor Único Si"}, {valor: "Asignar Valor Multiples"}, {valor: "Asignar Valor Multiples Si"}, {valor: "Contar"}, {valor: "Contar Si"}];
 const operacionesCadena = [{valor: "Asignar Valor Único"}, {valor: "Asignar Valor Único Si"}, {valor: "Asignar Valor Multiples"}, {valor: "Asignar Valor Multiples Si"}, {valor: "Contar"}, {valor: "Contar Si"}, {valor: "Sumar"}];*/
 var mostrarEsObjetoGlobal = true;
+var mostrarEsColeccionGlobal = true;
 var mostrarInstruccionSQLGlobal = true;
 var tituloGlobal = "Instrucción SQL";
+var valorPeriodicidadGlobal = "-1";
 var periodicidad = [{
   nombre: "diario"
 }, {
@@ -178,11 +180,13 @@ function (_React$Component) {
     _this = _possibleConstructorReturn(this, _getPrototypeOf(FuenteDatoVariable).call(this, props));
     _this.state = {
       mostrarEsObjeto: mostrarEsObjetoGlobal,
+      mostrarEsColeccion: mostrarEsColeccionGlobal,
       titulo: tituloGlobal,
       mostrarInstruccionSQL: mostrarInstruccionSQLGlobal,
-      valorPeriodicidad: "-1"
+      valorPeriodicidad: valorPeriodicidadGlobal
     };
     _this.cambioInstruccionSQL = _this.cambioInstruccionSQL.bind(_assertThisInitialized(_this));
+    _this.cambioAColeccion = _this.cambioAColeccion.bind(_assertThisInitialized(_this));
     _this.cambioAObjeto = _this.cambioAObjeto.bind(_assertThisInitialized(_this));
     _this.cambiarTitulo = _this.cambiarTitulo.bind(_assertThisInitialized(_this));
     _this.actualizarPeriodicidad = _this.actualizarPeriodicidad.bind(_assertThisInitialized(_this));
@@ -286,6 +290,7 @@ function (_React$Component) {
     _this.verificarPeriodicidadGuardar = _this.verificarPeriodicidadGuardar.bind(_assertThisInitialized(_this));
     _this.updatePeriodicidad = _this.updatePeriodicidad.bind(_assertThisInitialized(_this));
     _this.guardarPeriodicidad = _this.guardarPeriodicidad.bind(_assertThisInitialized(_this));
+    valorPeriodicidadGlobal = _this.props.periodicidadVariable;
     return _this;
   }
 
@@ -329,13 +334,19 @@ function (_React$Component) {
                   var titulo = "Instrucción SQL";
 
                   if (!result.recordset[0].esInstruccionSQL) {
-                    if (result.recordset[0].esObjeto) titulo = "Valores Multiples";else titulo = "Valor Único";
+                    if (result.recordset[0].esObjeto) titulo = "Variable Compuesta";else titulo = "Variable Individual";
                   }
+
+                  mostrarEsObjetoGlobal = result.recordset[0].esObjeto;
+                  mostrarEsColeccionGlobal = result.recordset[0].esColeccion;
+                  mostrarInstruccionSQLGlobal = result.recordset[0].esInstruccionSQL;
+                  valorPeriodicidadGlobal = result.recordset[0].periodicidad;
 
                   _this2.setState({
                     titulo: titulo,
                     mostrarEsObjeto: result.recordset[0].esObjeto,
                     mostrarInstruccionSQL: result.recordset[0].esInstruccionSQL,
+                    mostrarEsColeccion: result.recordset[0].esColeccion,
                     valorPeriodicidad: result.recordset[0].periodicidad
                   });
                 }
@@ -365,6 +376,14 @@ function (_React$Component) {
       }, this.cambiarTitulo);
     }
   }, {
+    key: "cambioAColeccion",
+    value: function cambioAColeccion() {
+      mostrarEsColeccionGlobal = !this.state.mostrarEsColeccion;
+      this.setState({
+        mostrarEsColeccion: !this.state.mostrarEsColeccion
+      });
+    }
+  }, {
     key: "cambiarTitulo",
     value: function cambiarTitulo() {
       this.props.cambioDeArreglosDeAtributos();
@@ -375,14 +394,14 @@ function (_React$Component) {
           titulo: "Instrucción SQL"
         });
       } else if (this.state.mostrarEsObjeto) {
-        tituloGlobal = "Valores Multiples";
+        tituloGlobal = "Variable Compuesta";
         this.setState({
-          titulo: "Valores Multiples"
+          titulo: "Variable Compuesta"
         });
       } else {
-        tituloGlobal = "Valor Único";
+        tituloGlobal = "Variable Individual";
         this.setState({
-          titulo: "Valor Único"
+          titulo: "Variable Individual"
         });
       }
 
@@ -408,6 +427,8 @@ function (_React$Component) {
         minViewMode: "days",
         language: 'es'
       });
+      console.log("this.props.fechaInicioVariable");
+      console.log(this.props.fechaInicioVariable);
       if (this.props.fechaInicioVariable.getFullYear() != 1964 && this.props.fechaInicioVariable.getMonth() != 4 && this.props.fechaInicioVariable.getDate() != 28) $("#fecha").datepicker("setDate", this.props.fechaInicioVariable);
       var self = this;
       $('#fecha').datepicker().on('changeDate', function () {
@@ -6498,11 +6519,37 @@ function (_React$Component) {
       }, _react["default"].createElement("div", {
         className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
       }, _react["default"].createElement("label", {
+        htmlFor: "esColeccion",
+        className: "col-form-label"
+      }, "Es colecci\xF3n de Datos:")), _react["default"].createElement("div", {
+        className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
+      }, _react["default"].createElement("div", {
+        className: "switch-button-coleccion switch-button-yesno",
+        style: {
+          margin: "0 auto",
+          display: "block"
+        }
+      }, _react["default"].createElement("input", {
+        type: "checkbox",
+        defaultChecked: this.state.mostrarEsColeccion,
+        name: "esColeccion",
+        id: "esColeccion",
+        onClick: this.cambioAColeccion
+      }), _react["default"].createElement("span", null, _react["default"].createElement("label", {
+        htmlFor: "esColeccion"
+      }))))) : null, !this.state.mostrarInstruccionSQL ? _react["default"].createElement("div", {
+        className: "row",
+        style: {
+          width: "100%"
+        }
+      }, _react["default"].createElement("div", {
+        className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
+      }, _react["default"].createElement("label", {
         htmlFor: "esObjetoFuenteDato",
         className: "col-form-label"
-      }, "Tiene m\xE1s de un campo:")), _react["default"].createElement("div", {
+      }, "Es variable compuesta:")), _react["default"].createElement("div", {
         className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
-      }, _react["default"].createElement("br", null), _react["default"].createElement("div", {
+      }, _react["default"].createElement("div", {
         className: "switch-button-variable switch-button-yesno",
         style: {
           margin: "0 auto",
@@ -6631,6 +6678,8 @@ function (_React$Component) {
         tipoNuevaVariable: this.props.tipoNuevaVariable,
         actualizarNombreCampoNuevoAtributosVario: this.props.actualizarNombreCampoNuevoAtributosVario,
         crearAtributoVariable: this.props.crearAtributoVariable,
+        eliminarAtributoVariable: this.props.eliminarAtributoVariable,
+        modificarNombreVariable: this.props.modificarNombreVariable,
         mostrarEsObjeto: this.state.mostrarEsObjeto,
         goToCreateConditions: this.props.goToCreateConditions,
         goCreateVariableFieldSQL: this.props.goCreateVariableFieldSQL
@@ -6659,7 +6708,14 @@ function (_React$Component) {
           marginLeft: "10px"
         },
         onClick: this.calculoVariable
-      }, "Realizar C\xE1lculo") : null), _react["default"].createElement("br", null));
+      }, "Realizar C\xE1lculo") : null, this.props.tipoVariableOriginal.localeCompare("variable") == 0 ? _react["default"].createElement("a", {
+        href: "#",
+        className: "btn btn-info active",
+        style: {
+          marginLeft: "10px"
+        },
+        onClick: this.props.goToTimeline
+      }, "Historial de Variable") : null), _react["default"].createElement("br", null));
     }
   }]);
 

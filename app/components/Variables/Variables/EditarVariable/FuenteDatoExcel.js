@@ -284,6 +284,8 @@ function (_React$Component) {
 
           var self = this;
           setTimeout(function () {
+            console.log("HOLA");
+
             if (self.props.tipoVariableOriginal.localeCompare("excel") != 0) {
               var transaction = new _mssql["default"].Transaction(self.props.pool);
               transaction.begin(function (err) {
@@ -345,7 +347,7 @@ function (_React$Component) {
               }); // fin transaction
 
             }
-          }, 1000); //}
+          }, 500); //}
         } else {
           alert('Ingrese un valor para la ubicación del archivo que debe ser menor a 1001 caracteres');
         }
@@ -373,57 +375,64 @@ function (_React$Component) {
               transaction1.rollback(function (err) {});
             }
           } else {
-            transaction1.commit(function (err) {});
+            transaction1.commit(function (err) {
+              console.log("BORRO");
+            });
           }
         });
       });
+      var self = this;
+      setTimeout(function () {
+        var _loop = function _loop() {
+          var nombreHoja = self.state.variables[i].nombreHoja;
+          var nombre = self.state.variables[i].nombre;
+          var operacion = self.state.variables[i].operacion;
+          var celdas = self.state.variables[i].celdas;
+          var tipo = self.state.variables[i].tipo;
+          var periodicidad = self.state.variables[i].periodicidad;
+          var fechaInicioCalculo = self.state.variables[i].fechaInicioCalculo;
+          var analista = self.state.variables[i].analista;
+          var guardarVariable = self.state.variables[i].guardar;
+          console.log("this.state.variables");
+          console.log(self.state.variables[i]);
+          var transaction = new _mssql["default"].Transaction(self.props.pool);
+          transaction.begin(function (err) {
+            var rolledBack = false;
+            transaction.on('rollback', function (aborted) {
+              rolledBack = true;
+            });
+            var request = new _mssql["default"].Request(transaction);
+            request.query("insert into ExcelVariables (excelArchivoID, nombreHoja, nombre, operacion, celdas, tipo, periodicidad, fechaInicioCalculo, analista, guardar) values (" + self.props.idVariable + ", '" + nombreHoja + "','" + nombre + "', '" + operacion + "', '" + celdas + "', '" + tipo + "', '" + periodicidad + "', '" + fechaInicioCalculo.getFullYear() + "-" + (fechaInicioCalculo.getMonth() + 1) + "-" + fechaInicioCalculo.getDate() + "', '" + analista + "', '" + guardarVariable + "')", function (err, result) {
+              if (err) {
+                console.log(err);
 
-      var _loop = function _loop() {
-        var nombreHoja = _this4.state.variables[i].nombreHoja;
-        var nombre = _this4.state.variables[i].nombre;
-        var operacion = _this4.state.variables[i].operacion;
-        var celdas = _this4.state.variables[i].celdas;
-        var tipo = _this4.state.variables[i].tipo;
-        var periodicidad = _this4.state.variables[i].periodicidad;
-        var fechaInicioCalculo = _this4.state.variables[i].fechaInicioCalculo;
-        var analista = _this4.state.variables[i].analista;
-        var guardarVariable = _this4.state.variables[i].guardar;
-        var transaction = new _mssql["default"].Transaction(_this4.props.pool);
-        transaction.begin(function (err) {
-          var rolledBack = false;
-          transaction.on('rollback', function (aborted) {
-            rolledBack = true;
-          });
-          var request = new _mssql["default"].Request(transaction);
-          request.query("insert into ExcelVariables (excelArchivoID, nombreHoja, nombre, operacion, celdas, tipo, periodicidad, fechaInicioCalculo, analista, guardar) values (" + _this4.props.idVariable + ", '" + nombreHoja + "','" + nombre + "', '" + operacion + "', '" + celdas + "', '" + tipo + "', '" + periodicidad + "', '" + fechaInicioCalculo.getFullYear() + "-" + (fechaInicioCalculo.getMonth() + 1) + "-" + fechaInicioCalculo.getDate() + "', '" + analista + "', '" + guardarVariable + "')", function (err, result) {
-            if (err) {
-              console.log(err);
+                if (!rolledBack) {
+                  transaction.rollback(function (err) {});
+                }
+              } else {
+                transaction.commit(function (err) {
+                  if (i == self.state.variables.length - 1) {
+                    self.traerArchivo();
+                    self.getExcel();
+                  }
 
-              if (!rolledBack) {
-                transaction.rollback(function (err) {});
+                  console.log("this.state");
+
+                  if (agregoVariable) {
+                    self.verificarSiExisteExcelEnResultadosHistoricosModificar(nombre);
+                  }
+                });
               }
-            } else {
-              transaction.commit(function (err) {
-                if (i == _this4.state.variables.length - 1) {
-                  _this4.traerArchivo();
+            });
+          }); // fin transaction
+        };
 
-                  _this4.getExcel();
-                }
+        for (var i = 0; i < self.state.variables.length; i++) {
+          _loop();
+        }
 
-                if (agregoVariable) {
-                  _this4.verificarSiExisteExcelEnResultadosHistoricosModificar(_this4.state.variables[i]);
-                }
-              });
-            }
-          });
-        }); // fin transaction
-      };
-
-      for (var i = 0; i < this.state.variables.length; i++) {
-        _loop();
-      }
-
-      ;
+        ;
+      }, 500);
     }
   }, {
     key: "traerArchivoID",
@@ -589,6 +598,9 @@ function (_React$Component) {
   }, {
     key: "updateVariable",
     value: function updateVariable(index) {
+      alert($("#hojaExcelVariable" + index).val());
+      alert($("#celdasVariable" + index).val());
+
       if ($("#nombreVariable" + index).length > 0 && $("#nombreVariable" + index).length < 101) {
         if ($("#operacion" + index).val().length > 0 && $("#operacion" + index).val().length < 31) {
           if ($("#celdasVariable" + index).length > 0 && $("#celdasVariable" + index).length < 101) {
@@ -623,6 +635,7 @@ function (_React$Component) {
                           valoresPeriodicidad: copyTempPeriodicidad
                         });
                         agregoVariable = true;
+                        alert("Variable Modificada");
                       } else {
                         alert('El nombre de la variable debe ser único.');
                       }
@@ -987,24 +1000,21 @@ function (_React$Component) {
       }
 
       ;
-
-      if (noExiste) {
-        for (var i = 0; i < excel.length; i++) {
-          if (this.props.tipoVariableOriginal.localeCompare("excel") == 0) {
-            if (excel[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0 && excel[i].ID != this.props.idVariable) {
-              noExiste = false;
-              break;
-            }
-          } else {
-            if (excel[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
-              noExiste = false;
-              break;
-            }
-          }
-        }
-
-        ;
-      }
+      /*if(noExiste) {
+          for (var i = 0; i < excel.length; i++) {
+              if(this.props.tipoVariableOriginal.localeCompare("excel") == 0) {
+                  if (excel[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0 && excel[i].ID != this.props.idVariable) {
+                      noExiste = false;
+                      break;
+                  }
+              } else {
+                  if (excel[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
+                      noExiste = false;
+                      break;
+                  }
+              }
+          };
+      }*/
 
       if (noExiste) {
         for (var i = 0; i < this.state.variables.length; i++) {
@@ -1122,8 +1132,7 @@ function (_React$Component) {
             }
           } else {
             transaction.commit(function (err) {
-              if (result.recordset.length == 0) {
-                _this9.crearTablaDeResultadoNombreModificar(variable);
+              if (result.recordset.length == 0) {//this.crearTablaDeResultadoNombreModificar(variable);
               } else {
                 console.log("ENCONTRO");
                 console.log(result.recordset[0]);
@@ -2492,7 +2501,7 @@ function (_React$Component) {
         }, _react["default"].createElement("input", {
           id: "hojaExcelVariable" + i,
           type: "text",
-          defaultValue: variable.celdas,
+          defaultValue: variable.nombreHoja,
           className: "form-control form-control-sm"
         }))), _react["default"].createElement("div", {
           className: "row",

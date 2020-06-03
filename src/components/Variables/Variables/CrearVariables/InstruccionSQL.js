@@ -95,7 +95,7 @@ export default class InstruccionSQL extends React.Component {
                                         for (var i = 0; i < camposError.length; i++) {
                                             textoCamposErrores += camposError[i];
                                         };
-                                        alert("Se encontraron errores al intentar acceder a los campos: "+textoCamposErrores+". No se guardo la instruccionSQL.");
+                                        alert("Se encontraron errores al recuperar los campos: "+textoCamposErrores+". No se guardo la instruccionSQL.");
                                     } else {
                                         this.props.agregarInstruccionSQL();
                                     }

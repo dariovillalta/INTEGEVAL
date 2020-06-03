@@ -378,7 +378,7 @@ export default class Campo extends React.Component {
     
     render() {
         return (
-            <div className={"row"}  style={{width: "100%"}}>
+            <div className={"row"}  style={{width: "100%", maxHeight: "60vh", overflowY: "scroll"}}>
                 <Accordion showTrash={false} showEdit={false} color={"#ffffff"}>
                     <div label={"Conexiones"}>
                         {this.props.tablas.map((conexion, i) => (

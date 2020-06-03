@@ -117,7 +117,7 @@ export default class FuenteDatoVariableAtributos extends React.Component {
                                                         <label htmlFor="nombreAtributo" className="col-form-label">Nombre de Atributo:</label>
                                                     </div>
                                                     <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
-                                                        <input id="nombreAtributo" type="text" defaultValue={atributo.nombre} className="form-control form-control-sm"/>
+                                                        <input id={"nombreAtributo"+i} type="text" defaultValue={atributo.nombre} onKeyUp={() => this.props.modificarNombreVariable(i)} className="form-control form-control-sm"/>
                                                     </div>
                                                 </div>
                                             </div>
@@ -132,6 +132,10 @@ export default class FuenteDatoVariableAtributos extends React.Component {
                                             </div>
                                             <br/>
                                             <a href="#" className="btn btn-success active font-20" style={{width: "100%"}} onClick={() => this.actualizarIndiceAtributoSeleccionado(i)}>Editar Instrucción Personalizada </a>
+                                            <br/><br/>
+                                            <div className={"text-center"} style={{width: "100%"}}>
+                                                <a href="#" className="btn btn-danger active" onClick={() => this.props.eliminarAtributoVariable(i)} style={{marginLeft: "10px"}}>Eliminar Variable</a>
+                                            </div>
                                             <br/>
                                         </div>
                                     ))}

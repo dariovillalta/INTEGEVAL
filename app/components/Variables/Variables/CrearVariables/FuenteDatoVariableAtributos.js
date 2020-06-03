@@ -272,9 +272,12 @@ function (_React$Component) {
             justifyContent: "center"
           }
         }, _react["default"].createElement("input", {
-          id: "nombreAtributo",
+          id: "nombreAtributo" + i,
           type: "text",
           defaultValue: atributo.nombre,
+          onKeyUp: function onKeyUp() {
+            return _this2.props.modificarNombreVariable(i);
+          },
           className: "form-control form-control-sm"
         })))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
           className: "row",
@@ -305,7 +308,21 @@ function (_React$Component) {
           onClick: function onClick() {
             return _this2.actualizarIndiceAtributoSeleccionado(i);
           }
-        }, "Editar Instrucci\xF3n Personalizada "), _react["default"].createElement("br", null));
+        }, "Editar Instrucci\xF3n Personalizada "), _react["default"].createElement("br", null), _react["default"].createElement("br", null), _react["default"].createElement("div", {
+          className: "text-center",
+          style: {
+            width: "100%"
+          }
+        }, _react["default"].createElement("a", {
+          href: "#",
+          className: "btn btn-danger active",
+          onClick: function onClick() {
+            return _this2.props.eliminarAtributoVariable(i);
+          },
+          style: {
+            marginLeft: "10px"
+          }
+        }, "Eliminar Variable")), _react["default"].createElement("br", null));
       })))));
     }
   }]);

@@ -1,7 +1,8 @@
 import React from 'react';
 import sql from 'mssql';
 
-import ImportacionResultadosHome from '../ImportacionResultados/ImportacionResultadosHome.js';
+import SeleccionarFechas from '../ImportacionResultados/SeleccionarFechas.js';
+import Filtro from '../ImportacionResultados/Filtro.js';
 import Reporteria from './Reporteria.js';
 
 export default class ReporteriaHome extends React.Component {
@@ -9,12 +10,16 @@ export default class ReporteriaHome extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            componenteActual: "importarResultados",
+            componenteActual: "selFechas",
+            fechaInicial: null,
+            fechaFinal: null,
             variables: [],
             indicadores: [],
             riesgos: []
         }
-        this.returnImportResults = this.returnImportResults.bind(this);
+        this.goCreateFilters = this.goCreateFilters.bind(this);
+        this.returnChooseDates = this.returnChooseDates.bind(this);
+        this.returnChooseFilter = this.returnChooseFilter.bind(this);
         this.retornoVariables = this.retornoVariables.bind(this);
     }
 
@@ -22,9 +27,39 @@ export default class ReporteriaHome extends React.Component {
         //
     }*/
 
-    returnImportResults () {
+    goCreateFilters (fechaInicial, fechaFinal) {
+        if(fechaInicial == null && fechaFinal == null) {
+            this.setState({
+                componenteActual: "crearFiltros"
+            });
+        } else if(fechaInicial == null && fechaFinal != null) {
+            this.setState({
+                componenteActual: "crearFiltros",
+                fechaFinal: fechaFinal
+            });
+        } else if(fechaInicial != null && fechaFinal == null) {
+            this.setState({
+                componenteActual: "crearFiltros",
+                fechaInicial: fechaInicial
+            });
+        } else if(fechaInicial != null && fechaFinal != null) {
+            this.setState({
+                componenteActual: "crearFiltros",
+                fechaInicial: fechaInicial,
+                fechaFinal: fechaFinal
+            });
+        }
+    }
+
+    returnChooseDates () {
         this.setState({
-            componenteActual: "importarResultados"
+            componenteActual: "selFechas"
+        });
+    }
+
+    returnChooseFilter () {
+        this.setState({
+            componenteActual: "crearFiltros"
         });
     }
 
@@ -44,14 +79,23 @@ export default class ReporteriaHome extends React.Component {
     }
 
     render() {
-        if(this.state.componenteActual.localeCompare("importarResultados") == 0) {
+        if(this.state.componenteActual.localeCompare("selFechas") == 0) {
             return (
                 <div>
-                    <ImportacionResultadosHome pool={this.props.pool}
-                                            navbarFechas={this.state.navbarFechas}
-                                            goCreateFilters={this.props.goCreateFilters}
-                                            retornoVariables={this.retornoVariables}>
-                    </ImportacionResultadosHome>
+                    <SeleccionarFechas navbar={this.props.navbarFechas}
+                                            goCreateFilters={this.goCreateFilters}>
+                    </SeleccionarFechas>
+                </div>
+            );
+        } else if(this.state.componenteActual.localeCompare("crearFiltros") == 0) {
+            return (
+                <div>
+                    <Filtro pool={this.props.pool}
+                                            fechaInicial={this.state.fechaInicial}
+                                            fechaFinal={this.state.fechaFinal}
+                                            retornoVariables={this.retornoVariables}
+                                            returnChooseDates={this.returnChooseDates}>
+                    </Filtro>
                 </div>
             );
         } else if(this.state.componenteActual.localeCompare("visualizarReporteria") == 0) {
@@ -61,7 +105,8 @@ export default class ReporteriaHome extends React.Component {
                                             variables={this.state.variables}
                                             indicadores={this.state.indicadores}
                                             riesgos={this.state.riesgos}
-                                            returnImportResults={this.returnImportResults}>
+                                            returnChooseDates={this.returnChooseDates}
+                                            returnChooseFilter={this.returnChooseFilter}>
                     </Reporteria>
                 </div>
             );

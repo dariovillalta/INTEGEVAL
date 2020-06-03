@@ -172,6 +172,7 @@ function (_React$Component) {
       var tipoIndicador = $("#tipoIndicador").val();
       var periodicidad = $("#periodicidad").val();
       var fecha = $("#fecha").datepicker('getDate');
+      if (tipoIndicador.localeCompare("-1")) fecha = new Date(1964, 4, 28);
       var analista = $("#analista").val();
       var riesgoPadre = this.props.riesgoPadre;
       console.log('nombre');
@@ -302,7 +303,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("insert into ElementoIndicador (indicadorID, conexionTablaID, esFuenteDeDato, excelArchivoID, excelVariableID, formaVariableID, elementoVariableID, elementoVariableCampoID, nombreColumnaEnTabla, tipoColumnaEnTabla, nombreVariable, descripcion, operacion) values (" + indicador.ID + ", " + elementoFormula.conexionTablaID + ", '" + elementoFormula.esFuenteDeDato + "', " + elementoFormula.excelArchivoID + ", " + elementoFormula.excelVariableID + ", " + elementoFormula.formaVariableID + ", " + elementoFormula.elementoVariableID + ", " + elementoFormula.elementoVariableCampoID + ", '" + elementoFormula.nombreColumnaEnTabla + "', '" + elementoFormula.tipoColumnaEnTabla + "', '" + elementoFormula.nombreVariable + "', '" + elementoFormula.descripcion + "', '" + elementoFormula.operacion + "')", function (err, result) {
+        request.query("insert into ElementoIndicador (indicadorID, conexionTablaID, esFuenteDeDato, excelArchivoID, excelVariableID, formaVariableID, elementoVariableID, elementoVariableCampoID, esValorManual, nombreColumnaEnTabla, tipoColumnaEnTabla, nombreVariable, descripcion, operacion) values (" + indicador.ID + ", " + elementoFormula.conexionTablaID + ", '" + elementoFormula.esFuenteDeDato + "', " + elementoFormula.excelArchivoID + ", " + elementoFormula.excelVariableID + ", " + elementoFormula.formaVariableID + ", " + elementoFormula.elementoVariableID + ", " + elementoFormula.elementoVariableCampoID + ", '" + elementoFormula.esValorManual + "', '" + elementoFormula.nombreColumnaEnTabla + "', '" + elementoFormula.tipoColumnaEnTabla + "', '" + elementoFormula.nombreVariable + "', '" + elementoFormula.descripcion + "', '" + elementoFormula.operacion + "')", function (err, result) {
           if (err) {
             console.log(err);
 
@@ -456,7 +457,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("insert into SegmentoReglasIndicadores (conexionTablaID, indicadorID, indicadorCampoID, variableIDCreacionCodigo, esConexionTabla, posicionSegmentoEnCampo, nivelMax) values (" + segmento.conexionTablaID + ", " + indicador.ID + ", " + indicadorCampo.ID + ", " + segmento.variableID + ", '" + segmento.esConexionTabla + "', " + posicionSegmento + ", " + segmento.nivelMax + ")", function (err, result) {
+        request.query("insert into SegmentoReglasIndicadores (conexionTablaID, indicadorID, indicadorCampoID, variableIDCreacionCodigo, excelArchivoID, excelVariableID, formaVariableID, esValorManual, esConexionTabla, posicionSegmentoEnCampo, nivelMax) values (" + segmento.conexionTablaID + ", " + indicador.ID + ", " + indicadorCampo.ID + ", " + segmento.variableID + ", " + segmento.excelArchivoID + ", " + segmento.excelVariableID + ", " + segmento.formaVariableID + ", '" + segmento.esValorManual + "', '" + segmento.esConexionTabla + "', " + posicionSegmento + ", " + segmento.nivelMax + ")", function (err, result) {
           if (err) {
             console.log(err);
 
@@ -918,7 +919,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("insert into ElementoFormulasIndicadoresCampos (indicadorID, indicadorCampoID, formulaID, conexionTablaID, esFuenteDeDato, elementoVariableID, elementoVariableCampoID, nombreColumnaEnTabla, tipoColumnaEnTabla, nombreVariable, descripcion, operacion) values (" + indicador.ID + ", " + indicadorCampo.ID + ", " + formula.ID + ", " + elemento.conexionTablaID + ", '" + elemento.esFuenteDeDato + "', " + elemento.elementoVariableID + ", " + elemento.elementoVariableCampoID + ", '" + elemento.nombreColumnaEnTabla + "', '" + elemento.tipoColumnaEnTabla + "', '" + elemento.nombreVariable + "', '" + elemento.descripcion + "', '" + elemento.operacion + "')", function (err, result) {
+        request.query("insert into ElementoFormulasIndicadoresCampos (indicadorID, indicadorCampoID, formulaID, conexionTablaID, esFuenteDeDato, excelArchivoID, excelVariableID, formaVariableID, elementoVariableID, elementoVariableCampoID, esValorManual, nombreColumnaEnTabla, tipoColumnaEnTabla, nombreVariable, descripcion, operacion) values (" + indicador.ID + ", " + indicadorCampo.ID + ", " + formula.ID + ", " + elemento.conexionTablaID + ", '" + elemento.esFuenteDeDato + "', " + elemento.excelArchivoID + ", " + elemento.excelVariableID + ", " + elemento.formaVariableID + ", " + elemento.elementoVariableID + ", " + elemento.elementoVariableCampoID + ", '" + elemento.esValorManual + "', '" + elemento.nombreColumnaEnTabla + "', '" + elemento.tipoColumnaEnTabla + "', '" + elemento.nombreVariable + "', '" + elemento.descripcion + "', '" + elemento.operacion + "')", function (err, result) {
           if (err) {
             console.log(err);
 
@@ -1609,11 +1610,23 @@ function (_React$Component) {
                     posicionInsertarReglaSegmento = 0;
                 var posicionSegmentoEnCampo = -1; //bandera para saber a que segmento pertenece la regla, utilizado para elegir color fondo reglas
 
+                var excelArchivoID = -1,
+                    excelVariableID = -1,
+                    formaVariableID = -1;
+                var esValorManual = false;
+
                 if (formulaSeleccionada.tablaID != -1) {
                   conexionTablaID = formulaSeleccionada.tablaID;
                   esConexionTabla = true;
-                } else {
+                } else if (formulaSeleccionada.variableID != -1) {
                   variableID = formulaSeleccionada.variableID;
+                } else if (formulaSeleccionada.excelArchivoID != -1) {
+                  excelArchivoID = formulaSeleccionada.excelArchivoID;
+                  excelVariableID = formulaSeleccionada.excelVariableID;
+                } else if (formulaSeleccionada.formaVariableID != -1) {
+                  formaVariableID = formulaSeleccionada.formaVariableID;
+                } else if (formulaSeleccionada.esValorManual != undefined) {
+                  esValorManual = formulaSeleccionada.esValorManual;
                 }
 
                 if (tipoElementoSeleccionadoRegla.localeCompare("abajo") == 0 || indiceSeleccionadoReglas == -1 && tipoElementoSeleccionadoRegla.length == 0 || segmentoRegla[posicionSel].length == 0) {
@@ -1628,7 +1641,11 @@ function (_React$Component) {
                     variableID: variableID,
                     esConexionTabla: esConexionTabla,
                     nivelMax: nivelMax,
-                    segmentoReglaIndex: segmentoReglaIndex
+                    segmentoReglaIndex: segmentoReglaIndex,
+                    excelArchivoID: excelArchivoID,
+                    excelVariableID: excelVariableID,
+                    formaVariableID: formaVariableID,
+                    esValorManual: esValorManual
                   });
                   posicionInsertarReglaAtributo = posicionSel;
                   posicionInsertarReglaSegmento = segmentoRegla[posicionSel].length - 1;
@@ -1948,6 +1965,8 @@ function (_React$Component) {
           if (formulaArreglo[i].variableID != undefined) elementoVariableID = formulaArreglo[i].variableID;
           var elementoVariableCampoID = -1;
           if (formulaArreglo[i].variableCampoID != undefined) elementoVariableCampoID = formulaArreglo[i].variableCampoID;
+          var esValorManual = false;
+          if (formulaArreglo[i].esValorManual != undefined) esValorManual = formulaArreglo[i].esValorManual;
           array.push({
             variableID: -1,
             variableCampoID: -1,
@@ -1959,6 +1978,7 @@ function (_React$Component) {
             formaVariableID: formaVariableID,
             elementoVariableID: elementoVariableID,
             elementoVariableCampoID: elementoVariableCampoID,
+            esValorManual: esValorManual,
             nombreColumnaEnTabla: formulaArreglo[i].valor,
             tipoColumnaEnTabla: tipoDeAsignacionSeleccionado,
             nombreVariable: formulaArreglo[i].valor,

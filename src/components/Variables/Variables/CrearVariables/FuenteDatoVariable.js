@@ -13,6 +13,7 @@ const operacionesBoolean = [{valor: "Asignar Valor Único"}, {valor: "Asignar Va
 const operacionesCadena = [{valor: "Asignar Valor Único"}, {valor: "Asignar Valor Único Si"}, {valor: "Asignar Valor Multiples"}, {valor: "Asignar Valor Multiples Si"}, {valor: "Contar"}, {valor: "Contar Si"}, {valor: "Sumar"}];*/
 
 var mostrarEsObjetoGlobal = true;
+var mostrarEsColeccionGlobal = true;
 var mostrarInstruccionSQLGlobal = true;
 var tituloGlobal = "Instrucción SQL";
 var valorPeriodicidadGlobal = "-1";
@@ -26,9 +27,11 @@ export default class FuenteDatoVariable extends React.Component {
             mostrarEsObjeto: mostrarEsObjetoGlobal,
             titulo: tituloGlobal,
             mostrarInstruccionSQL: mostrarInstruccionSQLGlobal,
+            mostrarEsColeccion: mostrarEsColeccionGlobal,
             valorPeriodicidad: valorPeriodicidadGlobal
         }
         this.cambioInstruccionSQL = this.cambioInstruccionSQL.bind(this);
+        this.cambioAColeccion = this.cambioAColeccion.bind(this);
         this.cambioAObjeto = this.cambioAObjeto.bind(this);
         this.cambiarTitulo = this.cambiarTitulo.bind(this);
         this.actualizarPeriodicidad = this.actualizarPeriodicidad.bind(this);
@@ -60,6 +63,13 @@ export default class FuenteDatoVariable extends React.Component {
         }, this.cambiarTitulo);
     }
 
+    cambioAColeccion () {
+        mostrarEsColeccionGlobal = !this.state.mostrarEsColeccion;
+        this.setState({
+            mostrarEsColeccion: !this.state.mostrarEsColeccion
+        });
+    }
+
     cambioAObjeto () {
         mostrarEsObjetoGlobal = !this.state.mostrarEsObjeto;
         this.setState({
@@ -76,14 +86,14 @@ export default class FuenteDatoVariable extends React.Component {
                 titulo: "Instrucción SQL"
             });
         } else if(this.state.mostrarEsObjeto) {
-            tituloGlobal = "Valores Multiples";
+            tituloGlobal = "Variable Compuesta";
             this.setState({
-                titulo: "Valores Multiples"
+                titulo: "Variable Compuesta"
             });
         } else  {
-            tituloGlobal = "Valor Único";
+            tituloGlobal = "Variable Individual";
             this.setState({
-                titulo: "Valor Único"
+                titulo: "Variable Individual"
             });
         }
         this.props.actualizarEstadoSiEsObjeto(this.state.mostrarEsObjeto);
@@ -152,10 +162,24 @@ export default class FuenteDatoVariable extends React.Component {
                     ?
                         <div className={"row"} style={{width: "100%"}}>
                             <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
-                                <label htmlFor="esObjetoFuenteDato" className="col-form-label">Tiene más de un campo:</label>
+                                <label htmlFor="esColeccion" className="col-form-label">Es colección de Datos:</label>
                             </div>
                             <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"}>
-                                <br/>
+                                <div className={"switch-button-coleccion switch-button-yesno"} style={{margin:"0 auto", display:"block"}}>
+                                    <input type="checkbox" defaultChecked={this.state.mostrarEsColeccion} name={"esColeccion"} id={"esColeccion"} onClick={this.cambioAColeccion}/><span>
+                                    <label htmlFor={"esColeccion"}></label></span>
+                                </div>
+                            </div>
+                        </div>
+                    : null
+                }
+                {!this.state.mostrarInstruccionSQL
+                    ?
+                        <div className={"row"} style={{width: "100%"}}>
+                            <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
+                                <label htmlFor="esObjetoFuenteDato" className="col-form-label">Es variable compuesta:</label>
+                            </div>
+                            <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"}>
                                 <div className={"switch-button-variable switch-button-yesno"} style={{margin:"0 auto", display:"block"}}>
                                     <input type="checkbox" defaultChecked={this.state.mostrarEsObjeto} name={"esObjetoFuenteDato"} id={"esObjetoFuenteDato"} onClick={this.cambioAObjeto}/><span>
                                     <label htmlFor={"esObjetoFuenteDato"}></label></span>
@@ -228,6 +252,8 @@ export default class FuenteDatoVariable extends React.Component {
                                                         tipoNuevaVariable={this.props.tipoNuevaVariable}
                                                         actualizarNombreCampoNuevoAtributosVario={this.props.actualizarNombreCampoNuevoAtributosVario}
                                                         crearAtributoVariable={this.props.crearAtributoVariable}
+                                                        eliminarAtributoVariable={this.props.eliminarAtributoVariable}
+                                                        modificarNombreVariable={this.props.modificarNombreVariable}
                                                         mostrarEsObjeto={this.state.mostrarEsObjeto}
                                                         goToCreateConditions={this.props.goToCreateConditions}
                                                         goCreateVariableFieldSQL={this.props.goCreateVariableFieldSQL}>

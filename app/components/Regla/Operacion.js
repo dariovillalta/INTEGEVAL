@@ -151,8 +151,7 @@ function (_React$Component) {
         return _react["default"].createElement("div", {
           className: "row",
           style: {
-            width: "100%",
-            borderBottom: "3px solid #d2d2e4"
+            width: "100%"
           }
         }, _react["default"].createElement("div", {
           style: {
@@ -196,8 +195,7 @@ function (_React$Component) {
         return _react["default"].createElement("div", {
           className: "row",
           style: {
-            width: "100%",
-            borderBottom: "3px solid #d2d2e4"
+            width: "100%"
           }
         }, _react["default"].createElement("div", {
           style: {

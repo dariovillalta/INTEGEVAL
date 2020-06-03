@@ -59,7 +59,8 @@ function (_React$Component) {
           zIndex: "99",
           backgroundColor: 'rgba(0,0,0,0.3)',
           padding: "130px 50px 50px 50px"
-        }
+        },
+        onClick: this.props.onClose
       }, _react["default"].createElement("div", {
         style: {
           backgroundColor: '#fff',
@@ -69,6 +70,9 @@ function (_React$Component) {
           margin: '0 auto',
           padding: "5px 30px 30px 30px",
           zIndex: "100"
+        },
+        onClick: function onClick(e) {
+          e.stopPropagation();
         }
       }, _react["default"].createElement("div", {
         style: {

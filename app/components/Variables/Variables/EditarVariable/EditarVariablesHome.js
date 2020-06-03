@@ -17,6 +17,8 @@ var _Formula = _interopRequireDefault(require("../../../Formula.js"));
 
 var _InstruccionSQL = _interopRequireDefault(require("./InstruccionSQL.js"));
 
+var _TimelineVariable = _interopRequireDefault(require("../../../TimelineVariable.js"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -170,7 +172,8 @@ function (_React$Component) {
       operacionSQL: "",
       formulaSeleccionadaEdit: null,
       condicionFormula: "",
-      condicionElemento: ""
+      condicionElemento: "",
+      esColeccion: false
     };
     _this.traerInstruccionSQLVariable = _this.traerInstruccionSQLVariable.bind(_assertThisInitialized(_this));
     _this.traerInstruccionSQL = _this.traerInstruccionSQL.bind(_assertThisInitialized(_this));
@@ -186,6 +189,7 @@ function (_React$Component) {
     _this.goToCreateConditionsClickNavBarFormula = _this.goToCreateConditionsClickNavBarFormula.bind(_assertThisInitialized(_this));
     _this.goToCreateFormula = _this.goToCreateFormula.bind(_assertThisInitialized(_this));
     _this.goCreateVariableFieldSQL = _this.goCreateVariableFieldSQL.bind(_assertThisInitialized(_this));
+    _this.goToTimeline = _this.goToTimeline.bind(_assertThisInitialized(_this));
     _this.createVariable = _this.createVariable.bind(_assertThisInitialized(_this));
     _this.updateVariable = _this.updateVariable.bind(_assertThisInitialized(_this));
     _this.getVariableID = _this.getVariableID.bind(_assertThisInitialized(_this));
@@ -216,6 +220,8 @@ function (_React$Component) {
     _this.guardarVariableUnAtributo = _this.guardarVariableUnAtributo.bind(_assertThisInitialized(_this));
     _this.guardarVariableVariosAtributo = _this.guardarVariableVariosAtributo.bind(_assertThisInitialized(_this));
     _this.crearAtributoVariable = _this.crearAtributoVariable.bind(_assertThisInitialized(_this));
+    _this.eliminarAtributoVariable = _this.eliminarAtributoVariable.bind(_assertThisInitialized(_this));
+    _this.modificarNombreVariable = _this.modificarNombreVariable.bind(_assertThisInitialized(_this));
     _this.crearVariableSQL = _this.crearVariableSQL.bind(_assertThisInitialized(_this));
     _this.crearInstruccionSQL = _this.crearInstruccionSQL.bind(_assertThisInitialized(_this));
     _this.anadirRegla = _this.anadirRegla.bind(_assertThisInitialized(_this));
@@ -297,9 +303,6 @@ function (_React$Component) {
             }
           } else {
             transaction.commit(function (err) {
-              console.log('result.recordset');
-              console.log(result.recordset);
-
               if (result.recordset.length > 0) {
                 nombreVariable = result.recordset[0].nombre;
                 descripcionVariable = result.recordset[0].descripcion;
@@ -308,23 +311,26 @@ function (_React$Component) {
                 if (_this2.props.esInstruccionSQLVariable) $("#esInstruccionSQL").prop('checked', true);else $("#esInstruccionSQL").prop('checked', false);
                 if (_this2.props.esObjetoVariable) $("#esObjetoFuenteDato").prop('checked', true);else $("#esObjetoFuenteDato").prop('checked', false);
                 if (result.recordset[0].guardar) $("#guardarFuenteDato").prop('checked', true);else $("#guardarFuenteDato").prop('checked', false);
+                if (result.recordset[0].esColeccion) $("#esColeccion").prop('checked', true);else $("#esColeccion").prop('checked', false);
                 fechaInicioVariable = result.recordset[0].fechaInicioCalculo;
-                periodicidadVariable = result.recordset[0].nombre;
+                periodicidadVariable = result.recordset[0].periodicidad;
                 analistaVariable = result.recordset[0].nombre;
                 $("#periodicidad").val(periodicidadVariable);
                 $("#analista").val(analistaVariable);
+                $("#fecha").datepicker("setDate", fechaInicioVariable);
 
                 if (fechaInicioVariable.getFullYear() == 1964 && fechaInicioVariable.getMonth() == 4 && fechaInicioVariable.getDate() == 28) {//
                 } else {
                   $("#fecha").datepicker("setDate", fechaInicioVariable);
                 }
-                /*this.setState({
-                    nombreVariable: result.recordset[0].nombre,
-                    descripcionVariable: result.recordset[0].descripcion,
-                    objetoPadreIDVariable: result.recordset[0].objetoPadreID,
-                    guardarVariable: result.recordset[0].guardar
-                });*/
 
+                _this2.setState({
+                  nombreVariable: result.recordset[0].nombre,
+                  descripcionVariable: result.recordset[0].descripcion,
+                  objetoPadreIDVariable: result.recordset[0].objetoPadreID,
+                  guardarVariable: result.recordset[0].guardar,
+                  esColeccion: result.recordset[0].esColeccion
+                });
 
                 _this2.traerInstruccionSQL();
               }
@@ -418,9 +424,6 @@ function (_React$Component) {
             }
           } else {
             transaction.commit(function (err) {
-              console.log('result.recordset');
-              console.log(result.recordset);
-
               if (result.recordset.length > 0) {
                 nombreVariable = result.recordset[0].nombre;
                 descripcionVariable = result.recordset[0].descripcion;
@@ -429,12 +432,25 @@ function (_React$Component) {
                 if (_this4.props.esInstruccionSQLVariable) $("#esInstruccionSQL").prop('checked', true);else $("#esInstruccionSQL").prop('checked', false);
                 if (_this4.props.esObjetoVariable) $("#esObjetoFuenteDato").prop('checked', true);else $("#esObjetoFuenteDato").prop('checked', false);
                 if (result.recordset[0].guardar) $("#guardarFuenteDato").prop('checked', true);else $("#guardarFuenteDato").prop('checked', false);
+                if (result.recordset[0].esColeccion) $("#esColeccion").prop('checked', true);else $("#esColeccion").prop('checked', false);
+                fechaInicioVariable = result.recordset[0].fechaInicioCalculo;
+                periodicidadVariable = result.recordset[0].periodicidad;
+                analistaVariable = result.recordset[0].nombre;
+                $("#periodicidad").val(periodicidadVariable);
+                $("#analista").val(analistaVariable);
+                $("#fecha").datepicker("setDate", fechaInicioVariable);
+
+                if (fechaInicioVariable.getFullYear() == 1964 && fechaInicioVariable.getMonth() == 4 && fechaInicioVariable.getDate() == 28) {//
+                } else {
+                  $("#fecha").datepicker("setDate", fechaInicioVariable);
+                }
 
                 _this4.setState({
                   nombreVariable: result.recordset[0].nombre,
                   descripcionVariable: result.recordset[0].descripcion,
                   objetoPadreIDVariable: result.recordset[0].objetoPadreID,
-                  guardarVariable: result.recordset[0].guardar
+                  guardarVariable: result.recordset[0].guardar,
+                  esColeccion: result.recordset[0].esColeccion
                 });
               }
             });
@@ -933,6 +949,61 @@ function (_React$Component) {
       });
     }
   }, {
+    key: "goToTimeline",
+    value: function goToTimeline() {
+      var navbar = _react["default"].createElement("div", {
+        className: "row"
+      }, _react["default"].createElement("div", {
+        className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
+      }, _react["default"].createElement("div", {
+        className: "page-header"
+      }, _react["default"].createElement("h2", {
+        className: "pageheader-title"
+      }, "Condiciones"), _react["default"].createElement("div", {
+        className: "page-breadcrumb"
+      }, _react["default"].createElement("nav", {
+        "aria-label": "breadcrumb"
+      }, _react["default"].createElement("ol", {
+        className: "breadcrumb"
+      }, _react["default"].createElement("li", {
+        className: "breadcrumb-item font-16",
+        "aria-current": "page",
+        onClick: this.props.configuracionHome
+      }, _react["default"].createElement("a", {
+        href: "#",
+        className: "breadcrumb-link"
+      }, "Configuraci\xF3n")), _react["default"].createElement("li", {
+        className: "breadcrumb-item font-16",
+        "aria-current": "page",
+        onClick: this.props.goOptions
+      }, _react["default"].createElement("a", {
+        href: "#",
+        className: "breadcrumb-link"
+      }, "Tipo de Configuraci\xF3n")), _react["default"].createElement("li", {
+        className: "breadcrumb-item font-16",
+        "aria-current": "page",
+        onClick: this.props.retornoSeleccionVariables
+      }, _react["default"].createElement("a", {
+        href: "#",
+        className: "breadcrumb-link"
+      }, "Variables")), _react["default"].createElement("li", {
+        className: "breadcrumb-item font-16",
+        "aria-current": "page",
+        onClick: this.returnToCreateVariable
+      }, _react["default"].createElement("a", {
+        href: "#",
+        className: "breadcrumb-link"
+      }, "Editar Variable")), _react["default"].createElement("li", {
+        className: "breadcrumb-item active font-16",
+        "aria-current": "page"
+      }, "Linea de Tiempo")))))));
+
+      this.setState({
+        navbar: navbar,
+        componenteActual: "timelineVariable"
+      });
+    }
+  }, {
     key: "createVariable",
     value: function createVariable(variable, campos) {
       var _this9 = this;
@@ -945,7 +1016,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("insert into Variables (nombre, descripcion, esObjeto, objetoPadreID, esInstruccionSQL, periodicidad, fechaInicioCalculo, analista, guardar) values ('" + variable.nombre + "', '" + variable.descripcion + "', '" + variable.esObjeto + "', " + variable.objetoPadreID + ", '" + variable.esInstruccionSQL + "', '" + periodicidad + "', '" + fechaInicioCalculo.getFullYear() + "-" + (fechaInicioCalculo.getMonth() + 1) + "-" + fechaInicioCalculo.getDate() + "', '" + analista + "', '" + variable.guardar + "')", function (err, result) {
+        request.query("insert into Variables (nombre, descripcion, esObjeto, esColeccion, objetoPadreID, esInstruccionSQL, periodicidad, fechaInicioCalculo, analista, guardar) values ('" + variable.nombre + "', '" + variable.descripcion + "', '" + variable.esObjeto + "', '" + variable.esColeccion + "', " + variable.objetoPadreID + ", '" + variable.esInstruccionSQL + "', '" + periodicidad + "', '" + fechaInicioCalculo.getFullYear() + "-" + (fechaInicioCalculo.getMonth() + 1) + "-" + fechaInicioCalculo.getDate() + "', '" + analista + "', '" + variable.guardar + "')", function (err, result) {
           if (err) {
             if (!rolledBack) {
               console.log(err);
@@ -2121,6 +2192,7 @@ function (_React$Component) {
                           nombre: nombreVariable,
                           descripcion: descripcionVariable,
                           esObjeto: esObjeto,
+                          esColeccion: false,
                           objetoPadreID: objetoPadreID,
                           esInstruccionSQL: esInstruccionSQL,
                           guardar: guardarResultadosEnBaseDatos
@@ -2168,6 +2240,8 @@ function (_React$Component) {
       var descripcionVariable = $("#descripcionFuenteDato").val();
       var esObjeto;
       if ($("#esObjetoFuenteDato").is(':checked')) esObjeto = true;else esObjeto = false;
+      var esColeccion;
+      if ($("#esColeccion").is(':checked')) esColeccion = true;else esColeccion = false;
       var guardarResultadosEnBaseDatos;
       if ($("#guardarFuenteDato").is(':checked')) guardarResultadosEnBaseDatos = true;else guardarResultadosEnBaseDatos = false;
       var objetoPadreID = -1;
@@ -2188,59 +2262,64 @@ function (_React$Component) {
           if (descripcionVariable.length < 701) {
             //if(operacionSeleccionada.valor != undefined) {
             if (esObjeto != undefined) {
-              if (guardarResultadosEnBaseDatos != undefined) {
-                if (esInstruccionSQL != undefined) {
-                  if (!isNaN(objetoPadreID)) {
-                    if (tipoDeAsignacionSeleccionado != undefined && tipoDeAsignacionSeleccionado.length > 0) {
-                      if (!isNaN(nuevoNivel)) {
-                        var nuevoAtributo = {
-                          nombre: nombreVariable,
-                          tipo: tipoDeAsignacionSeleccionado,
-                          nivel: nuevoNivel
-                        }; //si la formula ya fue asignada, no agregar tipo
+              if (esColeccion != undefined) {
+                if (guardarResultadosEnBaseDatos != undefined) {
+                  if (esInstruccionSQL != undefined) {
+                    if (!isNaN(objetoPadreID)) {
+                      if (tipoDeAsignacionSeleccionado != undefined && tipoDeAsignacionSeleccionado.length > 0) {
+                        if (!isNaN(nuevoNivel)) {
+                          var nuevoAtributo = {
+                            nombre: nombreVariable,
+                            tipo: tipoDeAsignacionSeleccionado,
+                            nivel: nuevoNivel
+                          }; //si la formula ya fue asignada, no agregar tipo
 
-                        /*if(atributosUnico[0].tipo == undefined) {
-                            nuevoAtributo = {nombre: nombreVariable, tipo: '', campoEsArreglo: campoEsArreglo,  nivel: nivelNuevoAtributoUnico};
+                          /*if(atributosUnico[0].tipo == undefined) {
+                              nuevoAtributo = {nombre: nombreVariable, tipo: '', campoEsArreglo: campoEsArreglo,  nivel: nivelNuevoAtributoUnico};
+                          } else {
+                              nuevoAtributo = atributosUnico[0];
+                              nuevoAtributo.nombre = nombreVariable;
+                              nuevoAtributo.campoEsArreglo = campoEsArreglo;
+                              nuevoAtributo.nivel = nivelNuevoAtributoUnico;
+                          }*/
+
+                          var nuevaVariable = {
+                            nombre: nombreVariable,
+                            descripcion: descripcionVariable,
+                            esObjeto: esObjeto,
+                            esColeccion: esColeccion,
+                            objetoPadreID: objetoPadreID,
+                            esInstruccionSQL: esInstruccionSQL,
+                            guardar: guardarResultadosEnBaseDatos
+                          };
+                          nivelNuevoAtributoUnico = 0;
+                          console.log('nuevoAtributo');
+                          console.log(nuevoAtributo);
+
+                          if (this.props.tipoVariableOriginal.localeCompare("variable") == 0) {
+                            this.updateVariable(nuevaVariable, [nuevoAtributo]);
+                          } else {
+                            this.createVariable(nuevaVariable, [nuevoAtributo]);
+                          }
+
+                          contadorObjetosAGuardar++;
                         } else {
-                            nuevoAtributo = atributosUnico[0];
-                            nuevoAtributo.nombre = nombreVariable;
-                            nuevoAtributo.campoEsArreglo = campoEsArreglo;
-                            nuevoAtributo.nivel = nivelNuevoAtributoUnico;
-                        }*/
-
-                        var nuevaVariable = {
-                          nombre: nombreVariable,
-                          descripcion: descripcionVariable,
-                          esObjeto: esObjeto,
-                          objetoPadreID: objetoPadreID,
-                          esInstruccionSQL: esInstruccionSQL,
-                          guardar: guardarResultadosEnBaseDatos
-                        };
-                        nivelNuevoAtributoUnico = 0;
-                        console.log('nuevoAtributo');
-                        console.log(nuevoAtributo);
-
-                        if (this.props.tipoVariableOriginal.localeCompare("variable") == 0) {
-                          this.updateVariable(nuevaVariable, [nuevoAtributo]);
-                        } else {
-                          this.createVariable(nuevaVariable, [nuevoAtributo]);
+                          alert("Seleccione un nivel para el campo.");
                         }
-
-                        contadorObjetosAGuardar++;
                       } else {
-                        alert("Seleccione un nivel para el campo.");
+                        alert("Seleccione un tipo de asignación.");
                       }
                     } else {
-                      alert("Seleccione un tipo de asignación.");
+                      alert("Tiene que ingresar un valor para objeto padre.");
                     }
                   } else {
-                    alert("Tiene que ingresar un valor para objeto padre.");
+                    alert("Tiene que ingresar si la variable se calcula con intrucciones SQL.");
                   }
                 } else {
-                  alert("Tiene que ingresar si la variable se calcula con intrucciones SQL.");
+                  alert("Tiene que ingresar si guardar o no variable.");
                 }
               } else {
-                alert("Tiene que ingresar si guardar o no variable.");
+                alert("Tiene que ingresar si la variable es coleccion o no.");
               }
             } else {
               alert("Tiene que ingresar si la variable tiene un atributo o muchos.");
@@ -2262,6 +2341,8 @@ function (_React$Component) {
       var descripcionVariable = $("#descripcionFuenteDato").val();
       var esObjeto;
       if ($("#esObjetoFuenteDato").is(':checked')) esObjeto = true;else esObjeto = false;
+      var esColeccion;
+      if ($("#esColeccion").is(':checked')) esColeccion = true;else esColeccion = false;
       var guardarResultadosEnBaseDatos;
       if ($("#guardarFuenteDato").is(':checked')) guardarResultadosEnBaseDatos = true;else guardarResultadosEnBaseDatos = false;
       var objetoPadreID = -1;
@@ -2282,54 +2363,59 @@ function (_React$Component) {
           if (descripcionVariable.length < 701) {
             //if(operacionSeleccionada.valor != undefined) {
             if (esObjeto != undefined) {
-              if (guardarResultadosEnBaseDatos != undefined) {
-                if (esInstruccionSQL != undefined) {
-                  if (!isNaN(objetoPadreID)) {
-                    //if(tipoDeAsignacionSeleccionado != undefined && tipoDeAsignacionSeleccionado.length > 0) {
-                    if (!isNaN(nuevoNivel)) {
-                      //var nuevoAtributo = {nombre: nombreVariable, tipo: tipoDeAsignacionSeleccionado, nivel: nuevoNivel};
-                      //si la formula ya fue asignada, no agregar tipo
+              if (esColeccion != undefined) {
+                if (guardarResultadosEnBaseDatos != undefined) {
+                  if (esInstruccionSQL != undefined) {
+                    if (!isNaN(objetoPadreID)) {
+                      //if(tipoDeAsignacionSeleccionado != undefined && tipoDeAsignacionSeleccionado.length > 0) {
+                      if (!isNaN(nuevoNivel)) {
+                        //var nuevoAtributo = {nombre: nombreVariable, tipo: tipoDeAsignacionSeleccionado, nivel: nuevoNivel};
+                        //si la formula ya fue asignada, no agregar tipo
 
-                      /*if(atributosUnico[0].tipo == undefined) {
-                          nuevoAtributo = {nombre: nombreVariable, tipo: '', campoEsArreglo: campoEsArreglo,  nivel: nivelNuevoAtributoUnico};
-                      } else {
-                          nuevoAtributo = atributosUnico[0];
-                          nuevoAtributo.nombre = nombreVariable;
-                          nuevoAtributo.campoEsArreglo = campoEsArreglo;
-                          nuevoAtributo.nivel = nivelNuevoAtributoUnico;
-                      }*/
-                      var nuevaVariable = {
-                        nombre: nombreVariable,
-                        descripcion: descripcionVariable,
-                        esObjeto: esObjeto,
-                        objetoPadreID: objetoPadreID,
-                        esInstruccionSQL: esInstruccionSQL,
-                        guardar: guardarResultadosEnBaseDatos
-                      };
+                        /*if(atributosUnico[0].tipo == undefined) {
+                            nuevoAtributo = {nombre: nombreVariable, tipo: '', campoEsArreglo: campoEsArreglo,  nivel: nivelNuevoAtributoUnico};
+                        } else {
+                            nuevoAtributo = atributosUnico[0];
+                            nuevoAtributo.nombre = nombreVariable;
+                            nuevoAtributo.campoEsArreglo = campoEsArreglo;
+                            nuevoAtributo.nivel = nivelNuevoAtributoUnico;
+                        }*/
+                        var nuevaVariable = {
+                          nombre: nombreVariable,
+                          descripcion: descripcionVariable,
+                          esObjeto: esObjeto,
+                          esColeccion: esColeccion,
+                          objetoPadreID: objetoPadreID,
+                          esInstruccionSQL: esInstruccionSQL,
+                          guardar: guardarResultadosEnBaseDatos
+                        };
 
-                      if (this.props.tipoVariableOriginal.localeCompare("variable") == 0) {
-                        this.updateVariable(nuevaVariable, atributosVario);
+                        if (this.props.tipoVariableOriginal.localeCompare("variable") == 0) {
+                          this.updateVariable(nuevaVariable, atributosVario);
+                        } else {
+                          this.createVariable(nuevaVariable, atributosVario);
+                        }
+
+                        nivelNuevoAtributoVarios = 0;
+                        contadorObjetosAGuardar++;
                       } else {
-                        this.createVariable(nuevaVariable, atributosVario);
+                        alert("Seleccione un nivel para el campo.");
                       }
+                      /*} else {
+                          alert("Seleccione un tipo de asignación.");
+                      }*/
 
-                      nivelNuevoAtributoVarios = 0;
-                      contadorObjetosAGuardar++;
                     } else {
-                      alert("Seleccione un nivel para el campo.");
+                      alert("Tiene que ingresar un valor para objeto padre.");
                     }
-                    /*} else {
-                        alert("Seleccione un tipo de asignación.");
-                    }*/
-
                   } else {
-                    alert("Tiene que ingresar un valor para objeto padre.");
+                    alert("Tiene que ingresar si la variable se calcula con intrucciones SQL.");
                   }
                 } else {
-                  alert("Tiene que ingresar si la variable se calcula con intrucciones SQL.");
+                  alert("Tiene que ingresar si guardar o no variable.");
                 }
               } else {
-                alert("Tiene que ingresar si guardar o no variable.");
+                alert("Tiene que ingresar si la variable es coleccion o no.");
               }
             } else {
               alert("Tiene que ingresar si la variable tiene un atributo o muchos.");
@@ -2403,6 +2489,44 @@ function (_React$Component) {
       } else {
         alert("Ingrese un valor para el nombre del atributo.");
       }
+    }
+  }, {
+    key: "eliminarAtributoVariable",
+    value: function eliminarAtributoVariable(index) {
+      var elementosFormulas, copiaAntiguaFormulas, reglas, segmentoRegla, atributos;
+
+      if (banderaEsObjeto) {
+        elementosFormulas = elementosFormulasVariosAtributos;
+        copiaAntiguaFormulas = formulasVariosAtributos;
+        reglas = reglasVariosAtributos;
+        segmentoRegla = segmentoReglasVariosAtributos;
+        atributos = atributosVario;
+      } else {
+        elementosFormulas = elementosFormulasUnAtributos;
+        copiaAntiguaFormulas = formulasUnAtributo;
+        reglas = reglasUnAtributo;
+        segmentoRegla = segmentoReglasUnAtributo;
+        atributos = atributosUnico;
+      }
+
+      elementosFormulas.splice(index, 1);
+      copiaAntiguaFormulas.splice(index, 1);
+      reglas.splice(index, 1);
+      segmentoRegla.splice(index, 1);
+      atributos.splice(index, 1);
+      this.setState({
+        atributos: atributos
+      });
+    }
+  }, {
+    key: "modificarNombreVariable",
+    value: function modificarNombreVariable(index) {
+      var copyAtributos = _toConsumableArray(this.state.atributos);
+
+      copyAtributos[index].nombre = $("#nombreAtributo" + index).val();
+      this.setState({
+        atributos: copyAtributos
+      });
     }
   }, {
     key: "crearVariableSQL",
@@ -2891,6 +3015,7 @@ function (_React$Component) {
                 var excelArchivoID = -1,
                     excelVariableID = -1,
                     formaVariableID = -1;
+                var esValorManual = false;
 
                 if (formulaSeleccionada.tablaID != -1) {
                   conexionTablaID = formulaSeleccionada.tablaID;
@@ -2902,6 +3027,8 @@ function (_React$Component) {
                   excelVariableID = formulaSeleccionada.excelVariableID;
                 } else if (formulaSeleccionada.formaVariableID != -1) {
                   formaVariableID = formulaSeleccionada.formaVariableID;
+                } else if (formulaSeleccionada.esValorManual != undefined) {
+                  esValorManual = formulaSeleccionada.esValorManual;
                 }
 
                 if (tipoElementoSeleccionadoRegla.localeCompare("abajo") == 0 || indiceSeleccionadoReglas == -1 && tipoElementoSeleccionadoRegla.length == 0 || segmentoRegla[posicionSel].length == 0) {
@@ -2919,7 +3046,8 @@ function (_React$Component) {
                     segmentoReglaIndex: segmentoReglaIndex,
                     excelArchivoID: excelArchivoID,
                     excelVariableID: excelVariableID,
-                    formaVariableID: formaVariableID
+                    formaVariableID: formaVariableID,
+                    esValorManual: esValorManual
                   });
                   posicionInsertarReglaAtributo = posicionSel;
                   posicionInsertarReglaSegmento = segmentoRegla[posicionSel].length - 1;
@@ -3250,6 +3378,8 @@ function (_React$Component) {
           if (formulaArreglo[i].variableID != undefined) elementoVariableID = formulaArreglo[i].variableID;
           var elementoVariableCampoID = -1;
           if (formulaArreglo[i].variableCampoID != undefined) elementoVariableCampoID = formulaArreglo[i].variableCampoID;
+          var esValorManual = false;
+          if (formulaArreglo[i].esValorManual != undefined) esValorManual = formulaArreglo[i].esValorManual;
           array.push({
             variableID: -1,
             variableCampoID: -1,
@@ -3261,6 +3391,7 @@ function (_React$Component) {
             formaVariableID: formaVariableID,
             elementoVariableID: elementoVariableID,
             elementoVariableCampoID: elementoVariableCampoID,
+            esValorManual: esValorManual,
             nombreColumnaEnTabla: formulaArreglo[i].valor,
             tipoColumnaEnTabla: formulaArreglo[i].tipoOriginal,
             nombreVariable: formulaArreglo[i].valor,
@@ -4378,11 +4509,14 @@ function (_React$Component) {
           actualizarEstadoSiEsInstruccionSQL: this.actualizarEstadoSiEsInstruccionSQL,
           configuracionHome: this.props.configuracionHome,
           goOptions: this.props.goOptions,
+          goToTimeline: this.goToTimeline,
           retornoSeleccionVariables: this.props.retornoSeleccionVariables,
           goToCreateConditions: this.goToCreateConditions,
           goCreateVariableFieldSQL: this.goCreateVariableFieldSQL,
           guardarVariable: this.guardarVariable,
           crearAtributoVariable: this.crearAtributoVariable,
+          eliminarAtributoVariable: this.eliminarAtributoVariable,
+          modificarNombreVariable: this.modificarNombreVariable,
           actualizarIDVariableModificada: this.props.actualizarIDVariableModificada,
           changeStateFirstTimeToFalse: this.props.changeStateFirstTimeToFalse,
           esPrimeraVez: this.props.esPrimeraVez,
@@ -4471,6 +4605,24 @@ function (_React$Component) {
           agregarInstruccionSQL: this.crearInstruccionSQL,
           actualizarCampo: this.actualizarCampoSQL,
           eliminarCampo: this.eliminarCampoSQL,
+          navbar: this.state.navbar
+        }));
+      } else if (this.state.componenteActual.localeCompare("timelineVariable") == 0) {
+        return _react["default"].createElement("div", {
+          style: {
+            width: "100%",
+            height: "100%"
+          }
+        }, _react["default"].createElement(_TimelineVariable["default"], {
+          pool: this.props.pool,
+          variable: {
+            ID: this.props.idVariable,
+            esObjeto: this.props.esObjetoVariable,
+            esInstruccionSQL: this.props.esInstruccionSQLVariable,
+            esColeccion: this.state.esColeccion
+          },
+          esVariable: true,
+          tablaInstruccion: "ResultadosNombreVariables where nombreVariable = '" + this.state.nombreVariable + "' ",
           navbar: this.state.navbar
         }));
       }

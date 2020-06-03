@@ -201,25 +201,31 @@ function (_React$Component) {
       var indicesVarSeleccionadosConexiones = _toConsumableArray(this.state.indicesVarSeleccionadosConexiones); //indicesVarSeleccionadosConexiones[posicion] = arreglo;
 
 
+      console.log('variable');
+      console.log(variable);
+      console.log('posicion');
+      console.log(posicion);
+      console.log('arreglo');
+      console.log(arreglo);
+      console.log('this.props.camposTablas');
+      console.log(this.props.camposTablas);
+
       for (var i = 0; i < this.props.tablas.length; i++) {
-        for (var j = 0; j < this.props.camposTablas[i].length; j++) {
-          i;
-          /*f(this.props.camposTablas[i][j] != undefined && this.props.camposTablas[i][j].valor.localeCompare(variable[0].valor) != 0) {
-             indicesVarSeleccionadosConexiones[i][j] = false;
-          } else if(this.props.camposTablas[i][j] != undefined && this.props.camposTablas[i][j].valor.localeCompare(variable[0].valor) == 0 && i != posicion) {
-             indicesVarSeleccionadosConexiones[i][j] = false;
-          } else if(this.props.camposTablas[i][j].valor.localeCompare(variable[0].valor) == 0 && i == posicion) {
-             indicesVarSeleccionadosConexiones[i][j] = true;
-          }*/
+        //for (var j = 0; j < this.props.camposTablas[i].length; j++) {
 
-          if (j != posicion) {
-            indicesVarSeleccionadosConexiones[j] = [];
-          } else {
-            indicesVarSeleccionadosConexiones[j] = arreglo;
-          }
-        }
+        /*if(this.props.camposTablas[i][j] != undefined && this.props.camposTablas[i][j].valor.localeCompare(variable[0].valor) != 0) {
+            indicesVarSeleccionadosConexiones[i][j] = false;
+        } else if(this.props.camposTablas[i][j] != undefined && this.props.camposTablas[i][j].valor.localeCompare(variable[0].valor) == 0 && i != posicion) {
+            indicesVarSeleccionadosConexiones[i][j] = false;
+        } else if(this.props.camposTablas[i][j].valor.localeCompare(variable[0].valor) == 0 && i == posicion) {
+            indicesVarSeleccionadosConexiones[i][j] = true;
+        }*/
+        if (i != posicion) {
+          indicesVarSeleccionadosConexiones[i] = [];
+        } else {
+          indicesVarSeleccionadosConexiones[i] = arreglo;
+        } //};
 
-        ;
       }
 
       ;
@@ -334,22 +340,21 @@ function (_React$Component) {
 
 
       for (var i = 0; i < this.props.objetos.length; i++) {
-        for (var j = 0; j < this.props.camposDeObjetos[i].length; j++) {
-          /*if(this.props.camposDeObjetos[i][j] != undefined && this.props.camposDeObjetos[i][j].valor.localeCompare(variable[0].valor) != 0) {
-              indicesVarSeleccionadosVariables[i][j] = false;
-          } else if(this.props.camposDeObjetos[i][j] != undefined && this.props.camposDeObjetos[i][j].valor.localeCompare(variable[0].valor) == 0 && i != posicion) {
-              indicesVarSeleccionadosVariables[i][j] = false;
-          } else if(this.props.camposDeObjetos[i][j].valor.localeCompare(variable[0].valor) == 0 && i == posicion) {
-              indicesVarSeleccionadosVariables[i][j] = true;
-          }*/
-          if (j != posicion) {
-            indicesVarSeleccionadosVariables[j] = [];
-          } else {
-            indicesVarSeleccionadosVariables[j] = arreglo;
-          }
-        }
+        //for (var j = 0; j < this.props.camposDeObjetos[i].length; j++) {
 
-        ;
+        /*if(this.props.camposDeObjetos[i][j] != undefined && this.props.camposDeObjetos[i][j].valor.localeCompare(variable[0].valor) != 0) {
+            indicesVarSeleccionadosVariables[i][j] = false;
+        } else if(this.props.camposDeObjetos[i][j] != undefined && this.props.camposDeObjetos[i][j].valor.localeCompare(variable[0].valor) == 0 && i != posicion) {
+            indicesVarSeleccionadosVariables[i][j] = false;
+        } else if(this.props.camposDeObjetos[i][j].valor.localeCompare(variable[0].valor) == 0 && i == posicion) {
+            indicesVarSeleccionadosVariables[i][j] = true;
+        }*/
+        if (i != posicion) {
+          indicesVarSeleccionadosVariables[i] = [];
+        } else {
+          indicesVarSeleccionadosVariables[i] = arreglo;
+        } //};
+
       }
 
       ;
@@ -411,22 +416,21 @@ function (_React$Component) {
 
 
       for (var i = 0; i < this.props.excel.length; i++) {
-        for (var j = 0; j < this.props.camposDeExcel[i].length; j++) {
-          /*if(this.props.camposDeExcel[i][j] != undefined && this.props.camposDeExcel[i][j].valor.localeCompare(variable[0].valor) != 0) {
-              indicesVarSeleccionadosExcel[i][j] = false;
-          } else if(this.props.camposDeExcel[i][j] != undefined && this.props.camposDeExcel[i][j].valor.localeCompare(variable[0].valor) == 0 && i != posicion) {
-              indicesVarSeleccionadosExcel[i][j] = false;
-          } else if(this.props.camposDeExcel[i][j].valor.localeCompare(variable[0].valor) == 0 && i == posicion) {
-              indicesVarSeleccionadosExcel[i][j] = true;
-          }*/
-          if (j != posicion) {
-            indicesVarSeleccionadosExcel[j] = [];
-          } else {
-            indicesVarSeleccionadosExcel[j] = arreglo;
-          }
-        }
+        //for (var j = 0; j < this.props.camposDeExcel[i].length; j++) {
 
-        ;
+        /*if(this.props.camposDeExcel[i][j] != undefined && this.props.camposDeExcel[i][j].valor.localeCompare(variable[0].valor) != 0) {
+            indicesVarSeleccionadosExcel[i][j] = false;
+        } else if(this.props.camposDeExcel[i][j] != undefined && this.props.camposDeExcel[i][j].valor.localeCompare(variable[0].valor) == 0 && i != posicion) {
+            indicesVarSeleccionadosExcel[i][j] = false;
+        } else if(this.props.camposDeExcel[i][j].valor.localeCompare(variable[0].valor) == 0 && i == posicion) {
+            indicesVarSeleccionadosExcel[i][j] = true;
+        }*/
+        if (i != posicion) {
+          indicesVarSeleccionadosExcel[i] = [];
+        } else {
+          indicesVarSeleccionadosExcel[i] = arreglo;
+        } //};
+
       }
 
       ;
@@ -541,22 +545,21 @@ function (_React$Component) {
 
 
       for (var i = 0; i < this.props.variablesSQL.length; i++) {
-        for (var j = 0; j < this.props.camposVariablesSQL[i].length; j++) {
-          /*if(this.props.camposVariablesSQL[i][j] != undefined && this.props.camposVariablesSQL[i][j].valor.localeCompare(variable[0].valor) != 0) {
-              indicesVarSeleccionadosVariablesSQL[i][j] = false;
-          } else if(this.props.camposVariablesSQL[i][j] != undefined && this.props.camposVariablesSQL[i][j].valor.localeCompare(variable[0].valor) == 0 && i != posicion) {
-              indicesVarSeleccionadosVariablesSQL[i][j] = false;
-          } else if(this.props.camposVariablesSQL[i][j].valor.localeCompare(variable[0].valor) == 0 && i == posicion) {
-              indicesVarSeleccionadosConexiones[i][j] = true;
-          }*/
-          if (j != posicion) {
-            indicesVarSeleccionadosVariablesSQL[j] = [];
-          } else {
-            indicesVarSeleccionadosVariablesSQL[j] = arreglo;
-          }
-        }
+        //for (var j = 0; j < this.props.camposVariablesSQL[i].length; j++) {
 
-        ;
+        /*if(this.props.camposVariablesSQL[i][j] != undefined && this.props.camposVariablesSQL[i][j].valor.localeCompare(variable[0].valor) != 0) {
+            indicesVarSeleccionadosVariablesSQL[i][j] = false;
+        } else if(this.props.camposVariablesSQL[i][j] != undefined && this.props.camposVariablesSQL[i][j].valor.localeCompare(variable[0].valor) == 0 && i != posicion) {
+            indicesVarSeleccionadosVariablesSQL[i][j] = false;
+        } else if(this.props.camposVariablesSQL[i][j].valor.localeCompare(variable[0].valor) == 0 && i == posicion) {
+            indicesVarSeleccionadosConexiones[i][j] = true;
+        }*/
+        if (i != posicion) {
+          indicesVarSeleccionadosVariablesSQL[i] = [];
+        } else {
+          indicesVarSeleccionadosVariablesSQL[i] = arreglo;
+        } //};
+
       }
 
       ;
@@ -735,6 +738,7 @@ function (_React$Component) {
         }
       }, _react["default"].createElement("input", {
         id: "valorManual",
+        onKeyUp: this.props.keyupEstadoInputManual,
         type: "text",
         className: "form-control form-control-sm"
       })))));

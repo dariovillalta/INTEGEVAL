@@ -212,6 +212,7 @@ export default class FuenteDatoExcel extends React.Component {
                     }
                     var self = this;
                     setTimeout(function() {
+                        console.log("HOLA");
                         if (self.props.tipoVariableOriginal.localeCompare("excel") != 0) {
                             const transaction = new sql.Transaction( self.props.pool );
                             transaction.begin(err => {
@@ -267,7 +268,7 @@ export default class FuenteDatoExcel extends React.Component {
                                 });
                             }); // fin transaction
                         }
-                    }, 1000);
+                    }, 500);
                 //}
             } else {
                 alert('Ingrese un valor para la ubicación del archivo que debe ser menor a 1001 caracteres');
@@ -294,48 +295,55 @@ export default class FuenteDatoExcel extends React.Component {
                     }
                 } else {
                     transaction1.commit(err => {
+                        console.log("BORRO")
                     });
                 }
             });
         });
-        for (var i = 0; i < this.state.variables.length; i++) {
-            let nombreHoja = this.state.variables[i].nombreHoja;
-            let nombre = this.state.variables[i].nombre;
-            let operacion = this.state.variables[i].operacion;
-            let celdas = this.state.variables[i].celdas;
-            let tipo = this.state.variables[i].tipo;
-            let periodicidad = this.state.variables[i].periodicidad;
-            let fechaInicioCalculo = this.state.variables[i].fechaInicioCalculo;
-            let analista = this.state.variables[i].analista;
-            let guardarVariable = this.state.variables[i].guardar;
-            let transaction = new sql.Transaction( this.props.pool );
-            transaction.begin(err => {
-                var rolledBack = false;
-                transaction.on('rollback', aborted => {
-                    rolledBack = true;
-                });
-                let request = new sql.Request(transaction);
-                request.query("insert into ExcelVariables (excelArchivoID, nombreHoja, nombre, operacion, celdas, tipo, periodicidad, fechaInicioCalculo, analista, guardar) values ("+this.props.idVariable+", '"+nombreHoja+"','"+nombre+"', '"+operacion+"', '"+celdas+"', '"+tipo+"', '"+periodicidad+"', '"+fechaInicioCalculo.getFullYear()+"-"+(fechaInicioCalculo.getMonth()+1)+"-"+fechaInicioCalculo.getDate()+"', '"+analista+"', '"+guardarVariable+"')", (err, result) => {
-                    if (err) {
-                        console.log(err);
-                        if (!rolledBack) {
-                            transaction.rollback(err => {
+        var self = this;
+        setTimeout(function() {
+            for (var i = 0; i < self.state.variables.length; i++) {
+                let nombreHoja = self.state.variables[i].nombreHoja;
+                let nombre = self.state.variables[i].nombre;
+                let operacion = self.state.variables[i].operacion;
+                let celdas = self.state.variables[i].celdas;
+                let tipo = self.state.variables[i].tipo;
+                let periodicidad = self.state.variables[i].periodicidad;
+                let fechaInicioCalculo = self.state.variables[i].fechaInicioCalculo;
+                let analista = self.state.variables[i].analista;
+                let guardarVariable = self.state.variables[i].guardar;
+                console.log("this.state.variables")
+                console.log(self.state.variables[i])
+                let transaction = new sql.Transaction( self.props.pool );
+                transaction.begin(err => {
+                    var rolledBack = false;
+                    transaction.on('rollback', aborted => {
+                        rolledBack = true;
+                    });
+                    let request = new sql.Request(transaction);
+                    request.query("insert into ExcelVariables (excelArchivoID, nombreHoja, nombre, operacion, celdas, tipo, periodicidad, fechaInicioCalculo, analista, guardar) values ("+self.props.idVariable+", '"+nombreHoja+"','"+nombre+"', '"+operacion+"', '"+celdas+"', '"+tipo+"', '"+periodicidad+"', '"+fechaInicioCalculo.getFullYear()+"-"+(fechaInicioCalculo.getMonth()+1)+"-"+fechaInicioCalculo.getDate()+"', '"+analista+"', '"+guardarVariable+"')", (err, result) => {
+                        if (err) {
+                            console.log(err);
+                            if (!rolledBack) {
+                                transaction.rollback(err => {
+                                });
+                            }
+                        } else {
+                            transaction.commit(err => {
+                                if(i == self.state.variables.length-1) {
+                                    self.traerArchivo();
+                                    self.getExcel();
+                                }
+                                console.log("this.state")
+                                if(agregoVariable) {
+                                    self.verificarSiExisteExcelEnResultadosHistoricosModificar(nombre);
+                                }
                             });
                         }
-                    } else {
-                        transaction.commit(err => {
-                            if(i == this.state.variables.length-1) {
-                                this.traerArchivo();
-                                this.getExcel();
-                            }
-                            if(agregoVariable) {
-                                this.verificarSiExisteExcelEnResultadosHistoricosModificar(this.state.variables[i]);
-                            }
-                        });
-                    }
-                });
-            }); // fin transaction
-        };
+                    });
+                }); // fin transaction
+            };
+        }, 500);
     }
 
     traerArchivoID () {
@@ -477,6 +485,8 @@ export default class FuenteDatoExcel extends React.Component {
     }
 
     updateVariable (index) {
+        alert($("#hojaExcelVariable"+index).val())
+        alert($("#celdasVariable"+index).val())
         if($("#nombreVariable"+index).length > 0 && $("#nombreVariable"+index).length < 101) {
             if($("#operacion"+index).val().length > 0 && $("#operacion"+index).val().length < 31) {
                 if($("#celdasVariable"+index).length > 0 && $("#celdasVariable"+index).length < 101) {
@@ -513,6 +523,7 @@ export default class FuenteDatoExcel extends React.Component {
                                                 valoresPeriodicidad: copyTempPeriodicidad
                                             });
                                             agregoVariable = true;
+                                            alert("Variable Modificada");
                                         } else {
                                             alert('El nombre de la variable debe ser único.');
                                         }
@@ -853,7 +864,7 @@ export default class FuenteDatoExcel extends React.Component {
                 break;
             }
         };
-        if(noExiste) {
+        /*if(noExiste) {
             for (var i = 0; i < excel.length; i++) {
                 if(this.props.tipoVariableOriginal.localeCompare("excel") == 0) {
                     if (excel[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0 && excel[i].ID != this.props.idVariable) {
@@ -867,7 +878,7 @@ export default class FuenteDatoExcel extends React.Component {
                     }
                 }
             };
-        }
+        }*/
         if(noExiste) {
             for (var i = 0; i < this.state.variables.length; i++) {
                 if (this.state.variables[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0 && index != i) {
@@ -968,7 +979,7 @@ export default class FuenteDatoExcel extends React.Component {
                 } else {
                     transaction.commit(err => {
                         if (result.recordset.length == 0) {
-                            this.crearTablaDeResultadoNombreModificar(variable);
+                            //this.crearTablaDeResultadoNombreModificar(variable);
                         } else {
                             console.log("ENCONTRO")
                             console.log(result.recordset[0])
@@ -2058,7 +2069,7 @@ export default class FuenteDatoExcel extends React.Component {
                                 <label htmlFor={"hojaExcelVariable"+i} className="col-form-label">Hoja de Excel:</label>
                             </div>
                             <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
-                                <input id={"hojaExcelVariable"+i} type="text" defaultValue={variable.celdas} className="form-control form-control-sm"/>
+                                <input id={"hojaExcelVariable"+i} type="text" defaultValue={variable.nombreHoja} className="form-control form-control-sm"/>
                             </div>
                         </div>
                         <div className={"row"} style={{width: "100%"}}>

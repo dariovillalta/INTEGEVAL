@@ -40,7 +40,7 @@ export default class FuenteDatoForma extends React.Component {
             guardar: "",
             valorPeriodicidad: '-1',
             forma: null,
-            showModalForma: true,
+            showModalForma: false,
             tituloVariableForma: "",
             htmlForma: ''
         }
@@ -613,7 +613,7 @@ export default class FuenteDatoForma extends React.Component {
                 } else {
                     transaction.commit(err => {
                         if (result.recordset.length == 0) {
-                            this.crearTablaDeResultadoNombreModificar(variable);
+                            //this.crearTablaDeResultadoNombreModificar(variable);
                         } else {
                             console.log("ENCONTRO")
                             console.log(result.recordset[0])

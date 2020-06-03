@@ -116,8 +116,11 @@ export default class EditarVariable extends React.Component {
                                                                 esInstruccionSQLVariable={this.props.esInstruccionSQLVariable}
                                                                 goToCreateConditions={this.props.goToCreateConditions}
                                                                 goCreateVariableFieldSQL={this.props.goCreateVariableFieldSQL}
+                                                                goToTimeline={this.props.goToTimeline}
                                                                 guardarVariable={this.props.guardarVariable}
                                                                 crearAtributoVariable={this.props.crearAtributoVariable}
+                                                                eliminarAtributoVariable={this.props.eliminarAtributoVariable}
+                                                                modificarNombreVariable={this.props.modificarNombreVariable}
                                                                 cambioDeArreglosDeAtributos={this.props.cambioDeArreglosDeAtributos}
                                                                 nombreVariable={this.props.nombreVariable}
                                                                 actualizarNombreVariable={this.props.actualizarNombreVariable}

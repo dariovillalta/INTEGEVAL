@@ -158,7 +158,7 @@ function (_React$Component) {
                       }
 
                       ;
-                      alert("Se encontraron errores al intentar acceder a los campos: " + textoCamposErrores + ". No se guardo la instruccionSQL.");
+                      alert("Se encontraron errores al recuperar los campos: " + textoCamposErrores + ". No se guardo la instruccionSQL.");
                     } else {
                       _this2.props.agregarInstruccionSQL();
                     }

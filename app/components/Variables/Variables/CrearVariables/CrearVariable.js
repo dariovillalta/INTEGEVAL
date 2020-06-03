@@ -156,6 +156,8 @@ function (_React$Component) {
         goCreateVariableFieldSQL: this.props.goCreateVariableFieldSQL,
         guardarVariable: this.props.guardarVariable,
         crearAtributoVariable: this.props.crearAtributoVariable,
+        eliminarAtributoVariable: this.props.eliminarAtributoVariable,
+        modificarNombreVariable: this.props.modificarNombreVariable,
         cambioDeArreglosDeAtributos: this.props.cambioDeArreglosDeAtributos,
         nombreVariable: this.props.nombreVariable,
         actualizarNombreVariable: this.props.actualizarNombreVariable,

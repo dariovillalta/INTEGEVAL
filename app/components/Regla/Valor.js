@@ -238,7 +238,9 @@ function (_React$Component) {
   }, {
     key: "changeTime",
     value: function changeTime() {
-      var valorARetornar = "TIEMPO=[DIAS=" + $("#dias").val() + ",MES=" + $("#mes").val() + ",AÑOS=" + $("#anio").val() + "]";
+      var esFuturo = 'FUTURO';
+      if (!$("#futuro").is(':checked')) esFuturo = 'PASADO';
+      var valorARetornar = "TIEMPO=[DIAS=" + $("#dias").val() + ",MES=" + $("#mes").val() + ",AÑOS=" + $("#anio").val() + "," + esFuturo + "]";
       this.props.retornarValorTime(valorARetornar, "DIAS=" + $("#dias").val() + ",MES=" + $("#mes").val() + ",AÑOS=" + $("#anio").val());
     }
   }, {
@@ -546,7 +548,34 @@ function (_React$Component) {
         name: "anio",
         step: "1",
         min: "0"
-      }))) : null);
+      })), _react["default"].createElement("div", {
+        className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
+      }, _react["default"].createElement("label", {
+        htmlFor: "futuro",
+        className: "col-form-label"
+      }, "Futuro o Pasado:")), _react["default"].createElement("div", {
+        className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
+      }, _react["default"].createElement("div", {
+        className: "switch-button-futuro switch-button-yesno",
+        style: {
+          margin: "0 auto",
+          display: "block"
+        }
+      }, _react["default"].createElement("input", {
+        type: "checkbox",
+        defaultChecked: this.state.mostrarEsObjeto,
+        name: "futuro",
+        id: "futuro",
+        onClick: this.changeTime
+      }), _react["default"].createElement("span", null, _react["default"].createElement("label", {
+        htmlFor: "futuro"
+      })))), _react["default"].createElement("p", {
+        className: "lead",
+        style: {
+          padding: "0% 5%",
+          textAlign: "center"
+        }
+      }, "Los valores ingresados ser\xE1n sumados o restados a la fecha que se realiza el c\xE1lculo.")) : null);
     }
   }]);
 

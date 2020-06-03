@@ -171,7 +171,10 @@ export default class Valor extends React.Component {
     }
 
     changeTime() {
-        var valorARetornar = "TIEMPO=[DIAS="+$("#dias").val()+",MES="+$("#mes").val()+",AÑOS="+$("#anio").val()+"]";
+        var esFuturo = 'FUTURO';
+        if (!$("#futuro").is(':checked'))
+            esFuturo = 'PASADO';
+        var valorARetornar = "TIEMPO=[DIAS="+$("#dias").val()+",MES="+$("#mes").val()+",AÑOS="+$("#anio").val()+","+esFuturo+"]";
         this.props.retornarValorTime(valorARetornar, "DIAS="+$("#dias").val()+",MES="+$("#mes").val()+",AÑOS="+$("#anio").val());
     }
 
@@ -350,6 +353,18 @@ export default class Valor extends React.Component {
                             <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
                                 <input type="number" defaultValue="0" onChange={this.changeTime} id="anio" name="anio" step="1" min="0"/>
                             </div>
+                            <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
+                                <label htmlFor="futuro" className="col-form-label">Futuro o Pasado:</label>
+                            </div>
+                            <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"}>
+                                <div className={"switch-button-futuro switch-button-yesno"} style={{margin:"0 auto", display:"block"}}>
+                                    <input type="checkbox" defaultChecked={this.state.mostrarEsObjeto} name={"futuro"} id={"futuro"} onClick={this.changeTime}/><span>
+                                    <label htmlFor={"futuro"}></label></span>
+                                </div>
+                            </div>
+                            <p className="lead" style={{padding: "0% 5%", textAlign: "center"}}>
+                                Los valores ingresados serán sumados o restados a la fecha que se realiza el cálculo.
+                            </p>
                         </div>
                     : null
                 }

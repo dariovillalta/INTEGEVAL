@@ -146,7 +146,9 @@ var identificadorIndicador = 0; //bandera para ver si selecciono
 var seleccionManual = false; //bandera para saber si ya trajo todas las variables
 
 var banderaCargaVariablesINICIO = 0;
-var banderaCargaVariablesFIN = 0; // diferencia posicionDeIndicadorSeleccionadoEnFormula y posicionIndicadorAgregarEnFormula
+var banderaCargaVariablesFIN = 0; //objeto para sacar las tablas de los valores de formula
+
+var objetoFormulaParaSacarID = {}; // diferencia posicionDeIndicadorSeleccionadoEnFormula y posicionIndicadorAgregarEnFormula
 //se usan en diferentes metodos, posicionDeIndicadorSeleccionadoEnFormula en clickFormula, y posicionIndicadorAgregarEnFormula para agregar var a formula
 
 /*var arrregloPrueba = [  {valor: "\\", width: "5%", height: "100%", tipo: "indicador", posicion: "izquierda"},
@@ -253,6 +255,8 @@ function (_React$Component) {
     _this.iniciarGuardarFormula = _this.iniciarGuardarFormula.bind(_assertThisInitialized(_this));
     _this.guardarVariable = _this.guardarVariable.bind(_assertThisInitialized(_this));
     _this.actualizarEstadoInputManual = _this.actualizarEstadoInputManual.bind(_assertThisInitialized(_this));
+    _this.keyupEstadoInputManual = _this.keyupEstadoInputManual.bind(_assertThisInitialized(_this));
+    _this.isValidDate = _this.isValidDate.bind(_assertThisInitialized(_this));
     _this.loadTablas = _this.loadTablas.bind(_assertThisInitialized(_this));
     _this.initLoadTablasCampos = _this.initLoadTablasCampos.bind(_assertThisInitialized(_this));
     _this.loadTablasCampos = _this.loadTablasCampos.bind(_assertThisInitialized(_this));
@@ -470,6 +474,7 @@ function (_React$Component) {
         console.log('columnaSeleccionada');
         console.log(columnaSeleccionada);
         variableSeleccionada = jQuery.extend(true, {}, variable[0]);
+        if (variableSeleccionada.tipo.localeCompare("numero") == 0) variableSeleccionada.tipo = "decimal";
         var tipoVariable = '';
 
         if (columnaSeleccionada.tipo.localeCompare("int") == 0 && this.state.formula.length == 0) {
@@ -477,7 +482,7 @@ function (_React$Component) {
           this.setState({
             operaciones: operacionesNumero
           });
-        } else if (columnaSeleccionada.tipo.localeCompare("decimal") == 0 && this.state.formula.length == 0) {
+        } else if ((columnaSeleccionada.tipo.localeCompare("decimal") == 0 || columnaSeleccionada.tipo.localeCompare("numero") == 0) && this.state.formula.length == 0) {
           tipoVariable = 'decimal';
           this.setState({
             operaciones: operacionesNumero
@@ -502,7 +507,7 @@ function (_React$Component) {
           this.setState({
             operaciones: operacionesNumeroMasDeUnValor
           });
-        } else if (columnaSeleccionada.tipo.localeCompare("decimal") == 0 && this.state.formula.length > 0) {
+        } else if ((columnaSeleccionada.tipo.localeCompare("decimal") == 0 || columnaSeleccionada.tipo.localeCompare("numero") == 0) && this.state.formula.length > 0) {
           tipoVariable = 'decimal';
           this.setState({
             operaciones: operacionesNumeroMasDeUnValor
@@ -662,6 +667,7 @@ function (_React$Component) {
             esFuenteDato: false,
             esObjeto: false,
             esInstruccionSQL: false,
+            esValorManual: true,
             nivel: 0,
             tipoOriginal: tipo
           };
@@ -2184,19 +2190,19 @@ function (_React$Component) {
           esDespuesDivision = false;
 
       for (var i = 0; i < arregloFormula.length; i++) {
-        if (!Array.isArray(arregloFormula[i].valor) && this.esOperacionAritmetica(arregloFormula[i].valor)) {
+        if (!Array.isArray(arregloFormula[i].valor) && this.esOperacionAritmetica(arregloFormula[i].valor.toString())) {
           if (!esDespuesDivision) {
             contadorSignosNumerador++;
           } else {
             contadorSignosDenominador++;
           }
-        } else if (!Array.isArray(arregloFormula[i].valor) && arregloFormula[i].valor.localeCompare("\\\\") != 0 && !this.esOperacionAritmetica(arregloFormula[i].valor) && arregloFormula[i].valor.localeCompare("division\\\\") != 0 || Array.isArray(arregloFormula[i].valor)) {
+        } else if (!Array.isArray(arregloFormula[i].valor) && arregloFormula[i].valor.toString().localeCompare("\\\\") != 0 && !this.esOperacionAritmetica(arregloFormula[i].valor.toString()) && arregloFormula[i].valor.toString().localeCompare("division\\\\") != 0 || Array.isArray(arregloFormula[i].valor)) {
           if (!esDespuesDivision) {
             contadorVariablesNumerador++;
           } else {
             contadorVariablesDenominador++;
           }
-        } else if (!Array.isArray(arregloFormula[i].valor) && arregloFormula[i].valor.localeCompare("\\\\") == 0) {
+        } else if (!Array.isArray(arregloFormula[i].valor) && arregloFormula[i].valor.toString().localeCompare("\\\\") == 0) {
           arregloFormula[i].identificadorIndicador = identificadorIndicador;
           identificadorIndicador++;
 
@@ -2207,7 +2213,7 @@ function (_React$Component) {
           }
         }
 
-        if (!Array.isArray(arregloFormula[i].valor) && arregloFormula[i].valor.localeCompare("division\\\\") == 0) {
+        if (!Array.isArray(arregloFormula[i].valor) && arregloFormula[i].valor.toString().localeCompare("division\\\\") == 0) {
           esDespuesDivision = true;
         }
       }
@@ -2229,9 +2235,9 @@ function (_React$Component) {
       var esDespuesDivisionWidth = false;
 
       for (var i = 0; i < arregloFormula.length; i++) {
-        if (!Array.isArray(arregloFormula[i].valor) && this.esOperacionAritmetica(arregloFormula[i].valor)) {
+        if (!Array.isArray(arregloFormula[i].valor) && this.esOperacionAritmetica(arregloFormula[i].valor.toString())) {
           arregloFormula[i].width = "2%";
-        } else if (!Array.isArray(arregloFormula[i].valor) && arregloFormula[i].valor.localeCompare("\\\\") != 0 && !this.esOperacionAritmetica(arregloFormula[i].valor) && arregloFormula[i].valor.localeCompare("division\\\\") != 0)
+        } else if (!Array.isArray(arregloFormula[i].valor) && arregloFormula[i].valor.toString().localeCompare("\\\\") != 0 && !this.esOperacionAritmetica(arregloFormula[i].valor.toString()) && arregloFormula[i].valor.toString().localeCompare("division\\\\") != 0)
           /*|| Array.isArray(arregloFormula[i].valor)*/
           {
             if (!esDespuesDivisionWidth) {
@@ -2239,7 +2245,7 @@ function (_React$Component) {
             } else {
               arregloFormula[i].width = widthDenominador + "%";
             }
-          } else if (!Array.isArray(arregloFormula[i].valor) && arregloFormula[i].valor.localeCompare("\\\\") == 0) {
+          } else if (!Array.isArray(arregloFormula[i].valor) && arregloFormula[i].valor.toString().localeCompare("\\\\") == 0) {
           //if(!esIndiceCero) {
           arregloFormula[i].width = "5%";
           /*} else {
@@ -2253,7 +2259,7 @@ function (_React$Component) {
           }
         }
 
-        if (!Array.isArray(arregloFormula[i].valor) && arregloFormula[i].valor.localeCompare("division\\\\") == 0) {
+        if (!Array.isArray(arregloFormula[i].valor) && arregloFormula[i].valor.toString().localeCompare("division\\\\") == 0) {
           arregloFormula[i].height = "2%";
         } else if (!Array.isArray(arregloFormula[i].valor)) {
           if (!esIndiceCero) {
@@ -2269,7 +2275,7 @@ function (_React$Component) {
           }
         }
 
-        if (!Array.isArray(arregloFormula[i].valor) && arregloFormula[i].valor.localeCompare("division\\\\") == 0) {
+        if (!Array.isArray(arregloFormula[i].valor) && arregloFormula[i].valor.toString().localeCompare("division\\\\") == 0) {
           esDespuesDivisionWidth = true;
         }
       }
@@ -2298,6 +2304,27 @@ function (_React$Component) {
     key: "getFormulaAndOperationText",
     value: function getFormulaAndOperationText(arreglo, esNivelRaiz) {
       for (var i = 0; i < arreglo.length; i++) {
+        if (arreglo[i].tablaID != undefined || arreglo[i].variableID != undefined || arreglo[i].excelVariableID != undefined || arreglo[i].formaVariableID != undefined || arreglo[i].esValorManual != undefined) {
+          console.log('arreglo[i]');
+          console.log(arreglo[i]);
+          console.log('objetoFormulaParaSacarID');
+          console.log(objetoFormulaParaSacarID);
+
+          if (objetoFormulaParaSacarID.tablaID == undefined && arreglo[i].tablaID != undefined) {
+            objetoFormulaParaSacarID.tablaID = arreglo[i].tablaID;
+          } else if (objetoFormulaParaSacarID.variableID == undefined && arreglo[i].variableID != undefined || objetoFormulaParaSacarID.variableID != undefined && arreglo[i].variableID != undefined && arreglo[i].esObjeto) {
+            objetoFormulaParaSacarID.variableID = arreglo[i].variableID;
+            objetoFormulaParaSacarID.variableCampoID = arreglo[i].variableCampoID;
+          } else if (objetoFormulaParaSacarID.excelArchivoID == undefined && arreglo[i].excelArchivoID != undefined) {
+            objetoFormulaParaSacarID.excelArchivoID = arreglo[i].excelArchivoID;
+            objetoFormulaParaSacarID.excelVariableID = arreglo[i].excelVariableID;
+          } else if (objetoFormulaParaSacarID.formaVariableID == undefined && arreglo[i].formaVariableID != undefined) {
+            objetoFormulaParaSacarID.formaVariableID = arreglo[i].formaVariableID;
+          } else if (objetoFormulaParaSacarID.esValorManual == undefined && arreglo[i].esValorManual) {
+            objetoFormulaParaSacarID.esValorManual = arreglo[i].esValorManual;
+          }
+        }
+
         if (Array.isArray(arreglo[i].valor)) {
           this.getFormulaAndOperationText(arreglo[i].valor, false);
         } else if (!Array.isArray(arreglo[i].valor)) {
@@ -2344,6 +2371,7 @@ function (_React$Component) {
       console.log(this.state.formula);
       formulaGuardarFormula = '';
       operacionGuardarFormula = '';
+      objetoFormulaParaSacarID = {};
       this.getFormulaAndOperationText(this.state.formula, true);
       /*for (var i = 0; i < this.state.formula.length; i++) {
           if(this.state.formula[i].operacion != undefined && this.state.formula[i].operacion.localeCompare("ASIG") == 0) {
@@ -2381,15 +2409,26 @@ function (_React$Component) {
         variableCampoID: -1,
         numeroDeFormulaDeVariable: -1,
         tablaID: -1,
+        excelArchivoID: -1,
+        excelVariableID: -1,
+        formaVariableID: -1,
         formula: formulaGuardarFormula,
-        operacion: operacionGuardarFormula
+        operacion: operacionGuardarFormula,
+        esValorManual: false
       };
 
-      if (variableSeleccionada.tablaID != undefined) {
-        objetoFormula.tablaID = variableSeleccionada.tablaID;
-      } else {
-        objetoFormula.variableID = variableSeleccionada.variableID;
-        objetoFormula.variableCampoID = variableSeleccionada.variableCampoID;
+      if (objetoFormulaParaSacarID.tablaID != undefined) {
+        objetoFormula.tablaID = objetoFormulaParaSacarID.tablaID;
+      } else if (objetoFormulaParaSacarID.excelArchivoID != undefined) {
+        objetoFormula.excelArchivoID = objetoFormulaParaSacarID.excelArchivoID;
+        objetoFormula.excelVariableID = objetoFormulaParaSacarID.excelVariableID;
+      } else if (objetoFormulaParaSacarID.formaVariableID != undefined) {
+        objetoFormula.formaVariableID = objetoFormulaParaSacarID.formaVariableID;
+      } else if (objetoFormulaParaSacarID.variableID != undefined) {
+        objetoFormula.variableID = objetoFormulaParaSacarID.variableID;
+        objetoFormula.variableCampoID = objetoFormulaParaSacarID.variableCampoID;
+      } else if (objetoFormulaParaSacarID.esValorManual) {
+        objetoFormula.esValorManual = objetoFormulaParaSacarID.esValorManual;
       }
 
       console.log('objetoFormula');
@@ -2439,6 +2478,54 @@ function (_React$Component) {
     key: "actualizarEstadoInputManual",
     value: function actualizarEstadoInputManual(seleccion) {
       seleccionManual = seleccion;
+    }
+  }, {
+    key: "keyupEstadoInputManual",
+    value: function keyupEstadoInputManual() {
+      var seleccion = $("#valorManual").val();
+
+      if (!isNaN(seleccion) && this.state.formula.length == 0) {
+        this.setState({
+          operaciones: operacionesNumero
+        });
+      } else if (!isNaN(seleccion) && this.state.formula.length == 0) {
+        this.setState({
+          operaciones: operacionesNumero
+        });
+      } else if (this.isValidDate(new Date(seleccion)) && this.state.formula.length == 0) {
+        this.setState({
+          operaciones: operacionesFecha
+        });
+      } else if (!isNaN(seleccion) && seleccion.toString().length > 0 && this.state.formula.length == 0) {
+        this.setState({
+          operaciones: operacionesCadena
+        });
+      } else if (!isNaN(seleccion) && this.state.formula.length > 0) {
+        this.setState({
+          operaciones: operacionesNumeroMasDeUnValor
+        });
+      } else if (!isNaN(seleccion) && this.state.formula.length > 0) {
+        this.setState({
+          operaciones: operacionesNumeroMasDeUnValor
+        });
+      } else if (!isNaN(seleccion) && seleccion.toString().length > 0 && this.state.formula.length > 0) {
+        this.setState({
+          operaciones: operacionesCadenaMasDeUnValor
+        });
+      }
+    }
+  }, {
+    key: "isValidDate",
+    value: function isValidDate(fecha) {
+      if (Object.prototype.toString.call(fecha) === "[object Date]") {
+        if (isNaN(fecha.getTime())) {
+          return false;
+        } else {
+          return true;
+        }
+      } else {
+        return false;
+      }
     }
   }, {
     key: "loadTablas",
@@ -2550,7 +2637,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("select * from Variables where esObjeto = 'false'", function (err, result) {
+        request.query("select * from Variables where esColeccion = 'false'", function (err, result) {
           if (err) {
             console.log(err);
 
@@ -2634,7 +2721,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("select * from Variables where esObjeto = 'true'", function (err, result) {
+        request.query("select * from Variables where esColeccion = 'true'", function (err, result) {
           if (err) {
             console.log(err);
 
@@ -3064,7 +3151,8 @@ function (_React$Component) {
         camposVariablesSQL: this.state.camposVariablesSQL,
         seleccionarMultiple: false,
         retornoSeleccionVariable: this.retornoSeleccionCampo,
-        returnStateManualValue: this.actualizarEstadoInputManual
+        returnStateManualValue: this.actualizarEstadoInputManual,
+        keyupEstadoInputManual: this.keyupEstadoInputManual
       }))), _react["default"].createElement("div", {
         style: {
           width: "50%",

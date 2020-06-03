@@ -78,7 +78,14 @@ function (_React$Component) {
       }, _react["default"].createElement("li", {
         className: "breadcrumb-item font-16",
         "aria-current": "page",
-        onClick: this.props.returnImportResults
+        onClick: this.props.returnChooseDates
+      }, _react["default"].createElement("a", {
+        href: "#",
+        className: "breadcrumb-link"
+      }, "Seleccionar Fechas")), _react["default"].createElement("li", {
+        className: "breadcrumb-item font-16",
+        "aria-current": "page",
+        onClick: this.props.returnChooseFilter
       }, _react["default"].createElement("a", {
         href: "#",
         className: "breadcrumb-link"
@@ -132,7 +139,7 @@ function (_React$Component) {
           return _react["default"].createElement("th", {
             scope: "col",
             key: campo.nombre + "" + variable.ID
-          }, campo.nombre);
+          }, campo.nombre.localeCompare("f3ch4Gu4rd4do") == 0 ? "Fecha Creación" : campo.nombre);
         }))), _react["default"].createElement("tbody", null, variable.resultados.map(function (resultado, j) {
           return _react["default"].createElement("tr", {
             key: variable.ID + "" + variable.ID + "" + resultado.ID
@@ -191,7 +198,7 @@ function (_React$Component) {
           return _react["default"].createElement("th", {
             scope: "col",
             key: campo.nombre + "" + indicador.ID
-          }, campo.nombre);
+          }, campo.nombre.localeCompare("f3ch4Gu4rd4do") == 0 ? "Fecha Creación" : campo.nombre);
         }))), _react["default"].createElement("tbody", null, indicador.resultados.map(function (resultado, j) {
           return _react["default"].createElement("tr", {
             key: indicador.ID + "" + indicador.ID + "" + resultado.ID
@@ -250,7 +257,7 @@ function (_React$Component) {
           return _react["default"].createElement("th", {
             scope: "col",
             key: campo.nombre + "" + riesgo.ID
-          }, campo.nombre);
+          }, campo.nombre.localeCompare("f3ch4Gu4rd4do") == 0 ? "Fecha Creación" : campo.nombre);
         }))), _react["default"].createElement("tbody", null, riesgo.resultados.map(function (resultado, j) {
           return _react["default"].createElement("tr", {
             key: riesgo.ID + "" + riesgo.ID + "" + resultado.ID

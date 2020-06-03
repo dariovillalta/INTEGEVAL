@@ -39,6 +39,7 @@ const operacionesFecha = [{valor: "Asignar Valor Único"}, {valor: "Asignar Valo
 const operacionesBoolean = [{valor: "Asignar Valor Único"}, {valor: "Asignar Valor Único Si"}, {valor: "Asignar Valor Multiples"}, {valor: "Asignar Valor Multiples Si"}, {valor: "Contar"}, {valor: "Contar Si"}];
 const operacionesCadena = [{valor: "Asignar Valor Único"}, {valor: "Asignar Valor Único Si"}, {valor: "Asignar Valor Multiples"}, {valor: "Asignar Valor Multiples Si"}, {valor: "Contar"}, {valor: "Contar Si"}, {valor: "Sumar"}];*/
 var mostrarEsObjetoGlobal = true;
+var mostrarEsColeccionGlobal = true;
 var mostrarInstruccionSQLGlobal = true;
 var tituloGlobal = "Instrucción SQL";
 var valorPeriodicidadGlobal = "-1";
@@ -71,9 +72,11 @@ function (_React$Component) {
       mostrarEsObjeto: mostrarEsObjetoGlobal,
       titulo: tituloGlobal,
       mostrarInstruccionSQL: mostrarInstruccionSQLGlobal,
+      mostrarEsColeccion: mostrarEsColeccionGlobal,
       valorPeriodicidad: valorPeriodicidadGlobal
     };
     _this.cambioInstruccionSQL = _this.cambioInstruccionSQL.bind(_assertThisInitialized(_this));
+    _this.cambioAColeccion = _this.cambioAColeccion.bind(_assertThisInitialized(_this));
     _this.cambioAObjeto = _this.cambioAObjeto.bind(_assertThisInitialized(_this));
     _this.cambiarTitulo = _this.cambiarTitulo.bind(_assertThisInitialized(_this));
     _this.actualizarPeriodicidad = _this.actualizarPeriodicidad.bind(_assertThisInitialized(_this));
@@ -109,6 +112,14 @@ function (_React$Component) {
       }, this.cambiarTitulo);
     }
   }, {
+    key: "cambioAColeccion",
+    value: function cambioAColeccion() {
+      mostrarEsColeccionGlobal = !this.state.mostrarEsColeccion;
+      this.setState({
+        mostrarEsColeccion: !this.state.mostrarEsColeccion
+      });
+    }
+  }, {
     key: "cambioAObjeto",
     value: function cambioAObjeto() {
       mostrarEsObjetoGlobal = !this.state.mostrarEsObjeto;
@@ -128,14 +139,14 @@ function (_React$Component) {
           titulo: "Instrucción SQL"
         });
       } else if (this.state.mostrarEsObjeto) {
-        tituloGlobal = "Valores Multiples";
+        tituloGlobal = "Variable Compuesta";
         this.setState({
-          titulo: "Valores Multiples"
+          titulo: "Variable Compuesta"
         });
       } else {
-        tituloGlobal = "Valor Único";
+        tituloGlobal = "Variable Individual";
         this.setState({
-          titulo: "Valor Único"
+          titulo: "Variable Individual"
         });
       }
 
@@ -247,11 +258,37 @@ function (_React$Component) {
       }, _react["default"].createElement("div", {
         className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
       }, _react["default"].createElement("label", {
+        htmlFor: "esColeccion",
+        className: "col-form-label"
+      }, "Es colecci\xF3n de Datos:")), _react["default"].createElement("div", {
+        className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
+      }, _react["default"].createElement("div", {
+        className: "switch-button-coleccion switch-button-yesno",
+        style: {
+          margin: "0 auto",
+          display: "block"
+        }
+      }, _react["default"].createElement("input", {
+        type: "checkbox",
+        defaultChecked: this.state.mostrarEsColeccion,
+        name: "esColeccion",
+        id: "esColeccion",
+        onClick: this.cambioAColeccion
+      }), _react["default"].createElement("span", null, _react["default"].createElement("label", {
+        htmlFor: "esColeccion"
+      }))))) : null, !this.state.mostrarInstruccionSQL ? _react["default"].createElement("div", {
+        className: "row",
+        style: {
+          width: "100%"
+        }
+      }, _react["default"].createElement("div", {
+        className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
+      }, _react["default"].createElement("label", {
         htmlFor: "esObjetoFuenteDato",
         className: "col-form-label"
-      }, "Tiene m\xE1s de un campo:")), _react["default"].createElement("div", {
+      }, "Es variable compuesta:")), _react["default"].createElement("div", {
         className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
-      }, _react["default"].createElement("br", null), _react["default"].createElement("div", {
+      }, _react["default"].createElement("div", {
         className: "switch-button-variable switch-button-yesno",
         style: {
           margin: "0 auto",
@@ -380,6 +417,8 @@ function (_React$Component) {
         tipoNuevaVariable: this.props.tipoNuevaVariable,
         actualizarNombreCampoNuevoAtributosVario: this.props.actualizarNombreCampoNuevoAtributosVario,
         crearAtributoVariable: this.props.crearAtributoVariable,
+        eliminarAtributoVariable: this.props.eliminarAtributoVariable,
+        modificarNombreVariable: this.props.modificarNombreVariable,
         mostrarEsObjeto: this.state.mostrarEsObjeto,
         goToCreateConditions: this.props.goToCreateConditions,
         goCreateVariableFieldSQL: this.props.goCreateVariableFieldSQL

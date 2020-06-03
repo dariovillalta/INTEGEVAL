@@ -1045,6 +1045,7 @@ function (_React$Component) {
           }
         }, _react["default"].createElement("select", {
           id: "tipoVariable" + i,
+          defaultValue: variable.tipo,
           className: "form-control"
         }, _react["default"].createElement("option", {
           value: "numero"

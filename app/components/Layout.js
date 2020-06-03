@@ -64,7 +64,9 @@ function (_React$Component) {
         //vista home para el mantenimiento de riesgos
         showCalulo: false,
         //vista para iniciar el calculo de las variables
-        showReporteria: false //vista home para hacer reporteria
+        showReporteria: false,
+        //vista home para hacer reporteria
+        showDashboard: false //vista home para hacer dashboards
 
       },
       showChooseMode: true,
@@ -82,6 +84,7 @@ function (_React$Component) {
     _this.showRiesgos = _this.showRiesgos.bind(_assertThisInitialized(_this));
     _this.showCalulo = _this.showCalulo.bind(_assertThisInitialized(_this));
     _this.showReporteria = _this.showReporteria.bind(_assertThisInitialized(_this));
+    _this.showDashboard = _this.showDashboard.bind(_assertThisInitialized(_this));
     return _this;
   }
 
@@ -160,7 +163,8 @@ function (_React$Component) {
           showIndicador: false,
           showRiesgos: false,
           showCalulo: false,
-          showReporteria: false
+          showReporteria: false,
+          showDashboard: false
         },
         showChooseMode: false,
         navbar: navbar
@@ -181,7 +185,7 @@ function (_React$Component) {
         className: "nav-item "
       }, _react["default"].createElement("a", {
         className: "nav-link",
-        onClick: this.showRiskMonitorHome,
+        onClick: this.showDashboard,
         href: "#"
       }, _react["default"].createElement("i", {
         className: "fa fa-fw fa-user-circle"
@@ -239,7 +243,8 @@ function (_React$Component) {
           showIndicador: false,
           showRiesgos: false,
           showCalulo: false,
-          showReporteria: false
+          showReporteria: false,
+          showDashboard: false
         },
         showChooseMode: false,
         navbar: navbar
@@ -258,7 +263,8 @@ function (_React$Component) {
           showIndicador: false,
           showRiesgos: false,
           showCalulo: false,
-          showReporteria: false
+          showReporteria: false,
+          showDashboard: false
         },
         showChooseMode: false
       });
@@ -276,7 +282,8 @@ function (_React$Component) {
           showIndicador: false,
           showRiesgos: false,
           showCalulo: false,
-          showReporteria: false
+          showReporteria: false,
+          showDashboard: false
         },
         showChooseMode: false
       });
@@ -294,7 +301,8 @@ function (_React$Component) {
           showIndicador: false,
           showRiesgos: false,
           showCalulo: false,
-          showReporteria: false
+          showReporteria: false,
+          showDashboard: false
         },
         showChooseMode: false
       });
@@ -312,7 +320,8 @@ function (_React$Component) {
           showIndicador: true,
           showRiesgos: false,
           showCalulo: false,
-          showReporteria: false
+          showReporteria: false,
+          showDashboard: false
         },
         showChooseMode: false
       });
@@ -330,7 +339,8 @@ function (_React$Component) {
           showIndicador: false,
           showRiesgos: true,
           showCalulo: false,
-          showReporteria: false
+          showReporteria: false,
+          showDashboard: false
         },
         showChooseMode: false
       });
@@ -348,7 +358,8 @@ function (_React$Component) {
           showIndicador: false,
           showRiesgos: false,
           showCalulo: true,
-          showReporteria: false
+          showReporteria: false,
+          showDashboard: false
         },
         showChooseMode: false
       });
@@ -366,7 +377,27 @@ function (_React$Component) {
           showIndicador: false,
           showRiesgos: false,
           showCalulo: false,
-          showReporteria: true
+          showReporteria: true,
+          showDashboard: false
+        },
+        showChooseMode: false
+      });
+    }
+  }, {
+    key: "showDashboard",
+    value: function showDashboard() {
+      this.setState({
+        router: {
+          showRiskControlHome: false,
+          showRiskMonitorHome: false,
+          showVariables: false,
+          showFormula: false,
+          showCondicionVar: false,
+          showIndicador: false,
+          showRiesgos: false,
+          showCalulo: false,
+          showReporteria: false,
+          showDashboard: true
         },
         showChooseMode: false
       });

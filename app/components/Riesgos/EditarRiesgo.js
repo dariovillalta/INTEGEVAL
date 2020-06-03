@@ -137,15 +137,18 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("update Riesgos set nombre = '" + nombre + "', peso = " + peso + ", formula = " + formula + " where ID = " + _this2.props.idRiesgoSeleccionado, function (err, result) {
+        request.query("update Riesgos set nombre = '" + nombre + "', peso = " + peso + ", formula = '" + formula + "' where ID = " + _this2.props.idRiesgoSeleccionado, function (err, result) {
           if (err) {
+            console.log(err);
+
             if (!rolledBack) {
-              console.log(err);
               transaction.rollback(function (err) {});
             }
           } else {
             transaction.commit(function (err) {
-              _this2.props.terminoCrearRiesgo(nombre);
+              alert("Riesgo Modificado.");
+
+              _this2.props.getRiesgos();
             });
           }
         });
@@ -291,8 +294,8 @@ function (_React$Component) {
           style: {
             color: "#fafafa"
           },
-          onClick: this.crearRiesgo
-        }, "Guardar")), _react["default"].createElement("br", null)))))));
+          onClick: this.guardarRiesgo
+        }, "Modificar")), _react["default"].createElement("br", null)))))));
       } else if (this.state.componentActual.localeCompare("EditarUmbral") == 0) {
         return _react["default"].createElement("div", null, _react["default"].createElement(_Umbral["default"], {
           navbar: this.state.navbar,

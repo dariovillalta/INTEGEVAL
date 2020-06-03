@@ -7248,7 +7248,7 @@ Media Query
     font-size: 12px;
     font-weight: 600;
     z-index: 0;
-    content: "VALORES MULTIPLES";
+    content: "VARIABLE COMPUESTA";
     color: #FFF;
     left: 0;
     text-align: left;
@@ -7264,7 +7264,7 @@ Media Query
     font-size: 12px;
     font-weight: 600;
     z-index: 0;
-    content: "VALOR ÚNICO";
+    content: "VARIABLE INDIVIDUAL";
     right: 0;
     display: block;
     width: 100%;
@@ -7335,7 +7335,7 @@ Media Query
 
 .abrirModalCrearCondicionOnHover:hover {
     box-shadow: 0 0 15px 0 #d2d2e4;
-    text-shadow: 1px 1px 1px #292826;
+    text-shadow: 1px 1px 0px #292826;
 }
 
 .textoRegla {
@@ -7584,4 +7584,278 @@ Media Query
 
 .switch-button-bool.switch-button-danger input[type=checkbox]:checked+span {
     background-color: #ef172c;
+}
+
+/* switch boton variable coleccion */
+.switch-button-coleccion.switch-button-xs {
+    height: 20px;
+    line-height: 16px;
+    width: 50px;
+}
+
+.switch-button-coleccion {
+    display: inline-block;
+    border-radius: 50px;
+    background-color: #9e9eaf;
+    width: 230px;
+    height: 27px;
+    padding: 4px;
+    position: relative;
+    overflow: hidden;
+    vertical-align: middle;
+}
+
+.switch-button-coleccion input[type=checkbox] {
+    display: none;
+}
+
+.switch-button-coleccion input[type=checkbox]:checked+span label {
+    float: right;
+    border-color: #2a75f3;
+}
+
+.switch-button-variable.switch-button-xs label {
+    height: 12px;
+    width: 12px;
+}
+
+.switch-button-coleccion input[type=checkbox]:checked+span label:before {
+    position: absolute;
+    font-size: 12px;
+    font-weight: 600;
+    z-index: 0;
+    content: "ES COLECCIÓN";
+    color: #FFF;
+    left: 0;
+    text-align: left;
+    padding-left: 10px;
+}
+
+.switch-button-coleccion.switch-button-xs label:before {
+    line-height: 21px;
+}
+
+.switch-button-coleccion label:before {
+    position: absolute;
+    font-size: 12px;
+    font-weight: 600;
+    z-index: 0;
+    content: "VALOR ÚNICO";
+    right: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    line-height: 27px;
+    top: 0;
+    text-align: right;
+    padding-right: 10px;
+    color: #FFF;
+}
+
+.switch-button-coleccion input[type=checkbox]:checked+span {
+    background-color: #5969ff;
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 4px;
+}
+
+.switch-button-coleccion.switch-button-sm label {
+    height: 16px;
+    width: 16px;
+}
+
+.switch-button-coleccion label {
+    border-radius: 50%;
+    box-shadow: 0 0 1px 1px #FFF inset;
+    background-color: #FFF;
+    margin: 0;
+    height: 19px;
+    width: 19px;
+    z-index: 1;
+    display: inline-block;
+    cursor: pointer;
+    background-clip: padding-box;
+}
+
+.switch-button-coleccion.switch-button-sm {
+    height: 24px;
+    width: 57px;
+    line-height: 20px;
+}
+
+.switch-button-coleccion.switch-button-lg {
+    height: 30px;
+    line-height: 32px;
+    width: 64px;
+}
+
+.switch-button-coleccion.switch-button-success input[type=checkbox]:checked+span {
+    background-color: #2ec551;
+}
+
+.switch-button-coleccion.switch-button-warning input[type=checkbox]:checked+span {
+    background-color: #ffc750;
+}
+
+.switch-button-coleccion.switch-button-danger input[type=checkbox]:checked+span {
+    background-color: #ef172c;
+}
+
+/* switch boton futuro o pasado */
+.switch-button-futuro.switch-button-xs {
+    height: 20px;
+    line-height: 16px;
+    width: 50px;
+}
+
+.switch-button-futuro {
+    display: inline-block;
+    border-radius: 50px;
+    background-color: #9e9eaf;
+    width: 100px;
+    height: 27px;
+    padding: 4px;
+    position: relative;
+    overflow: hidden;
+    vertical-align: middle;
+}
+
+.switch-button-futuro input[type=checkbox] {
+    display: none;
+}
+
+.switch-button-futuro input[type=checkbox]:checked+span label {
+    float: right;
+    border-color: #2a75f3;
+}
+
+.switch-button-variable.switch-button-xs label {
+    height: 12px;
+    width: 12px;
+}
+
+.switch-button-futuro input[type=checkbox]:checked+span label:before {
+    position: absolute;
+    font-size: 12px;
+    font-weight: 600;
+    z-index: 0;
+    content: "FUTURO";
+    color: #FFF;
+    left: 0;
+    text-align: left;
+    padding-left: 10px;
+}
+
+.switch-button-futuro.switch-button-xs label:before {
+    line-height: 21px;
+}
+
+.switch-button-futuro label:before {
+    position: absolute;
+    font-size: 12px;
+    font-weight: 600;
+    z-index: 0;
+    content: "PASADO";
+    right: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    line-height: 27px;
+    top: 0;
+    text-align: right;
+    padding-right: 10px;
+    color: #FFF;
+}
+
+.switch-button-futuro input[type=checkbox]:checked+span {
+    background-color: #5969ff;
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 4px;
+}
+
+.switch-button-futuro.switch-button-sm label {
+    height: 16px;
+    width: 16px;
+}
+
+.switch-button-futuro label {
+    border-radius: 50%;
+    box-shadow: 0 0 1px 1px #FFF inset;
+    background-color: #FFF;
+    margin: 0;
+    height: 19px;
+    width: 19px;
+    z-index: 1;
+    display: inline-block;
+    cursor: pointer;
+    background-clip: padding-box;
+}
+
+.switch-button-futuro.switch-button-sm {
+    height: 24px;
+    width: 57px;
+    line-height: 20px;
+}
+
+.switch-button-futuro.switch-button-lg {
+    height: 30px;
+    line-height: 32px;
+    width: 64px;
+}
+
+.switch-button-futuro.switch-button-success input[type=checkbox]:checked+span {
+    background-color: #2ec551;
+}
+
+.switch-button-futuro.switch-button-warning input[type=checkbox]:checked+span {
+    background-color: #ffc750;
+}
+
+.switch-button-futuro.switch-button-danger input[type=checkbox]:checked+span {
+    background-color: #ef172c;
+}
+
+
+/*SELECT GRAFICA*/
+.selectGraph {
+    position: relative;
+    display: inline-block;
+}
+
+.selectGraph-content {
+    position: relative;
+    bottom: 0px !important;
+    right: -40% !important;
+    background-color: #f9f9f9;
+    width: 30vw;
+    height: 33vh;
+    box-shadow: 0px 8px 8px 0px rgba(0,0,0,0.2);
+    padding: 0px 0px;
+    background-color: white;
+    z-index: 1;
+    text-shadow: none;
+    /*overflow-x: scroll !important;
+    white-space: nowrap;*/
+}
+
+.selectGraph:hover .selectGraph-content {
+    display: block !important;
+    cursor: pointer;
+}
+
+.selectGraph:hover {
+    cursor: pointer;
+}
+
+.graficoSeleccionadoHighlight {
+    border: 3px solid blue !important;
 }

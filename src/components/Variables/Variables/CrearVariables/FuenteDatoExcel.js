@@ -711,7 +711,7 @@ export default class FuenteDatoExcel extends React.Component {
                                 <label htmlFor={"tipoVariable"+i} className="col-form-label">Tipo de Variable en Celda:</label>
                             </div>
                             <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
-                                <select id={"tipoVariable"+i} className="form-control">
+                                <select id={"tipoVariable"+i} defaultValue={variable.tipo} className="form-control">
                                     <option value="numero">Número</option>
                                     <option value="varchar">Cadena</option>
                                     <option value="date">Fecha</option>

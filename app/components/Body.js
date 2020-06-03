@@ -25,6 +25,8 @@ var _Dashboard = _interopRequireDefault(require("./Dashboard.js"));
 
 var _ReporteriaHome = _interopRequireDefault(require("./Reporteria/ReporteriaHome.js"));
 
+var _DashboardHome = _interopRequireDefault(require("./Dashboards/DashboardHome.js"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -186,6 +188,10 @@ function (_React$Component) {
         }, " "));
       } else if (this.props.router.showReporteria) {
         return _react["default"].createElement("div", null, _react["default"].createElement(_ReporteriaHome["default"], {
+          pool: this.props.pool
+        }, " "));
+      } else if (this.props.router.showDashboard) {
+        return _react["default"].createElement("div", null, _react["default"].createElement(_DashboardHome["default"], {
           pool: this.props.pool
         }, " "));
       } else {

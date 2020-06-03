@@ -48,6 +48,9 @@ var seleccionManual = false;
 var banderaCargaVariablesINICIO = 0;
 var banderaCargaVariablesFIN = 0;
 
+//objeto para sacar las tablas de los valores de formula
+var objetoFormulaParaSacarID = {};
+
 // diferencia posicionDeIndicadorSeleccionadoEnFormula y posicionIndicadorAgregarEnFormula
 //se usan en diferentes metodos, posicionDeIndicadorSeleccionadoEnFormula en clickFormula, y posicionIndicadorAgregarEnFormula para agregar var a formula
 
@@ -144,6 +147,8 @@ export default class Formula extends React.Component {
         this.iniciarGuardarFormula = this.iniciarGuardarFormula.bind(this);
         this.guardarVariable = this.guardarVariable.bind(this);
         this.actualizarEstadoInputManual = this.actualizarEstadoInputManual.bind(this);
+        this.keyupEstadoInputManual = this.keyupEstadoInputManual.bind(this);
+        this.isValidDate = this.isValidDate.bind(this);
         this.loadTablas = this.loadTablas.bind(this);
         this.initLoadTablasCampos = this.initLoadTablasCampos.bind(this);
         this.loadTablasCampos = this.loadTablasCampos.bind(this);
@@ -333,13 +338,15 @@ export default class Formula extends React.Component {
             console.log('columnaSeleccionada')
             console.log(columnaSeleccionada)
             variableSeleccionada = jQuery.extend(true, {}, variable[0]);
+            if(variableSeleccionada.tipo.localeCompare("numero") == 0)
+                variableSeleccionada.tipo = "decimal";
             var tipoVariable = '';
             if(columnaSeleccionada.tipo.localeCompare("int") == 0 && this.state.formula.length == 0) {
                 tipoVariable = 'int';
                 this.setState({
                     operaciones: operacionesNumero
                 });
-            } else if(columnaSeleccionada.tipo.localeCompare("decimal") == 0 && this.state.formula.length == 0) {
+            } else if((columnaSeleccionada.tipo.localeCompare("decimal") == 0 || columnaSeleccionada.tipo.localeCompare("numero") == 0) && this.state.formula.length == 0) {
                 tipoVariable = 'decimal';
                 this.setState({
                     operaciones: operacionesNumero
@@ -364,7 +371,7 @@ export default class Formula extends React.Component {
                 this.setState({
                     operaciones: operacionesNumeroMasDeUnValor
                 });
-            } else if(columnaSeleccionada.tipo.localeCompare("decimal") == 0 && this.state.formula.length > 0) {
+            } else if((columnaSeleccionada.tipo.localeCompare("decimal") == 0 || columnaSeleccionada.tipo.localeCompare("numero") == 0) && this.state.formula.length > 0) {
                 tipoVariable = 'decimal';
                 this.setState({
                     operaciones: operacionesNumeroMasDeUnValor
@@ -498,6 +505,7 @@ export default class Formula extends React.Component {
                     esFuenteDato: false,
                     esObjeto: false,
                     esInstruccionSQL: false,
+                    esValorManual: true,
                     nivel: 0,
                     tipoOriginal: tipo
                 }
@@ -1739,19 +1747,19 @@ export default class Formula extends React.Component {
     agregarFormulaAnchuraYAltura(arregloFormula, esIndiceCero) {
         var contadorIndicadoresNumerador = 0, contadorIndicadoresDenominador = 0, contadorSignosNumerador = 0, contadorSignosDenominador = 0, contadorVariablesNumerador = 0, contadorVariablesDenominador = 0, esDespuesDivision = false;
         for (var i = 0; i < arregloFormula.length; i++) {
-            if( !Array.isArray(arregloFormula[i].valor) && this.esOperacionAritmetica(arregloFormula[i].valor) ) {
+            if( !Array.isArray(arregloFormula[i].valor) && this.esOperacionAritmetica(arregloFormula[i].valor.toString()) ) {
                 if(!esDespuesDivision) {
                     contadorSignosNumerador++;
                 } else {
                     contadorSignosDenominador++;
                 }
-            } else if( (!Array.isArray(arregloFormula[i].valor) && arregloFormula[i].valor.localeCompare("\\\\") != 0 && !this.esOperacionAritmetica(arregloFormula[i].valor) && arregloFormula[i].valor.localeCompare("division\\\\") != 0) || Array.isArray(arregloFormula[i].valor) ) {
+            } else if( (!Array.isArray(arregloFormula[i].valor) && arregloFormula[i].valor.toString().localeCompare("\\\\") != 0 && !this.esOperacionAritmetica(arregloFormula[i].valor.toString()) && arregloFormula[i].valor.toString().localeCompare("division\\\\") != 0) || Array.isArray(arregloFormula[i].valor) ) {
                 if(!esDespuesDivision) {
                     contadorVariablesNumerador++;
                 } else {
                     contadorVariablesDenominador++;
                 }
-            } else if( !Array.isArray(arregloFormula[i].valor) && arregloFormula[i].valor.localeCompare("\\\\") == 0 ) {
+            } else if( !Array.isArray(arregloFormula[i].valor) && arregloFormula[i].valor.toString().localeCompare("\\\\") == 0 ) {
                 arregloFormula[i].identificadorIndicador = identificadorIndicador;
                 identificadorIndicador++;
                 if(!esDespuesDivision) {
@@ -1760,7 +1768,7 @@ export default class Formula extends React.Component {
                     contadorIndicadoresDenominador++;
                 }
             }
-            if ( !Array.isArray(arregloFormula[i].valor) && arregloFormula[i].valor.localeCompare("division\\\\") == 0 ) {
+            if ( !Array.isArray(arregloFormula[i].valor) && arregloFormula[i].valor.toString().localeCompare("division\\\\") == 0 ) {
                 esDespuesDivision = true;
             }
         };
@@ -1781,15 +1789,15 @@ export default class Formula extends React.Component {
 
         var esDespuesDivisionWidth = false;
         for (var i = 0; i < arregloFormula.length; i++) {
-            if( !Array.isArray(arregloFormula[i].valor) && this.esOperacionAritmetica(arregloFormula[i].valor) ) {
+            if( !Array.isArray(arregloFormula[i].valor) && this.esOperacionAritmetica(arregloFormula[i].valor.toString()) ) {
                 arregloFormula[i].width = "2%";
-            } else if( (!Array.isArray(arregloFormula[i].valor) && arregloFormula[i].valor.localeCompare("\\\\") != 0 && !this.esOperacionAritmetica(arregloFormula[i].valor) && arregloFormula[i].valor.localeCompare("division\\\\") != 0) /*|| Array.isArray(arregloFormula[i].valor)*/ ) {
+            } else if( (!Array.isArray(arregloFormula[i].valor) && arregloFormula[i].valor.toString().localeCompare("\\\\") != 0 && !this.esOperacionAritmetica(arregloFormula[i].valor.toString()) && arregloFormula[i].valor.toString().localeCompare("division\\\\") != 0) /*|| Array.isArray(arregloFormula[i].valor)*/ ) {
                 if(!esDespuesDivisionWidth) {
                     arregloFormula[i].width = widthNumerador+"%";
                 } else {
                     arregloFormula[i].width = widthDenominador+"%";
                 }
-            } else if( !Array.isArray(arregloFormula[i].valor) && arregloFormula[i].valor.localeCompare("\\\\") == 0 ) {
+            } else if( !Array.isArray(arregloFormula[i].valor) && arregloFormula[i].valor.toString().localeCompare("\\\\") == 0 ) {
                 //if(!esIndiceCero) {
                     arregloFormula[i].width = "5%";
                 /*} else {
@@ -1802,7 +1810,7 @@ export default class Formula extends React.Component {
                     arregloFormula[i].width = widthNumerador+"%";
                 }
             }
-            if ( !Array.isArray(arregloFormula[i].valor) && arregloFormula[i].valor.localeCompare("division\\\\") == 0 ) {
+            if ( !Array.isArray(arregloFormula[i].valor) && arregloFormula[i].valor.toString().localeCompare("division\\\\") == 0 ) {
                 arregloFormula[i].height = "2%";
             } else if(!Array.isArray(arregloFormula[i].valor)) {
                 if(!esIndiceCero) {
@@ -1823,7 +1831,7 @@ export default class Formula extends React.Component {
                     arregloFormula[i].height = "100%";
                 }
             }
-            if ( !Array.isArray(arregloFormula[i].valor) && arregloFormula[i].valor.localeCompare("division\\\\") == 0 ) {
+            if ( !Array.isArray(arregloFormula[i].valor) && arregloFormula[i].valor.toString().localeCompare("division\\\\") == 0 ) {
                 esDespuesDivisionWidth = true;
             }
         };
@@ -1847,6 +1855,25 @@ export default class Formula extends React.Component {
     //esNivelRaiz es bandera para saber si el arreglo que se esta recorriendo es el principal/original nivel 0 del arreglo de formulas
     getFormulaAndOperationText (arreglo, esNivelRaiz) {
         for (var i = 0; i < arreglo.length; i++) {
+            if(arreglo[i].tablaID != undefined || arreglo[i].variableID != undefined || arreglo[i].excelVariableID != undefined || arreglo[i].formaVariableID != undefined || arreglo[i].esValorManual != undefined) {
+                console.log('arreglo[i]');
+                console.log(arreglo[i]);
+                console.log('objetoFormulaParaSacarID');
+                console.log(objetoFormulaParaSacarID);
+                if(objetoFormulaParaSacarID.tablaID == undefined && arreglo[i].tablaID != undefined) {
+                    objetoFormulaParaSacarID.tablaID = arreglo[i].tablaID;
+                } else if((objetoFormulaParaSacarID.variableID == undefined && arreglo[i].variableID != undefined) || (objetoFormulaParaSacarID.variableID != undefined && arreglo[i].variableID != undefined && arreglo[i].esObjeto)) {
+                    objetoFormulaParaSacarID.variableID = arreglo[i].variableID;
+                    objetoFormulaParaSacarID.variableCampoID = arreglo[i].variableCampoID;
+                } else if(objetoFormulaParaSacarID.excelArchivoID == undefined && arreglo[i].excelArchivoID != undefined) {
+                    objetoFormulaParaSacarID.excelArchivoID = arreglo[i].excelArchivoID;
+                    objetoFormulaParaSacarID.excelVariableID = arreglo[i].excelVariableID;
+                } else if(objetoFormulaParaSacarID.formaVariableID == undefined && arreglo[i].formaVariableID != undefined) {
+                    objetoFormulaParaSacarID.formaVariableID = arreglo[i].formaVariableID;
+                } else if(objetoFormulaParaSacarID.esValorManual == undefined && arreglo[i].esValorManual) {
+                    objetoFormulaParaSacarID.esValorManual = arreglo[i].esValorManual;
+                }
+            }
             if( Array.isArray(arreglo[i].valor) ) {
                 this.getFormulaAndOperationText(arreglo[i].valor, false);
             } else if( !Array.isArray(arreglo[i].valor) ) {
@@ -1891,6 +1918,7 @@ export default class Formula extends React.Component {
         console.log(this.state.formula)
         formulaGuardarFormula = '';
         operacionGuardarFormula = '';
+        objetoFormulaParaSacarID = {};
         this.getFormulaAndOperationText(this.state.formula, true);
         /*for (var i = 0; i < this.state.formula.length; i++) {
             if(this.state.formula[i].operacion != undefined && this.state.formula[i].operacion.localeCompare("ASIG") == 0) {
@@ -1922,12 +1950,19 @@ export default class Formula extends React.Component {
         console.log(operacionGuardarFormula);
         console.log('variableSeleccionada');
         console.log(variableSeleccionada);
-        var objetoFormula = {variableID: -1, variableCampoID: -1, numeroDeFormulaDeVariable: -1, tablaID: -1, formula: formulaGuardarFormula, operacion: operacionGuardarFormula};
-        if(variableSeleccionada.tablaID != undefined) {
-            objetoFormula.tablaID = variableSeleccionada.tablaID;
-        } else {
-            objetoFormula.variableID = variableSeleccionada.variableID;
-            objetoFormula.variableCampoID = variableSeleccionada.variableCampoID;
+        var objetoFormula = {variableID: -1, variableCampoID: -1, numeroDeFormulaDeVariable: -1, tablaID: -1, excelArchivoID: -1, excelVariableID: -1, formaVariableID: -1, formula: formulaGuardarFormula, operacion: operacionGuardarFormula, esValorManual: false};
+        if(objetoFormulaParaSacarID.tablaID != undefined) {
+            objetoFormula.tablaID = objetoFormulaParaSacarID.tablaID;
+        } else if(objetoFormulaParaSacarID.excelArchivoID != undefined) {
+            objetoFormula.excelArchivoID = objetoFormulaParaSacarID.excelArchivoID;
+            objetoFormula.excelVariableID = objetoFormulaParaSacarID.excelVariableID;
+        } else if(objetoFormulaParaSacarID.formaVariableID != undefined) {
+            objetoFormula.formaVariableID = objetoFormulaParaSacarID.formaVariableID;
+        } else if(objetoFormulaParaSacarID.variableID != undefined) {
+            objetoFormula.variableID = objetoFormulaParaSacarID.variableID;
+            objetoFormula.variableCampoID = objetoFormulaParaSacarID.variableCampoID;
+        } else if (objetoFormulaParaSacarID.esValorManual) {
+            objetoFormula.esValorManual = objetoFormulaParaSacarID.esValorManual;
         }
         console.log('objetoFormula');
         console.log(objetoFormula);
@@ -1971,6 +2006,51 @@ export default class Formula extends React.Component {
 
     actualizarEstadoInputManual (seleccion) {
         seleccionManual = seleccion;
+    }
+
+    keyupEstadoInputManual () {
+        var seleccion = $("#valorManual").val();
+        if(!isNaN(seleccion) && this.state.formula.length == 0) {
+            this.setState({
+                operaciones: operacionesNumero
+            });
+        } else if(!isNaN(seleccion) && this.state.formula.length == 0) {
+            this.setState({
+                operaciones: operacionesNumero
+            });
+        } else if(this.isValidDate(new Date(seleccion)) && this.state.formula.length == 0) {
+            this.setState({
+                operaciones: operacionesFecha
+            });
+        } else if(!isNaN(seleccion) && seleccion.toString().length > 0 && this.state.formula.length == 0) {
+            this.setState({
+                operaciones: operacionesCadena
+            });
+        } else if(!isNaN(seleccion) && this.state.formula.length > 0) {
+            this.setState({
+                operaciones: operacionesNumeroMasDeUnValor
+            });
+        } else if(!isNaN(seleccion) && this.state.formula.length > 0) {
+            this.setState({
+                operaciones: operacionesNumeroMasDeUnValor
+            });
+        } else if(!isNaN(seleccion) && seleccion.toString().length > 0 && this.state.formula.length > 0) {
+            this.setState({
+                operaciones: operacionesCadenaMasDeUnValor
+            });
+        }
+    }
+
+    isValidDate (fecha) {
+        if (Object.prototype.toString.call(fecha) === "[object Date]") {
+            if (isNaN(fecha.getTime())) {
+                return false;
+            } else {
+                return true;
+            }
+        } else {
+            return false;
+        }
     }
 
     loadTablas () {
@@ -2053,7 +2133,7 @@ export default class Formula extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("select * from Variables where esObjeto = 'false'", (err, result) => {
+            request.query("select * from Variables where esColeccion = 'false'", (err, result) => {
                 if (err) {
                     console.log(err);
                     if (!rolledBack) {
@@ -2113,7 +2193,7 @@ export default class Formula extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("select * from Variables where esObjeto = 'true'", (err, result) => {
+            request.query("select * from Variables where esColeccion = 'true'", (err, result) => {
                 if (err) {
                     console.log(err);
                     if (!rolledBack) {
@@ -2382,7 +2462,7 @@ export default class Formula extends React.Component {
                                             Seleccionar Variable
                                         </div>
                                         <div className={"row"} style={{height: "100%"}}>
-                                            <ListasSeleVariableContenedorVariable esOperacion={false} mostrarRosa={true}  tablas={this.state.tablas} camposTablas={this.state.camposTablas} variables={this.state.variablesEscalares} objetos={this.state.variables} camposDeObjetos={this.state.camposVariables} excel={this.state.excel} camposDeExcel={this.state.camposDeExcel} formas={this.state.formas} variablesSQL={this.state.variablesSQL} camposVariablesSQL={this.state.camposVariablesSQL} seleccionarMultiple={false} retornoSeleccionVariable={this.retornoSeleccionCampo} returnStateManualValue={this.actualizarEstadoInputManual}></ListasSeleVariableContenedorVariable>
+                                            <ListasSeleVariableContenedorVariable esOperacion={false} mostrarRosa={true}  tablas={this.state.tablas} camposTablas={this.state.camposTablas} variables={this.state.variablesEscalares} objetos={this.state.variables} camposDeObjetos={this.state.camposVariables} excel={this.state.excel} camposDeExcel={this.state.camposDeExcel} formas={this.state.formas} variablesSQL={this.state.variablesSQL} camposVariablesSQL={this.state.camposVariablesSQL} seleccionarMultiple={false} retornoSeleccionVariable={this.retornoSeleccionCampo} returnStateManualValue={this.actualizarEstadoInputManual} keyupEstadoInputManual={this.keyupEstadoInputManual}></ListasSeleVariableContenedorVariable>
                                         </div>
                                     </div>
                                     <div style={{width: "50%", height: "100%", float: "right", borderTop: "1px solid black", borderBottom: "1px solid black", padding: "0% 1%", overflowY: "scroll"}}>

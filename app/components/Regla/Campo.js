@@ -552,7 +552,9 @@ function (_React$Component) {
       return _react["default"].createElement("div", {
         className: "row",
         style: {
-          width: "100%"
+          width: "100%",
+          maxHeight: "60vh",
+          overflowY: "scroll"
         }
       }, _react["default"].createElement(_Accordion["default"], {
         showTrash: false,

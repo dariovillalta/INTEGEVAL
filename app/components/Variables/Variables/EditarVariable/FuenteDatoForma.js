@@ -83,7 +83,7 @@ function (_React$Component) {
       guardar: "",
       valorPeriodicidad: '-1',
       forma: null,
-      showModalForma: true,
+      showModalForma: false,
       tituloVariableForma: "",
       htmlForma: ''
     };
@@ -694,8 +694,7 @@ function (_React$Component) {
             }
           } else {
             transaction.commit(function (err) {
-              if (result.recordset.length == 0) {
-                _this6.crearTablaDeResultadoNombreModificar(variable);
+              if (result.recordset.length == 0) {//this.crearTablaDeResultadoNombreModificar(variable);
               } else {
                 console.log("ENCONTRO");
                 console.log(result.recordset[0]);

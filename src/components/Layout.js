@@ -18,7 +18,8 @@ export default class Layout extends React.Component {
                 showIndicador: false,               //vista home para el mantenimiento de indicadores
                 showRiesgos: false,                 //vista home para el mantenimiento de riesgos
                 showCalulo: false,                  //vista para iniciar el calculo de las variables
-                showReporteria: false               //vista home para hacer reporteria
+                showReporteria: false,              //vista home para hacer reporteria
+                showDashboard: false                //vista home para hacer dashboards
             },
             showChooseMode: true,                   //vista para elegir entre modo control riesgos y monitoreo riesgos
             navbar: ""
@@ -34,6 +35,7 @@ export default class Layout extends React.Component {
         this.showRiesgos = this.showRiesgos.bind(this);
         this.showCalulo = this.showCalulo.bind(this);
         this.showReporteria = this.showReporteria.bind(this);
+        this.showDashboard = this.showDashboard.bind(this);
     }
 
     showChooseMode() {
@@ -74,7 +76,8 @@ export default class Layout extends React.Component {
                 showIndicador: false,
                 showRiesgos: false,
                 showCalulo: false,
-                showReporteria: false
+                showReporteria: false,
+                showDashboard: false
             },
             showChooseMode: false,
             navbar: navbar
@@ -87,7 +90,7 @@ export default class Layout extends React.Component {
                             <h3 style={{color: "#b0bec5"}}>Menu</h3>
                         </li>
                         <li className={"nav-item "}>
-                            <a className={"nav-link"} onClick={this.showRiskMonitorHome} href="#"><i className={"fa fa-fw fa-user-circle"}></i><h3 style={{color: "white"}}>Dashboard</h3></a>
+                            <a className={"nav-link"} onClick={this.showDashboard} href="#"><i className={"fa fa-fw fa-user-circle"}></i><h3 style={{color: "white"}}>Dashboard</h3></a>
                         </li>
                         <li className={"nav-item "}>
                             <a className={"nav-link"} /*onClick={this.showCalulo}*/ href="#"><i className={"fa fa-fw fa-user-circle"}></i><h3 style={{color: "white"}}>Alertas</h3></a>
@@ -109,7 +112,8 @@ export default class Layout extends React.Component {
                 showIndicador: false,
                 showRiesgos: false,
                 showCalulo: false,
-                showReporteria: false
+                showReporteria: false,
+                showDashboard: false
             },
             showChooseMode: false,
             navbar: navbar
@@ -127,7 +131,8 @@ export default class Layout extends React.Component {
                 showIndicador: false,
                 showRiesgos: false,
                 showCalulo: false,
-                showReporteria: false
+                showReporteria: false,
+                showDashboard: false
             },
             showChooseMode: false
         });
@@ -144,7 +149,8 @@ export default class Layout extends React.Component {
                 showIndicador: false,
                 showRiesgos: false,
                 showCalulo: false,
-                showReporteria: false
+                showReporteria: false,
+                showDashboard: false
             },
             showChooseMode: false
         });
@@ -161,7 +167,8 @@ export default class Layout extends React.Component {
                 showIndicador: false,
                 showRiesgos: false,
                 showCalulo: false,
-                showReporteria: false
+                showReporteria: false,
+                showDashboard: false
             },
             showChooseMode: false
         });
@@ -178,7 +185,8 @@ export default class Layout extends React.Component {
                 showIndicador: true,
                 showRiesgos: false,
                 showCalulo: false,
-                showReporteria: false
+                showReporteria: false,
+                showDashboard: false
             },
             showChooseMode: false
         });
@@ -195,7 +203,8 @@ export default class Layout extends React.Component {
                 showIndicador: false,
                 showRiesgos: true,
                 showCalulo: false,
-                showReporteria: false
+                showReporteria: false,
+                showDashboard: false
             },
             showChooseMode: false
         });
@@ -212,7 +221,8 @@ export default class Layout extends React.Component {
                 showIndicador: false,
                 showRiesgos: false,
                 showCalulo: true,
-                showReporteria: false
+                showReporteria: false,
+                showDashboard: false
             },
             showChooseMode: false
         });
@@ -229,7 +239,26 @@ export default class Layout extends React.Component {
                 showIndicador: false,
                 showRiesgos: false,
                 showCalulo: false,
-                showReporteria: true
+                showReporteria: true,
+                showDashboard: false
+            },
+            showChooseMode: false
+        });
+    }
+
+    showDashboard() {
+        this.setState({
+            router: {
+                showRiskControlHome: false,
+                showRiskMonitorHome: false,
+                showVariables: false,
+                showFormula: false,
+                showCondicionVar: false,
+                showIndicador: false,
+                showRiesgos: false,
+                showCalulo: false,
+                showReporteria: false,
+                showDashboard: true
             },
             showChooseMode: false
         });

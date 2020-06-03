@@ -238,6 +238,7 @@ function (_React$Component) {
           nombreRiesgo: this.state.nombreRiesgo,
           pesoRiesgo: this.state.pesoRiesgo,
           formulaRiesgo: this.state.formulaRiesgo,
+          getRiesgos: this.getRiesgos,
           idRiesgoSeleccionado: this.state.idRiesgoSeleccionado
         }, " "));
       }

@@ -50,6 +50,9 @@ export default class LoginPage extends React.Component {
         this.crearUmbral = this.crearUmbral.bind(this);
         this.crearSeccionUmbral = this.crearSeccionUmbral.bind(this);
         this.crearRangoSeccionUmbral = this.crearRangoSeccionUmbral.bind(this);
+        this.crearBitacora = this.crearBitacora.bind(this);
+        this.crearDashboard = this.crearDashboard.bind(this);
+        this.crearSeccionDashboard = this.crearSeccionDashboard.bind(this);
 
         this.showModal = this.showModal.bind(this);
         this.closeModal = this.closeModal.bind(this);
@@ -184,6 +187,12 @@ export default class LoginPage extends React.Component {
             this.existeTabla("SeccionUmbral");
             //RangoSeccionUmbral
             this.existeTabla("RangoSeccionUmbral");
+            //Bitacora
+            this.existeTabla("Bitacora");
+            //Dashboard
+            this.existeTabla("Dashboard");
+            //SeccionDashboard
+            this.existeTabla("SeccionDashboard");
         }
     }
 
@@ -270,6 +279,12 @@ export default class LoginPage extends React.Component {
                                 this.crearSeccionUmbral();
                             } else if(nombreTabla.localeCompare("RangoSeccionUmbral") == 0) {
                                 this.crearRangoSeccionUmbral();
+                            } else if(nombreTabla.localeCompare("Bitacora") == 0) {
+                                this.crearBitacora();
+                            } else if(nombreTabla.localeCompare("Dashboard") == 0) {
+                                this.crearDashboard();
+                            } else if(nombreTabla.localeCompare("SeccionDashboard") == 0) {
+                                this.crearSeccionDashboard();
                             }
                         }
                     });
@@ -310,7 +325,7 @@ export default class LoginPage extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("CREATE TABLE Indicadores ( ID int IDENTITY(1,1) PRIMARY KEY, nombre varchar(100), codigo varchar(100), formula varchar(500), peso decimal(8,4), tolerancia decimal(8,4), valorIdeal decimal(8,4), tipoValorIdeal varchar(20), periodicidad varchar(50), tipoIndicador varchar(20), analista varchar(100), idRiesgoPadre int, fechaInicioCalculo date )", (err, result) => {
+            request.query("CREATE TABLE Indicadores ( ID int IDENTITY(1,1) PRIMARY KEY, nombre varchar(100), codigo varchar(100), formula varchar(500), peso decimal(22,4), tolerancia decimal(22,4), valorIdeal decimal(8,4), tipoValorIdeal varchar(20), periodicidad varchar(50), tipoIndicador varchar(20), analista varchar(100), idRiesgoPadre int, fechaInicioCalculo date )", (err, result) => {
                 if (err) {
                     if (!rolledBack) {
                         console.log(err);
@@ -334,7 +349,7 @@ export default class LoginPage extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("CREATE TABLE ElementoIndicador ( ID int IDENTITY(1,1) PRIMARY KEY, indicadorID int, conexionTablaID int, esFuenteDeDato bit, excelArchivoID int, excelVariableID int, formaVariableID int, elementoVariableID int, elementoVariableCampoID int, nombreColumnaEnTabla varchar(250), tipoColumnaEnTabla varchar(30), nombreVariable varchar(100), descripcion varchar(500), operacion varchar(30) )", (err, result) => {
+            request.query("CREATE TABLE ElementoIndicador ( ID int IDENTITY(1,1) PRIMARY KEY, indicadorID int, conexionTablaID int, esFuenteDeDato bit, excelArchivoID int, excelVariableID int, formaVariableID int, elementoVariableID int, elementoVariableCampoID int, esValorManual bit, nombreColumnaEnTabla varchar(250), tipoColumnaEnTabla varchar(30), nombreVariable varchar(100), descripcion varchar(500), operacion varchar(30) )", (err, result) => {
                 if (err) {
                     if (!rolledBack) {
                         console.log(err);
@@ -406,7 +421,7 @@ export default class LoginPage extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("CREATE TABLE ElementoFormulasIndicadoresCampos ( ID int IDENTITY(1,1) PRIMARY KEY, indicadorID int, indicadorCampoID int, formulaID int, conexionTablaID int, esFuenteDeDato bit, excelArchivoID int, excelVariableID int, formaVariableID int, elementoVariableID int, elementoVariableCampoID int, nombreColumnaEnTabla varchar(250), tipoColumnaEnTabla varchar(30), nombreVariable varchar(100), descripcion varchar(500), operacion varchar(30) )", (err, result) => {
+            request.query("CREATE TABLE ElementoFormulasIndicadoresCampos ( ID int IDENTITY(1,1) PRIMARY KEY, indicadorID int, indicadorCampoID int, formulaID int, conexionTablaID int, esFuenteDeDato bit, excelArchivoID int, excelVariableID int, formaVariableID int, elementoVariableID int, elementoVariableCampoID int, esValorManual bit, nombreColumnaEnTabla varchar(250), tipoColumnaEnTabla varchar(30), nombreVariable varchar(100), descripcion varchar(500), operacion varchar(30) )", (err, result) => {
                 if (err) {
                     if (!rolledBack) {
                         console.log(err);
@@ -430,7 +445,7 @@ export default class LoginPage extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("CREATE TABLE SegmentoReglasIndicadores ( ID int IDENTITY(1,1) PRIMARY KEY, conexionTablaID int, indicadorID int, indicadorCampoID int,  variableIDCreacionCodigo int, excelArchivoID int, excelVariableID int, formaVariableID int, esConexionTabla bit, posicionSegmentoEnCampo int, nivelMax int )", (err, result) => {
+            request.query("CREATE TABLE SegmentoReglasIndicadores ( ID int IDENTITY(1,1) PRIMARY KEY, conexionTablaID int, indicadorID int, indicadorCampoID int,  variableIDCreacionCodigo int, excelArchivoID int, excelVariableID int, formaVariableID int, esValorManual bit, esConexionTabla bit, posicionSegmentoEnCampo int, nivelMax int )", (err, result) => {
                 if (err) {
                     if (!rolledBack) {
                         console.log(err);
@@ -478,7 +493,7 @@ export default class LoginPage extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("CREATE TABLE Variables ( ID int IDENTITY(1,1) PRIMARY KEY, nombre varchar(100), descripcion varchar(700), esObjeto bit, objetoPadreID int, esInstruccionSQL bit, guardar bit, periodicidad varchar(50), analista varchar(100), fechaInicioCalculo date )", (err, result) => {
+            request.query("CREATE TABLE Variables ( ID int IDENTITY(1,1) PRIMARY KEY, nombre varchar(100), descripcion varchar(700), esObjeto bit, esColeccion bit, objetoPadreID int, esInstruccionSQL bit, guardar bit, periodicidad varchar(50), analista varchar(100), fechaInicioCalculo date )", (err, result) => {
                 if (err) {
                     if (!rolledBack) {
                         console.log(err);
@@ -550,7 +565,7 @@ export default class LoginPage extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("CREATE TABLE ElementoFormulasVariablesCampos ( ID int IDENTITY(1,1) PRIMARY KEY, variableID int, variableCampoID int, formulaID int, conexionTablaID int, esFuenteDeDato bit, excelArchivoID int, excelVariableID int, formaVariableID int, elementoVariableID int, elementoVariableCampoID int, nombreColumnaEnTabla varchar(250), tipoColumnaEnTabla varchar(30), nombreVariable varchar(100), descripcion varchar(500), operacion varchar(30) )", (err, result) => {
+            request.query("CREATE TABLE ElementoFormulasVariablesCampos ( ID int IDENTITY(1,1) PRIMARY KEY, variableID int, variableCampoID int, formulaID int, conexionTablaID int, esFuenteDeDato bit, excelArchivoID int, excelVariableID int, formaVariableID int, elementoVariableID int, elementoVariableCampoID int, esValorManual bit, nombreColumnaEnTabla varchar(250), tipoColumnaEnTabla varchar(30), nombreVariable varchar(100), descripcion varchar(500), operacion varchar(30) )", (err, result) => {
                 if (err) {
                     if (!rolledBack) {
                         console.log(err);
@@ -862,7 +877,7 @@ export default class LoginPage extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("CREATE TABLE SegmentoReglasVariables ( ID int IDENTITY(1,1) PRIMARY KEY, conexionTablaID int, variableID int, variableCampoID int,  variableIDCreacionCodigo int, excelArchivoID int, excelVariableID int, formaVariableID int, esConexionTabla bit, posicionSegmentoEnCampo int, nivelMax int )", (err, result) => {
+            request.query("CREATE TABLE SegmentoReglasVariables ( ID int IDENTITY(1,1) PRIMARY KEY, conexionTablaID int, variableID int, variableCampoID int,  variableIDCreacionCodigo int, excelArchivoID int, excelVariableID int, formaVariableID int, esConexionTabla bit, esValorManual bit, posicionSegmentoEnCampo int, nivelMax int )", (err, result) => {
                 if (err) {
                     if (!rolledBack) {
                         console.log(err);
@@ -1041,6 +1056,78 @@ export default class LoginPage extends React.Component {
                 } else {
                     transaction.commit(err => {
                         console.log("Tabla RangoSeccionUmbral creada.");
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    crearBitacora () {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("CREATE TABLE Bitacora ( ID int IDENTITY(1,1) PRIMARY KEY, usuarioID int, nombreUsuario varchar(100), fecha date, descripcion varchar(1000) )", (err, result) => {
+                if (err) {
+                    if (!rolledBack) {
+                        console.log(err);
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        console.log("Tabla Bitacora creada.");
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    crearDashboard () {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("CREATE TABLE Dashboard ( ID int IDENTITY(1,1) PRIMARY KEY, nombre varchar(100), descripcion varchar(500) )", (err, result) => {
+                if (err) {
+                    if (!rolledBack) {
+                        console.log(err);
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        console.log("Tabla Dashboard creada.");
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    crearSeccionDashboard () {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("CREATE TABLE SeccionDashboard ( ID int IDENTITY(1,1) PRIMARY KEY, dashboardID int, tamano varchar(10), tipoObjeto varchar(10), instruccion varchar(1000) )", (err, result) => {
+                if (err) {
+                    if (!rolledBack) {
+                        console.log(err);
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        console.log("Tabla SeccionDashboard creada.");
                     });
                 }
             });

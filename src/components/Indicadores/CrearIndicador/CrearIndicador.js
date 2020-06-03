@@ -87,6 +87,8 @@ export default class CrearIndicador extends React.Component {
         var tipoIndicador = $("#tipoIndicador").val();
         var periodicidad = $("#periodicidad").val();
         var fecha = $("#fecha").datepicker('getDate');
+        if(tipoIndicador.localeCompare("-1"))
+            fecha = new Date(1964, 4, 28);
         var analista = $("#analista").val();
         var riesgoPadre = this.props.riesgoPadre;
         console.log('nombre');
@@ -202,7 +204,7 @@ export default class CrearIndicador extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("insert into ElementoIndicador (indicadorID, conexionTablaID, esFuenteDeDato, excelArchivoID, excelVariableID, formaVariableID, elementoVariableID, elementoVariableCampoID, nombreColumnaEnTabla, tipoColumnaEnTabla, nombreVariable, descripcion, operacion) values ("+indicador.ID+", "+elementoFormula.conexionTablaID+", '"+elementoFormula.esFuenteDeDato+"', "+elementoFormula.excelArchivoID+", "+elementoFormula.excelVariableID+", "+elementoFormula.formaVariableID+", "+elementoFormula.elementoVariableID+", "+elementoFormula.elementoVariableCampoID+", '"+elementoFormula.nombreColumnaEnTabla+"', '"+elementoFormula.tipoColumnaEnTabla+"', '"+elementoFormula.nombreVariable+"', '"+elementoFormula.descripcion+"', '"+elementoFormula.operacion+"')", (err, result) => {
+            request.query("insert into ElementoIndicador (indicadorID, conexionTablaID, esFuenteDeDato, excelArchivoID, excelVariableID, formaVariableID, elementoVariableID, elementoVariableCampoID, esValorManual, nombreColumnaEnTabla, tipoColumnaEnTabla, nombreVariable, descripcion, operacion) values ("+indicador.ID+", "+elementoFormula.conexionTablaID+", '"+elementoFormula.esFuenteDeDato+"', "+elementoFormula.excelArchivoID+", "+elementoFormula.excelVariableID+", "+elementoFormula.formaVariableID+", "+elementoFormula.elementoVariableID+", "+elementoFormula.elementoVariableCampoID+", '"+elementoFormula.esValorManual+"', '"+elementoFormula.nombreColumnaEnTabla+"', '"+elementoFormula.tipoColumnaEnTabla+"', '"+elementoFormula.nombreVariable+"', '"+elementoFormula.descripcion+"', '"+elementoFormula.operacion+"')", (err, result) => {
                 if (err) {
                     console.log(err);
                     if (!rolledBack) {
@@ -334,7 +336,7 @@ export default class CrearIndicador extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("insert into SegmentoReglasIndicadores (conexionTablaID, indicadorID, indicadorCampoID, variableIDCreacionCodigo, esConexionTabla, posicionSegmentoEnCampo, nivelMax) values ("+segmento.conexionTablaID+", "+indicador.ID+", "+indicadorCampo.ID+", "+segmento.variableID+", '"+segmento.esConexionTabla+"', "+posicionSegmento+", "+segmento.nivelMax+")", (err, result) => {
+            request.query("insert into SegmentoReglasIndicadores (conexionTablaID, indicadorID, indicadorCampoID, variableIDCreacionCodigo, excelArchivoID, excelVariableID, formaVariableID, esValorManual, esConexionTabla, posicionSegmentoEnCampo, nivelMax) values ("+segmento.conexionTablaID+", "+indicador.ID+", "+indicadorCampo.ID+", "+segmento.variableID+", "+segmento.excelArchivoID+", "+segmento.excelVariableID+", "+segmento.formaVariableID+", '"+segmento.esValorManual+"', '"+segmento.esConexionTabla+"', "+posicionSegmento+", "+segmento.nivelMax+")", (err, result) => {
                 if (err) {
                     console.log(err);
                     if (!rolledBack) {
@@ -730,7 +732,7 @@ export default class CrearIndicador extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("insert into ElementoFormulasIndicadoresCampos (indicadorID, indicadorCampoID, formulaID, conexionTablaID, esFuenteDeDato, elementoVariableID, elementoVariableCampoID, nombreColumnaEnTabla, tipoColumnaEnTabla, nombreVariable, descripcion, operacion) values ("+indicador.ID+", "+indicadorCampo.ID+", "+formula.ID+", "+elemento.conexionTablaID+", '"+elemento.esFuenteDeDato+"', "+elemento.elementoVariableID+", "+elemento.elementoVariableCampoID+", '"+elemento.nombreColumnaEnTabla+"', '"+elemento.tipoColumnaEnTabla+"', '"+elemento.nombreVariable+"', '"+elemento.descripcion+"', '"+elemento.operacion+"')", (err, result) => {
+            request.query("insert into ElementoFormulasIndicadoresCampos (indicadorID, indicadorCampoID, formulaID, conexionTablaID, esFuenteDeDato, excelArchivoID, excelVariableID, formaVariableID, elementoVariableID, elementoVariableCampoID, esValorManual, nombreColumnaEnTabla, tipoColumnaEnTabla, nombreVariable, descripcion, operacion) values ("+indicador.ID+", "+indicadorCampo.ID+", "+formula.ID+", "+elemento.conexionTablaID+", '"+elemento.esFuenteDeDato+"', "+elemento.excelArchivoID+", "+elemento.excelVariableID+", "+elemento.formaVariableID+", "+elemento.elementoVariableID+", "+elemento.elementoVariableCampoID+", '"+elemento.esValorManual+"', '"+elemento.nombreColumnaEnTabla+"', '"+elemento.tipoColumnaEnTabla+"', '"+elemento.nombreVariable+"', '"+elemento.descripcion+"', '"+elemento.operacion+"')", (err, result) => {
                 if (err) {
                     console.log(err);
                     if (!rolledBack) {
@@ -1259,18 +1261,37 @@ export default class CrearIndicador extends React.Component {
                             var conexionTablaID = -1, variableID = -1, esConexionTabla = false, nivelMax = 1;
                             var posicionInsertarReglaAtributo = 0, posicionInsertarReglaSegmento = 0;
                             var posicionSegmentoEnCampo = -1; //bandera para saber a que segmento pertenece la regla, utilizado para elegir color fondo reglas
+                            var excelArchivoID = -1, excelVariableID = -1, formaVariableID = -1;
+                            var esValorManual = false;
                             if(formulaSeleccionada.tablaID != -1) {
                                 conexionTablaID = formulaSeleccionada.tablaID;
                                 esConexionTabla = true;
-                            } else {
+                            } else if(formulaSeleccionada.variableID != -1) {
                                 variableID = formulaSeleccionada.variableID;
+                            } else if(formulaSeleccionada.excelArchivoID != -1) {
+                                excelArchivoID = formulaSeleccionada.excelArchivoID;
+                                excelVariableID = formulaSeleccionada.excelVariableID;
+                            } else if(formulaSeleccionada.formaVariableID != -1) {
+                                formaVariableID = formulaSeleccionada.formaVariableID;
+                            } else if(formulaSeleccionada.esValorManual != undefined) {
+                                esValorManual = formulaSeleccionada.esValorManual;
                             }
                             if(tipoElementoSeleccionadoRegla.localeCompare("abajo") == 0 || (indiceSeleccionadoReglas == -1 && tipoElementoSeleccionadoRegla.length == 0) || segmentoRegla[posicionSel].length == 0) {
                                 var segmentoReglaIndex = 0;
                                 if(segmentoRegla[posicionSel].length > 0) {
                                     segmentoReglaIndex = segmentoRegla[posicionSel].length;
                                 }
-                                segmentoRegla[posicionSel].push({conexionTablaID: conexionTablaID, variableID: variableID, esConexionTabla: esConexionTabla, nivelMax: nivelMax, segmentoReglaIndex: segmentoReglaIndex});
+                                segmentoRegla[posicionSel].push({
+                                    conexionTablaID: conexionTablaID,
+                                    variableID: variableID,
+                                    esConexionTabla: esConexionTabla,
+                                    nivelMax: nivelMax,
+                                    segmentoReglaIndex: segmentoReglaIndex,
+                                    excelArchivoID: excelArchivoID,
+                                    excelVariableID: excelVariableID,
+                                    formaVariableID: formaVariableID,
+                                    esValorManual: esValorManual
+                                });
                                 posicionInsertarReglaAtributo = posicionSel;
                                 posicionInsertarReglaSegmento = segmentoRegla[posicionSel].length-1;
                             } else {
@@ -1583,6 +1604,9 @@ export default class CrearIndicador extends React.Component {
                 var elementoVariableCampoID = -1;
                 if(formulaArreglo[i].variableCampoID != undefined)
                     elementoVariableCampoID = formulaArreglo[i].variableCampoID;
+                var esValorManual = false;
+                if(formulaArreglo[i].esValorManual != undefined)
+                    esValorManual = formulaArreglo[i].esValorManual;
                 array.push({
                     variableID: -1,
                     variableCampoID: -1,
@@ -1594,6 +1618,7 @@ export default class CrearIndicador extends React.Component {
                     formaVariableID: formaVariableID,
                     elementoVariableID: elementoVariableID,
                     elementoVariableCampoID: elementoVariableCampoID,
+                    esValorManual: esValorManual,
                     nombreColumnaEnTabla: formulaArreglo[i].valor,
                     tipoColumnaEnTabla: tipoDeAsignacionSeleccionado,
                     nombreVariable: formulaArreglo[i].valor,

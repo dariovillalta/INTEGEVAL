@@ -9,6 +9,7 @@ import RiesgoHome from './Riesgos/RiesgoHome.js';
 import Calculo from './Calculo.js';
 import Dashboard from './Dashboard.js';
 import ReporteriaHome from './Reporteria/ReporteriaHome.js';
+import DashboardHome from './Dashboards/DashboardHome.js';
 
 export default class Body extends React.Component {
     constructor(props) {
@@ -123,6 +124,12 @@ export default class Body extends React.Component {
             return (
                 <div>
                     <ReporteriaHome pool={this.props.pool}> </ReporteriaHome>
+                </div>
+            );
+        } else if(this.props.router.showDashboard) {
+            return (
+                <div>
+                    <DashboardHome pool={this.props.pool}> </DashboardHome>
                 </div>
             );
         } else {

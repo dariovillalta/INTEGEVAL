@@ -9,7 +9,9 @@ var _react = _interopRequireDefault(require("react"));
 
 var _mssql = _interopRequireDefault(require("mssql"));
 
-var _ImportacionResultadosHome = _interopRequireDefault(require("../ImportacionResultados/ImportacionResultadosHome.js"));
+var _SeleccionarFechas = _interopRequireDefault(require("../ImportacionResultados/SeleccionarFechas.js"));
+
+var _Filtro = _interopRequireDefault(require("../ImportacionResultados/Filtro.js"));
 
 var _Reporteria = _interopRequireDefault(require("./Reporteria.js"));
 
@@ -45,12 +47,16 @@ function (_React$Component) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(ReporteriaHome).call(this, props));
     _this.state = {
-      componenteActual: "importarResultados",
+      componenteActual: "selFechas",
+      fechaInicial: null,
+      fechaFinal: null,
       variables: [],
       indicadores: [],
       riesgos: []
     };
-    _this.returnImportResults = _this.returnImportResults.bind(_assertThisInitialized(_this));
+    _this.goCreateFilters = _this.goCreateFilters.bind(_assertThisInitialized(_this));
+    _this.returnChooseDates = _this.returnChooseDates.bind(_assertThisInitialized(_this));
+    _this.returnChooseFilter = _this.returnChooseFilter.bind(_assertThisInitialized(_this));
     _this.retornoVariables = _this.retornoVariables.bind(_assertThisInitialized(_this));
     return _this;
   }
@@ -60,10 +66,42 @@ function (_React$Component) {
 
 
   _createClass(ReporteriaHome, [{
-    key: "returnImportResults",
-    value: function returnImportResults() {
+    key: "goCreateFilters",
+    value: function goCreateFilters(fechaInicial, fechaFinal) {
+      if (fechaInicial == null && fechaFinal == null) {
+        this.setState({
+          componenteActual: "crearFiltros"
+        });
+      } else if (fechaInicial == null && fechaFinal != null) {
+        this.setState({
+          componenteActual: "crearFiltros",
+          fechaFinal: fechaFinal
+        });
+      } else if (fechaInicial != null && fechaFinal == null) {
+        this.setState({
+          componenteActual: "crearFiltros",
+          fechaInicial: fechaInicial
+        });
+      } else if (fechaInicial != null && fechaFinal != null) {
+        this.setState({
+          componenteActual: "crearFiltros",
+          fechaInicial: fechaInicial,
+          fechaFinal: fechaFinal
+        });
+      }
+    }
+  }, {
+    key: "returnChooseDates",
+    value: function returnChooseDates() {
       this.setState({
-        componenteActual: "importarResultados"
+        componenteActual: "selFechas"
+      });
+    }
+  }, {
+    key: "returnChooseFilter",
+    value: function returnChooseFilter() {
+      this.setState({
+        componenteActual: "crearFiltros"
       });
     }
   }, {
@@ -85,12 +123,18 @@ function (_React$Component) {
   }, {
     key: "render",
     value: function render() {
-      if (this.state.componenteActual.localeCompare("importarResultados") == 0) {
-        return _react["default"].createElement("div", null, _react["default"].createElement(_ImportacionResultadosHome["default"], {
+      if (this.state.componenteActual.localeCompare("selFechas") == 0) {
+        return _react["default"].createElement("div", null, _react["default"].createElement(_SeleccionarFechas["default"], {
+          navbar: this.props.navbarFechas,
+          goCreateFilters: this.goCreateFilters
+        }));
+      } else if (this.state.componenteActual.localeCompare("crearFiltros") == 0) {
+        return _react["default"].createElement("div", null, _react["default"].createElement(_Filtro["default"], {
           pool: this.props.pool,
-          navbarFechas: this.state.navbarFechas,
-          goCreateFilters: this.props.goCreateFilters,
-          retornoVariables: this.retornoVariables
+          fechaInicial: this.state.fechaInicial,
+          fechaFinal: this.state.fechaFinal,
+          retornoVariables: this.retornoVariables,
+          returnChooseDates: this.returnChooseDates
         }));
       } else if (this.state.componenteActual.localeCompare("visualizarReporteria") == 0) {
         return _react["default"].createElement("div", null, _react["default"].createElement(_Reporteria["default"], {
@@ -98,7 +142,8 @@ function (_React$Component) {
           variables: this.state.variables,
           indicadores: this.state.indicadores,
           riesgos: this.state.riesgos,
-          returnImportResults: this.returnImportResults
+          returnChooseDates: this.returnChooseDates,
+          returnChooseFilter: this.returnChooseFilter
         }));
       }
     }

@@ -60,16 +60,17 @@ export default class EditarRiesgo extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("update Riesgos set nombre = '"+nombre+"', peso = "+peso+", formula = "+formula+" where ID = "+this.props.idRiesgoSeleccionado, (err, result) => {
+            request.query("update Riesgos set nombre = '"+nombre+"', peso = "+peso+", formula = '"+formula+"' where ID = "+this.props.idRiesgoSeleccionado, (err, result) => {
                 if (err) {
+                    console.log(err);
                     if (!rolledBack) {
-                        console.log(err);
                         transaction.rollback(err => {
                         });
                     }
                 } else {
                     transaction.commit(err => {
-                        this.props.terminoCrearRiesgo(nombre);
+                        alert("Riesgo Modificado.");
+                        this.props.getRiesgos();
                     });
                 }
             });
@@ -142,7 +143,7 @@ export default class EditarRiesgo extends React.Component {
                                         <a className={"btn btn-brand btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.goCrearUmbral}>Umbrales</a>
                                         <br/>
                                         <div className={"row"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
-                                            <a className={"btn btn-primary btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.crearRiesgo}>Guardar</a>
+                                            <a className={"btn btn-primary btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.guardarRiesgo}>Modificar</a>
                                         </div>
                                         <br/>
                                     </div>
