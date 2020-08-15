@@ -447,14 +447,6 @@ export default class InstruccionVariable extends React.Component {
     }
 
     retornarIndiceSeleccionadoParaMostrarCampoObjetivo (reglaSeleccionada, tipoIndiceSeleccionado, indiceI, indiceJ) {
-        console.log('reglaSeleccionada');
-        console.log(reglaSeleccionada);
-        console.log('tipoIndiceSeleccionado');
-        console.log(tipoIndiceSeleccionado);
-        console.log('this.props.reglas');
-        console.log(this.props.reglas);
-        console.log('this.props.reglas.length');
-        console.log(this.props.reglas.length);
         /*console.log('this.props.reglas[indiceI-1].length');
         console.log(this.props.reglas[indiceI-1].length);*/
         /*if(this.props.reglas.length-1 == indiceI*/ /*&& this.props.reglas[indiceI-1].length == indiceJ*/ /*&& tipoIndiceSeleccionado.localeCompare("abajo") == 0) {

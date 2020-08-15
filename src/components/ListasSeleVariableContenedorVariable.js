@@ -1,6 +1,7 @@
 import React from 'react';
 
 import ListasSeleVariable from './ListasSeleVariable.js';
+import Accordion from './Accordion/Accordion.js';
 
 export default class ListasSeleVariableContenedorVariable extends React.Component {
     constructor(props) {
@@ -434,56 +435,70 @@ export default class ListasSeleVariableContenedorVariable extends React.Componen
         return (
             <div style={{width: "100%", height: "100%"}}>
                 <div className={"row"} style={{border: "1px solid #e6e6f2", width: "100%", height: "100%"}}>
-                    {this.props.tablas.map((tabla, i) => (
-                        <div style={{width: "100%", height: "80%"}} key={tabla.ID}>
+                    <Accordion showTrash={false} showEdit={false} color={"#ffffff"}>
+                        <div label={"Conexiones"}>
+                            {this.props.tablas.map((tabla, i) => (
+                                <div style={{width: "100%", height: "80%"}} key={tabla.ID}>
+                                    {
+                                        this.props.camposTablas[i] != undefined
+                                        ? <ListasSeleVariable mostrarRosa={this.props.mostrarRosa} variables={this.props.camposTablas[i]} seleccionarMultiple={this.props.seleccionarMultiple} retornoSeleccion={this.retornoSeleccionVariableConexiones} titulo={tabla.nombre} indiceTabla={i} indicesVarSeleccionados={this.state.indicesVarSeleccionadosConexiones[i]}></ListasSeleVariable>
+                                        : null
+                                    }
+                                </div>
+                            ))}
+                        </div>
+                        <div label={"Variables Individuales"}>
                             {
-                                this.props.camposTablas[i] != undefined
-                                ? <ListasSeleVariable mostrarRosa={this.props.mostrarRosa} variables={this.props.camposTablas[i]} seleccionarMultiple={this.props.seleccionarMultiple} retornoSeleccion={this.retornoSeleccionVariableConexiones} titulo={tabla.nombre} indiceTabla={i} indicesVarSeleccionados={this.state.indicesVarSeleccionadosConexiones[i]}></ListasSeleVariable>
-                                : null
+                                this.props.variables.length > 0
+                                ?    <div style={{width: "100%", height: "80%"}}>
+                                        <ListasSeleVariable mostrarRosa={this.props.mostrarRosa} variables={this.props.variables} seleccionarMultiple={this.props.seleccionarMultiple} retornoSeleccion={this.retornoSeleccionVariableVariablesEscalar} titulo={"Variable Escalares"} indiceTabla={false} indicesVarSeleccionados={this.state.indicesVarSeleccionadosVariablesEscalares}></ListasSeleVariable>
+                                    </div>
+                                :   <span></span>
                             }
                         </div>
-                    ))}
-                    {
-                        this.props.variables.length > 0
-                        ?    <div style={{width: "100%", height: "80%"}}>
-                                <ListasSeleVariable mostrarRosa={this.props.mostrarRosa} variables={this.props.variables} seleccionarMultiple={this.props.seleccionarMultiple} retornoSeleccion={this.retornoSeleccionVariableVariablesEscalar} titulo={"Variable Escalares"} indiceTabla={false} indicesVarSeleccionados={this.state.indicesVarSeleccionadosVariablesEscalares}></ListasSeleVariable>
-                            </div>
-                        : null
-                    }
-                    {this.props.objetos.map((objeto, i) => (
-                        <div style={{width: "100%", height: "80%"}} key={objeto.ID}>
+                        <div label={"Variables Compuestas"}>
+                            {this.props.objetos.map((objeto, i) => (
+                                <div style={{width: "100%", height: "80%"}} key={objeto.ID}>
+                                    {
+                                        this.props.camposDeObjetos[i] != undefined
+                                        ? <ListasSeleVariable mostrarRosa={this.props.mostrarRosa} variables={this.props.camposDeObjetos[i]} seleccionarMultiple={this.props.seleccionarMultiple} retornoSeleccion={this.retornoSeleccionVariableVariables} titulo={objeto.nombre} key={i} indiceTabla={i} indicesVarSeleccionados={this.state.indicesVarSeleccionadosVariables[i]}></ListasSeleVariable>
+                                        : null
+                                    }
+                                </div>
+                            ))}
+                        </div>
+                        <div label={"Variables Excel"}>
+                            {this.props.excel.map((excel, i) => (
+                                <div style={{width: "100%", height: "80%"}} key={excel.ID}>
+                                    {
+                                        this.props.camposDeExcel[i] != undefined
+                                        ? <ListasSeleVariable mostrarRosa={this.props.mostrarRosa} variables={this.props.camposDeExcel[i]} seleccionarMultiple={this.props.seleccionarMultiple} retornoSeleccion={this.retornoSeleccionVariableExcel} titulo={excel.nombre} key={i} indiceTabla={i} indicesVarSeleccionados={this.state.indicesVarSeleccionadosExcel[i]}></ListasSeleVariable>
+                                        : null
+                                    }
+                                </div>
+                            ))}
+                        </div>
+                        <div label={"Variables Forma"}>
                             {
-                                this.props.camposDeObjetos[i] != undefined
-                                ? <ListasSeleVariable mostrarRosa={this.props.mostrarRosa} variables={this.props.camposDeObjetos[i]} seleccionarMultiple={this.props.seleccionarMultiple} retornoSeleccion={this.retornoSeleccionVariableVariables} titulo={objeto.nombre} key={i} indiceTabla={i} indicesVarSeleccionados={this.state.indicesVarSeleccionadosVariables[i]}></ListasSeleVariable>
-                                : null
+                                this.props.formas.length > 0
+                                ?    <div style={{width: "100%", height: "80%"}}>
+                                        <ListasSeleVariable mostrarRosa={this.props.mostrarRosa} variables={this.props.formas} seleccionarMultiple={this.props.seleccionarMultiple} retornoSeleccion={this.retornoSeleccionVariableForma} titulo={"Variables de Formas"} indiceTabla={false} indicesVarSeleccionados={this.state.indicesVarSeleccionadosFormas}></ListasSeleVariable>
+                                    </div>
+                                :   <span></span>
                             }
                         </div>
-                    ))}
-                    {this.props.excel.map((excel, i) => (
-                        <div style={{width: "100%", height: "80%"}} key={excel.ID}>
-                            {
-                                this.props.camposDeExcel[i] != undefined
-                                ? <ListasSeleVariable mostrarRosa={this.props.mostrarRosa} variables={this.props.camposDeExcel[i]} seleccionarMultiple={this.props.seleccionarMultiple} retornoSeleccion={this.retornoSeleccionVariableExcel} titulo={excel.nombre} key={i} indiceTabla={i} indicesVarSeleccionados={this.state.indicesVarSeleccionadosExcel[i]}></ListasSeleVariable>
-                                : null
-                            }
+                        <div label={"Variables SQL"}>
+                            {this.props.variablesSQL.map((variableSQL, i) => (
+                                <div style={{width: "100%", height: "80%"}} key={variableSQL.ID}>
+                                    {
+                                        this.props.camposVariablesSQL[i] != undefined
+                                        ? <ListasSeleVariable mostrarRosa={this.props.mostrarRosa} variables={this.props.camposVariablesSQL[i]} seleccionarMultiple={this.props.seleccionarMultiple} retornoSeleccion={this.retornoSeleccionVariableVariablesSQL} titulo={variableSQL.nombre} key={i} indiceTabla={i} indicesVarSeleccionados={this.state.indicesVarSeleccionadosVariablesSQL[i]}></ListasSeleVariable>
+                                        : null
+                                    }
+                                </div>
+                            ))}
                         </div>
-                    ))}
-                    {
-                        this.props.formas.length > 0
-                        ?    <div style={{width: "100%", height: "80%"}}>
-                                <ListasSeleVariable mostrarRosa={this.props.mostrarRosa} variables={this.props.formas} seleccionarMultiple={this.props.seleccionarMultiple} retornoSeleccion={this.retornoSeleccionVariableForma} titulo={"Variables de Formas"} indiceTabla={false} indicesVarSeleccionados={this.state.indicesVarSeleccionadosFormas}></ListasSeleVariable>
-                            </div>
-                        : null
-                    }
-                    {this.props.variablesSQL.map((variableSQL, i) => (
-                        <div style={{width: "100%", height: "80%"}} key={variableSQL.ID}>
-                            {
-                                this.props.camposVariablesSQL[i] != undefined
-                                ? <ListasSeleVariable mostrarRosa={this.props.mostrarRosa} variables={this.props.camposVariablesSQL[i]} seleccionarMultiple={this.props.seleccionarMultiple} retornoSeleccion={this.retornoSeleccionVariableVariablesSQL} titulo={variableSQL.nombre} key={i} indiceTabla={i} indicesVarSeleccionados={this.state.indicesVarSeleccionadosVariablesSQL[i]}></ListasSeleVariable>
-                                : null
-                            }
-                        </div>
-                    ))}
+                    </Accordion>
                     <div style={{width: "100%", height: "80%"}}>
                         <div className={"row text-center"} style={{display: "flex", alignItems: "center", justifyContent: "center", width: "100%", border: "2px solid #607d8b", height: "20%"}}>
                             <div>

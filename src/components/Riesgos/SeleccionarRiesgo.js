@@ -43,7 +43,7 @@ export default class SeleccionarRiesgo extends React.Component {
                                                     {riesgo.nombre}
                                                 </div>
                                                 <div className={"col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2"}>
-                                                    <a onClick={() => this.props.editarRiesgo(riesgo.ID, riesgo.nombre, riesgo.peso, riesgo.formula)}className="btn btn-success" style={{color: "white"}}>Editar</a>
+                                                    <a onClick={() => this.props.editarRiesgo(riesgo.ID, riesgo.nombre, riesgo.peso, riesgo.formula, riesgo.responsable)}className="btn btn-success" style={{color: "white"}}>Editar</a>
                                                 </div>
                                                 <div className={"col-xl-2 col-lg-2 col-md-2 col-sm-2 col-2"}>
                                                     <a onClick={() => this.props.deleteRiesgo(riesgo.ID)} className="btn btn-danger" style={{color: "white"}}>Borrar</a>

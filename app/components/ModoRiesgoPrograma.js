@@ -66,7 +66,7 @@ function (_React$Component) {
       }, _react["default"].createElement("span", {
         className: "row"
       }, _react["default"].createElement("img", {
-        src: "../assets/MONITOR_BLANCO.png",
+        src: "./assets/MONITOR_BLANCO.png",
         alt: "",
         style: {
           display: "block",
@@ -83,8 +83,7 @@ function (_React$Component) {
           height: "100%",
           display: "flex",
           alignItems: "center",
-          justifyContent: "center",
-          borderTop: "2px solid black"
+          justifyContent: "center"
         }
       }, _react["default"].createElement("a", {
         href: "#",
@@ -93,7 +92,7 @@ function (_React$Component) {
       }, _react["default"].createElement("span", {
         className: "row"
       }, _react["default"].createElement("img", {
-        src: "../assets/IDENTIFICAR BLANCO.png",
+        src: "./assets/IDENTIFICAR BLANCO.png",
         alt: "",
         style: {
           display: "block",
@@ -110,6 +109,12 @@ function (_React$Component) {
 
   return ModoRiesgoPrograma;
 }(_react["default"].Component);
+/*<img src="../assets/MONITOR_BLANCO.png" alt="" style={{display: "block", marginLeft: "auto", marginRight: "auto", height: "80px", width: "auto"}}/>*/
+
+/*<div className="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12 text-center" style={{height: "100%", display: "flex", alignItems: "center", justifyContent: "center", borderTop: "2px solid black"}}>*/
+
+/*<img src="../assets/IDENTIFICAR BLANCO.png" alt="" style={{display: "block", marginLeft: "auto", marginRight: "auto", height: "80px", width: "auto"}}/>*/
+
 
 exports["default"] = ModoRiesgoPrograma;
 //# sourceMappingURL=ModoRiesgoPrograma.js.map

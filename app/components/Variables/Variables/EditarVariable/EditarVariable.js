@@ -37,8 +37,8 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 
 var mostrarFuenteDatoVariableGlobal = false;
 var mostrarFuenteDatoFormaGlobal = false;
-var mostrarFuenteDatoExcelGlobal = true;
-var esPrimeraVez = true;
+var mostrarFuenteDatoExcelGlobal = false; //var esPrimeraVez = true;
+
 /*COMPONENTE QUE CONTROLA TIPOS DE VARIABLES (EXCEL, FORMA, VARIABLE)*/
 
 var EditarVariable =
@@ -70,17 +70,16 @@ function (_React$Component) {
         mostrarFuenteDatoVariableGlobal = false;
         mostrarFuenteDatoFormaGlobal = false;
         mostrarFuenteDatoExcelGlobal = true;
-        esPrimeraVez = false;
+        this.props.changeStateFirstTimeToFalse(); //esPrimeraVez = false;
       } else if (this.props.tipoVariableOriginal.localeCompare("forma") == 0 && this.props.esPrimeraVez) {
         mostrarFuenteDatoVariableGlobal = false;
         mostrarFuenteDatoFormaGlobal = true;
         mostrarFuenteDatoExcelGlobal = false;
-        esPrimeraVez = false;
+        this.props.changeStateFirstTimeToFalse(); //esPrimeraVez = false;
       } else if (this.props.tipoVariableOriginal.localeCompare("variable") == 0 && this.props.esPrimeraVez) {
         mostrarFuenteDatoVariableGlobal = true;
         mostrarFuenteDatoFormaGlobal = false;
-        mostrarFuenteDatoExcelGlobal = false;
-        esPrimeraVez = false;
+        mostrarFuenteDatoExcelGlobal = false; //esPrimeraVez = false;
       }
 
       this.setState({
@@ -88,7 +87,6 @@ function (_React$Component) {
         mostrarFuenteDatoForma: mostrarFuenteDatoFormaGlobal,
         mostrarFuenteDatoExcel: mostrarFuenteDatoExcelGlobal
       });
-      this.props.changeStateFirstTimeToFalse();
     }
   }, {
     key: "mostrarFuenteDatoVariable",
@@ -137,7 +135,7 @@ function (_React$Component) {
         className: "page-header"
       }, _react["default"].createElement("h2", {
         className: "pageheader-title"
-      }, "Crear Variable"), _react["default"].createElement("div", {
+      }, "Modificar Variable"), _react["default"].createElement("div", {
         className: "page-breadcrumb"
       }, _react["default"].createElement("nav", {
         "aria-label": "breadcrumb"
@@ -207,9 +205,13 @@ function (_React$Component) {
         actualizarFechaInicio: this.props.actualizarFechaInicio,
         actualizarPeriodicidad: this.props.actualizarPeriodicidad,
         actualizarNombreEncargado: this.props.actualizarNombreEncargado,
+        actualizarCategoriaVariable: this.props.actualizarCategoriaVariable,
         fechaInicioVariable: this.props.fechaInicioVariable,
         periodicidadVariable: this.props.periodicidadVariable,
-        analistaVariable: this.props.analistaVariable
+        responsableVariable: this.props.responsableVariable,
+        categoriaVariable: this.props.categoriaVariable,
+        esPrimeraVez: this.props.esPrimeraVez,
+        changeStateFirstTimeToFalse: this.props.changeStateFirstTimeToFalse
       }) : null, this.state.mostrarFuenteDatoForma ? _react["default"].createElement(_FuenteDatoForma["default"], {
         pool: this.props.pool,
         esObjetoVariable: this.props.esObjetoVariable,
@@ -217,7 +219,10 @@ function (_React$Component) {
         idVariable: this.props.idVariable,
         tipoVariableOriginal: this.props.tipoVariableOriginal,
         actualizarIDVariableModificada: this.props.actualizarIDVariableModificada,
-        eliminarVarForma: this.props.eliminarVarForma
+        goToTimeline: this.props.goToTimeline,
+        eliminarVarForma: this.props.eliminarVarForma,
+        getFormas: this.props.getFormas,
+        limpiarArreglos: this.props.limpiarArreglos
       }) : null, this.state.mostrarFuenteDatoExcel ? _react["default"].createElement(_FuenteDatoExcel["default"], {
         pool: this.props.pool,
         esObjetoVariable: this.props.esObjetoVariable,
@@ -225,7 +230,10 @@ function (_React$Component) {
         idVariable: this.props.idVariable,
         tipoVariableOriginal: this.props.tipoVariableOriginal,
         actualizarIDVariableModificada: this.props.actualizarIDVariableModificada,
-        eliminarVarExcel: this.props.eliminarVarExcel
+        goToTimeline: this.props.goToTimeline,
+        eliminarVarExcel: this.props.eliminarVarExcel,
+        getExcel: this.props.getExcel,
+        limpiarArreglos: this.props.limpiarArreglos
       }) : null), _react["default"].createElement("div", {
         className: "border-bottom",
         style: {

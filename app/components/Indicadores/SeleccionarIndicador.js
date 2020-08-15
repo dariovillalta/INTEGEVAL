@@ -141,20 +141,27 @@ function (_React$Component) {
       var pesoExistente = 0;
 
       for (var i = 0; i < this.state.indicadores[indexRiesgo].length; i++) {
-        console.log('i = ' + i);
-        console.log(this.state.indicadores[indexRiesgo][i]);
         pesoExistente += this.state.indicadores[indexRiesgo][i].peso;
       }
 
       ;
-      console.log('pesoExistente');
-      console.log(pesoExistente);
-      console.log('pesoRiesgoTotal');
-      console.log(pesoRiesgoTotal);
       var pesoDisponible = pesoRiesgoTotal - pesoExistente;
-      console.log('pesoDisponible');
-      console.log(pesoDisponible);
       this.props.goCrearIndicador(riesgo.ID, riesgo.formula, pesoDisponible);
+    }
+  }, {
+    key: "calcularPesoDisponibleEdit",
+    value: function calcularPesoDisponibleEdit(riesgo, indexRiesgo, indexIndicador) {
+      var pesoRiesgoTotal = 100;
+      var pesoExistente = 0;
+      var indicador = this.state.indicadores[indexRiesgo][indexIndicador];
+
+      for (var i = 0; i < this.state.indicadores[indexRiesgo].length; i++) {
+        pesoExistente += this.state.indicadores[indexRiesgo][i].peso;
+      }
+
+      ;
+      var pesoDisponible = pesoRiesgoTotal - pesoExistente;
+      this.props.goEditarIndicador(riesgo.ID, riesgo.formula, riesgo.pesoDisponible, indicador.ID, indicador.nombre, indicador.codigo, indicador.formula, indicador.peso, indicador.tolerancia, indicador.tipoValorIdeal, indicador.valorIdeal, indicador.periodicidad, indicador.tipoIndicador, indicador.analista, indicador.fechaInicioCalculo, this.state.indicadores[indexRiesgo]);
     }
   }, {
     key: "render",
@@ -169,7 +176,7 @@ function (_React$Component) {
         className: "page-header"
       }, _react["default"].createElement("h2", {
         className: "pageheader-title"
-      }, "Seleccionar Riesgo"), _react["default"].createElement("div", {
+      }, "Seleccionar Indicador"), _react["default"].createElement("div", {
         className: "page-breadcrumb"
       }, _react["default"].createElement("nav", {
         "aria-label": "breadcrumb"
@@ -185,7 +192,7 @@ function (_React$Component) {
       }, "Configuraci\xF3n")), _react["default"].createElement("li", {
         className: "breadcrumb-item active font-16",
         "aria-current": "page"
-      }, "Seleccionar Riesgo"))))))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
+      }, "Seleccionar Indicador"))))))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
         className: "row"
       }, _react["default"].createElement("div", {
         className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
@@ -202,6 +209,9 @@ function (_React$Component) {
         }, _this4.state.indicadores[i] != undefined ? _react["default"].createElement("div", null, _this4.state.indicadores[i].map(function (indicador, j) {
           return _react["default"].createElement("a", {
             className: "btn btn-outline-info btn-block btnWhiteColorHover fontSize1EM",
+            onClick: function onClick() {
+              return _this4.calcularPesoDisponibleEdit(riesgo, i, j);
+            },
             key: indicador.ID
           }, indicador.nombre);
         }), _react["default"].createElement("div", {

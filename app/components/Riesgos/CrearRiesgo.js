@@ -42,6 +42,10 @@ var tipoCampos = [{
 }, {
   nombre: "arreglo"
 }];
+var peso = 0,
+    nombre = '',
+    formula = '',
+    nombreEncargadoRiesgo = '';
 
 var CrearRiesgo =
 /*#__PURE__*/
@@ -55,21 +59,36 @@ function (_React$Component) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(CrearRiesgo).call(this, props));
     _this.state = {
-      x: 0
+      x: peso,
+      usuarios: []
     };
+    _this.getUsuarios = _this.getUsuarios.bind(_assertThisInitialized(_this));
     _this.crearRiesgo = _this.crearRiesgo.bind(_assertThisInitialized(_this));
+    _this.tieneEspaciosEnBlanco = _this.tieneEspaciosEnBlanco.bind(_assertThisInitialized(_this));
+    _this.updateNombreRiesgo = _this.updateNombreRiesgo.bind(_assertThisInitialized(_this));
+    _this.updateFormulaRiesgo = _this.updateFormulaRiesgo.bind(_assertThisInitialized(_this));
+    _this.updateNombreEncargadoRiesgo = _this.updateNombreEncargadoRiesgo.bind(_assertThisInitialized(_this));
     return _this;
   }
 
   _createClass(CrearRiesgo, [{
-    key: "crearRiesgo",
-    value: function crearRiesgo() {
+    key: "componentDidMount",
+    value: function componentDidMount() {
+      this.getUsuarios();
+    }
+  }, {
+    key: "componentWillUnmount",
+    value: function componentWillUnmount() {
+      peso = 0;
+      nombre = '';
+      formula = '';
+      nombreEncargadoRiesgo = '';
+    }
+  }, {
+    key: "getUsuarios",
+    value: function getUsuarios() {
       var _this2 = this;
 
-      var nombre = $("#nombreRiesgo").val();
-      var formula = $("#formula").val();
-      ;
-      var peso = this.state.x;
       var transaction = new _mssql["default"].Transaction(this.props.pool);
       transaction.begin(function (err) {
         var rolledBack = false;
@@ -77,26 +96,104 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("insert into Riesgos (nombre, formula, peso) values ('" + nombre + "', '" + formula + "', " + peso + ")", function (err, result) {
+        request.query("select * from Usuarios", function (err, result) {
           if (err) {
+            console.log(err);
+
             if (!rolledBack) {
-              console.log(err);
               transaction.rollback(function (err) {});
             }
           } else {
             transaction.commit(function (err) {
-              _this2.props.terminoCrearRiesgo();
-
-              _this2.props.actualizarRiesgos();
+              _this2.setState({
+                usuarios: result.recordset
+              });
             });
           }
         });
       }); // fin transaction
     }
   }, {
+    key: "crearRiesgo",
+    value: function crearRiesgo() {
+      var _this3 = this;
+
+      var nombre = $("#nombreRiesgo").val();
+      var formula = $("#formula").val();
+      var responsable = $("#responsable").val();
+      var peso = this.state.x;
+
+      if (nombre.length > 0 && nombre.length < 101) {
+        if (!this.tieneEspaciosEnBlanco(nombre)) {
+          if (formula.length > 0 && formula.length < 501) {
+            if (nombre.length > 0 && nombre.length < 101) {
+              if (responsable.length > 0) {
+                if (!isNaN(parseInt(peso))) {
+                  var transaction = new _mssql["default"].Transaction(this.props.pool);
+                  transaction.begin(function (err) {
+                    var rolledBack = false;
+                    transaction.on('rollback', function (aborted) {
+                      rolledBack = true;
+                    });
+                    var request = new _mssql["default"].Request(transaction);
+                    request.query("insert into Riesgos (nombre, formula, responsable, peso) values ('" + nombre + "', '" + formula + "', '" + responsable + "', " + peso + ")", function (err, result) {
+                      if (err) {
+                        if (!rolledBack) {
+                          console.log(err);
+                          transaction.rollback(function (err) {});
+                        }
+                      } else {
+                        transaction.commit(function (err) {
+                          _this3.props.terminoCrearRiesgo();
+
+                          _this3.props.actualizarRiesgos();
+                        });
+                      }
+                    });
+                  }); // fin transaction
+                } else {
+                  alert("el peso del riesgo debe ser un numero valido");
+                }
+              } else {
+                alert("Ingrese un valor para el responsable.");
+              }
+            } else {
+              alert("el peso del riesgo debe ser un numero valido");
+            }
+          } else {
+            alert("la formula del riesgo debe tener una longitud mayor a 0 y menor a 501");
+          }
+        } else {
+          alert('El nombre del riesgo no debe contener espacios en blanco');
+        }
+      } else {
+        alert("el nombre del riesgo debe tener una longitud mayor a 0 y menor a 101");
+      }
+    }
+  }, {
+    key: "tieneEspaciosEnBlanco",
+    value: function tieneEspaciosEnBlanco(s) {
+      return /\s/g.test(s);
+    }
+  }, {
+    key: "updateNombreRiesgo",
+    value: function updateNombreRiesgo() {
+      nombre = $("#nombreRiesgo").val();
+    }
+  }, {
+    key: "updateFormulaRiesgo",
+    value: function updateFormulaRiesgo() {
+      formula = $("#formula").val();
+    }
+  }, {
+    key: "updateNombreEncargadoRiesgo",
+    value: function updateNombreEncargadoRiesgo() {
+      nombreEncargadoRiesgo = $("#responsable").val();
+    }
+  }, {
     key: "render",
     value: function render() {
-      var _this3 = this;
+      var _this4 = this;
 
       return _react["default"].createElement("div", null, _react["default"].createElement("div", {
         className: "row"
@@ -157,6 +254,8 @@ function (_React$Component) {
       }, _react["default"].createElement("input", {
         id: "nombreRiesgo",
         type: "text",
+        defaultValue: nombre,
+        onKeyUp: this.updateNombreRiesgo,
         className: "form-control form-control-sm"
       }))), _react["default"].createElement("div", {
         className: "row",
@@ -172,7 +271,9 @@ function (_React$Component) {
         className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
       }, _react["default"].createElement("select", {
         id: "formula",
-        className: "form-control"
+        className: "form-control",
+        defaultValue: this.props.periodicidadVariable,
+        onChange: this.updateFormulaRiesgo
       }, _react["default"].createElement("option", {
         value: "ambos"
       }, "Calidad de Gesti\xF3n + Riesgo Inherente"), _react["default"].createElement("option", {
@@ -199,9 +300,12 @@ function (_React$Component) {
         x: this.state.x,
         onChange: function onChange(_ref) {
           var x = _ref.x;
-          return _this3.setState({
+
+          _this4.setState({
             x: x
           });
+
+          peso = x;
         },
         style: {
           width: "100%",
@@ -212,7 +316,31 @@ function (_React$Component) {
       }, _react["default"].createElement("label", {
         id: "pesoLabel",
         className: "col-form-label"
-      }, this.state.x))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
+      }, this.state.x))), _react["default"].createElement("div", {
+        className: "row",
+        style: {
+          width: "100%"
+        }
+      }, _react["default"].createElement("div", {
+        className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
+      }, _react["default"].createElement("label", {
+        htmlFor: "responsable",
+        className: "col-form-label"
+      }, "Nombre Encargado")), _react["default"].createElement("div", {
+        className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
+      }, _react["default"].createElement("select", {
+        id: "responsable",
+        defaultValue: nombreEncargadoRiesgo,
+        onChange: this.updateNombreEncargadoRiesgo,
+        className: "form-control"
+      }, _react["default"].createElement("option", {
+        value: "-1"
+      }, "Ninguno"), this.state.usuarios.map(function (usuario, i) {
+        return _react["default"].createElement("option", {
+          value: usuario.ID,
+          key: usuario.ID
+        }, usuario.usuario);
+      })))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
         className: "row",
         style: {
           display: "flex",

@@ -66,7 +66,15 @@ function (_React$Component) {
         //vista para iniciar el calculo de las variables
         showReporteria: false,
         //vista home para hacer reporteria
-        showDashboard: false //vista home para hacer dashboards
+        showDashboard: false,
+        //vista home para hacer dashboards
+        showListas: false,
+        //vista administrar listas
+        showGraficos: false,
+        //vista administrar graficos
+        showUsuarios: false,
+        //vista administrar usuarios
+        showBitacora: false //vista para ver bitacoras
 
       },
       showChooseMode: true,
@@ -85,6 +93,10 @@ function (_React$Component) {
     _this.showCalulo = _this.showCalulo.bind(_assertThisInitialized(_this));
     _this.showReporteria = _this.showReporteria.bind(_assertThisInitialized(_this));
     _this.showDashboard = _this.showDashboard.bind(_assertThisInitialized(_this));
+    _this.showListas = _this.showListas.bind(_assertThisInitialized(_this));
+    _this.showGraficos = _this.showGraficos.bind(_assertThisInitialized(_this));
+    _this.showUsuarios = _this.showUsuarios.bind(_assertThisInitialized(_this));
+    _this.showBitacora = _this.showBitacora.bind(_assertThisInitialized(_this));
     return _this;
   }
 
@@ -164,7 +176,11 @@ function (_React$Component) {
           showRiesgos: false,
           showCalulo: false,
           showReporteria: false,
-          showDashboard: false
+          showDashboard: false,
+          showListas: false,
+          showGraficos: false,
+          showUsuarios: false,
+          showBitacora: false
         },
         showChooseMode: false,
         navbar: navbar
@@ -221,9 +237,8 @@ function (_React$Component) {
       }, "Reporter\xEDa"))), _react["default"].createElement("li", {
         className: "nav-item "
       }, _react["default"].createElement("a", {
-        className: "nav-link"
-        /*onClick={this.showGraphics}*/
-        ,
+        className: "nav-link",
+        onClick: this.showGraficos,
         href: "#"
       }, _react["default"].createElement("i", {
         className: "fa fa-fw fa-user-circle"
@@ -244,7 +259,11 @@ function (_React$Component) {
           showRiesgos: false,
           showCalulo: false,
           showReporteria: false,
-          showDashboard: false
+          showDashboard: false,
+          showListas: false,
+          showGraficos: false,
+          showUsuarios: false,
+          showBitacora: false
         },
         showChooseMode: false,
         navbar: navbar
@@ -264,7 +283,11 @@ function (_React$Component) {
           showRiesgos: false,
           showCalulo: false,
           showReporteria: false,
-          showDashboard: false
+          showDashboard: false,
+          showListas: false,
+          showGraficos: false,
+          showUsuarios: false,
+          showBitacora: false
         },
         showChooseMode: false
       });
@@ -283,7 +306,11 @@ function (_React$Component) {
           showRiesgos: false,
           showCalulo: false,
           showReporteria: false,
-          showDashboard: false
+          showDashboard: false,
+          showListas: false,
+          showGraficos: false,
+          showUsuarios: false,
+          showBitacora: false
         },
         showChooseMode: false
       });
@@ -302,7 +329,11 @@ function (_React$Component) {
           showRiesgos: false,
           showCalulo: false,
           showReporteria: false,
-          showDashboard: false
+          showDashboard: false,
+          showListas: false,
+          showGraficos: false,
+          showUsuarios: false,
+          showBitacora: false
         },
         showChooseMode: false
       });
@@ -321,7 +352,11 @@ function (_React$Component) {
           showRiesgos: false,
           showCalulo: false,
           showReporteria: false,
-          showDashboard: false
+          showDashboard: false,
+          showListas: false,
+          showGraficos: false,
+          showUsuarios: false,
+          showBitacora: false
         },
         showChooseMode: false
       });
@@ -340,7 +375,10 @@ function (_React$Component) {
           showRiesgos: true,
           showCalulo: false,
           showReporteria: false,
-          showDashboard: false
+          showDashboard: false,
+          showListas: false,
+          showUsuarios: false,
+          showBitacora: false
         },
         showChooseMode: false
       });
@@ -359,7 +397,11 @@ function (_React$Component) {
           showRiesgos: false,
           showCalulo: true,
           showReporteria: false,
-          showDashboard: false
+          showDashboard: false,
+          showListas: false,
+          showGraficos: false,
+          showUsuarios: false,
+          showBitacora: false
         },
         showChooseMode: false
       });
@@ -378,7 +420,11 @@ function (_React$Component) {
           showRiesgos: false,
           showCalulo: false,
           showReporteria: true,
-          showDashboard: false
+          showDashboard: false,
+          showListas: false,
+          showGraficos: false,
+          showUsuarios: false,
+          showBitacora: false
         },
         showChooseMode: false
       });
@@ -397,7 +443,103 @@ function (_React$Component) {
           showRiesgos: false,
           showCalulo: false,
           showReporteria: false,
-          showDashboard: true
+          showDashboard: true,
+          showListas: false,
+          showGraficos: false,
+          showUsuarios: false,
+          showBitacora: false
+        },
+        showChooseMode: false
+      });
+    }
+  }, {
+    key: "showListas",
+    value: function showListas() {
+      this.setState({
+        router: {
+          showRiskControlHome: false,
+          showRiskMonitorHome: false,
+          showVariables: false,
+          showFormula: false,
+          showCondicionVar: false,
+          showIndicador: false,
+          showRiesgos: false,
+          showCalulo: false,
+          showReporteria: false,
+          showDashboard: false,
+          showListas: true,
+          showGraficos: false,
+          showUsuarios: false,
+          showBitacora: false
+        },
+        showChooseMode: false
+      });
+    }
+  }, {
+    key: "showGraficos",
+    value: function showGraficos() {
+      this.setState({
+        router: {
+          showRiskControlHome: false,
+          showRiskMonitorHome: false,
+          showVariables: false,
+          showFormula: false,
+          showCondicionVar: false,
+          showIndicador: false,
+          showRiesgos: false,
+          showCalulo: false,
+          showReporteria: false,
+          showDashboard: false,
+          showListas: false,
+          showGraficos: true,
+          showUsuarios: false,
+          showBitacora: false
+        },
+        showChooseMode: false
+      });
+    }
+  }, {
+    key: "showUsuarios",
+    value: function showUsuarios() {
+      this.setState({
+        router: {
+          showRiskControlHome: false,
+          showRiskMonitorHome: false,
+          showVariables: false,
+          showFormula: false,
+          showCondicionVar: false,
+          showIndicador: false,
+          showRiesgos: false,
+          showCalulo: false,
+          showReporteria: false,
+          showDashboard: false,
+          showListas: false,
+          showGraficos: false,
+          showUsuarios: true,
+          showBitacora: false
+        },
+        showChooseMode: false
+      });
+    }
+  }, {
+    key: "showBitacora",
+    value: function showBitacora() {
+      this.setState({
+        router: {
+          showRiskControlHome: false,
+          showRiskMonitorHome: false,
+          showVariables: false,
+          showFormula: false,
+          showCondicionVar: false,
+          showIndicador: false,
+          showRiesgos: false,
+          showCalulo: false,
+          showReporteria: false,
+          showDashboard: false,
+          showListas: false,
+          showGraficos: false,
+          showUsuarios: false,
+          showBitacora: true
         },
         showChooseMode: false
       });
@@ -423,7 +565,7 @@ function (_React$Component) {
         }, " "), _react["default"].createElement("div", {
           className: "dashboard-wrapper"
         }, _react["default"].createElement("div", {
-          className: "container-fluid dashboard-content"
+          className: !this.state.router.showReporteria ? "dashboard-content" : "dashboard-content2"
         }, _react["default"].createElement(_Body["default"], {
           router: this.state.router,
           pool: this.props.pool,
@@ -433,7 +575,10 @@ function (_React$Component) {
           showCondicionVar: this.showCondicionVar,
           showIndicador: this.showIndicador,
           showRiskControlHome: this.showRiskControlHome,
-          showRiesgos: this.showRiesgos
+          showRiesgos: this.showRiesgos,
+          showListas: this.showListas,
+          showUsuarios: this.showUsuarios,
+          showBitacora: this.showBitacora
         }, " "))));
       }
     }

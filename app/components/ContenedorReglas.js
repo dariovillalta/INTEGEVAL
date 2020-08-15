@@ -204,17 +204,7 @@ function (_React$Component) {
           width: "100%",
           height: "100%"
         }
-      }, !this.props.reglas[0][0].esCondicion ? _react["default"].createElement("div", {
-        id: "reglaInit",
-        onClick: function onClick() {
-          return _this2.seleccionRegla(0, "arriba", 0);
-        },
-        className: "highlightFormulaBackground addPointer",
-        style: {
-          width: "100%",
-          height: "10px"
-        }
-      }) : null, _react["default"].createElement("div", {
+      }, _react["default"].createElement("div", {
         onClick: function onClick() {
           return _this2.seleccionRegla(0, "reglaUnica", 0);
         },
@@ -270,17 +260,7 @@ function (_React$Component) {
               width: "100%",
               height: "100%"
             }
-          }, !regla.esCondicion && j == 0 ? _react["default"].createElement("div", {
-            id: "reglaInit" + i + "" + j,
-            onClick: function onClick() {
-              return _this2.seleccionRegla(i, "arriba", j);
-            },
-            className: "highlightFormulaBackground addPointer",
-            style: {
-              width: "100%",
-              height: "10px"
-            }
-          }) : null, _react["default"].createElement("div", {
+          }, _react["default"].createElement("div", {
             onClick: function onClick() {
               return _this2.seleccionRegla(i, "condicion", j);
             },
@@ -319,6 +299,76 @@ function (_React$Component) {
 
   return ContenedorReglas;
 }(_react["default"].Component);
+/*{
+    this.props.reglas.length == 1 && this.props.reglas[0].length == 1
+    ?
+        <div style={{width: "100%", height: "100%"}}>
+            {
+                !this.props.reglas[0][0].esCondicion
+                ?
+                    <div id={"reglaInit"} onClick={() => this.seleccionRegla(0, "arriba", 0)} className={"highlightFormulaBackground addPointer"} style={{width: "100%", height: "10px"}}>
+                    </div>
+                : null
+            }
+            <div onClick={() => this.seleccionRegla(0, "reglaUnica", 0)} className="row" style={{width: "100%", margin: "1% 0% 1% 0%"}}>
+                <div id="unicaRegla" className="addPointer font-20 textoRegla" style={{backgroundColor: "#"+this.getColor(this.props.reglas[0][0].posicionSegmentoEnCampo, this.props.reglas[0][0].nivel), borderRadius: "15px", padding: "0% 2%", width: "100%", marginLeft: "auto", marginRight: "0", fontFamily: "Arial Black, Gadget, sans-serif"}}>
+                    {
+                        this.props.reglas[0][0].esCondicion
+                        ? "SI "
+                        : ""
+                    }
+                    {this.props.reglas[0][0].texto}
+                </div>
+            </div>
+            <div id={"reglaFin"} onClick={() => this.seleccionRegla(0, "abajo", 0)} className={"highlightFormulaBackground addPointer"} style={{width: "100%", height: "10px"}}>
+            </div>
+            <br/>
+        </div>
+    : null
+}
+{
+    (this.props.reglas.length >= 1 && this.props.reglas[0].length > 1) || this.props.reglas.length > 1
+    ?
+        <div style={{width: "100%", height: "100%", overflowX: "scroll"}}>
+            {this.props.reglas.map((reglaSegmento, i) => (
+                <div key={i} style={{width: "100%", height: "100%"}}>
+                    {reglaSegmento.map((regla, j) => (
+                        <div key={i+""+j} style={{width: "100%", height: "100%"}}>
+                            <div style={{width: "100%", height: "100%"}}>
+                                {
+                                    !regla.esCondicion && j == 0
+                                    ?
+                                        <div id={"reglaInit"+i+""+j} onClick={() => this.seleccionRegla(i, "arriba", j)} className={"highlightFormulaBackground addPointer"} style={{width: "100%", height: "10px"}}>
+                                        </div>
+                                    : null
+                                }
+                                <div onClick={() => this.seleccionRegla(i, "condicion", j)} className="row" style={{width: "100%", margin: "1% 0% 1% 0%"}}>
+                                    <div id={"regla"+i+""+j} className="addPointer font-20 textoRegla" style={{backgroundColor: "#"+this.getColor(i, regla.nivel), borderRadius: "15px", padding: "0% 2%", width: 100-(this.props.reglas[i][j].nivel*10)+"%", marginLeft: "auto", marginRight: "0", fontFamily: "Arial Black, Gadget, sans-serif"}}>
+                                        {
+                                            regla.esCondicion
+                                            ? "SI "
+                                            : ""
+                                        }
+                                        {this.props.reglas[i][j].texto}
+                                    </div>
+                                </div>
+                                {
+                                    i == this.props.reglas.length-1 && j == reglaSegmento.length-1
+                                    ?
+                                        <div id={"reglaFin"+i+""+j} onClick={() => this.seleccionRegla(i, "abajo", j)} className={"highlightFormulaBackground addPointer"} style={{width: "100%", height: "10px"}}>
+                                        </div>
+                                    : null
+                                }
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            ))}
+            <br/>
+        </div>
+    : null
+}*/
+
 
 exports["default"] = ContenedorReglas;
 //# sourceMappingURL=ContenedorReglas.js.map

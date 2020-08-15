@@ -391,7 +391,7 @@ export default class Campo extends React.Component {
                             </div>
                         ))}
                     </div>
-                    <div label={"Variables"}>
+                    <div label={"Variables Compuestas"}>
                         {this.props.objetos.map((variable, i) => (
                             <div className={"row"} key={variable.valor+i} style={{height: "80%", width: "100%"}}>
                                 {   
@@ -402,12 +402,12 @@ export default class Campo extends React.Component {
                             </div>
                         ))}
                     </div>
-                    <div label={"Variables Escalares"}>
+                    <div label={"Variables Individuales"}>
                         <div className={"row"} style={{height: "80%", width: "100%"}}>
                             <ListasSeleVariable mostrarRosa={true} variables={this.props.variablesEscalares} seleccionarMultiple={false} retornoSeleccion={this.retornoSeleccionVariableVariablesEscalar} titulo={"Variables Escalares"} indiceTabla={false} indicesVarSeleccionados={this.state.indicesVarSeleccionadosVariablesEscalares}></ListasSeleVariable>
                         </div>
                     </div>
-                    <div label={"Excel"}>
+                    <div label={"Variables Excel"}>
                         {this.props.excel.map((excel, i) => (
                             <div className={"row"} key={excel.ID} style={{height: "80%", width: "100%"}}>
                                 {   
@@ -418,7 +418,7 @@ export default class Campo extends React.Component {
                             </div>
                         ))}
                     </div>
-                    <div label={"Formas"}>
+                    <div label={"Variables Formas"}>
                         <div className={"row"} style={{height: "80%", width: "100%"}}>
                             <ListasSeleVariable mostrarRosa={true} variables={this.props.formas} seleccionarMultiple={false} retornoSeleccion={this.retornoSeleccionVariableForma} titulo={"Formas"} indiceTabla={false} indicesVarSeleccionados={this.state.indicesVarSeleccionadosFormas}></ListasSeleVariable>
                         </div>

@@ -76,6 +76,7 @@ function (_React$Component) {
     _this.finImportacion = _this.finImportacion.bind(_assertThisInitialized(_this));
     _this.insertarValorEnColeccion = _this.insertarValorEnColeccion.bind(_assertThisInitialized(_this));
     _this.crearHTML = _this.crearHTML.bind(_assertThisInitialized(_this));
+    _this.styleDate = _this.styleDate.bind(_assertThisInitialized(_this));
     return _this;
   }
 
@@ -89,9 +90,7 @@ function (_React$Component) {
     value: function getResultsVariables() {
       var _this2 = this;
 
-      console.log('this.props.tablaInstruccion');
-      console.log(this.props.tablaInstruccion); //OBTENER LA LISTA DE POSIBLES VARIABLES A VISUALIZAR
-
+      //OBTENER LA LISTA DE POSIBLES VARIABLES A VISUALIZAR
       var transaction = new _mssql["default"].Transaction(this.props.pool);
       transaction.begin(function (err) {
         var rolledBack = false;
@@ -122,7 +121,7 @@ function (_React$Component) {
       banderaImportacionFin = 0;
 
       for (var i = 0; i < resultados.length; i++) {
-        banderaImportacionFin++;
+        banderaImportacionFin += 2;
         arregloTemp.push(resultados[i]);
         this.getFieldAttributes(resultados[i], i, arregloTemp);
         this.getFieldResults(resultados[i], i, arregloTemp);
@@ -162,10 +161,11 @@ function (_React$Component) {
 
               ;
               array[index].atributos = arrTemp;
+              banderaImportacionInicio++;
 
               _this3.setState({
                 resultados: array
-              });
+              }, _this3.finImportacion);
             });
           }
         });
@@ -193,13 +193,11 @@ function (_React$Component) {
           } else {
             transaction.commit(function (err) {
               array[index].resultados = result.recordset;
-              banderaImportacionInicio++;
-
-              _this4.finImportacion();
+              banderaImportacionInicio++; //this.finImportacion();
 
               _this4.setState({
                 resultados: array
-              });
+              }, _this4.finImportacion);
             });
           }
         });
@@ -286,8 +284,6 @@ function (_React$Component) {
               html += '</div>';
           html += '</section>';*/
       var htmlContent = [];
-      console.log('this.state.resultados');
-      console.log(this.state.resultados);
 
       for (var i = 0; i < this.state.resultados[0].resultados.length; i++) {
         if (this.props.esVariable && this.props.variable.esColeccion) {
@@ -315,15 +311,31 @@ function (_React$Component) {
 
             for (var k = 0; k < this.state.resultados[0].atributos.length; k++) {
               if (this.state.resultados[0].atributos[k].nombre.localeCompare("f3ch4Gu4rd4do") != 0) {
-                htmlObjectDesc.push(_react["default"].createElement("span", {
+                var divObj = _react["default"].createElement("div", {
+                  key: i + "" + k + "z",
+                  className: "row border-bottom",
+                  style: {
+                    clear: "both",
+                    display: "block",
+                    overflow: "auto",
+                    width: "100%"
+                  }
+                }, _react["default"].createElement("span", {
                   key: i + "" + k + "a",
                   style: {
-                    fontWeight: "bold"
+                    fontWeight: "bold",
+                    "float": "left"
                   }
-                }, this.state.resultados[0].atributos[k].nombre));
-                htmlObjectDesc.push(_react["default"].createElement("span", {
-                  key: i + "" + k + "b"
-                }, this.state.resultados[0].resultados[i][this.state.resultados[0].atributos[k].nombre]));
+                }, this.state.resultados[0].atributos[k].nombre, " :"), _react["default"].createElement("span", {
+                  key: i + "" + k + "b",
+                  style: {
+                    "float": "right"
+                  }
+                }, this.state.resultados[0].atributos[k].tipo.localeCompare("date") == 0 ? this.styleDate(this.state.resultados[0].resultados[i][this.state.resultados[0].atributos[k].nombre]) : this.state.resultados[0].resultados[i][this.state.resultados[0].atributos[k].nombre]));
+
+                htmlObjectDesc.push(divObj);
+                /*htmlObjectDesc.push(<span key={i+""+k+"a"} style={{fontWeight: "bold"}}>{this.state.resultados[0].atributos[k].nombre}</span>);
+                htmlObjectDesc.push(<span key={i+""+k+"b"}>{this.state.resultados[0].resultados[i][this.state.resultados[0].atributos[k].nombre]}</span>);*/
               }
             }
 
@@ -361,24 +373,27 @@ function (_React$Component) {
       });
     }
   }, {
+    key: "styleDate",
+    value: function styleDate(date) {
+      return date.getDate() + '-' + (date.getMonth() + 1) + '-' + date.getFullYear();
+    }
+  }, {
     key: "render",
     value: function render() {
-      return _react["default"].createElement("div", null, this.props.navbar, _react["default"].createElement("br", null), _react["default"].createElement("div", {
-        className: "row",
-        style: {
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center"
-        }
-      }, _react["default"].createElement("a", {
-        className: "btn btn-brand btnWhiteColorHover font-bold font-20",
-        onClick: this.crearRiesgo
-      }, "Realizar C\xE1lculo")), _react["default"].createElement("br", null), this.state.html);
+      return _react["default"].createElement("div", null, this.props.navbar, this.state.html);
     }
   }]);
 
   return TimelineVariable;
 }(_react["default"].Component);
+/*
+<br/>
+<div className={"row"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
+    <a className={"btn btn-brand btnWhiteColorHover font-bold font-20"} onClick={this.crearRiesgo}>Realizar Cálculo</a>
+</div>
+<br/>
+*/
+
 
 exports["default"] = TimelineVariable;
 //# sourceMappingURL=TimelineVariable.js.map

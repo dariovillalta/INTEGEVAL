@@ -13,6 +13,8 @@ var _VistaUmbral = _interopRequireDefault(require("./VistaUmbral.js"));
 
 var _EditarUmbral = _interopRequireDefault(require("./EditarUmbral.js"));
 
+var _ListaRestoUmbrales = _interopRequireDefault(require("./ListaRestoUmbrales.js"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -72,7 +74,6 @@ function (_React$Component) {
     _this.traerSeccionRango = _this.traerSeccionRango.bind(_assertThisInitialized(_this));
     _this.inicioCrearArregloSeccionRango = _this.inicioCrearArregloSeccionRango.bind(_assertThisInitialized(_this));
     _this.ingresarSeccion = _this.ingresarSeccion.bind(_assertThisInitialized(_this));
-    console.log(_this.props.navbar);
     return _this;
   }
 
@@ -233,8 +234,6 @@ function (_React$Component) {
       }
 
       ;
-      console.log('arrOrdenado');
-      console.log(arrOrdenado);
       this.setState({
         secciones: arrOrdenado
       });
@@ -266,13 +265,16 @@ function (_React$Component) {
   }, {
     key: "render",
     value: function render() {
-      return _react["default"].createElement("div", null, this.props.navbar, _react["default"].createElement(_VistaUmbral["default"], {
+      return _react["default"].createElement("div", null, this.props.navbar, _react["default"].createElement(_ListaRestoUmbrales["default"], {
+        lista: this.props.lista
+      }, " "), _react["default"].createElement(_VistaUmbral["default"], {
         umbrales: this.state.secciones
       }, " "), _react["default"].createElement(_EditarUmbral["default"], {
         idVariable: this.props.idVariable,
         pool: this.props.pool,
         tablaVariable: this.props.tablaVariable,
-        tituloUmbral: this.props.tituloUmbral
+        tituloUmbral: this.props.tituloUmbral,
+        traerUmbralesPADRE: this.traerUmbrales
       }, " "));
     }
   }]);

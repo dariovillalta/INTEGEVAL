@@ -3,7 +3,7 @@ import sql from 'mssql';
 import Slider from 'react-input-slider';
 
 import Modal from '../Modal/Modal.js';
-import Campo from '../Regla/Campo.js';
+import CampoDashboard from './CampoDashboard.js';
 
 const tipoCampos = [ {nombre: "texto"}, {nombre: "booleano"}, {nombre: "fecha"}, {nombre: "número"}, {nombre: "arreglo"}];
 
@@ -23,7 +23,7 @@ export default class CrearDashboard extends React.Component {
             showModalCampoEjeX: false,
             objetoEjeXNuevo: {},
             variablesSeleccionadasSeccionesDashboardTablaNueva: [],
-            variablesDisponiblesSeccionesDashboardTablaNueva: this.props.tablas.concat(this.props.variablesEscalares, this.props.objetos, this.props.variablesSQL, this.props.excel, this.props.formas),
+            variablesDisponiblesSeccionesDashboardTablaNueva: this.props.variables.concat(this.props.indicadores, this.props.riesgos),
             //
             tipoObjetoUpdate: [],
             tipoGraficoUpdate: [],
@@ -37,6 +37,7 @@ export default class CrearDashboard extends React.Component {
             variablesDisponiblesSeccionesDashboardTablaUpdate: []
         }
         this.crearDashboard = this.crearDashboard.bind(this);
+        this.getIDDashboard = this.getIDDashboard.bind(this);
         this.crearSeccionDashboard = this.crearSeccionDashboard.bind(this);
         this.crearArreglosDeInstrucciones = this.crearArreglosDeInstrucciones.bind(this);
         this.getObject = this.getObject.bind(this);
@@ -75,6 +76,92 @@ export default class CrearDashboard extends React.Component {
     crearDashboard () {
         var nombre = $("#nombreDashboard").val();
         var descripcion = $("#descripcionDashboard").val();
+        if(nombre.length > 0) {
+            const transaction = new sql.Transaction( this.props.pool );
+            transaction.begin(err => {
+                var rolledBack = false;
+                transaction.on('rollback', aborted => {
+                    rolledBack = true;
+                });
+                const request = new sql.Request(transaction);
+                request.query("insert into Dashboard (nombre, descripcion) values('"+nombre+"', '"+descripcion+"') ", (err, result) => {
+                    if (err) {
+                        console.log(err);
+                        if (!rolledBack) {
+                            transaction.rollback(err => {
+                            });
+                        }
+                    } else {
+                        transaction.commit(err => {
+                            this.getIDDashboard();
+                            alert("Dashboard creado.")
+                        });
+                    }
+                });
+            }); // fin transaction
+        } else {
+            alert("Ingrese un nombre para el dashboard.")
+        }
+    }
+
+    getIDDashboard () {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("select top 1 * from Dashboard order by ID desc", (err, result) => {
+                if (err) {
+                    if (!rolledBack) {
+                        console.log(err);
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        if(result.recordset != undefined) {
+                            if(result.recordset.length > 0) {
+                                this.guardarSeccionesDashboard(result.recordset[0]);
+                            }
+                        }
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    guardarSeccionesDashboard (dashboard) {
+        for (var i = 0; i < this.state.seccionesDashboard.length; i++) {
+            let tamano = this.state.seccionesDashboard[i].tamano;
+            let tipoObjeto = this.state.seccionesDashboard[i].tipoObjeto;
+            let instruccion = this.state.seccionesDashboard[i].instruccion;
+            let index = i;
+            const transaction = new sql.Transaction( this.props.pool );
+            transaction.begin(err => {
+                var rolledBack = false;
+                transaction.on('rollback', aborted => {
+                    rolledBack = true;
+                });
+                const request = new sql.Request(transaction);
+                request.query("insert into SeccionDashboard (dashboardID, tamano, tipoObjeto, instruccion) values("+dashboard.ID+", '"+tamano+"', '"+tipoObjeto+"', '"+instruccion+"') ", (err, result) => {
+                    if (err) {
+                        console.log(err);
+                        if (!rolledBack) {
+                            transaction.rollback(err => {
+                            });
+                        }
+                    } else {
+                        transaction.commit(err => {
+                            if(i == this.state.seccionesDashboard.length) {
+                                this.props.terminoCrearDashboardPasarAEdit();
+                            }
+                        });
+                    }
+                });
+            }); // fin transaction
+        };
     }
 
     crearSeccionDashboard () {
@@ -91,20 +178,14 @@ export default class CrearDashboard extends React.Component {
                     //EJEY
                     instruccion += "EJEX={";
                     if(this.state.objetoEjeXNuevo.esVariable) {
-                        instruccion += 'esVariable:true,esSQL:false,esTabla:false,esExcel:false,esForma:false,';
-                        instruccion += 'variableID:'+this.state.objetoEjeXNuevo.variableID+',tablaID:-1,nombreCampoTabla:"",excelArchivoID:-1,excelVariableID:-1,formaVariableID:-1}';
-                    } else if(this.state.objetoEjeXNuevo.esSQL) {
-                        instruccion += 'esVariable:false,esSQL:true,esTabla:false,esExcel:false,esForma:false,';
-                        instruccion += 'variableID:'+this.state.objetoEjeXNuevo.variableID+',tablaID:-1,nombreCampoTabla:"",excelArchivoID:-1,excelVariableID:-1,formaVariableID:-1}';
-                    } else if(this.state.objetoEjeXNuevo.esTabla) {
-                        instruccion += 'esVariable:false,esSQL:false,esTabla:true,esExcel:false,esForma:false,';
-                        instruccion += 'variableID:-1,tablaID:'+this.state.objetoEjeXNuevo.tablaID+',nombreCampoTabla:"'+this.state.objetoEjeXNuevo.valor+'",excelArchivoID:-1,excelVariableID:-1,formaVariableID:-1}';
-                    } else if(this.state.objetoEjeXNuevo.esExcel) {
-                        instruccion += 'esVariable:false,esSQL:false,esTabla:false,esExcel:true,esForma:false,';
-                        instruccion += 'variableID:-1,tablaID:-1,nombreCampoTabla:"",excelArchivoID:'+this.state.objetoEjeXNuevo.excelArchivoID+',excelVariableID:'+this.state.objetoEjeXNuevo.excelVariableID+',formaVariableID:-1}';
-                    } else if(this.state.objetoEjeXNuevo.esForma) {
-                        instruccion += 'esVariable:false,esSQL:false,esTabla:false,esExcel:false,esForma:true,';
-                        instruccion += 'variableID:-1,tablaID:-1,nombreCampoTabla:"",excelArchivoID:-1,excelVariableID:-1,formaVariableID:'+this.state.objetoEjeXNuevo.formaVariableID+'}';
+                        instruccion += 'esVariable:true,esIndicador:false,esRiesgo:false,';
+                        instruccion += 'nombreVariable:"'+this.state.objetoEjeXNuevo.nombreVariable+'",nombreCampo:"'+this.state.objetoEjeXNuevo.nombreCampo+'",valor:"'+this.state.objetoEjeXNuevo.valor+'"}';
+                    } else if(this.state.objetoEjeXNuevo.esIndicador) {
+                        instruccion += 'esVariable:false,esIndicador:true,esRiesgo:false,';
+                        instruccion += 'nombreIndicador:"'+this.state.objetoEjeXNuevo.nombreIndicador+'",nombreCampo:"'+this.state.objetoEjeXNuevo.nombreCampo+'",valor:"'+this.state.objetoEjeXNuevo.valor+'"}';
+                    } else if(this.state.objetoEjeXNuevo.esRiesgo) {
+                        instruccion += 'esVariable:false,esIndicador:false,esRiesgo:true,';
+                        instruccion += 'nombreRiesgo:"'+this.state.objetoEjeXNuevo.nombreRiesgo+'",nombreCampo:"'+this.state.objetoEjeXNuevo.nombreCampo+'",valor:"'+this.state.objetoEjeXNuevo.valor+'"}';
                     }
                     //EJEX
                     instruccion += "\\/EJEY={";
@@ -112,20 +193,14 @@ export default class CrearDashboard extends React.Component {
                         if(i > 0)
                             instruccion += '<>{'
                         if(this.state.variablesSeleccionadasSeccionesDashboardNueva[i].esVariable) {
-                            instruccion += 'esVariable:true,esSQL:false,esTabla:false,esExcel:false,esForma:false,';
-                            instruccion += 'variableID:'+this.state.variablesSeleccionadasSeccionesDashboardNueva[i].variableID+',tablaID:-1,nombreCampoTabla:"",excelArchivoID:-1,excelVariableID:-1,formaVariableID:-1}';
-                        } else if(this.state.variablesSeleccionadasSeccionesDashboardNueva[i].esSQL) {
-                            instruccion += 'esVariable:false,esSQL:true,esTabla:false,esExcel:false,esForma:false,';
-                            instruccion += 'variableID:'+this.state.variablesSeleccionadasSeccionesDashboardNueva[i].variableID+',tablaID:-1,nombreCampoTabla:"",excelArchivoID:-1,excelVariableID:-1,formaVariableID:-1}';
-                        } else if(this.state.variablesSeleccionadasSeccionesDashboardNueva[i].esTabla) {
-                            instruccion += 'esVariable:false,esSQL:false,esTabla:true,esExcel:false,esForma:false,';
-                            instruccion += 'variableID:-1,tablaID:'+this.state.variablesSeleccionadasSeccionesDashboardNueva[i].tablaID+',nombreCampoTabla:"'+this.state.variablesSeleccionadasSeccionesDashboardNueva[i].valor+'",excelArchivoID:-1,excelVariableID:-1,formaVariableID:-1}';
-                        } else if(this.state.variablesSeleccionadasSeccionesDashboardNueva[i].esExcel) {
-                            instruccion += 'esVariable:false,esSQL:false,esTabla:false,esExcel:true,esForma:false,';
-                            instruccion += 'variableID:-1,tablaID:-1,nombreCampoTabla:"",excelArchivoID:'+this.state.variablesSeleccionadasSeccionesDashboardNueva[i].excelArchivoID+',excelVariableID:'+this.state.variablesSeleccionadasSeccionesDashboardNueva[i].excelVariableID+',formaVariableID:-1}';
-                        } else if(this.state.variablesSeleccionadasSeccionesDashboardNueva[i].esForma) {
-                            instruccion += 'esVariable:false,esSQL:false,esTabla:false,esExcel:false,esForma:true,';
-                            instruccion += 'variableID:-1,tablaID:-1,nombreCampoTabla:"",excelArchivoID:-1,excelVariableID:-1,formaVariableID:'+this.state.variablesSeleccionadasSeccionesDashboardNueva[i].formaVariableID+'}';
+                            instruccion += 'esVariable:true,esIndicador:false,esRiesgo:false,';
+                            instruccion += 'nombreVariable:"'+this.state.variablesSeleccionadasSeccionesDashboardNueva[i].nombreVariable+'",nombreCampo:"'+this.state.variablesSeleccionadasSeccionesDashboardNueva[i].valor+'",valor:"'+this.state.variablesSeleccionadasSeccionesDashboardNueva[i].valor+'"}';
+                        } else if(this.state.variablesSeleccionadasSeccionesDashboardNueva[i].esIndicador) {
+                            instruccion += 'esVariable:false,esIndicador:true,esRiesgo:false,';
+                            instruccion += 'nombreIndicador:"'+this.state.variablesSeleccionadasSeccionesDashboardNueva[i].nombreIndicador+'",nombreCampo:"'+this.state.variablesSeleccionadasSeccionesDashboardNueva[i].valor+'",valor:"'+this.state.variablesSeleccionadasSeccionesDashboardNueva[i].valor+'"}';
+                        } else if(this.state.variablesSeleccionadasSeccionesDashboardNueva[i].esRiesgo) {
+                            instruccion += 'esVariable:false,esIndicador:false,esRiesgo:true,';
+                            instruccion += 'nombreRiesgo:"'+this.state.variablesSeleccionadasSeccionesDashboardNueva[i].nombreRiesgo+'",nombreCampo:"'+this.state.variablesSeleccionadasSeccionesDashboardNueva[i].valor+'",valor:"'+this.state.variablesSeleccionadasSeccionesDashboardNueva[i].valor+'"}';
                         }
                     };
                     instruccion += ']';
@@ -136,20 +211,14 @@ export default class CrearDashboard extends React.Component {
                         if(i > 0)
                             instruccion += '<>{'
                         if(this.state.variablesSeleccionadasSeccionesDashboardNueva[i].esVariable) {
-                            instruccion += 'esVariable:true,esSQL:false,esTabla:false,esExcel:false,esForma:false,';
-                            instruccion += 'variableID:'+this.state.variablesSeleccionadasSeccionesDashboardNueva[i].variableID+',tablaID:-1,nombreCampoTabla:"",excelArchivoID:-1,excelVariableID:-1,formaVariableID:-1}';
-                        } else if(this.state.variablesSeleccionadasSeccionesDashboardNueva[i].esSQL) {
-                            instruccion += 'esVariable:false,esSQL:true,esTabla:false,esExcel:false,esForma:false,';
-                            instruccion += 'variableID:'+this.state.variablesSeleccionadasSeccionesDashboardNueva[i].variableID+',tablaID:-1,nombreCampoTabla:"",excelArchivoID:-1,excelVariableID:-1,formaVariableID:-1}';
-                        } else if(this.state.variablesSeleccionadasSeccionesDashboardNueva[i].esTabla) {
-                            instruccion += 'esVariable:false,esSQL:false,esTabla:true,esExcel:false,esForma:false,';
-                            instruccion += 'variableID:-1,tablaID:'+this.state.variablesSeleccionadasSeccionesDashboardNueva[i].tablaID+',nombreCampoTabla:"'+this.state.variablesSeleccionadasSeccionesDashboardNueva[i].valor+'",excelArchivoID:-1,excelVariableID:-1,formaVariableID:-1}';
-                        } else if(this.state.variablesSeleccionadasSeccionesDashboardNueva[i].esExcel) {
-                            instruccion += 'esVariable:false,esSQL:false,esTabla:false,esExcel:true,esForma:false,';
-                            instruccion += 'variableID:-1,tablaID:-1,nombreCampoTabla:"",excelArchivoID:'+this.state.variablesSeleccionadasSeccionesDashboardNueva[i].excelArchivoID+',excelVariableID:'+this.state.variablesSeleccionadasSeccionesDashboardNueva[i].excelVariableID+',formaVariableID:-1}';
-                        } else if(this.state.variablesSeleccionadasSeccionesDashboardNueva[i].esForma) {
-                            instruccion += 'esVariable:false,esSQL:false,esTabla:false,esExcel:false,esForma:true,';
-                            instruccion += 'variableID:-1,tablaID:-1,nombreCampoTabla:"",excelArchivoID:-1,excelVariableID:-1,formaVariableID:'+this.state.variablesSeleccionadasSeccionesDashboardNueva[i].formaVariableID+'}';
+                            instruccion += 'esVariable:true,esIndicador:false,esRiesgo:false,';
+                            instruccion += 'nombreVariable:"'+this.state.variablesSeleccionadasSeccionesDashboardNueva[i].nombreVariable+'",nombreCampo:"'+this.state.variablesSeleccionadasSeccionesDashboardNueva[i].valor+'",valor:"'+this.state.variablesSeleccionadasSeccionesDashboardNueva[i].valor+'"}';
+                        } else if(this.state.variablesSeleccionadasSeccionesDashboardNueva[i].esIndicador) {
+                            instruccion += 'esVariable:false,esIndicador:true,esRiesgo:false,';
+                            instruccion += 'nombreIndicador:"'+this.state.variablesSeleccionadasSeccionesDashboardNueva[i].nombreIndicador+'",nombreCampo:"'+this.state.variablesSeleccionadasSeccionesDashboardNueva[i].valor+'",valor:"'+this.state.variablesSeleccionadasSeccionesDashboardNueva[i].valor+'"}';
+                        } else if(this.state.variablesSeleccionadasSeccionesDashboardNueva[i].esRiesgo) {
+                            instruccion += 'esVariable:false,esIndicador:false,esRiesgo:true,';
+                            instruccion += 'nombreRiesgo:"'+this.state.variablesSeleccionadasSeccionesDashboardNueva[i].nombreRiesgo+'",nombreCampo:"'+this.state.variablesSeleccionadasSeccionesDashboardNueva[i].valor+'",valor:"'+this.state.variablesSeleccionadasSeccionesDashboardNueva[i].valor+'"}';
                         }
                     };
                     instruccion += ']';
@@ -160,31 +229,17 @@ export default class CrearDashboard extends React.Component {
             //EJEMPLO: TABLA=>[{esVariable: true, variableID: 1}<>{esVariable: true, variableID: 1}<>{esVariable: true, variableID: 1}]
             instruccion += 'TABLA=>[{';
             for (var i = 0; i < this.state.variablesSeleccionadasSeccionesDashboardTablaNueva.length; i++) {
-                console.log('i = '+i);
-                console.log('this.state.variablesSeleccionadasSeccionesDashboardTablaNueva[i]');
-                console.log(this.state.variablesSeleccionadasSeccionesDashboardTablaNueva[i]);
                 if(i > 0)
                     instruccion += '<>{'
                 if(this.state.variablesSeleccionadasSeccionesDashboardTablaNueva[i].esVariable) {
-                    console.log('1');
-                    instruccion += 'esVariable:true,esSQL:false,esTabla:false,esExcel:false,esForma:false,';
-                    instruccion += 'variableID:'+this.state.variablesSeleccionadasSeccionesDashboardTablaNueva[i].variableID+',tablaID:-1,nombreCampoTabla:"",excelArchivoID:-1,formaVariableID:-1}';
-                } else if(this.state.variablesSeleccionadasSeccionesDashboardTablaNueva[i].esSQL) {
-                    console.log('2');
-                    instruccion += 'esVariable:false,esSQL:true,esTabla:false,esExcel:false,esForma:false,';
-                    instruccion += 'variableID:'+this.state.variablesSeleccionadasSeccionesDashboardTablaNueva[i].variableID+',tablaID:-1,nombreCampoTabla:"",excelArchivoID:-1,formaVariableID:-1}';
-                } else if(this.state.variablesSeleccionadasSeccionesDashboardTablaNueva[i].esTabla) {
-                    console.log('3');
-                    instruccion += 'esVariable:false,esSQL:false,esTabla:true,esExcel:false,esForma:false,';
-                    instruccion += 'variableID:-1,tablaID:'+this.state.variablesSeleccionadasSeccionesDashboardTablaNueva[i].tablaID+',nombreCampoTabla:"'+this.state.variablesSeleccionadasSeccionesDashboardTablaNueva[i].valor+'",excelArchivoID:-1,formaVariableID:-1}';
-                } else if(this.state.variablesSeleccionadasSeccionesDashboardTablaNueva[i].esExcel) {
-                    console.log('4');
-                    instruccion += 'esVariable:false,esSQL:false,esTabla:false,esExcel:true,esForma:false,';
-                    instruccion += 'variableID:-1,tablaID:-1,nombreCampoTabla:"",excelArchivoID:'+this.state.variablesSeleccionadasSeccionesDashboardTablaNueva[i].excelArchivoID+',formaVariableID:-1}';
-                } else if(this.state.variablesSeleccionadasSeccionesDashboardTablaNueva[i].esForma) {
-                    console.log('5');
-                    instruccion += 'esVariable:false,esSQL:false,esTabla:false,esExcel:false,esForma:true,';
-                    instruccion += 'variableID:-1,tablaID:-1,nombreCampoTabla:"",excelArchivoID:-1,formaVariableID:'+this.state.variablesSeleccionadasSeccionesDashboardTablaNueva[i].formaVariableID+'}';
+                    instruccion += 'esVariable:true,esIndicador:false,esRiesgo:false,';
+                    instruccion += 'nombreVariable:"'+this.state.variablesSeleccionadasSeccionesDashboardTablaNueva[i].nombreVariable+'",nombreCampo:"'+this.state.variablesSeleccionadasSeccionesDashboardTablaNueva[i].valor+'",valor:"'+this.state.variablesSeleccionadasSeccionesDashboardTablaNueva[i].valor+'"}';
+                } else if(this.state.variablesSeleccionadasSeccionesDashboardTablaNueva[i].esIndicador) {
+                    instruccion += 'esVariable:false,esIndicador:true,esRiesgo:false,';
+                    instruccion += 'nombreIndicador:"'+this.state.variablesSeleccionadasSeccionesDashboardTablaNueva[i].nombreIndicador+'",nombreCampo:"'+this.state.variablesSeleccionadasSeccionesDashboardTablaNueva[i].valor+'",valor:"'+this.state.variablesSeleccionadasSeccionesDashboardTablaNueva[i].valor+'"}';
+                } else if(this.state.variablesSeleccionadasSeccionesDashboardTablaNueva[i].esRiesgo) {
+                    instruccion += 'esVariable:false,esIndicador:false,esRiesgo:true,';
+                    instruccion += 'nombreRiesgo:"'+this.state.variablesSeleccionadasSeccionesDashboardTablaNueva[i].nombreRiesgo+'",nombreCampo:"'+this.state.variablesSeleccionadasSeccionesDashboardTablaNueva[i].valor+'",valor:"'+this.state.variablesSeleccionadasSeccionesDashboardTablaNueva[i].valor+'"}';
                 }
             };
             instruccion += ']';
@@ -194,7 +249,7 @@ export default class CrearDashboard extends React.Component {
                 if( (tipoObjeto.localeCompare("grafica") == 0 && this.state.tipoGraficoNuevo.length > 0) || tipoObjeto.localeCompare("tabla") == 0) {
                     //viendo si creo variables
                     if( ((this.state.tipoGraficoNuevo.localeCompare("LINEA") == 0 || this.state.tipoGraficoNuevo.localeCompare("AREA") == 0 || 
-                                        this.state.tipoGraficoNuevo.localeCompare("BARRA") == 0 || this.state.tipoGraficoNuevo.localeCompare("DISPERSION") == 0) && this.state.objetoEjeXNuevo != undefined && this.state.objetoEjeXNuevo.nombre != undefined && this.state.variablesSeleccionadasSeccionesDashboardNueva.length > 0) ||
+                                        this.state.tipoGraficoNuevo.localeCompare("BARRA") == 0 || this.state.tipoGraficoNuevo.localeCompare("DISPERSION") == 0) && this.state.objetoEjeXNuevo != undefined && this.state.objetoEjeXNuevo.valor != undefined && this.state.variablesSeleccionadasSeccionesDashboardNueva.length > 0) ||
                         ( (this.state.tipoGraficoNuevo.localeCompare("PIE") == 0) && this.state.variablesSeleccionadasSeccionesDashboardNueva.length > 0 ) ||
                         (tipoObjeto.localeCompare("tabla") == 0 && this.state.variablesSeleccionadasSeccionesDashboardTablaNueva.length > 0) ) {
                             var seccionesDashboard = [...this.state.seccionesDashboard];
@@ -204,7 +259,7 @@ export default class CrearDashboard extends React.Component {
                             }, this.crearArreglosDeInstrucciones );
                     } else {
                         if( ((this.state.tipoGraficoNuevo.localeCompare("LINEA") == 0 || this.state.tipoGraficoNuevo.localeCompare("AREA") == 0 || 
-                                        this.state.tipoGraficoNuevo.localeCompare("BARRA") == 0 || this.state.tipoGraficoNuevo.localeCompare("DISPERSION") == 0) && (this.state.objetoEjeXNuevo == undefined || this.state.objetoEjeXNuevo.nombre == undefined)) ) {
+                                        this.state.tipoGraficoNuevo.localeCompare("BARRA") == 0 || this.state.tipoGraficoNuevo.localeCompare("DISPERSION") == 0) && (this.state.objetoEjeXNuevo == undefined || this.state.objetoEjeXNuevo.valor == undefined)) ) {
                             alert("Seleccione una variable para el eje x");
                         } else if ((this.state.tipoGraficoNuevo.localeCompare("LINEA") == 0 || this.state.tipoGraficoNuevo.localeCompare("AREA") == 0 || 
                                         this.state.tipoGraficoNuevo.localeCompare("BARRA") == 0 || this.state.tipoGraficoNuevo.localeCompare("DISPERSION") == 0) && this.state.variablesSeleccionadasSeccionesDashboardNueva.length == 0) {
@@ -233,7 +288,7 @@ export default class CrearDashboard extends React.Component {
             variablesSeleccionadasSeccionesDashboardNueva: [],
             objetoEjeXNuevo: {},
             variablesSeleccionadasSeccionesDashboardTablaNueva: [],
-            variablesDisponiblesSeccionesDashboardTablaNueva: this.props.tablas.concat(this.props.variablesEscalares, this.props.objetos, this.props.variablesSQL, this.props.excel, this.props.formas)
+            variablesDisponiblesSeccionesDashboardTablaNueva: this.props.variables.concat(this.props.indicadores, this.props.riesgos)
         });
         var tipoObjetoUpdate = [], tipoGraficoUpdate = [], displayGraphicsUpdate = [], indiceGraphSelectUpdate = [], objetoEjeXUpdate = [];
         var variablesSeleccionadasSeccionesDashboardUpdate = [], variablesSeleccionadasSeccionesDashboardTablaUpdate = [], variablesDisponiblesSeccionesDashboardTablaUpdate = [];
@@ -262,19 +317,19 @@ export default class CrearDashboard extends React.Component {
                     var objetoXCadena = arregloObjetoX.substring(arregloObjetoX.indexOf("{")+1, arregloObjetoX.indexOf("}"));
                     eval("objetoEjeXUpdate[i] = {"+objetoXCadena+"}");
                     objetoEjeXUpdate[i].nombre = '';
-                    this.getObject(objetoEjeXUpdate, i, objetoEjeXUpdate[i], "objetoEjeXUpdate");
+                    //this.getObject(objetoEjeXUpdate, i, objetoEjeXUpdate[i], "objetoEjeXUpdate");
                     var arregloObjetosY = cadenaValores.split("\\/")[1];
                     var arregloValores = arregloObjetosY.split("<>");
                     if(variablesDisponiblesSeccionesDashboardTablaUpdate[i] == undefined)
                         variablesDisponiblesSeccionesDashboardTablaUpdate[i] = [];
-                    variablesDisponiblesSeccionesDashboardTablaUpdate[i] = this.props.tablas.concat(this.props.variablesEscalares, this.props.objetos, this.props.variablesSQL, this.props.excel, this.props.formas);
+                    variablesDisponiblesSeccionesDashboardTablaUpdate[i] = this.props.variables.concat(this.props.indicadores, this.props.riesgos);
                     if(variablesSeleccionadasSeccionesDashboardUpdate[i] == undefined)
                         variablesSeleccionadasSeccionesDashboardUpdate[i] = [];
                     for (var j = 0; j < arregloValores.length; j++) {
                         var objeto = arregloValores[j].substring(arregloValores[j].indexOf("{")+1, arregloValores[j].lastIndexOf("}"));
                         eval("variablesSeleccionadasSeccionesDashboardUpdate[i].push({"+objeto+"})");
                         variablesSeleccionadasSeccionesDashboardUpdate[i][j].nombre = '';
-                        this.getObject(variablesSeleccionadasSeccionesDashboardUpdate, i, variablesSeleccionadasSeccionesDashboardUpdate[i][j], "variablesSeleccionadasSeccionesDashboardUpdate", j);
+                        //this.getObject(variablesSeleccionadasSeccionesDashboardUpdate, i, variablesSeleccionadasSeccionesDashboardUpdate[i][j], "variablesSeleccionadasSeccionesDashboardUpdate", j);
                     };
                 } else if(cadenaValores.indexOf("PIE") == 0) {
                     tipoGraficoUpdate[i] = 'PIE';
@@ -290,14 +345,14 @@ export default class CrearDashboard extends React.Component {
                     var arregloValores = arregloObjetosY.split("<>");
                     if(variablesDisponiblesSeccionesDashboardTablaUpdate[i] == undefined)
                         variablesDisponiblesSeccionesDashboardTablaUpdate[i] = [];
-                    variablesDisponiblesSeccionesDashboardTablaUpdate[i] = this.props.tablas.concat(this.props.variablesEscalares, this.props.objetos, this.props.variablesSQL, this.props.excel, this.props.formas);
+                    variablesDisponiblesSeccionesDashboardTablaUpdate[i] = this.props.variables.concat(this.props.indicadores, this.props.riesgos);
                     if(variablesSeleccionadasSeccionesDashboardUpdate[i] == undefined)
                         variablesSeleccionadasSeccionesDashboardUpdate[i] = [];
                     for (var j = 0; j < arregloValores.length; j++) {
                         var objeto = arregloValores[j].substring(arregloValores[j].indexOf("{")+1, arregloValores[j].lastIndexOf("}"));
                         eval("variablesSeleccionadasSeccionesDashboardUpdate[i].push({"+objeto+"})");
                         variablesSeleccionadasSeccionesDashboardUpdate[i][j].nombre = '';
-                        this.getObject(variablesSeleccionadasSeccionesDashboardUpdate, i, variablesSeleccionadasSeccionesDashboardUpdate[i][j], "variablesSeleccionadasSeccionesDashboardUpdate", j);
+                        //this.getObject(variablesSeleccionadasSeccionesDashboardUpdate, i, variablesSeleccionadasSeccionesDashboardUpdate[i][j], "variablesSeleccionadasSeccionesDashboardUpdate", j);
                     };
                 }
             } else if(this.state.seccionesDashboard[i].instruccion.indexOf("TABLA") == 0) {
@@ -309,16 +364,44 @@ export default class CrearDashboard extends React.Component {
                     variablesSeleccionadasSeccionesDashboardTablaUpdate[i] = [];
                 if(variablesDisponiblesSeccionesDashboardTablaUpdate[i] == undefined)
                     variablesDisponiblesSeccionesDashboardTablaUpdate[i] = [];
+                variablesDisponiblesSeccionesDashboardTablaUpdate[i] = this.props.variables.concat(this.props.indicadores, this.props.riesgos);
                 for (var j = 0; j < arregloValores.length; j++) {
                     var objeto = arregloValores[j].substring(arregloValores[j].indexOf("{")+1, arregloValores[j].lastIndexOf("}"));
                     eval("variablesSeleccionadasSeccionesDashboardTablaUpdate[i].push({"+objeto+"})");
                     variablesSeleccionadasSeccionesDashboardTablaUpdate[i][j].nombre = '';
-                    this.getObject(variablesSeleccionadasSeccionesDashboardTablaUpdate, i, variablesSeleccionadasSeccionesDashboardTablaUpdate[i][j], "variablesSeleccionadasSeccionesDashboardTablaUpdate", j);
-                    //variablesDisponiblesSeccionesDashboardTablaUpdate[i] = this.props.tablas.concat(this.props.variablesEscalares, this.props.objetos, this.props.variablesSQL, this.props.excel, this.props.formas);
+                    //this.getObject(variablesSeleccionadasSeccionesDashboardTablaUpdate, i, variablesSeleccionadasSeccionesDashboardTablaUpdate[i][j], "variablesSeleccionadasSeccionesDashboardTablaUpdate", j);
+                    //variablesDisponiblesSeccionesDashboardTablaUpdate[i] = this.props.variables.concat(this.props.indicadores, this.props.riesgos);
+                };
+                for (var j = 0; j < variablesSeleccionadasSeccionesDashboardTablaUpdate[i].length; j++) {
+                    if(variablesSeleccionadasSeccionesDashboardTablaUpdate[i][j].esVariable) {
+                        FORDISPONIBLES:
+                        for (var k = 0; k < variablesDisponiblesSeccionesDashboardTablaUpdate[i].length; k++) {
+                            if(variablesDisponiblesSeccionesDashboardTablaUpdate[i][k].esVariable && variablesDisponiblesSeccionesDashboardTablaUpdate[i][k].nombreVariable.localeCompare(variablesSeleccionadasSeccionesDashboardTablaUpdate[i][j].nombreVariable) == 0) {
+                                variablesDisponiblesSeccionesDashboardTablaUpdate[i].splice(k, 1);
+                                break FORDISPONIBLES;
+                            }
+                        };
+                    } else if(variablesSeleccionadasSeccionesDashboardTablaUpdate[i][j].esIndicador) {
+                        FORDISPONIBLES:
+                        for (var k = 0; k < variablesDisponiblesSeccionesDashboardTablaUpdate[i].length; k++) {
+                            if(variablesDisponiblesSeccionesDashboardTablaUpdate[i][k].esIndicador && variablesDisponiblesSeccionesDashboardTablaUpdate[i][k].nombreIndicador.localeCompare(variablesSeleccionadasSeccionesDashboardTablaUpdate[i][j].nombreIndicador) == 0) {
+                                variablesDisponiblesSeccionesDashboardTablaUpdate[i].splice(k, 1);
+                                break FORDISPONIBLES;
+                            }
+                        };
+                    } else if(variablesSeleccionadasSeccionesDashboardTablaUpdate[i][j].esRiesgo) {
+                        FORDISPONIBLES:
+                        for (var k = 0; k < variablesDisponiblesSeccionesDashboardTablaUpdate[i].length; k++) {
+                            if(variablesDisponiblesSeccionesDashboardTablaUpdate[i][k].esRiesgo && variablesDisponiblesSeccionesDashboardTablaUpdate[i][k].nombreRiesgo.localeCompare(variablesSeleccionadasSeccionesDashboardTablaUpdate[i][j].nombreRiesgo) == 0) {
+                                variablesDisponiblesSeccionesDashboardTablaUpdate[i].splice(k, 1);
+                                break FORDISPONIBLES;
+                            }
+                        };
+                    }
                 };
             }
         };
-        console.log('tipoObjetoUpdate')
+        /*console.log('tipoObjetoUpdate')
         console.log(tipoObjetoUpdate)
         console.log('tipoGraficoUpdate')
         console.log(tipoGraficoUpdate)
@@ -333,10 +416,13 @@ export default class CrearDashboard extends React.Component {
         console.log('variablesSeleccionadasSeccionesDashboardTablaUpdate')
         console.log(variablesSeleccionadasSeccionesDashboardTablaUpdate)
         console.log('variablesDisponiblesSeccionesDashboardTablaUpdate')
-        console.log(variablesDisponiblesSeccionesDashboardTablaUpdate)
+        console.log(variablesDisponiblesSeccionesDashboardTablaUpdate)*/
         this.setState({
             tipoObjetoUpdate: tipoObjetoUpdate,
             tipoGraficoUpdate: tipoGraficoUpdate,
+            objetoEjeXUpdate: objetoEjeXUpdate,
+            variablesSeleccionadasSeccionesDashboardUpdate: variablesSeleccionadasSeccionesDashboardUpdate,
+            variablesSeleccionadasSeccionesDashboardTablaUpdate: variablesSeleccionadasSeccionesDashboardTablaUpdate,
             displayGraphicsUpdate: displayGraphicsUpdate,
             indiceGraphSelectUpdate: indiceGraphSelectUpdate,
             variablesDisponiblesSeccionesDashboardTablaUpdate: variablesDisponiblesSeccionesDashboardTablaUpdate
@@ -396,7 +482,7 @@ export default class CrearDashboard extends React.Component {
                                 variablesSeleccionadasSeccionesDashboardUpdate: arreglo
                             });
                         } else if(arregloNombre.localeCompare("variablesSeleccionadasSeccionesDashboardTablaUpdate") == 0) {
-                            var arrOrig = this.props.tablas.concat(this.props.variablesEscalares, this.props.objetos, this.props.variablesSQL, this.props.excel, this.props.formas);
+                            var arrOrig = this.props.variables.concat(this.props.indicadores, this.props.riesgos);
                             for (var i = arrOrig.length-1; i >= 0; i--) {
                                 arrOrig[i].nombre = arrOrig[i].valor;
                                 for (var j = 0; j < arreglo[indiceSec].length; j++) {
@@ -411,11 +497,7 @@ export default class CrearDashboard extends React.Component {
                             this.setState({
                                 variablesSeleccionadasSeccionesDashboardTablaUpdate: arreglo,
                                 variablesDisponiblesSeccionesDashboardTablaUpdate: copyTemp
-                            }, console.log(this.state.variablesSeleccionadasSeccionesDashboardTablaUpdate) );
-                            var self = this.state;
-                            setTimeout(function () {
-                                console.log(self.variablesSeleccionadasSeccionesDashboardTablaUpdate);
-                            }, 1000);
+                            });
                         }
                     });
                 }
@@ -427,7 +509,7 @@ export default class CrearDashboard extends React.Component {
         if($("#tipoObjeto").val().localeCompare("tabla") == 0) {
             this.setState({
                 variablesSeleccionadasSeccionesDashboardTablaNueva: [],
-                variablesDisponiblesSeccionesDashboardTablaNueva: this.props.tablas.concat(this.props.variablesEscalares, this.props.objetos, this.props.variablesSQL, this.props.excel, this.props.formas)
+                variablesDisponiblesSeccionesDashboardTablaNueva: this.props.variables.concat(this.props.indicadores, this.props.riesgos)
             });
         }
         this.setState({
@@ -448,9 +530,13 @@ export default class CrearDashboard extends React.Component {
     }
 
     cerrarDivGraficos () {
-        console.log("CALLED")
+        var copyTemp = [...this.state.displayGraphicsUpdate];
+        for (var i = 0; i < copyTemp.length; i++) {
+            copyTemp[i] = false;
+        };
         this.setState({
-            displayGraphics: false/*,
+            displayGraphics: false,
+            displayGraphicsUpdate: copyTemp/*,
             indiceGraphSelect: -1*/
         });
     }
@@ -474,39 +560,34 @@ export default class CrearDashboard extends React.Component {
 
     retornoSeleccionEjeX(campoSeleccionadoInput) {
         var campo = campoSeleccionadoInput[0];
-        var esVariable = false, esSQL = false, esTabla = false, esExcel = false, esForma = false;
-        var variableID = -1, tablaID = -1, excelArchivoID = -1, excelVariableID = -1, formaVariableID = -1;
-        if(campo.tablaID != undefined) {
-            esTabla = true;
-            tablaID = campo.tablaID;
-        } else if(campo.variableID != undefined) {
-            if(campo.esInstruccionSQL)
-                esSQL = true;
-            else
-                esVariable = true;
-            variableID = campo.variableID;
-        } else if(campo.excelArchivoID != undefined) {
-            esExcel = true;
-            excelArchivoID = campo.excelArchivoID;
-            excelVariableID = campo.excelVariableID;
-        } else if(campo.formaVariableID != undefined) {
-            esForma = true;
-            formaVariableID = campo.formaVariableID;
+        var esVariable = false, esIndicador = false, esRiesgo = false;
+        var nombreVariable = '', nombreIndicador = '', nombreRiesgo = '', nombreCampo = '', valor = '';
+        if(campo.esVariable) {
+            esVariable = true;
+            nombreVariable = campo.nombreVariable;
+            nombreCampo = campo.valor;
+            valor = campo.valor;
+        } else if(campo.esIndicador) {
+            esIndicador = true;
+            nombreIndicador = campo.nombreIndicador;
+            nombreCampo = campo.valor;
+            valor = campo.valor;
+        } else if(campo.esRiesgo) {
+            esRiesgo = true;
+            nombreRiesgo = campo.nombreRiesgo;
+            nombreCampo = campo.valor;
+            valor = campo.valor;
         }
         this.setState({
             objetoEjeXNuevo: {
-                nombre: campo.valor,
-                valor: campo.valor,
+                nombreCampo: nombreCampo,
+                valor: valor,
                 esVariable: esVariable,
-                esSQL: esSQL,
-                esTabla: esTabla,
-                esExcel: esExcel,
-                esForma: esForma,
-                variableID: variableID,
-                tablaID: tablaID,
-                excelArchivoID: excelArchivoID,
-                excelVariableID: excelVariableID,
-                formaVariableID: formaVariableID
+                esIndicador: esIndicador,
+                esRiesgo: esRiesgo,
+                nombreVariable: nombreVariable,
+                nombreIndicador: nombreIndicador,
+                nombreRiesgo: nombreRiesgo
             }
         });
     }
@@ -526,41 +607,35 @@ export default class CrearDashboard extends React.Component {
 
     retornoSeleccionEjeY(campoSeleccionadoInput) {
         var campo = campoSeleccionadoInput[0];
-        console.log('campo EJE Y');
-        console.log(campo);
-        var esVariable = false, esSQL = false, esTabla = false, esExcel = false, esForma = false;
-        var variableID = -1, tablaID = -1, excelArchivoID = -1, excelVariableID = -1, formaVariableID = -1;
-        if(campo.tablaID != undefined) {
-            esTabla = true;
-            tablaID = campo.tablaID;
-        } else if(campo.variableID != undefined) {
-            if(campo.esInstruccionSQL)
-                esSQL = true;
-            else
-                esVariable = true;
-            variableID = campo.variableID;
-        } else if(campo.excelArchivoID != undefined) {
-            esExcel = true;
-            excelArchivoID = campo.excelArchivoID;
-            excelVariableID = campo.excelVariableID;
-        } else if(campo.formaVariableID != undefined) {
-            esForma = true;
-            formaVariableID = campo.formaVariableID;
+        var esVariable = false, esIndicador = false, esRiesgo = false;
+        var nombreVariable = '', nombreIndicador = '', nombreRiesgo = '', nombreCampo = '', valor = '';
+        if(campo.esVariable) {
+            esVariable = true;
+            nombreVariable = campo.nombreVariable;
+            nombreCampo = campo.valor;
+            valor = campo.valor;
+        } else if(campo.esIndicador) {
+            esIndicador = true;
+            nombreIndicador = campo.nombreIndicador;
+            nombreCampo = campo.valor;
+            valor = campo.valor;
+        } else if(campo.esRiesgo) {
+            esRiesgo = true;
+            nombreRiesgo = campo.nombreRiesgo;
+            nombreCampo = campo.valor;
+            valor = campo.valor;
         }
+
         var copyTemp = [...this.state.variablesSeleccionadasSeccionesDashboardNueva];
         copyTemp.push({
-            nombre: campo.valor,
-            valor: campo.valor,
+            nombreCampo: nombreCampo,
+            valor: valor,
             esVariable: esVariable,
-            esSQL: esSQL,
-            esTabla: esTabla,
-            esExcel: esExcel,
-            esForma: esForma,
-            variableID: variableID,
-            tablaID: tablaID,
-            excelArchivoID: excelArchivoID,
-            excelVariableID: excelVariableID,
-            formaVariableID: formaVariableID
+            esIndicador: esIndicador,
+            esRiesgo: esRiesgo,
+            nombreVariable: nombreVariable,
+            nombreIndicador: nombreIndicador,
+            nombreRiesgo: nombreRiesgo
         });
         this.setState({
             variablesSeleccionadasSeccionesDashboardNueva: copyTemp
@@ -582,45 +657,87 @@ export default class CrearDashboard extends React.Component {
     }
 
     seleccionVarTableNuevo (index) {
+        //verificar si existe valor, sino agregar
+        //verificar que sea del mismo tipo (variable, indicador o riesgo)
+        //si es indicador o riesgo agregar
+        //si es variable y ya existe, no agregar
         var copyVarSel = [...this.state.variablesSeleccionadasSeccionesDashboardTablaNueva], copyVarDisponibles = [...this.state.variablesDisponiblesSeccionesDashboardTablaNueva];
-
-        var esVariable = false, esSQL = false, esTabla = false, esExcel = false, esForma = false;
-        var variableID = -1, tablaID = -1, excelArchivoID = -1, formaVariableID = -1;
-        if(copyVarDisponibles[index].esTabla != undefined) {
-            esTabla = true;
-            tablaID = copyVarDisponibles[index].ID;
-        } else if(copyVarDisponibles[index].esVariable != undefined) {
-            if(copyVarDisponibles[index].esInstruccionSQL)
-                esSQL = true;
-            else
+        var agregarVar = false;
+        if (copyVarSel.length == 0) {
+            agregarVar = true;
+        } else {
+            var esVariable = false, esIndicador = false, esRiesgo = false;
+            if(copyVarSel[0].esVariable) {
                 esVariable = true;
-            variableID = copyVarDisponibles[index].ID;
-        } else if(copyVarDisponibles[index].esExcel != undefined) {
-            esExcel = true;
-            excelArchivoID = copyVarDisponibles[index].ID;
-        } else if(copyVarDisponibles[index].esForma != undefined) {
-            esForma = true;
-            formaVariableID = copyVarDisponibles[index].ID;
+            } else if(copyVarSel[0].esIndicador) {
+                esIndicador = true;
+            } else if(copyVarSel[0].esRiesgo) {
+                esRiesgo = true;
+            }
+            if(esVariable) {
+                agregarVar = false;
+            } else if(esIndicador || esRiesgo) {
+                if(copyVarDisponibles[index].esIndicador && esIndicador) {
+                    agregarVar = true;
+                } else if(copyVarDisponibles[index].esRiesgo && esRiesgo) {
+                    agregarVar = true;
+                } else {
+                    agregarVar = false;
+                }
+            }
         }
+        if(agregarVar) {
+            var esVariable = false, esIndicador = false, esRiesgo = false;
+            var nombreVariable = '', nombreIndicador = '', nombreRiesgo = '', nombreCampo = '', valor = '';
+            if(copyVarDisponibles[index].esVariable) {
+                esVariable = true;
+                nombreVariable = copyVarDisponibles[index].nombreVariable;
+                nombreCampo = copyVarDisponibles[index].valor;
+                valor = copyVarDisponibles[index].valor;
+            } else if(copyVarDisponibles[index].esIndicador) {
+                esIndicador = true;
+                nombreIndicador = copyVarDisponibles[index].nombreIndicador;
+                nombreCampo = copyVarDisponibles[index].valor;
+                valor = copyVarDisponibles[index].valor;
+            } else if(copyVarDisponibles[index].esRiesgo) {
+                esRiesgo = true;
+                nombreRiesgo = copyVarDisponibles[index].nombreRiesgo;
+                nombreCampo = copyVarDisponibles[index].valor;
+                valor = copyVarDisponibles[index].valor;
+            }
 
-        copyVarSel.push({
-            nombre: copyVarDisponibles[index].valor,
-            valor: copyVarDisponibles[index].valor,
-            esVariable: esVariable,
-            esSQL: esSQL,
-            esTabla: esTabla,
-            esExcel: esExcel,
-            esForma: esForma,
-            variableID: variableID,
-            tablaID: tablaID,
-            excelArchivoID: excelArchivoID,
-            formaVariableID: formaVariableID
-        });
-        copyVarDisponibles.splice(index, 1);
-        this.setState({
-            variablesSeleccionadasSeccionesDashboardTablaNueva: copyVarSel,
-            variablesDisponiblesSeccionesDashboardTablaNueva: copyVarDisponibles
-        });
+            copyVarSel.push({
+                nombreCampo: nombreCampo,
+                valor: valor,
+                esVariable: esVariable,
+                esIndicador: esIndicador,
+                esRiesgo: esRiesgo,
+                nombreVariable: nombreVariable,
+                nombreIndicador: nombreIndicador,
+                nombreRiesgo: nombreRiesgo
+            });
+            copyVarDisponibles.splice(index, 1);
+            this.setState({
+                variablesSeleccionadasSeccionesDashboardTablaNueva: copyVarSel,
+                variablesDisponiblesSeccionesDashboardTablaNueva: copyVarDisponibles
+            });
+        } else {
+            var esVariable = false, esIndicador = false, esRiesgo = false;
+            if(copyVarSel[0].esVariable) {
+                esVariable = true;
+            } else if(copyVarSel[0].esIndicador) {
+                esIndicador = true;
+            } else if(copyVarSel[0].esRiesgo) {
+                esRiesgo = true;
+            }
+            if(esVariable) {
+                alert("Una tabla solo puede tener una variable.");
+            } else if(esIndicador || esRiesgo) {
+                if( (copyVarDisponibles[index].esIndicador && !esIndicador) || (copyVarDisponibles[index].esRiesgo && !esRiesgo) ) {
+                    alert("Las variables de la tabla deben ser del mismo tipo (riesgo o indicador).");
+                }
+            }
+        }
     }
 
     deseleccionVarTableNuevo (index) {
@@ -657,7 +774,6 @@ export default class CrearDashboard extends React.Component {
                 indiceGraphSelectUpdate: copyIndiceGraphSelectUpdate
             });
         }*/
-        console.log("YEE")
         var copyDisplayGraphicsUpdate = [...this.state.displayGraphicsUpdate];
         copyDisplayGraphicsUpdate[index] = !copyDisplayGraphicsUpdate[index]
         this.setState({
@@ -666,7 +782,6 @@ export default class CrearDashboard extends React.Component {
     }
 
     cerrarDivGraficosUpdate (index) {
-        console.log("CALLED")
         var copyDisplayGraphicsUpdate = [...this.state.displayGraphicsUpdate];
         copyDisplayGraphicsUpdate[index] = !copyDisplayGraphicsUpdate[index]
         var copyIndiceGraphSelectUpdate = [...this.state.indiceGraphSelectUpdate];
@@ -699,39 +814,35 @@ export default class CrearDashboard extends React.Component {
 
     retornoSeleccionEjeXUpdate(campoSeleccionadoInput) {
         var campo = campoSeleccionadoInput[0];
-        var esVariable = false, esSQL = false, esTabla = false, esExcel = false, esForma = false;
-        var variableID = -1, tablaID = -1, excelArchivoID = -1, excelVariableID = -1, formaVariableID = -1;
-        if(campo.tablaID != undefined) {
-            esTabla = true;
-            tablaID = campo.tablaID;
-        } else if(campo.variableID != undefined) {
-            if(campo.esInstruccionSQL)
-                esSQL = true;
-            else
-                esVariable = true;
-            variableID = campo.variableID;
-        } else if(campo.excelArchivoID != undefined) {
-            esExcel = true;
-            excelArchivoID = campo.excelArchivoID;
-            excelVariableID = campo.excelVariableID;
-        } else if(campo.formaVariableID != undefined) {
-            esForma = true;
-            formaVariableID = campo.formaVariableID;
+        var esVariable = false, esIndicador = false, esRiesgo = false;
+        var nombreVariable = '', nombreIndicador = '', nombreRiesgo = '', nombreCampo = '', valor = '';
+        if(campo.esVariable) {
+            esVariable = true;
+            nombreVariable = campo.nombreVariable;
+            nombreCampo = campo.valor;
+            valor = campo.valor;
+        } else if(campo.esIndicador) {
+            esIndicador = true;
+            nombreIndicador = campo.nombreIndicador;
+            nombreCampo = campo.valor;
+            valor = campo.valor;
+        } else if(campo.esRiesgo) {
+            esRiesgo = true;
+            nombreRiesgo = campo.nombreRiesgo;
+            nombreCampo = campo.valor;
+            valor = campo.valor;
         }
+
         var copyObjetoEjeXUpdate = [...this.state.objetoEjeXUpdate];
         copyObjetoEjeXUpdate[this.state.indexSeccionDeEjeUpdate] = {
-                nombre: campo.valor,
-                valor: campo.valor,
+                nombreCampo: nombreCampo,
+                valor: valor,
                 esVariable: esVariable,
-                esSQL: esSQL,
-                esTabla: esTabla,
-                esExcel: esExcel,
-                esForma: esForma,
-                variableID: variableID,
-                tablaID: tablaID,
-                excelArchivoID: excelArchivoID,
-                excelVariableID: excelVariableID,
-                formaVariableID: formaVariableID
+                esIndicador: esIndicador,
+                esRiesgo: esRiesgo,
+                nombreVariable: nombreVariable,
+                nombreIndicador: nombreIndicador,
+                nombreRiesgo: nombreRiesgo
             };
         this.setState({
             objetoEjeXUpdate: copyObjetoEjeXUpdate
@@ -754,41 +865,35 @@ export default class CrearDashboard extends React.Component {
 
     retornoSeleccionEjeYUpdate(campoSeleccionadoInput) {
         var campo = campoSeleccionadoInput[0];
-        console.log('campo EJE Y');
-        console.log(campo);
-        var esVariable = false, esSQL = false, esTabla = false, esExcel = false, esForma = false;
-        var variableID = -1, tablaID = -1, excelArchivoID = -1, excelVariableID = -1, formaVariableID = -1;
-        if(campo.tablaID != undefined) {
-            esTabla = true;
-            tablaID = campo.tablaID;
-        } else if(campo.variableID != undefined) {
-            if(campo.esInstruccionSQL)
-                esSQL = true;
-            else
-                esVariable = true;
-            variableID = campo.variableID;
-        } else if(campo.excelArchivoID != undefined) {
-            esExcel = true;
-            excelArchivoID = campo.excelArchivoID;
-            excelVariableID = campo.excelVariableID;
-        } else if(campo.formaVariableID != undefined) {
-            esForma = true;
-            formaVariableID = campo.formaVariableID;
+        var esVariable = false, esIndicador = false, esRiesgo = false;
+        var nombreVariable = '', nombreIndicador = '', nombreRiesgo = '', nombreCampo = '', valor = '';
+        if(campo.esVariable) {
+            esVariable = true;
+            nombreVariable = campo.nombreVariable;
+            nombreCampo = campo.valor;
+            valor = campo.valor;
+        } else if(campo.esIndicador) {
+            esIndicador = true;
+            nombreIndicador = campo.nombreIndicador;
+            nombreCampo = campo.valor;
+            valor = campo.valor;
+        } else if(campo.esRiesgo) {
+            esRiesgo = true;
+            nombreRiesgo = campo.nombreRiesgo;
+            nombreCampo = campo.valor;
+            valor = campo.valor;
         }
+
         var copyTemp = [...this.state.variablesSeleccionadasSeccionesDashboardUpdate];
         copyTemp[this.state.indexSeccionDeEjeUpdate].push({
-            nombre: campo.valor,
-            valor: campo.valor,
+            nombreCampo: nombreCampo,
+            valor: valor,
             esVariable: esVariable,
-            esSQL: esSQL,
-            esTabla: esTabla,
-            esExcel: esExcel,
-            esForma: esForma,
-            variableID: variableID,
-            tablaID: tablaID,
-            excelArchivoID: excelArchivoID,
-            excelVariableID: excelVariableID,
-            formaVariableID: formaVariableID
+            esIndicador: esIndicador,
+            esRiesgo: esRiesgo,
+            nombreVariable: nombreVariable,
+            nombreIndicador: nombreIndicador,
+            nombreRiesgo: nombreRiesgo
         });
         this.setState({
             variablesSeleccionadasSeccionesDashboardUpdate: copyTemp
@@ -811,51 +916,83 @@ export default class CrearDashboard extends React.Component {
 
     seleccionVarTableNuevoUpdate (index, indexSeccion) {
         var copyVarSel = [...this.state.variablesSeleccionadasSeccionesDashboardTablaUpdate], copyVarDisponibles = [...this.state.variablesDisponiblesSeccionesDashboardTablaUpdate];
-
-        var esVariable = false, esSQL = false, esTabla = false, esExcel = false, esForma = false;
-        var variableID = -1, tablaID = -1, excelArchivoID = -1, excelVariableID = -1, formaVariableID = -1;
-        console.log('copyVarDisponibles')
-        console.log(copyVarDisponibles)
-        console.log('copyVarDisponibles[indexSeccion]')
-        console.log(copyVarDisponibles[indexSeccion])
-        console.log('copyVarDisponibles[indexSeccion][index]')
-        console.log(copyVarDisponibles[indexSeccion][index])
-        if(copyVarDisponibles[indexSeccion][index].esTabla != undefined) {
-            esTabla = true;
-            tablaID = copyVarDisponibles[indexSeccion][index].ID;
-        } else if(copyVarDisponibles[indexSeccion][index].esVariable != undefined) {
-            if(copyVarDisponibles[indexSeccion][index].esInstruccionSQL)
-                esSQL = true;
-            else
+        var agregarVar = false;
+        if (copyVarSel.length == 0) {
+            agregarVar = true;
+        } else {
+            var esVariable = false, esIndicador = false, esRiesgo = false;
+            if(copyVarSel[0].esVariable) {
                 esVariable = true;
-            variableID = copyVarDisponibles[indexSeccion][index].ID;
-        } else if(copyVarDisponibles[indexSeccion][index].excelArchivoID != undefined) {
-            esExcel = true;
-            excelArchivoID = copyVarDisponibles[indexSeccion][index].ID;
-        } else if(copyVarDisponibles[indexSeccion][index].esForma != undefined) {
-            esForma = true;
-            formaVariableID = copyVarDisponibles[indexSeccion][index].ID;
+            } else if(copyVarSel[0].esIndicador) {
+                esIndicador = true;
+            } else if(copyVarSel[0].esRiesgo) {
+                esRiesgo = true;
+            }
+            if(esVariable) {
+                agregarVar = false;
+            } else if(esIndicador || esRiesgo) {
+                if(copyVarDisponibles[index].esIndicador && esIndicador) {
+                    agregarVar = true;
+                } else if(copyVarDisponibles[index].esRiesgo && esRiesgo) {
+                    agregarVar = true;
+                } else {
+                    agregarVar = false;
+                }
+            }
         }
 
-        copyVarSel[indexSeccion].push({
-            nombre: copyVarDisponibles[indexSeccion][index].valor,
-            valor: copyVarDisponibles[indexSeccion][index].valor,
-            esVariable: esVariable,
-            esSQL: esSQL,
-            esTabla: esTabla,
-            esExcel: esExcel,
-            esForma: esForma,
-            variableID: variableID,
-            tablaID: tablaID,
-            excelArchivoID: excelArchivoID,
-            excelVariableID: excelVariableID,
-            formaVariableID: formaVariableID
-        });
-        copyVarDisponibles[indexSeccion].splice(index, 1);
-        this.setState({
-            variablesSeleccionadasSeccionesDashboardTablaUpdate: copyVarSel,
-            variablesDisponiblesSeccionesDashboardTablaUpdate: copyVarDisponibles
-        });
+        if(agregarVar) {
+            var esVariable = false, esIndicador = false, esRiesgo = false;
+            var nombreVariable = '', nombreIndicador = '', nombreRiesgo = '', nombreCampo = '', valor = '';
+            if(copyVarDisponibles[indexSeccion][index].esVariable) {
+                esVariable = true;
+                nombreVariable = copyVarDisponibles[indexSeccion][index].nombreVariable;
+                nombreCampo = copyVarDisponibles[indexSeccion][index].valor;
+                valor = copyVarDisponibles[indexSeccion][index].valor;
+            } else if(copyVarDisponibles[indexSeccion][index].esIndicador) {
+                esIndicador = true;
+                nombreIndicador = copyVarDisponibles[indexSeccion][index].nombreIndicador;
+                nombreCampo = copyVarDisponibles[indexSeccion][index].valor;
+                valor = copyVarDisponibles[indexSeccion][index].valor;
+            } else if(copyVarDisponibles[indexSeccion][index].esRiesgo) {
+                esRiesgo = true;
+                nombreRiesgo = copyVarDisponibles[indexSeccion][index].nombreRiesgo;
+                nombreCampo = copyVarDisponibles[indexSeccion][index].valor;
+                valor = copyVarDisponibles[indexSeccion][index].valor;
+            }
+
+            copyVarSel[indexSeccion].push({
+                nombreCampo: nombreCampo,
+                valor: valor,
+                esVariable: esVariable,
+                esIndicador: esIndicador,
+                esRiesgo: esRiesgo,
+                nombreVariable: nombreVariable,
+                nombreIndicador: nombreIndicador,
+                nombreRiesgo: nombreRiesgo
+            });
+            copyVarDisponibles[indexSeccion].splice(index, 1);
+            this.setState({
+                variablesSeleccionadasSeccionesDashboardTablaUpdate: copyVarSel,
+                variablesDisponiblesSeccionesDashboardTablaUpdate: copyVarDisponibles
+            });
+        } else {
+            var esVariable = false, esIndicador = false, esRiesgo = false;
+            if(copyVarSel[0].esVariable) {
+                esVariable = true;
+            } else if(copyVarSel[0].esIndicador) {
+                esIndicador = true;
+            } else if(copyVarSel[0].esRiesgo) {
+                esRiesgo = true;
+            }
+            if(esVariable) {
+                alert("Una tabla solo puede tener una variable.");
+            } else if(esIndicador || esRiesgo) {
+                if( (copyVarDisponibles[index].esIndicador && !esIndicador) || (copyVarDisponibles[index].esRiesgo && !esRiesgo) ) {
+                    alert("Las variables de la tabla deben ser del mismo tipo (riesgo o indicador).");
+                }
+            }
+        }
     }
 
     deseleccionVarTableUpdate (index, indexSeccion) {
@@ -875,8 +1012,8 @@ export default class CrearDashboard extends React.Component {
             if(tipoObjeto.length < 10) {
                 if( (tipoObjeto.localeCompare("grafica") == 0 && this.state.tipoGraficoUpdate[index].length > 0) || tipoObjeto.localeCompare("tabla") == 0) {
                     //viendo si creo variables
-                    if( ((this.state.tipoGraficoUpdate[index].localeCompare("LINEA") == 0 || this.state.tipoGraficoUpdate[index].localeCompare("AREA") == 0 || 
-                        this.state.tipoGraficoUpdate[index].localeCompare("BARRA") == 0 || this.state.tipoGraficoUpdate[index].localeCompare("DISPERSION") == 0) && this.state.objetoEjeXUpdate[index] != undefined && this.state.objetoEjeXUpdate[index].nombre != undefined && this.state.variablesSeleccionadasSeccionesDashboardUpdate[index] != undefined && this.state.variablesSeleccionadasSeccionesDashboardUpdate[index].length > 0) ||
+                    if( (this.state.tipoGraficoUpdate[index] != undefined && ((this.state.tipoGraficoUpdate[index].localeCompare("LINEA") == 0 || this.state.tipoGraficoUpdate[index].localeCompare("AREA") == 0 || 
+                                            this.state.tipoGraficoUpdate[index].localeCompare("BARRA") == 0 || this.state.tipoGraficoUpdate[index].localeCompare("DISPERSION") == 0) && this.state.objetoEjeXUpdate[index] != undefined && this.state.objetoEjeXUpdate[index].valor != undefined && this.state.variablesSeleccionadasSeccionesDashboardUpdate[index] != undefined && this.state.variablesSeleccionadasSeccionesDashboardUpdate[index].length > 0)) ||
                         (tipoObjetoUpdate[index].localeCompare("tabla") == 0 && this.state.variablesSeleccionadasSeccionesDashboardTablaUpdate[index].length > 0) ) {
                         var instruccion = '';
                         if (tipoObjeto.localeCompare("grafica") == 0) {
@@ -889,20 +1026,14 @@ export default class CrearDashboard extends React.Component {
                                     //EJEY
                                     instruccion += "EJEX={";
                                     if(this.state.objetoEjeXUpdate[index].esVariable) {
-                                        instruccion += 'esVariable:true,esSQL:false,esTabla:false,esExcel:false,esForma:false,';
-                                        instruccion += 'variableID:'+this.state.objetoEjeXUpdate[index].variableID+',tablaID:-1,nombreCampoTabla:"",excelArchivoID:-1,excelVariableID:-1,formaVariableID:-1}';
-                                    } else if(this.state.objetoEjeXUpdate[index].esSQL) {
-                                        instruccion += 'esVariable:false,esSQL:true,esTabla:false,esExcel:false,esForma:false,';
-                                        instruccion += 'variableID:'+this.state.objetoEjeXUpdate[index].variableID+',tablaID:-1,nombreCampoTabla:"",excelArchivoID:-1,excelVariableID:-1,formaVariableID:-1}';
-                                    } else if(this.state.objetoEjeXUpdate[index].esTabla) {
-                                        instruccion += 'esVariable:false,esSQL:false,esTabla:true,esExcel:false,esForma:false,';
-                                        instruccion += 'variableID:-1,tablaID:'+this.state.objetoEjeXUpdate[index].tablaID+',nombreCampoTabla:"'+this.state.objetoEjeXUpdate[index].valor+'",excelArchivoID:-1,excelVariableID:-1,formaVariableID:-1}';
-                                    } else if(this.state.objetoEjeXUpdate[index].esExcel) {
-                                        instruccion += 'esVariable:false,esSQL:false,esTabla:false,esExcel:true,esForma:false,';
-                                        instruccion += 'variableID:-1,tablaID:-1,nombreCampoTabla:"",excelArchivoID:'+this.state.objetoEjeXUpdate[index].excelArchivoID+',excelVariableID:'+this.state.objetoEjeXUpdate[index].excelVariableID+',formaVariableID:-1}';
-                                    } else if(this.state.objetoEjeXUpdate[index].esForma) {
-                                        instruccion += 'esVariable:false,esSQL:false,esTabla:false,esExcel:false,esForma:true,';
-                                        instruccion += 'variableID:-1,tablaID:-1,nombreCampoTabla:"",excelArchivoID:-1,excelVariableID:-1,formaVariableID:'+this.state.objetoEjeXUpdate[index].formaVariableID+'}';
+                                        instruccion += 'esVariable:true,esIndicador:false,esRiesgo:false,';
+                                        instruccion += 'nombreVariable:"'+this.state.objetoEjeXUpdate[index].nombreVariable+'",nombreCampo:"'+this.state.objetoEjeXUpdate[index].nombreCampo+'",valor:"'+this.state.objetoEjeXUpdate[index].valor+'"}';
+                                    } else if(this.state.objetoEjeXUpdate[index].esIndicador) {
+                                        instruccion += 'esVariable:false,esIndicador:true,esRiesgo:false,';
+                                        instruccion += 'nombreIndicador:"'+this.state.objetoEjeXUpdate[index].nombreIndicador+'",nombreCampo:"'+this.state.objetoEjeXUpdate[index].nombreCampo+'",valor:"'+this.state.objetoEjeXUpdate[index].valor+'"}';
+                                    } else if(this.state.objetoEjeXUpdate[index].esRiesgo) {
+                                        instruccion += 'esVariable:false,esIndicador:false,esRiesgo:true,';
+                                        instruccion += 'nombreRiesgo:"'+this.state.objetoEjeXUpdate[index].nombreRiesgo+'",nombreCampo:"'+this.state.objetoEjeXUpdate[index].nombreCampo+'",valor:"'+this.state.objetoEjeXUpdate[index].valor+'"}';
                                     }
                                     //EJEX
                                     instruccion += "\\/EJEY={";
@@ -910,20 +1041,14 @@ export default class CrearDashboard extends React.Component {
                                         if(i > 0)
                                             instruccion += '<>{'
                                         if(this.state.variablesSeleccionadasSeccionesDashboardUpdate[index][i].esVariable) {
-                                            instruccion += 'esVariable:true,esSQL:false,esTabla:false,esExcel:false,esForma:false,';
-                                            instruccion += 'variableID:'+this.state.variablesSeleccionadasSeccionesDashboardUpdate[index][i].variableID+',tablaID:-1,nombreCampoTabla:"",excelArchivoID:-1,excelVariableID:-1,formaVariableID:-1}';
-                                        } else if(this.state.variablesSeleccionadasSeccionesDashboardUpdate[index][i].esSQL) {
-                                            instruccion += 'esVariable:false,esSQL:true,esTabla:false,esExcel:false,esForma:false,';
-                                            instruccion += 'variableID:'+this.state.variablesSeleccionadasSeccionesDashboardUpdate[index][i].variableID+',tablaID:-1,nombreCampoTabla:"",excelArchivoID:-1,excelVariableID:-1,formaVariableID:-1}';
-                                        } else if(this.state.variablesSeleccionadasSeccionesDashboardUpdate[index][i].esTabla) {
-                                            instruccion += 'esVariable:false,esSQL:false,esTabla:true,esExcel:false,esForma:false,';
-                                            instruccion += 'variableID:-1,tablaID:'+this.state.variablesSeleccionadasSeccionesDashboardUpdate[index][i].tablaID+',nombreCampoTabla:"'+this.state.variablesSeleccionadasSeccionesDashboardUpdate[index][i].valor+'",excelArchivoID:-1,excelVariableID:-1,formaVariableID:-1}';
-                                        } else if(this.state.variablesSeleccionadasSeccionesDashboardUpdate[index][i].esExcel) {
-                                            instruccion += 'esVariable:false,esSQL:false,esTabla:false,esExcel:true,esForma:false,';
-                                            instruccion += 'variableID:-1,tablaID:-1,nombreCampoTabla:"",excelArchivoID:'+this.state.variablesSeleccionadasSeccionesDashboardUpdate[index][i].excelArchivoID+',excelVariableID:'+this.state.variablesSeleccionadasSeccionesDashboardUpdate[i].excelVariableID+',formaVariableID:-1}';
-                                        } else if(this.state.variablesSeleccionadasSeccionesDashboardUpdate[index][i].esForma) {
-                                            instruccion += 'esVariable:false,esSQL:false,esTabla:false,esExcel:false,esForma:true,';
-                                            instruccion += 'variableID:-1,tablaID:-1,nombreCampoTabla:"",excelArchivoID:-1,excelVariableID:-1,formaVariableID:'+this.state.variablesSeleccionadasSeccionesDashboardUpdate[index][i].formaVariableID+'}';
+                                            instruccion += 'esVariable:true,esIndicador:false,esRiesgo:false,';
+                                            instruccion += 'nombreVariable:"'+this.state.variablesSeleccionadasSeccionesDashboardUpdate[index][i].nombreVariable+'",nombreCampo:"'+this.state.variablesSeleccionadasSeccionesDashboardUpdate[index][i].nombreCampo+'",valor:"'+this.state.variablesSeleccionadasSeccionesDashboardUpdate[index][i].valor+'"}';
+                                        } else if(this.state.variablesSeleccionadasSeccionesDashboardUpdate[index][i].esIndicador) {
+                                            instruccion += 'esVariable:false,esIndicador:true,esRiesgo:false,';
+                                            instruccion += 'nombreIndicador:"'+this.state.variablesSeleccionadasSeccionesDashboardUpdate[index][i].nombreVariable+'",nombreCampo:"'+this.state.variablesSeleccionadasSeccionesDashboardUpdate[index][i].nombreCampo+'",valor:"'+this.state.variablesSeleccionadasSeccionesDashboardUpdate[index][i].valor+'"}';
+                                        } else if(this.state.variablesSeleccionadasSeccionesDashboardUpdate[index][i].esRiesgo) {
+                                            instruccion += 'esVariable:false,esIndicador:false,esRiesgo:true,';
+                                            instruccion += 'nombreRiesgo:"'+this.state.variablesSeleccionadasSeccionesDashboardUpdate[index][i].nombreVariable+'",nombreCampo:"'+this.state.variablesSeleccionadasSeccionesDashboardUpdate[index][i].nombreCampo+'",valor:"'+this.state.variablesSeleccionadasSeccionesDashboardUpdate[index][i].valor+'"}';
                                         }
                                     };
                                     instruccion += ']';
@@ -934,20 +1059,14 @@ export default class CrearDashboard extends React.Component {
                                         if(i > 0)
                                             instruccion += '<>{'
                                         if(this.state.variablesSeleccionadasSeccionesDashboardUpdate[index][i].esVariable) {
-                                            instruccion += 'esVariable:true,esSQL:false,esTabla:false,esExcel:false,esForma:false,';
-                                            instruccion += 'variableID:'+this.state.variablesSeleccionadasSeccionesDashboardUpdate[index][i].variableID+',tablaID:-1,nombreCampoTabla:"",excelArchivoID:-1,excelVariableID:-1,formaVariableID:-1}';
-                                        } else if(this.state.variablesSeleccionadasSeccionesDashboardUpdate[index][i].esSQL) {
-                                            instruccion += 'esVariable:false,esSQL:true,esTabla:false,esExcel:false,esForma:false,';
-                                            instruccion += 'variableID:'+this.state.variablesSeleccionadasSeccionesDashboardUpdate[index][i].variableID+',tablaID:-1,nombreCampoTabla:"",excelArchivoID:-1,excelVariableID:-1,formaVariableID:-1}';
-                                        } else if(this.state.variablesSeleccionadasSeccionesDashboardUpdate[index][i].esTabla) {
-                                            instruccion += 'esVariable:false,esSQL:false,esTabla:true,esExcel:false,esForma:false,';
-                                            instruccion += 'variableID:-1,tablaID:'+this.state.variablesSeleccionadasSeccionesDashboardUpdate[index][i].tablaID+',nombreCampoTabla:"'+this.state.variablesSeleccionadasSeccionesDashboardUpdate[index][i].valor+'",excelArchivoID:-1,excelVariableID:-1,formaVariableID:-1}';
-                                        } else if(this.state.variablesSeleccionadasSeccionesDashboardUpdate[index][i].esExcel) {
-                                            instruccion += 'esVariable:false,esSQL:false,esTabla:false,esExcel:true,esForma:false,';
-                                            instruccion += 'variableID:-1,tablaID:-1,nombreCampoTabla:"",excelArchivoID:'+this.state.variablesSeleccionadasSeccionesDashboardUpdate[index][i].excelArchivoID+',excelVariableID:'+this.state.variablesSeleccionadasSeccionesDashboardUpdate[i].excelVariableID+',formaVariableID:-1}';
-                                        } else if(this.state.variablesSeleccionadasSeccionesDashboardUpdate[index][i].esForma) {
-                                            instruccion += 'esVariable:false,esSQL:false,esTabla:false,esExcel:false,esForma:true,';
-                                            instruccion += 'variableID:-1,tablaID:-1,nombreCampoTabla:"",excelArchivoID:-1,excelVariableID:-1,formaVariableID:'+this.state.variablesSeleccionadasSeccionesDashboardUpdate[index][i].formaVariableID+'}';
+                                            instruccion += 'esVariable:true,esIndicador:false,esRiesgo:false,';
+                                            instruccion += 'nombreVariable:"'+this.state.variablesSeleccionadasSeccionesDashboardUpdate[index][i].nombreVariable+'",nombreCampo:"'+this.state.variablesSeleccionadasSeccionesDashboardUpdate[index][i].nombreCampo+'",valor:"'+this.state.variablesSeleccionadasSeccionesDashboardUpdate[index][i].valor+'"}';
+                                        } else if(this.state.variablesSeleccionadasSeccionesDashboardUpdate[index][i].esIndicador) {
+                                            instruccion += 'esVariable:false,esIndicador:true,esRiesgo:false,';
+                                            instruccion += 'nombreIndicador:"'+this.state.variablesSeleccionadasSeccionesDashboardUpdate[index][i].nombreVariable+'",nombreCampo:"'+this.state.variablesSeleccionadasSeccionesDashboardUpdate[index][i].nombreCampo+'",valor:"'+this.state.variablesSeleccionadasSeccionesDashboardUpdate[index][i].valor+'"}';
+                                        } else if(this.state.variablesSeleccionadasSeccionesDashboardUpdate[index][i].esRiesgo) {
+                                            instruccion += 'esVariable:false,esIndicador:false,esRiesgo:true,';
+                                            instruccion += 'nombreRiesgo:"'+this.state.variablesSeleccionadasSeccionesDashboardUpdate[index][i].nombreVariable+'",nombreCampo:"'+this.state.variablesSeleccionadasSeccionesDashboardUpdate[index][i].nombreCampo+'",valor:"'+this.state.variablesSeleccionadasSeccionesDashboardUpdate[index][i].valor+'"}';
                                         }
                                     };
                                     instruccion += ']';
@@ -961,20 +1080,14 @@ export default class CrearDashboard extends React.Component {
                                 if(i > 0)
                                     instruccion += '<>{'
                                 if(this.state.variablesSeleccionadasSeccionesDashboardTablaUpdate[index][i].esVariable) {
-                                    instruccion += 'esVariable:true,esSQL:false,esTabla:false,esExcel:false,esForma:false,';
-                                    instruccion += 'variableID:'+this.state.variablesSeleccionadasSeccionesDashboardTablaUpdate[index][i].variableID+',tablaID:-1,nombreCampoTabla:"",excelArchivoID:-1,formaVariableID:-1}';
-                                } else if(this.state.variablesSeleccionadasSeccionesDashboardTablaUpdate[index][i].esSQL) {
-                                    instruccion += 'esVariable:false,esSQL:true,esTabla:false,esExcel:false,esForma:false,';
-                                    instruccion += 'variableID:'+this.state.variablesSeleccionadasSeccionesDashboardTablaUpdate[index][i].variableID+',tablaID:-1,nombreCampoTabla:"",excelArchivoID:-1,formaVariableID:-1}';
-                                } else if(this.state.variablesSeleccionadasSeccionesDashboardTablaUpdate[index][i].esTabla) {
-                                    instruccion += 'esVariable:false,esSQL:false,esTabla:true,esExcel:false,esForma:false,';
-                                    instruccion += 'variableID:-1,tablaID:'+this.state.variablesSeleccionadasSeccionesDashboardTablaUpdate[index][i].tablaID+',nombreCampoTabla:"'+this.state.variablesSeleccionadasSeccionesDashboardTablaUpdate[i].valor+'",excelArchivoID:-1,formaVariableID:-1}';
-                                } else if(this.state.variablesSeleccionadasSeccionesDashboardTablaUpdate[index][i].esExcel) {
-                                    instruccion += 'esVariable:false,esSQL:false,esTabla:false,esExcel:true,esForma:false,';
-                                    instruccion += 'variableID:-1,tablaID:-1,nombreCampoTabla:"",excelArchivoID:'+this.state.variablesSeleccionadasSeccionesDashboardTablaUpdate[index][i].excelArchivoID+',formaVariableID:-1}';
-                                } else if(this.state.variablesSeleccionadasSeccionesDashboardTablaUpdate[index][i].esForma) {
-                                    instruccion += 'esVariable:false,esSQL:false,esTabla:false,esExcel:false,esForma:true,';
-                                    instruccion += 'variableID:-1,tablaID:-1,nombreCampoTabla:"",excelArchivoID:-1,formaVariableID:'+this.state.variablesSeleccionadasSeccionesDashboardTablaUpdate[index][i].formaVariableID+'}';
+                                    instruccion += 'esVariable:true,esIndicador:false,esRiesgo:false,';
+                                    instruccion += 'nombreVariable:"'+this.state.variablesSeleccionadasSeccionesDashboardTablaUpdate[index][i].nombreVariable+'",nombreCampo:"'+this.state.variablesSeleccionadasSeccionesDashboardTablaUpdate[index][i].nombreCampo+'",valor:"'+this.state.variablesSeleccionadasSeccionesDashboardTablaUpdate[index][i].valor+'"}';
+                                } else if(this.state.variablesSeleccionadasSeccionesDashboardTablaUpdate[index][i].esIndicador) {
+                                    instruccion += 'esVariable:false,esIndicador:true,esRiesgo:false,';
+                                    instruccion += 'nombreIndicador:"'+this.state.variablesSeleccionadasSeccionesDashboardTablaUpdate[index][i].nombreIndicador+'",nombreCampo:"'+this.state.variablesSeleccionadasSeccionesDashboardTablaUpdate[index][i].nombreCampo+'",valor:"'+this.state.variablesSeleccionadasSeccionesDashboardTablaUpdate[index][i].valor+'"}';
+                                } else if(this.state.variablesSeleccionadasSeccionesDashboardTablaUpdate[index][i].esRiesgo) {
+                                    instruccion += 'esVariable:false,esIndicador:false,esRiesgo:true,';
+                                    instruccion += 'nombreRiesgo:"'+this.state.variablesSeleccionadasSeccionesDashboardTablaUpdate[index][i].nombreRiesgo+'",nombreCampo:"'+this.state.variablesSeleccionadasSeccionesDashboardTablaUpdate[index][i].nombreCampo+'",valor:"'+this.state.variablesSeleccionadasSeccionesDashboardTablaUpdate[index][i].valor+'"}';
                                 }
                             };
                             instruccion += ']';
@@ -999,7 +1112,7 @@ export default class CrearDashboard extends React.Component {
                         }*/
                     } else {
                         if( ((this.state.tipoGraficoNuevo.localeCompare("LINEA") == 0 || this.state.tipoGraficoNuevo.localeCompare("AREA") == 0 || 
-                                        this.state.tipoGraficoNuevo.localeCompare("BARRA") == 0 || this.state.tipoGraficoNuevo.localeCompare("DISPERSION") == 0) && this.state.objetoEjeYNuevo.nombre == undefined) ) {
+                                        this.state.tipoGraficoNuevo.localeCompare("BARRA") == 0 || this.state.tipoGraficoNuevo.localeCompare("DISPERSION") == 0) && this.state.objetoEjeYNuevo.valor == undefined) ) {
                             alert("Seleccione una variable para el eje y");
                         } else if ((this.state.tipoGraficoNuevo.localeCompare("LINEA") == 0 || this.state.tipoGraficoNuevo.localeCompare("AREA") == 0 || 
                                         this.state.tipoGraficoNuevo.localeCompare("BARRA") == 0 || this.state.tipoGraficoNuevo.localeCompare("DISPERSION") == 0) && this.state.variablesSeleccionadasSeccionesDashboardNueva.length == 0) {
@@ -1020,7 +1133,6 @@ export default class CrearDashboard extends React.Component {
     }
 
     eliminarSeccionDashboard (index) {
-        console.log("index = "+index);
         var copySeccionesDashboard = [...this.state.seccionesDashboard];
         copySeccionesDashboard.splice(index, 1);
         var copyObjetoEjeXUpdate = [...this.state.objetoEjeXUpdate];
@@ -1030,16 +1142,6 @@ export default class CrearDashboard extends React.Component {
         var copyVarSel = [...this.state.variablesSeleccionadasSeccionesDashboardTablaUpdate], copyVarDisponibles = [...this.state.variablesDisponiblesSeccionesDashboardTablaUpdate];
         copyVarSel.splice(index, 1);
         copyVarDisponibles.splice(index, 1);
-        console.log("copySeccionesDashboard");
-        console.log(copySeccionesDashboard);
-        console.log("copyObjetoEjeXUpdate");
-        console.log(copyObjetoEjeXUpdate);
-        console.log("copyTemp");
-        console.log(copyTemp);
-        console.log("copyVarSel");
-        console.log(copyVarSel);
-        console.log("copyVarDisponibles");
-        console.log(copyVarDisponibles);
         this.setState({
             seccionesDashboard: copySeccionesDashboard,
             objetoEjeXUpdate: copyObjetoEjeXUpdate,
@@ -1074,26 +1176,22 @@ export default class CrearDashboard extends React.Component {
                     if(objetoEjeXUpdate[i] == undefined)
                         objetoEjeXUpdate[i] = [];
                     var arregloObjetoX = cadenaValores.split("\\/")[0];
-                    console.log('cadenaValores');
-                    console.log(cadenaValores);
                     var objetoXCadena = arregloObjetoX.substring(arregloObjetoX.indexOf("{")+1, arregloObjetoX.indexOf("}"));
                     eval("objetoEjeXUpdate[i] = {"+objetoXCadena+"}");
                     objetoEjeXUpdate[i].nombre = '';
-                    this.getObject(objetoEjeXUpdate, i, objetoEjeXUpdate[i], "objetoEjeXUpdate");
+                    //this.getObject(objetoEjeXUpdate, i, objetoEjeXUpdate[i], "objetoEjeXUpdate");
                     var arregloObjetosY = cadenaValores.split("\\/")[1];
                     var arregloValores = arregloObjetosY.split("<>");
                     if(variablesDisponiblesSeccionesDashboardTablaUpdate[i] == undefined)
                         variablesDisponiblesSeccionesDashboardTablaUpdate[i] = [];
-                    variablesDisponiblesSeccionesDashboardTablaUpdate[i] = this.props.tablas.concat(this.props.variablesEscalares, this.props.objetos, this.props.variablesSQL, this.props.excel, this.props.formas);
+                    variablesDisponiblesSeccionesDashboardTablaUpdate[i] = this.props.variables.concat(this.props.indicadores, this.props.riesgos);
                     if(variablesSeleccionadasSeccionesDashboardUpdate[i] == undefined)
                         variablesSeleccionadasSeccionesDashboardUpdate[i] = [];
-                    console.log('arregloValores');
-                    console.log(arregloValores);
                     for (var j = 0; j < arregloValores.length; j++) {
                         var objeto = arregloValores[j].substring(arregloValores[j].indexOf("{")+1, arregloValores[j].lastIndexOf("}"));
                         eval("variablesSeleccionadasSeccionesDashboardUpdate[i].push({"+objeto+"})");
                         variablesSeleccionadasSeccionesDashboardUpdate[i][j].nombre = '';
-                        this.getObject(variablesSeleccionadasSeccionesDashboardUpdate, i, variablesSeleccionadasSeccionesDashboardUpdate[i][j], "variablesSeleccionadasSeccionesDashboardUpdate", j);
+                        //this.getObject(variablesSeleccionadasSeccionesDashboardUpdate, i, variablesSeleccionadasSeccionesDashboardUpdate[i][j], "variablesSeleccionadasSeccionesDashboardUpdate", j);
                     };
                 } else if(cadenaValores.indexOf("PIE") == 0) {
                     tipoGraficoUpdate[i] = 'PIE';
@@ -1109,14 +1207,14 @@ export default class CrearDashboard extends React.Component {
                     var arregloValores = arregloObjetosY.split("<>");
                     if(variablesDisponiblesSeccionesDashboardTablaUpdate[i] == undefined)
                         variablesDisponiblesSeccionesDashboardTablaUpdate[i] = [];
-                    variablesDisponiblesSeccionesDashboardTablaUpdate[i] = this.props.tablas.concat(this.props.variablesEscalares, this.props.objetos, this.props.variablesSQL, this.props.excel, this.props.formas);
+                    variablesDisponiblesSeccionesDashboardTablaUpdate[i] = this.props.variables.concat(this.props.indicadores, this.props.riesgos);
                     if(variablesSeleccionadasSeccionesDashboardUpdate[i] == undefined)
                         variablesSeleccionadasSeccionesDashboardUpdate[i] = [];
                     for (var j = 0; j < arregloValores.length; j++) {
                         var objeto = arregloValores[j].substring(arregloValores[j].indexOf("{")+1, arregloValores[j].lastIndexOf("}"));
                         eval("variablesSeleccionadasSeccionesDashboardUpdate[i].push({"+objeto+"})");
                         variablesSeleccionadasSeccionesDashboardUpdate[i][j].nombre = '';
-                        this.getObject(variablesSeleccionadasSeccionesDashboardUpdate, i, variablesSeleccionadasSeccionesDashboardUpdate[i][j], "variablesSeleccionadasSeccionesDashboardUpdate", j);
+                        //this.getObject(variablesSeleccionadasSeccionesDashboardUpdate, i, variablesSeleccionadasSeccionesDashboardUpdate[i][j], "variablesSeleccionadasSeccionesDashboardUpdate", j);
                     };
                 }
             } else if(this.state.seccionesDashboard[i].instruccion.indexOf("TABLA") == 0) {
@@ -1128,16 +1226,44 @@ export default class CrearDashboard extends React.Component {
                     variablesSeleccionadasSeccionesDashboardTablaUpdate[i] = [];
                 if(variablesDisponiblesSeccionesDashboardTablaUpdate[i] == undefined)
                     variablesDisponiblesSeccionesDashboardTablaUpdate[i] = [];
+                variablesDisponiblesSeccionesDashboardTablaUpdate[i] = this.props.variables.concat(this.props.indicadores, this.props.riesgos);
                 for (var j = 0; j < arregloValores.length; j++) {
                     var objeto = arregloValores[j].substring(arregloValores[j].indexOf("{")+1, arregloValores[j].lastIndexOf("}"));
                     eval("variablesSeleccionadasSeccionesDashboardTablaUpdate[i].push({"+objeto+"})");
                     variablesSeleccionadasSeccionesDashboardTablaUpdate[i][j].nombre = '';
-                    this.getObject(variablesSeleccionadasSeccionesDashboardTablaUpdate, i, variablesSeleccionadasSeccionesDashboardTablaUpdate[i][j], "variablesSeleccionadasSeccionesDashboardTablaUpdate", j);
-                    //variablesDisponiblesSeccionesDashboardTablaUpdate[i] = this.props.tablas.concat(this.props.variablesEscalares, this.props.objetos, this.props.variablesSQL, this.props.excel, this.props.formas);
+                    //this.getObject(variablesSeleccionadasSeccionesDashboardTablaUpdate, i, variablesSeleccionadasSeccionesDashboardTablaUpdate[i][j], "variablesSeleccionadasSeccionesDashboardTablaUpdate", j);
+                    //variablesDisponiblesSeccionesDashboardTablaUpdate[i] = this.props.variables.concat(this.props.indicadores, this.props.riesgos);
+                };
+                for (var j = 0; j < variablesSeleccionadasSeccionesDashboardTablaUpdate[i].length; j++) {
+                    if(variablesSeleccionadasSeccionesDashboardTablaUpdate[i][j].esVariable) {
+                        FORDISPONIBLES:
+                        for (var k = 0; k < variablesDisponiblesSeccionesDashboardTablaUpdate[i].length; k++) {
+                            if(variablesDisponiblesSeccionesDashboardTablaUpdate[i][k].esVariable && variablesDisponiblesSeccionesDashboardTablaUpdate[i][k].nombreVariable.localeCompare(variablesSeleccionadasSeccionesDashboardTablaUpdate[i][j].nombreVariable) == 0) {
+                                variablesDisponiblesSeccionesDashboardTablaUpdate[i].splice(k, 1);
+                                break FORDISPONIBLES;
+                            }
+                        };
+                    } else if(variablesSeleccionadasSeccionesDashboardTablaUpdate[i][j].esIndicador) {
+                        FORDISPONIBLES:
+                        for (var k = 0; k < variablesDisponiblesSeccionesDashboardTablaUpdate[i].length; k++) {
+                            if(variablesDisponiblesSeccionesDashboardTablaUpdate[i][k].esIndicador && variablesDisponiblesSeccionesDashboardTablaUpdate[i][k].nombreIndicador.localeCompare(variablesSeleccionadasSeccionesDashboardTablaUpdate[i][j].nombreIndicador) == 0) {
+                                variablesDisponiblesSeccionesDashboardTablaUpdate[i].splice(k, 1);
+                                break FORDISPONIBLES;
+                            }
+                        };
+                    } else if(variablesSeleccionadasSeccionesDashboardTablaUpdate[i][j].esRiesgo) {
+                        FORDISPONIBLES:
+                        for (var k = 0; k < variablesDisponiblesSeccionesDashboardTablaUpdate[i].length; k++) {
+                            if(variablesDisponiblesSeccionesDashboardTablaUpdate[i][k].esRiesgo && variablesDisponiblesSeccionesDashboardTablaUpdate[i][k].nombreRiesgo.localeCompare(variablesSeleccionadasSeccionesDashboardTablaUpdate[i][j].nombreRiesgo) == 0) {
+                                variablesDisponiblesSeccionesDashboardTablaUpdate[i].splice(k, 1);
+                                break FORDISPONIBLES;
+                            }
+                        };
+                    }
                 };
             }
         };
-        console.log('tipoObjetoUpdate')
+        /*console.log('tipoObjetoUpdate')
         console.log(tipoObjetoUpdate)
         console.log('tipoGraficoUpdate')
         console.log(tipoGraficoUpdate)
@@ -1152,7 +1278,7 @@ export default class CrearDashboard extends React.Component {
         console.log('variablesSeleccionadasSeccionesDashboardTablaUpdate')
         console.log(variablesSeleccionadasSeccionesDashboardTablaUpdate)
         console.log('variablesDisponiblesSeccionesDashboardTablaUpdate')
-        console.log(variablesDisponiblesSeccionesDashboardTablaUpdate)
+        console.log(variablesDisponiblesSeccionesDashboardTablaUpdate)*/
         this.setState({
             tipoObjetoUpdate: tipoObjetoUpdate,
             tipoGraficoUpdate: tipoGraficoUpdate,
@@ -1302,8 +1428,8 @@ export default class CrearDashboard extends React.Component {
                                                                 </div>
                                                                 <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
                                                                     {
-                                                                        this.state.objetoEjeXNuevo.nombre != undefined
-                                                                        ?   this.state.objetoEjeXNuevo.nombre
+                                                                        this.state.objetoEjeXNuevo.valor != undefined
+                                                                        ?   this.state.objetoEjeXNuevo.valor
                                                                         :   ""
                                                                     }
                                                                 </div>
@@ -1316,22 +1442,18 @@ export default class CrearDashboard extends React.Component {
                                                                     <Modal show={this.state.showModalCampoEjeX}
                                                                         titulo={"Seleccionar Variable Eje X"}
                                                                         onClose={this.closeCampoModalEjeX}>
-                                                                            <Campo esNumero={() => void 0}
+                                                                            <CampoDashboard esNumero={() => void 0}
                                                                                 esBoolean={() => void 0}
                                                                                 esFecha={() => void 0}
                                                                                 esTexto={() => void 0}
-                                                                                tablas={this.props.tablas}
-                                                                                camposTablas={this.props.camposTablas}
-                                                                                variablesEscalares={this.props.variablesEscalares}
-                                                                                objetos={this.props.objetos}
-                                                                                camposDeObjetos={this.props.camposDeObjetos}
-                                                                                excel={this.props.excel}
-                                                                                camposDeExcel={this.props.camposDeExcel}
-                                                                                formas={this.props.formas}
-                                                                                variablesSQL={this.props.variablesSQL}
-                                                                                camposVariablesSQL={this.props.camposVariablesSQL}
+                                                                                variables={this.props.variables}
+                                                                                camposDeVariables={this.props.camposDeVariables}
+                                                                                indicadores={this.props.indicadores}
+                                                                                camposDeIndicadores={this.props.camposDeIndicadores}
+                                                                                riesgos={this.props.riesgos}
+                                                                                camposDeRiesgos={this.props.camposDeRiesgos}
                                                                                 retornoSeleccionVariable={this.retornoSeleccionEjeX}>
-                                                                            </Campo>
+                                                                            </CampoDashboard>
                                                                     </Modal>
                                                                 </div>
                                                             </div>
@@ -1344,8 +1466,8 @@ export default class CrearDashboard extends React.Component {
                                                                         <h4 className="pageheader-title">Variables Seleccionadas</h4>
                                                                         <div style={{maxHeight: "25vh", width: "100%", overflowY: "scroll"}}>
                                                                             {this.state.variablesSeleccionadasSeccionesDashboardNueva.map((variableSeleccionada, i) =>
-                                                                                <div key={variableSeleccionada.nombre+i} className="border" style={{height: "33%", width: "100%", display: "flex", alignItems: "center", justifyContent: "center"}}>
-                                                                                    {variableSeleccionada.nombre}
+                                                                                <div key={variableSeleccionada.valor+i} className="border" style={{height: "33%", width: "100%", display: "flex", alignItems: "center", justifyContent: "center"}}>
+                                                                                    {variableSeleccionada.valor}
                                                                                     <span> <img className="addPointer" onClick={() => this.deleteVariableSeleccionadasSeccionesDashboardNueva(i)} src={"../assets/trash.png"} style={{height: "20px", width: "20px", display: "block", float: "right"}}></img> </span>
                                                                                 </div>
                                                                             )}
@@ -1361,22 +1483,18 @@ export default class CrearDashboard extends React.Component {
                                                                     <Modal show={this.state.showModalCampoEjeY}
                                                                         titulo={"Seleccionar Variables Eje Y"}
                                                                         onClose={this.closeCampoModalEjeY}>
-                                                                            <Campo esNumero={() => void 0}
+                                                                            <CampoDashboard esNumero={() => void 0}
                                                                                 esBoolean={() => void 0}
                                                                                 esFecha={() => void 0}
                                                                                 esTexto={() => void 0}
-                                                                                tablas={this.props.tablas}
-                                                                                camposTablas={this.props.camposTablas}
-                                                                                variablesEscalares={this.props.variablesEscalares}
-                                                                                objetos={this.props.objetos}
-                                                                                camposDeObjetos={this.props.camposDeObjetos}
-                                                                                excel={this.props.excel}
-                                                                                camposDeExcel={this.props.camposDeExcel}
-                                                                                formas={this.props.formas}
-                                                                                variablesSQL={this.props.variablesSQL}
-                                                                                camposVariablesSQL={this.props.camposVariablesSQL}
+                                                                                variables={this.props.variables}
+                                                                                camposDeVariables={this.props.camposDeVariables}
+                                                                                indicadores={this.props.indicadores}
+                                                                                camposDeIndicadores={this.props.camposDeIndicadores}
+                                                                                riesgos={this.props.riesgos}
+                                                                                camposDeRiesgos={this.props.camposDeRiesgos}
                                                                                 retornoSeleccionVariable={this.retornoSeleccionEjeY}>
-                                                                            </Campo>
+                                                                            </CampoDashboard>
                                                                     </Modal>
                                                                 </div>
                                                             </div>
@@ -1395,8 +1513,8 @@ export default class CrearDashboard extends React.Component {
                                                                         <h4 className="pageheader-title">Variables Seleccionadas</h4>
                                                                         <div style={{maxHeight: "25vh", width: "100%", overflowY: "scroll"}}>
                                                                             {this.state.variablesSeleccionadasSeccionesDashboardNueva.map((variableSeleccionada, i) =>
-                                                                                <div key={variableSeleccionada.nombre+i} className="border" style={{height: "33%", width: "100%", display: "flex", alignItems: "center", justifyContent: "center"}}>
-                                                                                    {variableSeleccionada.nombre}
+                                                                                <div key={variableSeleccionada.valor+i} className="border" style={{height: "33%", width: "100%", display: "flex", alignItems: "center", justifyContent: "center"}}>
+                                                                                    {variableSeleccionada.valor}
                                                                                     <span> <img className="addPointer" onClick={() => this.deleteVariableSeleccionadasSeccionesDashboardNueva(i)} src={"../assets/trash.png"} style={{height: "20px", width: "20px", display: "block", float: "right"}}></img> </span>
                                                                                 </div>
                                                                             )}
@@ -1412,22 +1530,18 @@ export default class CrearDashboard extends React.Component {
                                                                     <Modal show={this.state.showModalCampoEjeY}
                                                                         titulo={"Seleccionar Variables Eje Y"}
                                                                         onClose={this.closeCampoModalEjeY}>
-                                                                            <Campo esNumero={() => void 0}
+                                                                            <CampoDashboard esNumero={() => void 0}
                                                                                 esBoolean={() => void 0}
                                                                                 esFecha={() => void 0}
                                                                                 esTexto={() => void 0}
-                                                                                tablas={this.props.tablas}
-                                                                                camposTablas={this.props.camposTablas}
-                                                                                variablesEscalares={this.props.variablesEscalares}
-                                                                                objetos={this.props.objetos}
-                                                                                camposDeObjetos={this.props.camposDeObjetos}
-                                                                                excel={this.props.excel}
-                                                                                camposDeExcel={this.props.camposDeExcel}
-                                                                                formas={this.props.formas}
-                                                                                variablesSQL={this.props.variablesSQL}
-                                                                                camposVariablesSQL={this.props.camposVariablesSQL}
+                                                                                variables={this.props.variables}
+                                                                                camposDeVariables={this.props.camposDeVariables}
+                                                                                indicadores={this.props.indicadores}
+                                                                                camposDeIndicadores={this.props.camposDeIndicadores}
+                                                                                riesgos={this.props.riesgos}
+                                                                                camposDeRiesgos={this.props.camposDeRiesgos}
                                                                                 retornoSeleccionVariable={this.retornoSeleccionEjeY}>
-                                                                            </Campo>
+                                                                            </CampoDashboard>
                                                                     </Modal>
                                                                 </div>
                                                             </div>
@@ -1525,7 +1639,7 @@ export default class CrearDashboard extends React.Component {
                                                                 </div>
                                                             </div>
                                                             <div className="row" style={{width: "100%"}}>
-                                                                <div className={"selectGraph-content"} style={{overflowX: "scroll", overflowY: "hidden", whiteSpace: "nowrap", backgroundColor: "rgba(210, 210, 228, 0.3)", display: (this.state.displayGraphicsUpdate ? "block" : "none" )}}>
+                                                                <div className={"selectGraph-content"} style={{overflowX: "scroll", overflowY: "hidden", whiteSpace: "nowrap", backgroundColor: "rgba(210, 210, 228, 0.3)", display: (this.state.displayGraphicsUpdate[i] ? "block" : "none" )}}>
                                                                     <div className={"addPointer border-right" + (this.state.indiceGraphSelectUpdate[i] == 0 ? " graficoSeleccionadoHighlight" : "")} style={{height: "100%", width: "90%", display: "inline-block"}} onClick={(e) => this.seleccionGraficoUpdate(e, "LINEA", 0, i)}>
                                                                         <div className={"row"} style={{height: "9%", width: "100%", textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center"}}>
                                                                             <p className="lead"> Gráfico de Lineas </p>
@@ -1579,8 +1693,8 @@ export default class CrearDashboard extends React.Component {
                                                                         </div>
                                                                         <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
                                                                             {
-                                                                                this.state.objetoEjeXUpdate[i] != undefined && this.state.objetoEjeXUpdate[i].nombre != undefined
-                                                                                ?   this.state.objetoEjeXUpdate[i].nombre
+                                                                                this.state.objetoEjeXUpdate[i] != undefined && this.state.objetoEjeXUpdate[i].valor != undefined
+                                                                                ?   this.state.objetoEjeXUpdate[i].valor
                                                                                 :   ""
                                                                             }
                                                                         </div>
@@ -1593,22 +1707,18 @@ export default class CrearDashboard extends React.Component {
                                                                             <Modal show={this.state.showModalCampoEjeXUpdate}
                                                                                 titulo={"Seleccionar Variable Eje X"}
                                                                                 onClose={this.closeCampoModalEjeXUpdate}>
-                                                                                    <Campo esNumero={() => void 0}
+                                                                                    <CampoDashboard esNumero={() => void 0}
                                                                                         esBoolean={() => void 0}
                                                                                         esFecha={() => void 0}
                                                                                         esTexto={() => void 0}
-                                                                                        tablas={this.props.tablas}
-                                                                                        camposTablas={this.props.camposTablas}
-                                                                                        variablesEscalares={this.props.variablesEscalares}
-                                                                                        objetos={this.props.objetos}
-                                                                                        camposDeObjetos={this.props.camposDeObjetos}
-                                                                                        excel={this.props.excel}
-                                                                                        camposDeExcel={this.props.camposDeExcel}
-                                                                                        formas={this.props.formas}
-                                                                                        variablesSQL={this.props.variablesSQL}
-                                                                                        camposVariablesSQL={this.props.camposVariablesSQL}
+                                                                                        variables={this.props.variables}
+                                                                                        camposDeVariables={this.props.camposDeVariables}
+                                                                                        indicadores={this.props.indicadores}
+                                                                                        camposDeIndicadores={this.props.camposDeIndicadores}
+                                                                                        riesgos={this.props.riesgos}
+                                                                                        camposDeRiesgos={this.props.camposDeRiesgos}
                                                                                         retornoSeleccionVariable={this.retornoSeleccionEjeXUpdate}>
-                                                                                    </Campo>
+                                                                                    </CampoDashboard>
                                                                             </Modal>
                                                                         </div>
                                                                     </div>
@@ -1624,13 +1734,13 @@ export default class CrearDashboard extends React.Component {
                                                                                         this.state.variablesSeleccionadasSeccionesDashboardUpdate[i] != undefined
                                                                                         ?   <div>
                                                                                                 {this.state.variablesSeleccionadasSeccionesDashboardUpdate[i].map((variableSeleccionada, i) =>
-                                                                                                    <div key={variableSeleccionada.nombre+i} className="border" style={{height: "33%", width: "100%", display: "flex", alignItems: "center", justifyContent: "center"}}>
-                                                                                                        {variableSeleccionada.nombre}
+                                                                                                    <div key={variableSeleccionada.valor+i} className="border" style={{height: "33%", width: "100%", display: "flex", alignItems: "center", justifyContent: "center"}}>
+                                                                                                        {variableSeleccionada.valor}
                                                                                                         <span> <img className="addPointer" onClick={() => this.deleteVariableSeleccionadasSeccionesDashboardUpdate(i)} src={"../assets/trash.png"} style={{height: "20px", width: "20px", display: "block", float: "right"}}></img> </span>
                                                                                                     </div>
                                                                                                 )}
                                                                                             </div>
-                                                                                        : null
+                                                                                        : ""
                                                                                     }
                                                                                 </div>
                                                                             </div>
@@ -1644,22 +1754,18 @@ export default class CrearDashboard extends React.Component {
                                                                             <Modal show={this.state.showModalCampoEjeYUpdate}
                                                                                 titulo={"Seleccionar Variables Eje Y"}
                                                                                 onClose={this.closeCampoModalEjeYUpdate}>
-                                                                                    <Campo esNumero={() => void 0}
+                                                                                    <CampoDashboard esNumero={() => void 0}
                                                                                         esBoolean={() => void 0}
                                                                                         esFecha={() => void 0}
                                                                                         esTexto={() => void 0}
-                                                                                        tablas={this.props.tablas}
-                                                                                        camposTablas={this.props.camposTablas}
-                                                                                        variablesEscalares={this.props.variablesEscalares}
-                                                                                        objetos={this.props.objetos}
-                                                                                        camposDeObjetos={this.props.camposDeObjetos}
-                                                                                        excel={this.props.excel}
-                                                                                        camposDeExcel={this.props.camposDeExcel}
-                                                                                        formas={this.props.formas}
-                                                                                        variablesSQL={this.props.variablesSQL}
-                                                                                        camposVariablesSQL={this.props.camposVariablesSQL}
+                                                                                        variables={this.props.variables}
+                                                                                        camposDeVariables={this.props.camposDeVariables}
+                                                                                        indicadores={this.props.indicadores}
+                                                                                        camposDeIndicadores={this.props.camposDeIndicadores}
+                                                                                        riesgos={this.props.riesgos}
+                                                                                        camposDeRiesgos={this.props.camposDeRiesgos}
                                                                                         retornoSeleccionVariable={this.retornoSeleccionEjeYUpdate}>
-                                                                                    </Campo>
+                                                                                    </CampoDashboard>
                                                                             </Modal>
                                                                         </div>
                                                                     </div>
@@ -1681,8 +1787,8 @@ export default class CrearDashboard extends React.Component {
                                                                                         this.state.variablesSeleccionadasSeccionesDashboardUpdate[i] != undefined
                                                                                         ?   <div>
                                                                                                 {this.state.variablesSeleccionadasSeccionesDashboardUpdate[i].map((variableSeleccionada, i) =>
-                                                                                                    <div key={variableSeleccionada.nombre+i} className="border" style={{height: "33%", width: "100%", display: "flex", alignItems: "center", justifyContent: "center"}}>
-                                                                                                        {variableSeleccionada.nombre}
+                                                                                                    <div key={variableSeleccionada.valor+i} className="border" style={{height: "33%", width: "100%", display: "flex", alignItems: "center", justifyContent: "center"}}>
+                                                                                                        {variableSeleccionada.valor}
                                                                                                         <span> <img className="addPointer" onClick={() => this.deleteVariableSeleccionadasSeccionesDashboardUpdate(i)} src={"../assets/trash.png"} style={{height: "20px", width: "20px", display: "block", float: "right"}}></img> </span>
                                                                                                     </div>
                                                                                                 )}
@@ -1701,22 +1807,18 @@ export default class CrearDashboard extends React.Component {
                                                                             <Modal show={this.state.showModalCampoEjeYUpdate}
                                                                                 titulo={"Seleccionar Variables Eje Y"}
                                                                                 onClose={this.closeCampoModalEjeYUpdate}>
-                                                                                    <Campo esNumero={() => void 0}
+                                                                                    <CampoDashboard esNumero={() => void 0}
                                                                                         esBoolean={() => void 0}
                                                                                         esFecha={() => void 0}
                                                                                         esTexto={() => void 0}
-                                                                                        tablas={this.props.tablas}
-                                                                                        camposTablas={this.props.camposTablas}
-                                                                                        variablesEscalares={this.props.variablesEscalares}
-                                                                                        objetos={this.props.objetos}
-                                                                                        camposDeObjetos={this.props.camposDeObjetos}
-                                                                                        excel={this.props.excel}
-                                                                                        camposDeExcel={this.props.camposDeExcel}
-                                                                                        formas={this.props.formas}
-                                                                                        variablesSQL={this.props.variablesSQL}
-                                                                                        camposVariablesSQL={this.props.camposVariablesSQL}
+                                                                                        variables={this.props.variables}
+                                                                                        camposDeVariables={this.props.camposDeVariables}
+                                                                                        indicadores={this.props.indicadores}
+                                                                                        camposDeIndicadores={this.props.camposDeIndicadores}
+                                                                                        riesgos={this.props.riesgos}
+                                                                                        camposDeRiesgos={this.props.camposDeRiesgos}
                                                                                         retornoSeleccionVariable={this.retornoSeleccionEjeYUpdate}>
-                                                                                    </Campo>
+                                                                                    </CampoDashboard>
                                                                             </Modal>
                                                                         </div>
                                                                     </div>
@@ -1767,8 +1869,8 @@ export default class CrearDashboard extends React.Component {
                                                     </div>
                                             }
                                             <div className={"text-center"} style={{width: "100%"}}>
-                                                <a href="#" className="btn btn-success active" onClick={() => this.modificarSeccionDashboard(i)}>Modificar Variable</a>
-                                                <a href="#" className="btn btn-danger active" onClick={() => this.eliminarSeccionDashboard(i)} style={{marginLeft: "10px"}}>Eliminar Variable</a>
+                                                <a href="#" className="btn btn-success active" onClick={() => this.modificarSeccionDashboard(i)}>Modificar Sección</a>
+                                                <a href="#" className="btn btn-danger active" onClick={() => this.eliminarSeccionDashboard(i)} style={{marginLeft: "10px"}}>Eliminar Sección</a>
                                             </div>
                                             <br/>
                                         </div>
@@ -1777,7 +1879,7 @@ export default class CrearDashboard extends React.Component {
                                     <br/>
                                     <hr/>
                                     <div className={"row"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
-                                        <a className={"btn btn-success btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.crearRiesgo}>Crear</a>
+                                        <a className={"btn btn-success btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.crearDashboard}>Crear</a>
                                     </div>
                                     <br/>
                                 </div>

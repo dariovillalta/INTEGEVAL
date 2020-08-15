@@ -35,11 +35,6 @@ export default class LoginPage extends React.Component {
         this.crearTablaResultadosNombreVariables = this.crearTablaResultadosNombreVariables.bind(this);
         this.crearTablaResultadosNombreIndicadores = this.crearTablaResultadosNombreIndicadores.bind(this);
         this.crearTablaResultadosNombreRiesgos = this.crearTablaResultadosNombreRiesgos.bind(this);
-        this.crearTablaResultadosIndicadoresInt = this.crearTablaResultadosIndicadoresInt.bind(this);
-        this.crearTablaResultadosIndicadoresDecimal = this.crearTablaResultadosIndicadoresDecimal.bind(this);
-        this.crearTablaResultadosIndicadoresDate = this.crearTablaResultadosIndicadoresDate.bind(this);
-        this.crearTablaResultadosIndicadoresBool = this.crearTablaResultadosIndicadoresBool.bind(this);
-        this.crearTablaResultadosIndicadoresString = this.crearTablaResultadosIndicadoresString.bind(this);
         this.crearTablaPeriodicidadCalculo = this.crearTablaPeriodicidadCalculo.bind(this);
         this.crearTablaTablas = this.crearTablaTablas.bind(this);
         this.crearTablaSegmentoReglasVariables = this.crearTablaSegmentoReglasVariables.bind(this);
@@ -53,14 +48,13 @@ export default class LoginPage extends React.Component {
         this.crearBitacora = this.crearBitacora.bind(this);
         this.crearDashboard = this.crearDashboard.bind(this);
         this.crearSeccionDashboard = this.crearSeccionDashboard.bind(this);
+        this.crearListas = this.crearListas.bind(this);
+        this.crearVariablesdeLista = this.crearVariablesdeLista.bind(this);
+        this.crearUsuarios = this.crearUsuarios.bind(this);
 
         this.showModal = this.showModal.bind(this);
         this.closeModal = this.closeModal.bind(this);
         this.saveFile = this.saveFile.bind(this);
-    }
-
-    componentDidMount() {
-        this.probarExistenciaTablas();
     }
 
     componentDidUpdate (prevProps, prevState, snapshot) {
@@ -73,52 +67,56 @@ export default class LoginPage extends React.Component {
     }
 
     login () {
-        /*var username = $('#username').val();
-        var password = $('#password').val();
-        if(username.localeCompare("admin") == 0) {
-            if(password.localeCompare("password111!") == 0) {
-                this.props.login("Admin", "admin");
+        if(this.props.conexionAbierta) {
+            /*var username = $('#username').val();
+            var password = $('#password').val();
+            if(username.localeCompare("admin") == 0) {
+                if(password.localeCompare("password111!") == 0) {
+                    this.props.login("Admin", "admin");
+                }
             }
-        }
-        if(username.length > 0){
-            if(password.length > 0){
-                const transaction = new sql.Transaction( this.props.pool );
-                transaction.begin(err => {
-                    var rolledBack = false;
-                    transaction.on('rollback', aborted => {
-                        // emited with aborted === true
-                        rolledBack = true;
-                    });
-                    const request = new sql.Request(transaction);
-                    request.query("select * from Usuarios where usuario = '"+ username +"' and contrasena = '"+ password +"'", (err, result) => {
-                        if (err) {
-                            console.log(err);
-                            if (!rolledBack) {
-                                transaction.rollback(err => {
-                                    alert("Error en conección con la tabla de Usuarios.");
+            if(username.length > 0){
+                if(password.length > 0){
+                    const transaction = new sql.Transaction( this.props.pool );
+                    transaction.begin(err => {
+                        var rolledBack = false;
+                        transaction.on('rollback', aborted => {
+                            // emited with aborted === true
+                            rolledBack = true;
+                        });
+                        const request = new sql.Request(transaction);
+                        request.query("select * from Usuarios where usuario = '"+ username +"' and contrasena = '"+ password +"'", (err, result) => {
+                            if (err) {
+                                console.log(err);
+                                if (!rolledBack) {
+                                    transaction.rollback(err => {
+                                        alert("Error en conección con la tabla de Usuarios.");
+                                    });
+                                }
+                            }  else {
+                                transaction.commit(err => {
+                                    // ... error checks
+                                    if(result.recordset.length > 0) {
+                                        var usuario = result.recordset[0];*/
+                                        //Cookie Username
+                                        //this.props.login(usuario.nombreCompleto, usuario.tipoUsuario);
+                                        this.props.login("Dario Villalta", "admin");
+                                    /*} else {
+                                        alert("Usuario ó contraseña incorrecta.");
+                                    }
                                 });
                             }
-                        }  else {
-                            transaction.commit(err => {
-                                // ... error checks
-                                if(result.recordset.length > 0) {
-                                    var usuario = result.recordset[0];*/
-                                    //Cookie Username
-                                    //this.props.login(usuario.nombreCompleto, usuario.tipoUsuario);
-                                    this.props.login("Dario Villalta", "admin");
-                                /*} else {
-                                    alert("Usuario ó contraseña incorrecta.");
-                                }
-                            });
-                        }
-                    });
-                }); // fin transaction
+                        });
+                    }); // fin transaction
+                } else {
+                    alert("Ingrese un valor para la contraseña.");
+                }
             } else {
-                alert("Ingrese un valor para la contraseña.");
-            }
+                alert("Ingrese un valor para el usuario.");
+            }*/
         } else {
-            alert("Ingrese un valor para el usuario.");
-        }*/
+            alert("La conexion con la base de datos no ha sido realizada")
+        }
     }
 
     probarExistenciaTablas () {
@@ -157,16 +155,6 @@ export default class LoginPage extends React.Component {
             this.existeTabla("ResultadosNombreIndicadores");
             //ResultadosNombreRiesgos
             this.existeTabla("ResultadosNombreRiesgos");
-            //ResultadosIndicadoresInt
-            this.existeTabla("ResultadosIndicadoresInt");
-            //ResultadosIndicadoresDecimal
-            this.existeTabla("ResultadosIndicadoresDecimal");
-            //ResultadosIndicadoresDate
-            this.existeTabla("ResultadosIndicadoresDate");
-            //ResultadosIndicadoresBool
-            this.existeTabla("ResultadosIndicadoresBool");
-            //ResultadosIndicadoresString
-            this.existeTabla("ResultadosIndicadoresString");
             //PeriodicidadCalculo
             this.existeTabla("PeriodicidadCalculo");
             //Tablas
@@ -193,6 +181,14 @@ export default class LoginPage extends React.Component {
             this.existeTabla("Dashboard");
             //SeccionDashboard
             this.existeTabla("SeccionDashboard");
+            //Listas
+            this.existeTabla("Listas");
+            //VariablesdeLista
+            this.existeTabla("VariablesdeLista");
+            //Usuarios
+            this.existeTabla("Usuarios");
+            //PermisosUsuarios
+            this.existeTabla("PermisosUsuarios");
         }
     }
 
@@ -249,16 +245,6 @@ export default class LoginPage extends React.Component {
                                 this.crearTablaResultadosNombreIndicadores();
                             } else if(nombreTabla.localeCompare("ResultadosNombreRiesgos") == 0) {
                                 this.crearTablaResultadosNombreRiesgos();
-                            } else if(nombreTabla.localeCompare("ResultadosIndicadoresInt") == 0) {
-                                this.crearTablaResultadosIndicadoresInt();
-                            } else if(nombreTabla.localeCompare("ResultadosIndicadoresDecimal") == 0) {
-                                this.crearTablaResultadosIndicadoresDecimal();
-                            } else if(nombreTabla.localeCompare("ResultadosIndicadoresDate") == 0) {
-                                this.crearTablaResultadosIndicadoresDate();
-                            } else if(nombreTabla.localeCompare("ResultadosIndicadoresBool") == 0) {
-                                this.crearTablaResultadosIndicadoresBool();
-                            } else if(nombreTabla.localeCompare("ResultadosIndicadoresString") == 0) {
-                                this.crearTablaResultadosIndicadoresString();
                             } else if(nombreTabla.localeCompare("PeriodicidadCalculo") == 0) {
                                 this.crearTablaPeriodicidadCalculo();
                             } else if(nombreTabla.localeCompare("Tablas") == 0) {
@@ -285,6 +271,14 @@ export default class LoginPage extends React.Component {
                                 this.crearDashboard();
                             } else if(nombreTabla.localeCompare("SeccionDashboard") == 0) {
                                 this.crearSeccionDashboard();
+                            } else if(nombreTabla.localeCompare("Listas") == 0) {
+                                this.crearListas();
+                            } else if(nombreTabla.localeCompare("VariablesdeLista") == 0) {
+                                this.crearVariablesdeLista();
+                            } else if(nombreTabla.localeCompare("Usuarios") == 0) {
+                                this.crearUsuarios();
+                            } else if(nombreTabla.localeCompare("PermisosUsuarios") == 0) {
+                                this.crearPermisosUsuarios();
                             }
                         }
                     });
@@ -301,7 +295,7 @@ export default class LoginPage extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("CREATE TABLE Riesgos ( ID int IDENTITY(1,1) PRIMARY KEY, nombre varchar(100), formula varchar(500), peso decimal(8,4) )", (err, result) => {
+            request.query("CREATE TABLE Riesgos ( ID int IDENTITY(1,1) PRIMARY KEY, nombre varchar(100), formula varchar(500), responsable int, peso decimal(8,4) )", (err, result) => {
                 if (err) {
                     if (!rolledBack) {
                         console.log(err);
@@ -325,7 +319,7 @@ export default class LoginPage extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("CREATE TABLE Indicadores ( ID int IDENTITY(1,1) PRIMARY KEY, nombre varchar(100), codigo varchar(100), formula varchar(500), peso decimal(22,4), tolerancia decimal(22,4), valorIdeal decimal(8,4), tipoValorIdeal varchar(20), periodicidad varchar(50), tipoIndicador varchar(20), analista varchar(100), idRiesgoPadre int, fechaInicioCalculo date )", (err, result) => {
+            request.query("CREATE TABLE Indicadores ( ID int IDENTITY(1,1) PRIMARY KEY, nombre varchar(100), codigo varchar(100), formula varchar(500), peso decimal(22,4), tolerancia decimal(22,4), valorIdeal decimal(8,4), tipoValorIdeal varchar(20), periodicidad varchar(50), tipoIndicador varchar(20), responsable int, idRiesgoPadre int, fechaInicioCalculo date )", (err, result) => {
                 if (err) {
                     if (!rolledBack) {
                         console.log(err);
@@ -493,7 +487,7 @@ export default class LoginPage extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("CREATE TABLE Variables ( ID int IDENTITY(1,1) PRIMARY KEY, nombre varchar(100), descripcion varchar(700), esObjeto bit, esColeccion bit, objetoPadreID int, esInstruccionSQL bit, guardar bit, periodicidad varchar(50), analista varchar(100), fechaInicioCalculo date )", (err, result) => {
+            request.query("CREATE TABLE Variables ( ID int IDENTITY(1,1) PRIMARY KEY, nombre varchar(100), descripcion varchar(700), esObjeto bit, esColeccion bit, objetoPadreID int, esInstruccionSQL bit, guardar bit, periodicidad varchar(50), responsable int, categoriaVariable varchar(100), fechaInicioCalculo date )", (err, result) => {
                 if (err) {
                     if (!rolledBack) {
                         console.log(err);
@@ -701,126 +695,6 @@ export default class LoginPage extends React.Component {
         }); // fin transaction
     }
 
-    crearTablaResultadosIndicadoresInt () {
-        const transaction = new sql.Transaction( this.props.pool );
-        transaction.begin(err => {
-            var rolledBack = false;
-            transaction.on('rollback', aborted => {
-                rolledBack = true;
-            });
-            const request = new sql.Request(transaction);
-            request.query("CREATE TABLE ResultadosIndicadoresInt( ID int IDENTITY(1,1) PRIMARY KEY, indicadorID int, nombre varchar(100), fecha date, valor int )", (err, result) => {
-                if (err) {
-                    if (!rolledBack) {
-                        console.log(err);
-                        transaction.rollback(err => {
-                        });
-                    }
-                } else {
-                    transaction.commit(err => {
-                        console.log("Tabla ResultadosIndicadoresInt creada.");
-                    });
-                }
-            });
-        }); // fin transaction
-    }
-
-    crearTablaResultadosIndicadoresDecimal () {
-        const transaction = new sql.Transaction( this.props.pool );
-        transaction.begin(err => {
-            var rolledBack = false;
-            transaction.on('rollback', aborted => {
-                rolledBack = true;
-            });
-            const request = new sql.Request(transaction);
-            request.query("CREATE TABLE ResultadosIndicadoresDecimal( ID int IDENTITY(1,1) PRIMARY KEY, indicadorID int, nombre varchar(100), fecha date, valor decimal(22,4) )", (err, result) => {
-                if (err) {
-                    if (!rolledBack) {
-                        console.log(err);
-                        transaction.rollback(err => {
-                        });
-                    }
-                } else {
-                    transaction.commit(err => {
-                        console.log("Tabla ResultadosIndicadoresDecimal creada.");
-                    });
-                }
-            });
-        }); // fin transaction
-    }
-    
-    crearTablaResultadosIndicadoresDate () {
-        const transaction = new sql.Transaction( this.props.pool );
-        transaction.begin(err => {
-            var rolledBack = false;
-            transaction.on('rollback', aborted => {
-                rolledBack = true;
-            });
-            const request = new sql.Request(transaction);
-            request.query("CREATE TABLE ResultadosIndicadoresDate( ID int IDENTITY(1,1) PRIMARY KEY, indicadorID int, nombre varchar(100), fecha date, valor date )", (err, result) => {
-                if (err) {
-                    if (!rolledBack) {
-                        console.log(err);
-                        transaction.rollback(err => {
-                        });
-                    }
-                } else {
-                    transaction.commit(err => {
-                        console.log("Tabla ResultadosIndicadoresDate creada.");
-                    });
-                }
-            });
-        }); // fin transaction
-    }
-    
-    crearTablaResultadosIndicadoresBool () {
-        const transaction = new sql.Transaction( this.props.pool );
-        transaction.begin(err => {
-            var rolledBack = false;
-            transaction.on('rollback', aborted => {
-                rolledBack = true;
-            });
-            const request = new sql.Request(transaction);
-            request.query("CREATE TABLE ResultadosIndicadoresBool( ID int IDENTITY(1,1) PRIMARY KEY, indicadorID int, nombre varchar(100), fecha date, valor bit )", (err, result) => {
-                if (err) {
-                    if (!rolledBack) {
-                        console.log(err);
-                        transaction.rollback(err => {
-                        });
-                    }
-                } else {
-                    transaction.commit(err => {
-                        console.log("Tabla ResultadosIndicadoresBool creada.");
-                    });
-                }
-            });
-        }); // fin transaction
-    }
-    
-    crearTablaResultadosIndicadoresString () {
-        const transaction = new sql.Transaction( this.props.pool );
-        transaction.begin(err => {
-            var rolledBack = false;
-            transaction.on('rollback', aborted => {
-                rolledBack = true;
-            });
-            const request = new sql.Request(transaction);
-            request.query("CREATE TABLE ResultadosIndicadoresString( ID int IDENTITY(1,1) PRIMARY KEY, indicadorID int, nombre varchar(100), fecha date, valor varchar(2000) )", (err, result) => {
-                if (err) {
-                    if (!rolledBack) {
-                        console.log(err);
-                        transaction.rollback(err => {
-                        });
-                    }
-                } else {
-                    transaction.commit(err => {
-                        console.log("Tabla ResultadosIndicadoresString creada.");
-                    });
-                }
-            });
-        }); // fin transaction
-    }
-
     crearTablaPeriodicidadCalculo () {
         const transaction = new sql.Transaction( this.props.pool );
         transaction.begin(err => {
@@ -950,7 +824,7 @@ export default class LoginPage extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("CREATE TABLE ExcelVariables ( ID int IDENTITY(1,1) PRIMARY KEY, excelArchivoID int, nombreHoja varchar(200), nombre varchar(100), operacion varchar(30), celdas varchar(100), tipo varchar(30), periodicidad varchar(50), fechaInicioCalculo date, analista varchar(100), guardar bit )", (err, result) => {
+            request.query("CREATE TABLE ExcelVariables ( ID int IDENTITY(1,1) PRIMARY KEY, excelArchivoID int, nombreHoja varchar(200), nombre varchar(100), operacion varchar(30), celdas varchar(100), tipo varchar(30), periodicidad varchar(50), fechaInicioCalculo date, responsable int, guardar bit )", (err, result) => {
                 if (err) {
                     if (!rolledBack) {
                         console.log(err);
@@ -974,7 +848,7 @@ export default class LoginPage extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("CREATE TABLE FormasVariables ( ID int IDENTITY(1,1) PRIMARY KEY, nombre varchar(100), tipo varchar(30), periodicidad varchar(50), fechaInicioCalculo date, analista varchar(100), guardar bit )", (err, result) => {
+            request.query("CREATE TABLE FormasVariables ( ID int IDENTITY(1,1) PRIMARY KEY, nombre varchar(100), tipo varchar(30), periodicidad varchar(50), fechaInicioCalculo date, responsable int, guardar bit )", (err, result) => {
                 if (err) {
                     if (!rolledBack) {
                         console.log(err);
@@ -1128,6 +1002,102 @@ export default class LoginPage extends React.Component {
                 } else {
                     transaction.commit(err => {
                         console.log("Tabla SeccionDashboard creada.");
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    crearListas () {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("CREATE TABLE Listas ( ID int IDENTITY(1,1) PRIMARY KEY, nombre varchar(40) )", (err, result) => {
+                if (err) {
+                    if (!rolledBack) {
+                        console.log(err);
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        console.log("Tabla Listas creada.");
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    crearVariablesdeLista () {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("CREATE TABLE VariablesdeLista ( ID int IDENTITY(1,1) PRIMARY KEY, listaID int, valor varchar(500), nombre varchar(50), tipo varchar(25) )", (err, result) => {
+                if (err) {
+                    if (!rolledBack) {
+                        console.log(err);
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        console.log("Tabla VariablesdeLista creada.");
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    crearUsuarios () {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("CREATE TABLE Usuarios ( ID int IDENTITY(1,1) PRIMARY KEY, nombreCompleto varchar(100), usuario varchar(25), contrasena varchar(50) )", (err, result) => {
+                if (err) {
+                    if (!rolledBack) {
+                        console.log(err);
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        console.log("Tabla Usuarios creada.");
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    crearPermisosUsuarios () {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("CREATE TABLE PermisosUsuarios ( ID int IDENTITY(1,1) PRIMARY KEY, usuarioID int, variable varchar(10), indicador varchar(10), riesgo varchar(10), riesgoIntegral varchar(10), usuario varchar(10), lista varchar(10), alarma varchar(10) )", (err, result) => {
+                if (err) {
+                    if (!rolledBack) {
+                        console.log(err);
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        console.log("Tabla PermisosUsuarios creada.");
                     });
                 }
             });

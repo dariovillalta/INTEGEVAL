@@ -85,7 +85,8 @@ function (_React$Component) {
       userName: null,
       permision: "",
       config: {},
-      pool: null // connection2 is now an open Connection
+      pool: null,
+      conexionAbierta: false // connection2 is now an open Connection
 
     };
     _this.login = _this.login.bind(_assertThisInitialized(_this));
@@ -177,6 +178,8 @@ function (_React$Component) {
   }, {
     key: "connectToDB",
     value: function connectToDB() {
+      var _this3 = this;
+
       var poolTemp = new _mssql["default"].ConnectionPool(this.state.config, function (err) {
         if (err) {
           console.log(err);
@@ -184,6 +187,10 @@ function (_React$Component) {
           alert("Error en conección con la base de datos");
         } else {
           console.log('pool loaded');
+
+          _this3.setState({
+            conexionAbierta: true
+          });
         }
       });
       this.setState({
@@ -201,7 +208,8 @@ function (_React$Component) {
       }, " ") : _react["default"].createElement(_LoginPage["default"], {
         login: this.login,
         pool: this.state.pool,
-        readConfigFile: this.readConfigFile
+        readConfigFile: this.readConfigFile,
+        conexionAbierta: this.state.conexionAbierta
       }, " "));
     }
   }]);

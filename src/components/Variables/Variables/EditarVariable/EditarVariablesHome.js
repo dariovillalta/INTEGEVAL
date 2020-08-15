@@ -7,8 +7,10 @@ import Formula from '../../../Formula.js';
 import InstruccionSQL from './InstruccionSQL.js';
 import TimelineVariable from '../../../TimelineVariable.js';
 
-var campoSeleccionado, operacionSeleccionada, objetoConexionSeleccionada;
-var tipoDeAsignacionSeleccionado;   //para saber el tipo de asignacion que se debera hacer al atributo / campo
+var campoSeleccionado, valorSeleccionado, valorSeleccionadoTexto, operacionSeleccionada, objetoConexionSeleccionada;
+var tipoDeAsignacionSeleccionado = '';   //para saber el tipo de asignacion que se debera hacer al atributo / campo
+var tipoDeAsignacionSeleccionadoVarios = '';   //para saber el tipo de asignacion que se debera hacer al atributo / campo
+var tipoDeAsignacionSeleccionadoUnico = '';   //para saber el tipo de asignacion que se debera hacer al atributo / campo
 var indiceFormulaSeleccionadaEdit = -1;
 
 /*COMPONENTE PARA MANEJRA CAMBIO DE VISTA ENTRE CREAR VARIABLE Y VISTA DE CONDICIONES / INSTRUCIONES*/
@@ -56,7 +58,8 @@ var nombreVariable = '';
 var descripcionVariable = '';
 var fechaInicioVariable = '';
 var periodicidadVariable = '';
-var analistaVariable = '';
+var responsableVariable = '';
+var categoriaVariable = '';
 
 var nombreCampoNuevoAtributosVario = '';
 var atributosVario = [];
@@ -108,7 +111,11 @@ export default class EditarVariablesHome extends React.Component {
             formulaSeleccionadaEdit: null,
             condicionFormula: "",
             condicionElemento: "",
-            esColeccion: false
+            esColeccion: false,
+            ///
+            idVariable: this.props.idVariable,
+            esObjetoVariable: this.props.esObjetoVariable,
+            esInstruccionSQLVariable: this.props.esInstruccionSQLVariable
         }
         this.traerInstruccionSQLVariable = this.traerInstruccionSQLVariable.bind(this);
         this.traerInstruccionSQL = this.traerInstruccionSQL.bind(this);
@@ -126,8 +133,8 @@ export default class EditarVariablesHome extends React.Component {
         this.goCreateVariableFieldSQL = this.goCreateVariableFieldSQL.bind(this);
         this.goToTimeline = this.goToTimeline.bind(this);
         this.createVariable = this.createVariable.bind(this);
-        this.updateVariable = this.updateVariable.bind(this);
         this.getVariableID = this.getVariableID.bind(this);
+        this.updateVariable = this.updateVariable.bind(this);
         this.createVariableSQL = this.createVariableSQL.bind(this);
         this.createInstructionSQL = this.createInstructionSQL.bind(this);
         this.createVariableField = this.createVariableField.bind(this);
@@ -191,6 +198,8 @@ export default class EditarVariablesHome extends React.Component {
         this.eliminarVarForma = this.eliminarVarForma.bind(this);
         this.eliminarVarExcel = this.eliminarVarExcel.bind(this);
         this.eliminarVariable = this.eliminarVariable.bind(this);
+        this.tieneEspaciosEnBlanco = this.tieneEspaciosEnBlanco.bind(this);
+        this.isValidDate = this.isValidDate.bind(this);
     }
 
     componentDidMount () {
@@ -211,6 +220,37 @@ export default class EditarVariablesHome extends React.Component {
                 banderaEsObjeto = false;
             }
         }
+    }
+
+    componentWillUnmount() {
+        //this.limpiarArreglos();
+        nivelNuevoAtributoVarios = 0;
+        nivelNuevoAtributoUnico = 0;
+        indiceSeleccionadoSegmentoReglas = -1;
+        indiceSeleccionadoReglas = -1;
+        tipoElementoSeleccionadoRegla = '';
+        posicionAtributoSeleccionado = -1;
+        indiceSeleccionadoFormula = -1;
+
+        atributosVario = [];
+        reglasVariosAtributos = [];
+        segmentoReglasVariosAtributos = [];
+        formulasVariosAtributos = [];
+        elementosFormulasVariosAtributos = [];
+        atributosUnico = [];
+        reglasUnAtributo = [];
+        segmentoReglasUnAtributo = [];
+        formulasUnAtributo = [];
+        elementosFormulasUnAtributos = [];
+
+        tipoDeAsignacionSeleccionado = '';
+        tipoDeAsignacionSeleccionadoVarios = '';
+        tipoDeAsignacionSeleccionadoUnico = '';
+
+        variablesSQL = [];
+        instruccionSQL = '';
+        $("#nombreFuenteDato").val("");
+        $("#descripcionFuenteDato").val("");
     }
 
     traerInstruccionSQLVariable () {
@@ -252,11 +292,15 @@ export default class EditarVariablesHome extends React.Component {
                                 $("#esColeccion").prop('checked', true);
                             else
                                 $("#esColeccion").prop('checked', false);
+                            banderaEsInstruccionSQL = this.props.esInstruccionSQLVariable;
+                            banderaEsObjeto = this.props.esObjetoVariable;
                             fechaInicioVariable = result.recordset[0].fechaInicioCalculo;
                             periodicidadVariable = result.recordset[0].periodicidad;
-                            analistaVariable = result.recordset[0].nombre;
+                            responsableVariable = result.recordset[0].responsable;
+                            categoriaVariable = result.recordset[0].categoriaVariable;
                             $("#periodicidad").val(periodicidadVariable);
-                            $("#analista").val(analistaVariable);
+                            $("#responsable").val(responsableVariable);
+                            $("#categoriaVariable").val(categoriaVariable);
                             $("#fecha").datepicker("setDate", fechaInicioVariable);
                             if(fechaInicioVariable.getFullYear() == 1964 && fechaInicioVariable.getMonth() == 4 && fechaInicioVariable.getDate() == 28){
                                 //
@@ -375,12 +419,16 @@ export default class EditarVariablesHome extends React.Component {
                                 $("#esColeccion").prop('checked', true);
                             else
                                 $("#esColeccion").prop('checked', false);
+                            banderaEsInstruccionSQL = this.props.esInstruccionSQLVariable;
+                            banderaEsObjeto = this.props.esObjetoVariable;
                             fechaInicioVariable = result.recordset[0].fechaInicioCalculo;
                             periodicidadVariable = result.recordset[0].periodicidad;
-                            analistaVariable = result.recordset[0].nombre;
+                            responsableVariable = result.recordset[0].responsable;
+                            categoriaVariable = result.recordset[0].categoriaVariable;
                             $("#periodicidad").val(periodicidadVariable);
-                            $("#analista").val(analistaVariable);
+                            $("#responsable").val(responsableVariable);
                             $("#fecha").datepicker("setDate", fechaInicioVariable);
+                            $("#categoriaVariable").val(categoriaVariable);
                             if(fechaInicioVariable.getFullYear() == 1964 && fechaInicioVariable.getMonth() == 4 && fechaInicioVariable.getDate() == 28){
                                 //
                             } else {
@@ -420,11 +468,17 @@ export default class EditarVariablesHome extends React.Component {
                                 atributosVario = result.recordset;
                             } else {
                                 atributosUnico = result.recordset;
+                                tipoDeAsignacionSeleccionado = result.recordset[0].tipo;
+                                this.setState({
+                                    tipoNuevaVariable: result.recordset[0].tipo
+                                });
                             }
                             this.setState({
                                 atributos: result.recordset
                             });
                             for (var i = 0; i < result.recordset.length; i++) {
+                                console.log('result.recordset[i]');
+                                console.log(result.recordset[i]);
                                 this.traerSegmentosDeCampo(result.recordset[i], i, esObjeto);
                                 this.traerFormulasDeCampo(result.recordset[i], i, esObjeto);
                             };
@@ -453,8 +507,10 @@ export default class EditarVariablesHome extends React.Component {
                     }
                 } else {
                     transaction.commit(err => {
-                        console.log('1');
                         if(result.recordset.length > 0) {
+                            console.log('SegmentoReglasVariables');
+                            console.log('result.recordset');
+                            console.log(result.recordset);
                             if(esObjeto) {
                                 if(segmentoReglasVariosAtributos[posicionAtributo] ==  null)
                                     segmentoReglasVariosAtributos[posicionAtributo] = [];
@@ -462,6 +518,8 @@ export default class EditarVariablesHome extends React.Component {
                                 for (var i = 0; i < segmentoReglasVariosAtributos[posicionAtributo].length; i++) {
                                     this.traerReglasDeCampo(campo, segmentoReglasVariosAtributos[posicionAtributo][i], posicionAtributo, i, esObjeto);
                                 };
+                                console.log('segmentoReglasVariosAtributos');
+                                console.log(segmentoReglasVariosAtributos);
                             } else {
                                 if(segmentoReglasUnAtributo[posicionAtributo] ==  null)
                                     segmentoReglasUnAtributo[posicionAtributo] = [];
@@ -469,6 +527,8 @@ export default class EditarVariablesHome extends React.Component {
                                 for (var i = 0; i < segmentoReglasUnAtributo[posicionAtributo].length; i++) {
                                     this.traerReglasDeCampo(campo, segmentoReglasUnAtributo[posicionAtributo][i], posicionAtributo, i, esObjeto);
                                 };
+                                console.log('segmentoReglasUnAtributo');
+                                console.log(segmentoReglasUnAtributo);
                             }
                         }
                     });
@@ -495,26 +555,30 @@ export default class EditarVariablesHome extends React.Component {
                     }
                 } else {
                     transaction.commit(err => {
-                        console.log('2');
                         if(result.recordset.length > 0) {
+                            console.log('ReglasVariables');
+                            console.log('result.recordset');
+                            console.log(result.recordset);
                             var tempCopy = result.recordset;
                             tempCopy.sort(function(a, b){
                                 return a.reglaPadreID-b.reglaPadreID}
                             );
-                            console.log('tempCopy')
-                            console.log(tempCopy)
                             if(esObjeto) {
                                 if(reglasVariosAtributos[posicionAtributo] == null)
                                     reglasVariosAtributos[posicionAtributo] = [];
                                 if(reglasVariosAtributos[posicionAtributo][posicionSegmento] == null)
                                     reglasVariosAtributos[posicionAtributo][posicionSegmento] = [];
                                 reglasVariosAtributos[posicionAtributo][posicionSegmento] = tempCopy;
+                                console.log('reglasVariosAtributos');
+                                console.log(reglasVariosAtributos);
                             } else {
                                 if(reglasUnAtributo[posicionAtributo] == null)
                                     reglasUnAtributo[posicionAtributo] = [];
                                 if(reglasUnAtributo[posicionAtributo][posicionSegmento] == null)
                                     reglasUnAtributo[posicionAtributo][posicionSegmento] = [];
                                 reglasUnAtributo[posicionAtributo][posicionSegmento] = tempCopy;
+                                console.log('reglasUnAtributo');
+                                console.log(reglasUnAtributo);
                             }
                         }
                     });
@@ -541,8 +605,10 @@ export default class EditarVariablesHome extends React.Component {
                     }
                 } else {
                     transaction.commit(err => {
-                        console.log('11');
                         if(result.recordset.length > 0) {
+                            console.log('FormulasVariablesCampos');
+                            console.log('result.recordset');
+                            console.log(result.recordset);
                             if(esObjeto) {
                                 if(formulasVariosAtributos[posicionAtributo] == null)
                                     formulasVariosAtributos[posicionAtributo] = [];
@@ -557,6 +623,8 @@ export default class EditarVariablesHome extends React.Component {
                                 for (var i = 0; i < formulasUnAtributo[posicionAtributo].length; i++) {
                                     this.traerElementosDeCampo(campo, formulasUnAtributo[posicionAtributo][i], posicionAtributo, i, esObjeto);
                                 };
+                                console.log('formulasUnAtributo');
+                                console.log(formulasUnAtributo);
                             }
                         }
                     });
@@ -583,22 +651,26 @@ export default class EditarVariablesHome extends React.Component {
                     }
                 } else {
                     transaction.commit(err => {
-                        console.log('22');
-                        console.log('result.recordset');
-                        console.log(result.recordset);
                         if(result.recordset.length > 0) {
+                            console.log('ElementoFormulasVariablesCampos');
+                            console.log('result.recordset');
+                            console.log(result.recordset);
                             if(esObjeto) {
                                 if(elementosFormulasVariosAtributos[posicionAtributo] == null)
                                     elementosFormulasVariosAtributos[posicionAtributo] = [];
                                 if(elementosFormulasVariosAtributos[posicionAtributo][posicionFormula] == null)
                                     elementosFormulasVariosAtributos[posicionAtributo][posicionFormula] = [];
                                 elementosFormulasVariosAtributos[posicionAtributo][posicionFormula] = result.recordset;
+                                console.log('elementosFormulasVariosAtributos');
+                                console.log(elementosFormulasVariosAtributos);
                             } else {
                                 if(elementosFormulasUnAtributos[posicionAtributo] == null)
                                     elementosFormulasUnAtributos[posicionAtributo] = [];
                                 if(elementosFormulasUnAtributos[posicionAtributo][posicionFormula] == null)
                                     elementosFormulasUnAtributos[posicionAtributo][posicionFormula] = [];
                                 elementosFormulasUnAtributos[posicionAtributo][posicionFormula] = result.recordset;
+                                console.log('elementosFormulasUnAtributos');
+                                console.log(elementosFormulasUnAtributos);
                             }
                         }
                     });
@@ -635,7 +707,7 @@ export default class EditarVariablesHome extends React.Component {
                                 <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.props.configuracionHome}><a href="#" className={"breadcrumb-link"}>Configuraci&oacute;n</a></li>
                                 <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.props.goOptions}><a href="#" className={"breadcrumb-link"}>Tipo de Configuraci&oacute;n</a></li>
                                 <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.props.retornoSeleccionVariables}><a href="#" className={"breadcrumb-link"}>Variables</a></li>
-                                <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.returnToCreateVariable}><a href="#" className={"breadcrumb-link"}>Crear Variable</a></li>
+                                <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.returnToCreateVariable}><a href="#" className={"breadcrumb-link"}>Modificar Variable</a></li>
                                 <li className={"breadcrumb-item active font-16"} aria-current="page">Condiciones</li>
                             </ol>
                         </nav>
@@ -686,7 +758,7 @@ export default class EditarVariablesHome extends React.Component {
         this.goToCreateConditions(posicionAtributoSeleccionado);
     }
 
-    goToCreateFormula (indice) {
+    goToCreateFormula (indice, esEditarVarN) {
         var navbar = <div className={"row"}>
             <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
                 <div className={"page-header"}>
@@ -697,7 +769,7 @@ export default class EditarVariablesHome extends React.Component {
                                 <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.props.configuracionHome}><a href="#" className={"breadcrumb-link"}>Configuraci&oacute;n</a></li>
                                 <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.props.goOptions}><a href="#" className={"breadcrumb-link"}>Tipo de Configuraci&oacute;n</a></li>
                                 <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.props.retornoSeleccionVariables}><a href="#" className={"breadcrumb-link"}>Variables</a></li>
-                                <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.returnToCreateVariable}><a href="#" className={"breadcrumb-link"}>Crear Variable</a></li>
+                                <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.returnToCreateVariable}><a href="#" className={"breadcrumb-link"}>Modificar Variable</a></li>
                                 <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.goToCreateConditionsClickNavBarFormula}><a href="#" className={"breadcrumb-link"}>Condiciones</a></li>
                                 <li className={"breadcrumb-item active font-16"} aria-current="page">Crear F&oacute;rmula</li>
                             </ol>
@@ -712,7 +784,6 @@ export default class EditarVariablesHome extends React.Component {
             esOperacionSQL = false;
             operacionSQL = "";
         }
-        var esEditarVar = false;
         if (this.state.formulaSeleccionadaEdit != null) {
             if(this.state.formulaSeleccionadaEdit.operacion.localeCompare("ASIG") == 0 ||
                 this.state.formulaSeleccionadaEdit.operacion.localeCompare("COUNT") == 0 ||
@@ -723,12 +794,11 @@ export default class EditarVariablesHome extends React.Component {
                 this.state.formulaSeleccionadaEdit.operacion.localeCompare("AUTOSUM") == 0 ) {
 
                 esOperacionSQL = true;
-                operacionSQL = formulas[posicionAtributoSeleccionado][indice].operacion;
+                operacionSQL = this.state.formulaSeleccionadaEdit.operacion;
             } else {
                 esOperacionSQL = false;
                 operacionSQL = "";
             }
-            esEditarVar = true;
         }
 
         //deseleccionado regla seleccionada
@@ -737,7 +807,7 @@ export default class EditarVariablesHome extends React.Component {
         this.setState({
             componenteActual: "variableFormula",
             navbar: navbar,
-            esEditarVar: esEditarVar,
+            esEditarVar: esEditarVarN,
             esOperacionSQL: esOperacionSQL,
             operacionSQL: operacionSQL
         });
@@ -754,7 +824,7 @@ export default class EditarVariablesHome extends React.Component {
                                 <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.props.configuracionHome}><a href="#" className={"breadcrumb-link"}>Configuraci&oacute;n</a></li>
                                 <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.props.goOptions}><a href="#" className={"breadcrumb-link"}>Tipo de Configuraci&oacute;n</a></li>
                                 <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.props.retornoSeleccionVariables}><a href="#" className={"breadcrumb-link"}>Variables</a></li>
-                                <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.returnToCreateVariable}><a href="#" className={"breadcrumb-link"}>Crear Variable</a></li>
+                                <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.returnToCreateVariable}><a href="#" className={"breadcrumb-link"}>Modificar Variable</a></li>
                                 <li className={"breadcrumb-item active font-16"} aria-current="page">Instrucción SQL</li>
                             </ol>
                         </nav>
@@ -768,7 +838,7 @@ export default class EditarVariablesHome extends React.Component {
         });
     }
 
-    goToTimeline () {
+    goToTimeline (esExcel, idVariableExcel, nombreVariable, esColeccion) {
         var navbar = <div className={"row"}>
             <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
                 <div className={"page-header"}>
@@ -779,7 +849,7 @@ export default class EditarVariablesHome extends React.Component {
                                 <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.props.configuracionHome}><a href="#" className={"breadcrumb-link"}>Configuraci&oacute;n</a></li>
                                 <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.props.goOptions}><a href="#" className={"breadcrumb-link"}>Tipo de Configuraci&oacute;n</a></li>
                                 <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.props.retornoSeleccionVariables}><a href="#" className={"breadcrumb-link"}>Variables</a></li>
-                                <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.returnToCreateVariable}><a href="#" className={"breadcrumb-link"}>Editar Variable</a></li>
+                                <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.returnToCreateVariable}><a href="#" className={"breadcrumb-link"}>Modificar Variable</a></li>
                                 <li className={"breadcrumb-item active font-16"} aria-current="page">Linea de Tiempo</li>
                             </ol>
                         </nav>
@@ -788,10 +858,26 @@ export default class EditarVariablesHome extends React.Component {
             </div>
         </div>;
 
-        this.setState({
-            navbar: navbar,
-            componenteActual: "timelineVariable",
-        });
+        if(esExcel && idVariableExcel != undefined) {
+            this.setState({
+                idVariable: idVariableExcel,
+                esObjetoVariable: false,
+                esInstruccionSQLVariable: false,
+                nombreVariable: nombreVariable,
+                esColeccion: esColeccion,
+                navbar: navbar,
+                componenteActual: "timelineVariable",
+            }, console.log(this.state));
+        } else {
+            this.setState({
+                idVariable: this.props.idVariable,
+                esObjetoVariable: this.props.esObjetoVariable,
+                esInstruccionSQLVariable: this.props.esInstruccionSQLVariable,
+                esColeccion: this.state.esColeccion,
+                navbar: navbar,
+                componenteActual: "timelineVariable",
+            });
+        }
     }
 
     createVariable (variable, campos) {
@@ -803,49 +889,20 @@ export default class EditarVariablesHome extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("insert into Variables (nombre, descripcion, esObjeto, esColeccion, objetoPadreID, esInstruccionSQL, periodicidad, fechaInicioCalculo, analista, guardar) values ('"+variable.nombre+"', '"+variable.descripcion+"', '"+variable.esObjeto+"', '"+variable.esColeccion+"', "+variable.objetoPadreID+", '"+variable.esInstruccionSQL+"', '"+periodicidad+"', '"+fechaInicioCalculo.getFullYear()+"-"+(fechaInicioCalculo.getMonth()+1)+"-"+fechaInicioCalculo.getDate()+"', '"+analista+"', '"+variable.guardar+"')", (err, result) => {
+            request.query("insert into Variables (nombre, descripcion, esObjeto, esColeccion, objetoPadreID, esInstruccionSQL, periodicidad, fechaInicioCalculo, responsable, guardar, categoriaVariable) values ('"+variable.nombre+"', '"+variable.descripcion+"', '"+variable.esObjeto+"', '"+variable.esColeccion+"', "+variable.objetoPadreID+", '"+variable.esInstruccionSQL+"', '"+variable.periodicidad+"', '"+variable.fechaInicioCalculo.getFullYear()+"-"+(variable.fechaInicioCalculo.getMonth()+1)+"-"+variable.fechaInicioCalculo.getDate()+"', '"+variable.responsable+"', '"+variable.guardar+"', '"+variable.categoriaVariable+"')", (err, result) => {
                 if (err) {
                     if (!rolledBack) {
                         console.log(err);
                         contadorObjetosGuardados++;
+                        this.limpiarArreglos();
                         transaction.rollback(err => {
                         });
                     }
                 } else {
                     transaction.commit(err => {
                         alert("variable modificada.");
-                        $("#nombreFuenteDato").val("");
-                        $("#descripcionFuenteDato").val("");
-                        contadorObjetosGuardados++;
-                        this.getVariableID(variable, campos);
-                    });
-                }
-            });
-        }); // fin transaction
-    }
-
-    updateVariable (variable, campos) {
-        //validaciones existe por lo menos regla asignar
-        const transaction = new sql.Transaction( this.props.pool );
-        transaction.begin(err => {
-            var rolledBack = false;
-            transaction.on('rollback', aborted => {
-                rolledBack = true;
-            });
-            const request = new sql.Request(transaction);
-            request.query("update Variables set nombre = '"+variable.nombre+"', descripcion = '"+variable.descripcion+"', esObjeto = '"+variable.esObjeto+"', objetoPadreID = "+variable.objetoPadreID+", esInstruccionSQL = '"+variable.esInstruccionSQL+"', periodicidad = '"+periodicidad+"', fechaInicioCalculo = '"+fechaInicioCalculo.getFullYear()+"-"+(fechaInicioCalculo.getMonth()+1)+"-"+fechaInicioCalculo.getDate()+"', analista = '"+analista+"', guardar = '"+variable.guardar+"' where ID = "+this.props.idVariable, (err, result) => {
-                if (err) {
-                    if (!rolledBack) {
-                        console.log(err);
-                        contadorObjetosGuardados++;
-                        transaction.rollback(err => {
-                        });
-                    }
-                } else {
-                    transaction.commit(err => {
-                        alert("variable modificada.");
-                        $("#nombreFuenteDato").val("");
-                        $("#descripcionFuenteDato").val("");
+                        /*$("#nombreFuenteDato").val("");
+                        $("#descripcionFuenteDato").val("");*/
                         contadorObjetosGuardados++;
                         this.getVariableID(variable, campos);
                     });
@@ -866,6 +923,7 @@ export default class EditarVariablesHome extends React.Component {
             request.query("select top 1 * from Variables order by ID desc", (err, result) => {
                 if (err) {
                     console.log(err);
+                    this.limpiarArreglos();
                     if (!rolledBack) {
                         transaction.rollback(err => {
                         });
@@ -881,7 +939,6 @@ export default class EditarVariablesHome extends React.Component {
                                     this.createVariableField(result.recordset[0], campos[i], i);
                                 };
                             }
-                            this.verificarSiExisteExcelEnResultadosHistoricosModificar(result.recordset[0]);
                         }
                     });
                 }
@@ -889,8 +946,49 @@ export default class EditarVariablesHome extends React.Component {
         }); // fin transaction
     }
 
-    createVariableSQL () {
-        for (var i = 0; i < variablesSQL.length; i++) {
+    updateVariable (variable, campos) {
+        //validaciones existe por lo menos regla asignar
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("update Variables set nombre = '"+variable.nombre+"', descripcion = '"+variable.descripcion+"', esObjeto = '"+variable.esObjeto+"', objetoPadreID = "+variable.objetoPadreID+", esInstruccionSQL = '"+variable.esInstruccionSQL+"', periodicidad = '"+variable.periodicidad+"', fechaInicioCalculo = '"+variable.fechaInicioCalculo.getFullYear()+"-"+(variable.fechaInicioCalculo.getMonth()+1)+"-"+variable.fechaInicioCalculo.getDate()+"', responsable = '"+variable.responsable+"', guardar = '"+variable.guardar+"', categoriaVariable = '"+variable.categoriaVariable+"' where ID = "+this.props.idVariable, (err, result) => {
+                if (err) {
+                    if (!rolledBack) {
+                        console.log(err);
+                        contadorObjetosGuardados++;
+                        this.limpiarArreglos();
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        alert("variable modificada.");
+                        /*$("#nombreFuenteDato").val("");
+                        $("#descripcionFuenteDato").val("");*/
+                        //para en verificarSiExisteExcelEnResultadosHistoricosModificar
+                        variable.ID = this.props.idVariable;
+
+                        contadorObjetosGuardados++;
+                        if(banderaEsInstruccionSQL) {
+                            this.createVariableSQL(variable);
+                        } else {
+                            for (var i = 0; i < campos.length; i++) {
+                                contadorObjetosAGuardar++;
+                                this.createVariableField(variable, campos[i], i);
+                            };
+                        }
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    createVariableSQL (variable) {
+        for (let i = 0; i < variablesSQL.length; i++) {
             let nombre = variablesSQL[i].nombre;
             let tipo = variablesSQL[i].tipo;
             const transaction = new sql.Transaction( this.props.pool );
@@ -900,9 +998,10 @@ export default class EditarVariablesHome extends React.Component {
                     rolledBack = true;
                 });
                 const request = new sql.Request(transaction);
-                request.query("insert into InstruccionSQLCampos (variableID, nombre, tipo) values ("+this.props.idVariable+", '"+nombre+"', '"+tipo+"')", (err, result) => {
+                request.query("insert into InstruccionSQLCampos (variableID, nombre, tipo) values ("+variable.ID+", '"+nombre+"', '"+tipo+"')", (err, result) => {
                     if (err) {
                         console.log(err);
+                        this.limpiarArreglos();
                         if (!rolledBack) {
                             transaction.rollback(err => {
                             });
@@ -910,7 +1009,7 @@ export default class EditarVariablesHome extends React.Component {
                     } else {
                         transaction.commit(err => {
                             if(i == variablesSQL.length-1)
-                                this.createInstructionSQL();
+                                this.createInstructionSQL(variable);
                         });
                     }
                 });
@@ -918,7 +1017,7 @@ export default class EditarVariablesHome extends React.Component {
         };
     }
 
-    createInstructionSQL () {
+    createInstructionSQL (variable) {
         const transaction = new sql.Transaction( this.props.pool );
         transaction.begin(err => {
             var rolledBack = false;
@@ -926,23 +1025,25 @@ export default class EditarVariablesHome extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("insert into InstruccionSQL (variableID, instruccionSQL) values ("+this.props.idVariable+", '"+instruccionSQL+"')", (err, result) => {
+            request.query("insert into InstruccionSQL (variableID, instruccionSQL) values ("+variable.ID+", '"+instruccionSQL+"')", (err, result) => {
                 if (err) {
                     console.log(err);
+                    this.limpiarArreglos();
                     if (!rolledBack) {
                         transaction.rollback(err => {
                         });
                     }
                 } else {
                     transaction.commit(err => {
-                        this.limpiarArreglos();
+                        //this.limpiarArreglos();
+                        this.verificarSiExisteExcelEnResultadosHistoricosModificar(variable);
                     });
                 }
             });
         }); // fin transaction
     }
 
-    createVariableField (variableCampo, posicionAtributo) {
+    createVariableField (variable, variableCampo, posicionAtributo) {
         const transaction = new sql.Transaction( this.props.pool );
         transaction.begin(err => {
             var rolledBack = false;
@@ -950,9 +1051,10 @@ export default class EditarVariablesHome extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("insert into VariablesCampos (variableID, nombre, tipo, nivel) values ("+this.props.idVariable+", '"+variableCampo.nombre+"', '"+variableCampo.tipo+"', "+variableCampo.nivel+")", (err, result) => {
+            request.query("insert into VariablesCampos (variableID, nombre, tipo, nivel) values ("+variable.ID+", '"+variableCampo.nombre+"', '"+variableCampo.tipo+"', "+variableCampo.nivel+")", (err, result) => {
                 if (err) {
                     console.log(err);
+                    this.limpiarArreglos();
                     if (!rolledBack) {
                         contadorObjetosGuardados++;
                         transaction.rollback(err => {
@@ -962,14 +1064,14 @@ export default class EditarVariablesHome extends React.Component {
                     transaction.commit(err => {
                         //this.props.terminoCrearCampo(variable, variableCampo);
                         contadorObjetosGuardados++;
-                        this.getVariableFieldID(variableCampo, posicionAtributo);
+                        this.getVariableFieldID(variable, variableCampo, posicionAtributo);
                     });
                 }
             });
         }); // fin transaction
     }
 
-    getVariableFieldID (variableCampo, posicionAtributo) {
+    getVariableFieldID (variable, variableCampo, posicionAtributo) {
         //validaciones existe por lo menos regla asignar
         const transaction = new sql.Transaction( this.props.pool );
         transaction.begin(err => {
@@ -978,9 +1080,10 @@ export default class EditarVariablesHome extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("select * from VariablesCampos where nombre = '"+variableCampo.nombre+"' and variableID = "+this.props.idVariable, (err, result) => {
+            request.query("select * from VariablesCampos where nombre = '"+variableCampo.nombre+"' and variableID = "+variable.ID, (err, result) => {
                 if (err) {
                     console.log(err);
+                    this.limpiarArreglos();
                     if (!rolledBack) {
                         transaction.rollback(err => {
                         });
@@ -1009,7 +1112,7 @@ export default class EditarVariablesHome extends React.Component {
                                 arregloElementosDeFormulasALlamar[posicionAtributo] = [];
                             formulas[posicionAtributo][j].posicionFormulaEnCampo = j;
                             contadorObjetosAGuardar++;
-                            this.createVariableFieldFormula(result.recordset[0], formulas[posicionAtributo][j], posicionAtributo, j, arregloDeFormulasALlamar, arregloElementosDeFormulasALlamar);
+                            this.createVariableFieldFormula(variable, result.recordset[0], formulas[posicionAtributo][j], posicionAtributo, j, arregloDeFormulasALlamar, arregloElementosDeFormulasALlamar);
                         };
                         if(formulas[posicionAtributo].length == 0) {
                             var arregloDeSegmentosALlamar = [], arregloReglasDeSegmentosALlamar = [];
@@ -1021,12 +1124,13 @@ export default class EditarVariablesHome extends React.Component {
                                     arregloReglasDeSegmentosALlamar[posicionAtributo] = [];
                                 segmentoRegla[posicionAtributo][j].posicionSegmentoEnCampo = j;
                                 contadorObjetosAGuardar++;
-                                this.createVariableFieldRuleSegments(result.recordset[0], segmentoRegla[posicionAtributo][j], posicionAtributo, j, arregloDeSegmentosALlamar, arregloReglasDeSegmentosALlamar);
+                                this.createVariableFieldRuleSegments(variable, result.recordset[0], segmentoRegla[posicionAtributo][j], posicionAtributo, j, arregloDeSegmentosALlamar, arregloReglasDeSegmentosALlamar);
                             };
                         }
                         if(formulas[posicionAtributo].length == 0 && segmentoRegla[posicionAtributo].length == 0) {
                             console.log('HOLA 1');
-                            this.limpiarArreglos();
+                            //this.limpiarArreglos();
+                            this.verificarSiExisteExcelEnResultadosHistoricosModificar(variable);
                         }
                     });
                 }
@@ -1034,7 +1138,15 @@ export default class EditarVariablesHome extends React.Component {
         }); // fin transaction
     }
 
-    createVariableFieldRuleSegments (variableCampo, segmento, posicionAtributo, posicionSegmento, arregloDeSegmentosALlamar, arregloReglasDeSegmentosALlamar) {
+    createVariableFieldRuleSegments (variable, variableCampo, segmento, posicionAtributo, posicionSegmento, arregloDeSegmentosALlamar, arregloReglasDeSegmentosALlamar) {
+        console.log('variableCampo');
+        console.log(variableCampo);
+        console.log('segmento');
+        console.log(segmento);
+        console.log('posicionAtributo');
+        console.log(posicionAtributo);
+        console.log('posicionSegmento');
+        console.log(posicionSegmento);
         const transaction = new sql.Transaction( this.props.pool );
         transaction.begin(err => {
             var rolledBack = false;
@@ -1042,9 +1154,10 @@ export default class EditarVariablesHome extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("insert into SegmentoReglasVariables (conexionTablaID, variableID, variableCampoID, variableIDCreacionCodigo, excelArchivoID, excelVariableID, formaVariableID, esConexionTabla, posicionSegmentoEnCampo, nivelMax) values ("+segmento.conexionTablaID+", "+variable.ID+", "+variableCampo.ID+", "+segmento.variableID+", "+segmento.excelArchivoID+", "+segmento.excelVariableID+", "+segmento.formaVariableID+", '"+segmento.esConexionTabla+"', "+posicionSegmento+", "+segmento.nivelMax+")", (err, result) => {
+            request.query("insert into SegmentoReglasVariables (conexionTablaID, variableID, variableCampoID, variableIDCreacionCodigo, excelArchivoID, excelVariableID, formaVariableID, esConexionTabla, esValorManual, posicionSegmentoEnCampo, nivelMax) values ("+segmento.conexionTablaID+", "+variable.ID+", "+variableCampo.ID+", "+segmento.variableID+", "+segmento.excelArchivoID+", "+segmento.excelVariableID+", "+segmento.formaVariableID+", '"+segmento.esConexionTabla+"', '"+segmento.esValorManual+"', "+posicionSegmento+", "+segmento.nivelMax+")", (err, result) => {
                 if (err) {
                     console.log(err);
+                    this.limpiarArreglos();
                     if (!rolledBack) {
                         contadorObjetosGuardados++;
                         transaction.rollback(err => {
@@ -1053,14 +1166,14 @@ export default class EditarVariablesHome extends React.Component {
                 } else {
                     transaction.commit(err => {
                         contadorObjetosGuardados++;
-                        this.getVariableFieldRuleSegments(variableCampo, segmento, posicionAtributo, posicionSegmento, arregloDeSegmentosALlamar, arregloReglasDeSegmentosALlamar);
+                        this.getVariableFieldRuleSegments(variable, variableCampo, segmento, posicionAtributo, posicionSegmento, arregloDeSegmentosALlamar, arregloReglasDeSegmentosALlamar);
                     });
                 }
             });
         }); // fin transaction
     }
 
-    getVariableFieldRuleSegments (variableCampo, segmento, posicionAtributo, posicionSegmento, arregloDeSegmentosALlamar, arregloReglasDeSegmentosALlamar) {
+    getVariableFieldRuleSegments (variable, variableCampo, segmento, posicionAtributo, posicionSegmento, arregloDeSegmentosALlamar, arregloReglasDeSegmentosALlamar) {
         const transaction = new sql.Transaction( this.props.pool );
         transaction.begin(err => {
             var rolledBack = false;
@@ -1068,9 +1181,10 @@ export default class EditarVariablesHome extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("select * from SegmentoReglas where conexionTablaID = "+segmento.conexionTablaID+" and variableID = "+this.props.idVariable+" and variableCampoID = "+variableCampo.ID+" and esConexionTabla = '"+segmento.esConexionTabla+"' and posicionSegmentoEnCampo = "+posicionSegmento+" and nivelMax = "+segmento.nivelMax, (err, result) => {
+            request.query("select * from SegmentoReglasVariables where conexionTablaID = "+segmento.conexionTablaID+" and variableID = "+variable.ID+" and variableCampoID = "+variableCampo.ID+" and esConexionTabla = '"+segmento.esConexionTabla+"' and posicionSegmentoEnCampo = "+posicionSegmento+" and nivelMax = "+segmento.nivelMax, (err, result) => {
                 if (err) {
                     console.log(err);
+                    this.limpiarArreglos();
                     if (!rolledBack) {
                         transaction.rollback(err => {
                         });
@@ -1122,7 +1236,7 @@ export default class EditarVariablesHome extends React.Component {
                             //crear reglas que sean de comparacion (esCondicion = verdadero)
                             if(reglas[posicionAtributo][posicionSegmento][0].esCondicion) {
                                 contadorObjetosAGuardar++;
-                                this.createVariableFieldRules(variableCampo, result.recordset[0], reglas[posicionAtributo][posicionSegmento][0], posicionAtributo, posicionSegmento, 0, arregloReglasDeSegmentosALlamar, -1);
+                                this.createVariableFieldRules(variable, variableCampo, result.recordset[0], reglas[posicionAtributo][posicionSegmento][0], posicionAtributo, posicionSegmento, 0, arregloReglasDeSegmentosALlamar, -1);
                             } else if(!reglas[posicionAtributo][posicionSegmento][0].esCondicion) {
                                 contadorObjetosAGuardar++;
                                 //crear reglas que sean de asignacion (esCondicion = falso) con el id de formula correcto
@@ -1137,11 +1251,12 @@ export default class EditarVariablesHome extends React.Component {
                                         break;
                                     }
                                 };
-                                this.createVariableFieldRules(variableCampo, result.recordset[0], reglas[posicionAtributo][posicionSegmento][0], posicionAtributo, posicionSegmento, 0, arregloReglasDeSegmentosALlamar, -1);
+                                this.createVariableFieldRules(variable, variableCampo, result.recordset[0], reglas[posicionAtributo][posicionSegmento][0], posicionAtributo, posicionSegmento, 0, arregloReglasDeSegmentosALlamar, -1);
                             }
                             if( arregloDeSegmentosALlamar.length == 0 && arregloReglasDeSegmentosALlamar.length == 0) {
                                 console.log('HOLA 2');
-                                this.limpiarArreglos();
+                                //this.limpiarArreglos();
+                                this.verificarSiExisteExcelEnResultadosHistoricosModificar(variable);
                             }
                         }
                     });
@@ -1149,7 +1264,7 @@ export default class EditarVariablesHome extends React.Component {
             });
         }); // fin transaction
     }
-    createVariableFieldRules (variableCampo, segmento, regla, posicionAtributo, posicionSegmento, posicionRegla, arregloReglasDeSegmentosALlamar, reglaPadreID) {
+    createVariableFieldRules (variable, variableCampo, segmento, regla, posicionAtributo, posicionSegmento, posicionRegla, arregloReglasDeSegmentosALlamar, reglaPadreID) {
         if(regla != undefined) {
             console.log('variableCampo');
             console.log(variableCampo);
@@ -1172,9 +1287,10 @@ export default class EditarVariablesHome extends React.Component {
                     rolledBack = true;
                 });
                 const request = new sql.Request(transaction);
-                request.query("insert into Reglas (segmentoReglaID, variableID, variableCampoID, formulaID, reglaPadreID, conexionTablaID, nombreColumnaEnTabla, tipoCampoObjetivo, esCondicion, esConexionTabla, posicionSegmento, operacion, operacionTexto, valor, texto, nivel) values ("+segmento.ID+", "+this.props.idVariable+", "+variableCampo.ID+", "+regla.formulaID+", "+reglaPadreID+", "+regla.conexionTablaID+", '"+regla.nombreColumnaEnTabla+"', '"+regla.tipoCampoObjetivo+"', '"+regla.esCondicion+"', '"+regla.esConexionTabla+"', "+posicionSegmento+", '"+regla.operacion+"', '"+regla.operacionTexto+"', '"+regla.valor+"', '"+regla.texto+"', "+regla.nivel+")", (err, result) => {
+                request.query("insert into ReglasVariables (segmentoReglaID, variableID, variableCampoID, formulaID, reglaPadreID, conexionTablaID, nombreColumnaEnTabla, tipoCampoObjetivo, esCondicion, esConexionTabla, posicionSegmentoEnCampo, operacion, operacionTexto, valor, texto, nivel) values ("+segmento.ID+", "+variable.ID+", "+variableCampo.ID+", "+regla.formulaID+", "+reglaPadreID+", "+regla.conexionTablaID+", '"+regla.nombreColumnaEnTabla+"', '"+regla.tipoCampoObjetivo+"', '"+regla.esCondicion+"', '"+regla.esConexionTabla+"', "+posicionSegmento+", '"+regla.operacion+"', '"+regla.operacionTexto+"', '"+regla.valor+"', '"+regla.texto+"', "+regla.nivel+")", (err, result) => {
                     if (err) {
                         console.log(err);
+                        this.limpiarArreglos();
                         if (!rolledBack) {
                             contadorObjetosGuardados++;
                             this.limpiarArreglos();
@@ -1217,9 +1333,10 @@ export default class EditarVariablesHome extends React.Component {
                             }
                             if( arregloReglasDeSegmentosALlamar.length == 0) {
                                 console.log('HOLA 3');
-                                this.limpiarArreglos();
+                                //this.limpiarArreglos();
+                                this.verificarSiExisteExcelEnResultadosHistoricosModificar(variable);
                             } else {
-                                this.traerRegla(variableCampo, segmento, regla, posicionAtributo, posicionSegmento, posicionRegla, arregloReglasDeSegmentosALlamar, reglaPadreID);
+                                this.traerRegla(variable, variableCampo, segmento, regla, posicionAtributo, posicionSegmento, posicionRegla, arregloReglasDeSegmentosALlamar, reglaPadreID);
                             }
                         });
                     }
@@ -1227,11 +1344,12 @@ export default class EditarVariablesHome extends React.Component {
             }); // fin transaction
         } else {
             console.log('HOLA 4');
-            this.limpiarArreglos();
+            //this.limpiarArreglos();
+            this.verificarSiExisteExcelEnResultadosHistoricosModificar(variable);
         }
     }
 
-    traerRegla(variableCampo, segmento, regla, posicionAtributo, posicionSegmento, posicionRegla, arregloReglasDeSegmentosALlamar, reglaPadreID) {
+    traerRegla(variable, variableCampo, segmento, regla, posicionAtributo, posicionSegmento, posicionRegla, arregloReglasDeSegmentosALlamar, reglaPadreID) {
         console.log('variableCampo');
         console.log(variableCampo);
         console.log('segmento');
@@ -1245,9 +1363,10 @@ export default class EditarVariablesHome extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("select * from Reglas where segmentoReglaID = "+segmento.ID+" and variableID = "+this.props.idVariable+" and variableCampoID = "+variableCampo.ID+" and formulaID = "+regla.formulaID+" and reglaPadreID =  "+reglaPadreID+" and conexionTablaID = "+regla.conexionTablaID+" and nombreColumnaEnTabla = '"+regla.nombreColumnaEnTabla+"' and tipoCampoObjetivo = '"+regla.tipoCampoObjetivo+"' and esCondicion = '"+regla.esCondicion+"' and esConexionTabla = '"+regla.esConexionTabla+"' and posicionSegmentoEnCampo = "+posicionSegmento+" and operacion = '"+regla.operacion+"' and operacionTexto = '"+regla.operacionTexto+"' and valor = '"+regla.valor+"' and texto = '"+regla.texto+"' and nivel = "+regla.nivel, (err, result) => {
+            request.query("select * from ReglasVariables where segmentoReglaID = "+segmento.ID+" and variableID = "+variable.ID+" and variableCampoID = "+variableCampo.ID+" and formulaID = "+regla.formulaID+" and reglaPadreID =  "+reglaPadreID+" and conexionTablaID = "+regla.conexionTablaID+" and nombreColumnaEnTabla = '"+regla.nombreColumnaEnTabla+"' and tipoCampoObjetivo = '"+regla.tipoCampoObjetivo+"' and esCondicion = '"+regla.esCondicion+"' and esConexionTabla = '"+regla.esConexionTabla+"' and posicionSegmentoEnCampo = "+posicionSegmento+" and operacion = '"+regla.operacion+"' and operacionTexto = '"+regla.operacionTexto+"' and valor = '"+regla.valor+"' and texto = '"+regla.texto+"' and nivel = "+regla.nivel, (err, result) => {
                 if (err) {
                     console.log(err);
+                    this.limpiarArreglos();
                     if (!rolledBack) {
                         contadorObjetosGuardados++;
                         this.limpiarArreglos();
@@ -1278,7 +1397,7 @@ export default class EditarVariablesHome extends React.Component {
                             if(reglas[posicionAtributo] != undefined && reglas[posicionAtributo][posicionSegmento] != undefined && reglas[posicionAtributo][posicionSegmento][posicionRegla+1] != undefined) {
                                 if(reglas[posicionAtributo][posicionSegmento][posicionRegla+1].esCondicion) {
                                     contadorObjetosAGuardar++;
-                                    this.createVariableFieldRules(variableCampo, segmento, reglas[posicionAtributo][posicionSegmento][posicionRegla+1], posicionAtributo, posicionSegmento, posicionRegla+1, arregloReglasDeSegmentosALlamar, result.recordset[0].ID);
+                                    this.createVariableFieldRules(variable, variableCampo, segmento, reglas[posicionAtributo][posicionSegmento][posicionRegla+1], posicionAtributo, posicionSegmento, posicionRegla+1, arregloReglasDeSegmentosALlamar, result.recordset[0].ID);
                                 } else if(!reglas[posicionAtributo][posicionSegmento][posicionRegla+1].esCondicion) {
                                     contadorObjetosAGuardar++;
                                     //crear reglas que sean de asignacion (esCondicion = falso) con el id de formula correcto
@@ -1288,12 +1407,12 @@ export default class EditarVariablesHome extends React.Component {
                                             break;
                                         }
                                     };
-                                    this.createVariableFieldRules(variableCampo, segmento, reglas[posicionAtributo][posicionSegmento][posicionRegla+1], posicionAtributo, posicionSegmento, posicionRegla+1, arregloReglasDeSegmentosALlamar, result.recordset[0].ID);
+                                    this.createVariableFieldRules(variable, variableCampo, segmento, reglas[posicionAtributo][posicionSegmento][posicionRegla+1], posicionAtributo, posicionSegmento, posicionRegla+1, arregloReglasDeSegmentosALlamar, result.recordset[0].ID);
                                 }
                             } /*else if(reglas[posicionAtributo] != undefined && reglas[posicionAtributo][posicionSegmento+1] != undefined) {
                                 if(reglas[posicionAtributo][posicionSegmento+1][posicionRegla].esCondicion) {
                                     contadorObjetosAGuardar++;
-                                    this.createVariableFieldRules(variableCampo, segmento, reglas[posicionAtributo][posicionSegmento+1][posicionRegla], posicionAtributo, posicionSegmento+1, 0, arregloReglasDeSegmentosALlamar, result.recordset[0].ID);
+                                    this.createVariableFieldRules(variable, variableCampo, segmento, reglas[posicionAtributo][posicionSegmento+1][posicionRegla], posicionAtributo, posicionSegmento+1, 0, arregloReglasDeSegmentosALlamar, result.recordset[0].ID);
                                 } else if(!reglas[posicionAtributo][posicionSegmento+1][posicionRegla].esCondicion) {
                                     contadorObjetosAGuardar++;
                                     //crear reglas que sean de asignacion (esCondicion = falso) con el id de formula correcto
@@ -1303,7 +1422,7 @@ export default class EditarVariablesHome extends React.Component {
                                             break;
                                         }
                                     };
-                                    this.createVariableFieldRules(variableCampo, segmento, reglas[posicionAtributo][posicionSegmento+1][posicionRegla], posicionAtributo, posicionSegmento+1, 0, arregloReglasDeSegmentosALlamar, result.recordset[0].ID);
+                                    this.createVariableFieldRules(variable, variableCampo, segmento, reglas[posicionAtributo][posicionSegmento+1][posicionRegla], posicionAtributo, posicionSegmento+1, 0, arregloReglasDeSegmentosALlamar, result.recordset[0].ID);
                                 }
                             } else if(reglas[posicionAtributo+1] != undefined) {
                                 if(reglas[posicionAtributo+1][0][0].esCondicion) {
@@ -1318,11 +1437,12 @@ export default class EditarVariablesHome extends React.Component {
                                             break;
                                         }
                                     };
-                                    this.createVariableFieldRules(variableCampo, segmento, reglas[posicionAtributo+1][0][0], posicionAtributo+1, 0, 0, arregloReglasDeSegmentosALlamar, result.recordset[0].ID);
+                                    this.createVariableFieldRules(variable, variableCampo, segmento, reglas[posicionAtributo+1][0][0], posicionAtributo+1, 0, 0, arregloReglasDeSegmentosALlamar, result.recordset[0].ID);
                                 }
                             }*/ else {
                                 console.log('HOLA 5');
-                                this.limpiarArreglos();
+                                //this.limpiarArreglos();
+                                this.verificarSiExisteExcelEnResultadosHistoricosModificar(variable);
                             }
                         }
                     });
@@ -1331,7 +1451,7 @@ export default class EditarVariablesHome extends React.Component {
         }); // fin transaction
     }
 
-    createVariableFieldFormula (variableCampo, formula, posicionAtributo, posicionFormula, arregloDeFormulasALlamar, arregloElementosDeFormulasALlamar) {
+    createVariableFieldFormula (variable, variableCampo, formula, posicionAtributo, posicionFormula, arregloDeFormulasALlamar, arregloElementosDeFormulasALlamar) {
         const transaction = new sql.Transaction( this.props.pool );
         transaction.begin(err => {
             var rolledBack = false;
@@ -1339,9 +1459,10 @@ export default class EditarVariablesHome extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("insert into FormulasVariablesCampos (variableID, variableCampoID, posicionFormulaEnCampo, formula, operacion) values ("+this.props.idVariable+", "+variableCampo.ID+", "+posicionFormula+", '"+formula.formula+"', '"+formula.operacion+"')", (err, result) => {
+            request.query("insert into FormulasVariablesCampos (variableID, variableCampoID, posicionFormulaEnCampo, formula, operacion) values ("+variable.ID+", "+variableCampo.ID+", "+posicionFormula+", '"+formula.formula+"', '"+formula.operacion+"')", (err, result) => {
                 if (err) {
                     console.log(err);
+                    this.limpiarArreglos();
                     if (!rolledBack) {
                         contadorObjetosGuardados++;
                         transaction.rollback(err => {
@@ -1350,14 +1471,14 @@ export default class EditarVariablesHome extends React.Component {
                 } else {
                     transaction.commit(err => {
                         contadorObjetosGuardados++;
-                        this.getVariableFieldFormulaID(variableCampo, formula, posicionAtributo, posicionFormula, arregloDeFormulasALlamar, arregloElementosDeFormulasALlamar);
+                        this.getVariableFieldFormulaID(variable, variableCampo, formula, posicionAtributo, posicionFormula, arregloDeFormulasALlamar, arregloElementosDeFormulasALlamar);
                     });
                 }
             });
         }); // fin transaction
     }
 
-    getVariableFieldFormulaID (variableCampo, formula, posicionAtributo, posicionFormula, arregloDeFormulasALlamar, arregloElementosDeFormulasALlamar) {
+    getVariableFieldFormulaID (variable, variableCampo, formula, posicionAtributo, posicionFormula, arregloDeFormulasALlamar, arregloElementosDeFormulasALlamar) {
         const transaction = new sql.Transaction( this.props.pool );
         transaction.begin(err => {
             var rolledBack = false;
@@ -1365,9 +1486,10 @@ export default class EditarVariablesHome extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("select * from FormulasVariablesCampos where variableID = "+this.props.idVariable+" and variableCampoID = "+variableCampo.ID+" and posicionFormulaEnCampo = "+posicionFormula, (err, result) => {
+            request.query("select * from FormulasVariablesCampos where variableID = "+variable.ID+" and variableCampoID = "+variableCampo.ID+" and posicionFormulaEnCampo = "+posicionFormula, (err, result) => {
                 if (err) {
                     console.log(err);
+                    this.limpiarArreglos();
                     if (!rolledBack) {
                         transaction.rollback(err => {
                         });
@@ -1396,7 +1518,7 @@ export default class EditarVariablesHome extends React.Component {
                                     arregloElementosDeFormulasALlamar[posicionAtributo][posicionFormula] = [];
                                 arregloElementosDeFormulasALlamar[posicionAtributo][posicionFormula].push(i);
                                 contadorObjetosAGuardar++;
-                                this.createVariableFieldFormulaElement(variableCampo, result.recordset[0], elementosFormulas[posicionAtributo][posicionFormula][i], posicionAtributo, posicionFormula, i, arregloElementosDeFormulasALlamar, existenSegmentos);
+                                this.createVariableFieldFormulaElement(variable, variableCampo, result.recordset[0], elementosFormulas[posicionAtributo][posicionFormula][i], posicionAtributo, posicionFormula, i, arregloElementosDeFormulasALlamar, existenSegmentos);
                             };
                             formulas[posicionAtributo][posicionFormula].ID = result.recordset[0].ID;
                             if (banderaEsObjeto) {
@@ -1424,7 +1546,7 @@ export default class EditarVariablesHome extends React.Component {
                                         arregloReglasDeSegmentosALlamar[posicionAtributo] = [];
                                     contadorObjetosAGuardar++;
                                     segmentoRegla[posicionAtributo][j].posicionSegmentoEnCampo = j;
-                                    this.createVariableFieldRuleSegments(variableCampo, segmentoRegla[posicionAtributo][j], posicionAtributo, j, arregloDeSegmentosALlamar, arregloReglasDeSegmentosALlamar);
+                                    this.createVariableFieldRuleSegments(variable, variableCampo, segmentoRegla[posicionAtributo][j], posicionAtributo, j, arregloDeSegmentosALlamar, arregloReglasDeSegmentosALlamar);
                                 };
                                 /*for (var i = 0; i < segmentoRegla.length; i++) {
                                     for (var j = 0; j < segmentoRegla[i].length; j++) {
@@ -1441,7 +1563,8 @@ export default class EditarVariablesHome extends React.Component {
                             }
                             if( arregloDeFormulasALlamar.length == 0 && !existenSegmentos ) {
                                 console.log('HOLA 6');
-                                this.limpiarArreglos();
+                                //this.limpiarArreglos();
+                                this.verificarSiExisteExcelEnResultadosHistoricosModificar(variable);
                             }
                         }
                     });
@@ -1450,7 +1573,7 @@ export default class EditarVariablesHome extends React.Component {
         }); // fin transaction
     }
 
-    createVariableFieldFormulaElement (variableCampo, formula, elemento, posicionAtributo, posicionFormula, posicionElemento, arregloElementosDeFormulasALlamar, existenSegmentos) {
+    createVariableFieldFormulaElement (variable, variableCampo, formula, elemento, posicionAtributo, posicionFormula, posicionElemento, arregloElementosDeFormulasALlamar, existenSegmentos) {
         //if(elemento != undefined) {
             console.log('variableCampo');
             console.log(variableCampo);
@@ -1465,7 +1588,7 @@ export default class EditarVariablesHome extends React.Component {
                     rolledBack = true;
                 });
                 const request = new sql.Request(transaction);
-                request.query("insert into ElementoFormulasVariablesCampos (variableID, variableCampoID, formulaID, conexionTablaID, esFuenteDeDato, excelArchivoID , excelVariableID , formaVariableID , elementoVariableID, elementoVariableCampoID, nombreColumnaEnTabla, tipoColumnaEnTabla, nombreVariable, descripcion, operacion) values ("+this.props.idVariable+", "+variableCampo.ID+", "+formula.ID+", "+elemento.conexionTablaID+", '"+elemento.esFuenteDeDato+"', "+elemento.excelArchivoID+", "+elemento.excelVariableID+", "+elemento.formaVariableID+", "+elemento.elementoVariableID+", "+elemento.elementoVariableCampoID+", '"+elemento.nombreColumnaEnTabla+"', '"+elemento.tipoColumnaEnTabla+"', '"+elemento.nombreVariable+"', '"+elemento.descripcion+"', '"+elemento.operacion+"')", (err, result) => {
+                request.query("insert into ElementoFormulasVariablesCampos (variableID, variableCampoID, formulaID, conexionTablaID, esFuenteDeDato, excelArchivoID , excelVariableID , formaVariableID , elementoVariableID, elementoVariableCampoID, esValorManual, nombreColumnaEnTabla, tipoColumnaEnTabla, nombreVariable, descripcion, operacion) values ("+variable.ID+", "+variableCampo.ID+", "+formula.ID+", "+elemento.conexionTablaID+", '"+elemento.esFuenteDeDato+"', "+elemento.excelArchivoID+", "+elemento.excelVariableID+", "+elemento.formaVariableID+", "+elemento.elementoVariableID+", "+elemento.elementoVariableCampoID+", '"+elemento.esValorManual+"', '"+elemento.nombreColumnaEnTabla+"', '"+elemento.tipoColumnaEnTabla+"', '"+elemento.nombreVariable+"', '"+elemento.descripcion+"', '"+elemento.operacion+"')", (err, result) => {
                     if (err) {
                         console.log(err);
                         if (!rolledBack) {
@@ -1495,7 +1618,8 @@ export default class EditarVariablesHome extends React.Component {
                             }
                             if( arregloElementosDeFormulasALlamar.length == 0 && !existenSegmentos ) {
                                 console.log('HOLA 7');
-                                this.limpiarArreglos();
+                                //this.limpiarArreglos();
+                                this.verificarSiExisteExcelEnResultadosHistoricosModificar(variable);
                             }
                         });
                     }
@@ -1510,7 +1634,7 @@ export default class EditarVariablesHome extends React.Component {
     limpiarArreglos() {
         if(contadorObjetosGuardados == contadorObjetosAGuardar) {
             console.log("BORRRO")
-            nivelNuevoAtributoVarios = 0;
+            /*nivelNuevoAtributoVarios = 0;
             nivelNuevoAtributoUnico = 0;
             indiceSeleccionadoSegmentoReglas = -1;
             indiceSeleccionadoReglas = -1;
@@ -1529,8 +1653,13 @@ export default class EditarVariablesHome extends React.Component {
             formulasUnAtributo = [];
             elementosFormulasUnAtributos = [];
 
+            tipoDeAsignacionSeleccionado = '';
+            tipoDeAsignacionSeleccionadoVarios = '';
+            tipoDeAsignacionSeleccionadoUnico = '';
+
             variablesSQL = [];
-            instruccionSQL = '';
+            instruccionSQL = '';*/
+
 
             this.setState({
                 atributos: [],
@@ -1542,9 +1671,7 @@ export default class EditarVariablesHome extends React.Component {
             });
 
             this.getVariables();
-            this.getExcel();
-            this.getFormas();
-            if (this.props.tipoVariableOriginal.localeCompare("variable") == 0) {
+            if (this.props.tipoVariable.localeCompare("variable") != 0) {
                 this.props.actualizarIDVariableModificada("variable");
             }
         }
@@ -1568,10 +1695,12 @@ export default class EditarVariablesHome extends React.Component {
                 } else {
                     transaction.commit(err => {
                         if (result.recordset.length == 0) {
-                            this.crearTablaDeResultadoNombreModificar(variable);
+                            //this.crearTablaDeResultadoNombreModificar(variable);
+                            this.limpiarArreglos();
                         } else {
                             console.log("ENCONTRO")
                             console.log(result.recordset[0])
+                            console.log(result.recordset[0].inicioVigencia)
                             this.modificarResultadosNombre(variable, result.recordset[0].inicioVigencia);
                         }
                     });
@@ -1585,19 +1714,55 @@ export default class EditarVariablesHome extends React.Component {
         //VIGENCIA: DIA CREACION
         let hoy = new Date();
         var textoCreacionTabla = 'CREATE TABLE '+variable.nombre+'_'+hoy.getFullYear()+'_'+(hoy.getMonth()+1)+'_'+hoy.getDate()+'_'+hoy.getHours()+'_'+hoy.getMinutes()+'_'+hoy.getSeconds()+' ( ID int IDENTITY(1,1) PRIMARY KEY, ';
-        for (var i = 0; i < variable.variables.length; i++) {
-            if(i != 0)
-                textoCreacionTabla += ', ';
-            if(variable.variables[i].tipo.localeCompare("numero") == 0) {
-                textoCreacionTabla += variable.variables[i].nombre+' decimal(22,4)';
-            } else if(variable.variables[i].tipo.localeCompare("varchar") == 0) {
-                textoCreacionTabla += variable.variables[i].nombre+' varchar(1000)';
-            } else if(variable.variables[i].tipo.localeCompare("bit") == 0) {
-                textoCreacionTabla += variable.variables[i].nombre+' bit';
-            } else if(variable.variables[i].tipo.localeCompare("date") == 0) {
-                textoCreacionTabla += variable.variables[i].nombre+' date';
-            }
-        };
+        if (banderaEsInstruccionSQL) {
+            for (var i = 0; i < variablesSQL.length; i++) {
+                if(i != 0)
+                    textoCreacionTabla += ', ';
+                if(variablesSQL[i].tipo.localeCompare("decimal") == 0) {
+                    textoCreacionTabla += variablesSQL[i].nombre+' decimal(22,4)';
+                } else if(variablesSQL[i].tipo.localeCompare("int") == 0) {
+                    textoCreacionTabla += variablesSQL[i].nombre+' int';
+                } else if(variablesSQL[i].tipo.localeCompare("varchar") == 0) {
+                    textoCreacionTabla += variablesSQL[i].nombre+' varchar(1000)';
+                } else if(variablesSQL[i].tipo.localeCompare("bit") == 0) {
+                    textoCreacionTabla += variablesSQL[i].nombre+' bit';
+                } else if(variablesSQL[i].tipo.localeCompare("date") == 0) {
+                    textoCreacionTabla += variablesSQL[i].nombre+' date';
+                }
+            };
+        } else if (!banderaEsObjeto) {
+            for (var i = 0; i < atributosUnico.length; i++) {
+                if(i != 0)
+                    textoCreacionTabla += ', ';
+                if(atributosUnico[i].tipo.localeCompare("decimal") == 0) {
+                    textoCreacionTabla += atributosUnico[i].decimal+' decimal(22,4)';
+                } else if(atributosUnico[i].tipo.localeCompare("int") == 0) {
+                    textoCreacionTabla += atributosUnico[i].nombre+' int';
+                } else if(atributosUnico[i].tipo.localeCompare("varchar") == 0) {
+                    textoCreacionTabla += atributosUnico[i].nombre+' varchar(1000)';
+                } else if(atributosUnico[i].tipo.localeCompare("bit") == 0) {
+                    textoCreacionTabla += atributosUnico[i].nombre+' bit';
+                } else if(atributosUnico[i].tipo.localeCompare("date") == 0) {
+                    textoCreacionTabla += atributosUnico[i].nombre+' date';
+                }
+            };
+        } else {
+            for (var i = 0; i < atributosVario.length; i++) {
+                if(i != 0)
+                    textoCreacionTabla += ', ';
+                if(atributosVario[i].tipo.localeCompare("decimal") == 0) {
+                    textoCreacionTabla += atributosVario[i].nombre+' decimal(22,4)';
+                } else if(atributosVario[i].tipo.localeCompare("int") == 0) {
+                    textoCreacionTabla += atributosVario[i].nombre+' int';
+                } else if(atributosVario[i].tipo.localeCompare("varchar") == 0) {
+                    textoCreacionTabla += atributosVario[i].nombre+' varchar(1000)';
+                } else if(atributosVario[i].tipo.localeCompare("bit") == 0) {
+                    textoCreacionTabla += atributosVario[i].nombre+' bit';
+                } else if(atributosVario[i].tipo.localeCompare("date") == 0) {
+                    textoCreacionTabla += atributosVario[i].nombre+' date';
+                }
+            };
+        }
         textoCreacionTabla += ', f3ch4Gu4rd4do date )';
         console.log('textoCreacionTabla')
         console.log(textoCreacionTabla)
@@ -1651,15 +1816,17 @@ export default class EditarVariablesHome extends React.Component {
                 } else {
                     transaction.commit(err => {
                         console.log('GUARDO RESULTADO');
-                        this.verificarPeriodicidadGuardarModificar(variable, "excel", hoy);
+                        this.verificarPeriodicidadGuardarModificar(variable, "variable", hoy);
                     });
                 }
             });
         }); // fin transaction
     }
 
-    modificarResultadosNombre (resultado, variable, hoy)  {
+    modificarResultadosNombre (variable, hoy)  {
         console.log('MODIFICAR CREAR RESULTADO');
+        console.log('hoy');
+        console.log(hoy);
         let mes = hoy.getMonth()+1;
         if(mes.toString().length == 1)
             mes = '0'+mes;
@@ -1673,7 +1840,7 @@ export default class EditarVariablesHome extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("update ResultadosNombreVariables set finVigencia = '"+hoy.getFullYear()+'-'+mes+'-'+dia+" "+hoy.getHours()+"' where ID = "+resultado.ID, (err, result) => {
+            request.query("update ResultadosNombreVariables set finVigencia = '"+hoy.getFullYear()+'-'+mes+'-'+dia+" "+hoy.getHours()+"' where ID = "+variable.ID, (err, result) => {
                 if (err) {
                     console.log(err);
                     if (!rolledBack) {
@@ -1683,7 +1850,7 @@ export default class EditarVariablesHome extends React.Component {
                 } else {
                     transaction.commit(err => {
                         console.log('GUARDO RESULTADO');
-                        this.crearTablaDeResultadoNombreModificar(variable);
+                        this.verificarPeriodicidadGuardarModificar(variable, "variable", hoy);
                     });
                 }
             });
@@ -1691,6 +1858,7 @@ export default class EditarVariablesHome extends React.Component {
     }
 
     verificarPeriodicidadGuardarModificar (variable, tabla, hoy) {
+        this.limpiarArreglos();
         const transaction = new sql.Transaction( this.props.pool );
         transaction.begin(err => {
             var rolledBack = false;
@@ -1776,15 +1944,6 @@ export default class EditarVariablesHome extends React.Component {
     guardarVariable() {
         contadorObjetosGuardados = 0;
         contadorObjetosAGuardar = 0;
-        if (this.props.tipoVariable.localeCompare("excel") == 0) {
-            this.eliminarVarExcel();
-        }
-        if (this.props.tipoVariable.localeCompare("variable") == 0) {
-            this.eliminarVariable();
-        }
-        if (this.props.tipoVariable.localeCompare("forma") == 0) {
-            this.eliminarVarForma();
-        }
         if (banderaEsInstruccionSQL) {
             this.guardarVariableSQL();
         } else if (!banderaEsObjeto) {
@@ -1808,8 +1967,8 @@ export default class EditarVariablesHome extends React.Component {
         else
             guardarResultadosEnBaseDatos = false;
         var objetoPadreID = -1;
-        if ($("#esObjetoFuenteDato").is(':checked'))
-            objetoPadreID = $("#objetoPadreID").val();
+        /*if ($("#esObjetoFuenteDato").is(':checked'))
+            objetoPadreID = $("#objetoPadreID").val();*/
         var nuevoNivel = 0;
         if(banderaEsObjeto) {
             nuevoNivel = nivelNuevoAtributoVarios;
@@ -1821,45 +1980,87 @@ export default class EditarVariablesHome extends React.Component {
             esInstruccionSQL = true;
         else
             esInstruccionSQL = false;
+        var periodicidad = $("#periodicidad").val();
+        var fechaInicioCalculo;
+        if(periodicidad.localeCompare("-1") == 0) {
+            fechaInicioCalculo = new Date(1964, 4, 28);
+        } else {
+            fechaInicioCalculo = $("#fecha").datepicker('getDate');
+        }
+        var responsable = $("#responsable").val();
+        var categoria = $("#categoriaVariable").val();
         if(nombreVariable.length < 101 && nombreVariable.length > 0) {
-            if(descripcionVariable.length < 701) {      //if(operacionSeleccionada.valor != undefined) {
-                if(esObjeto != undefined) {
-                    if(guardarResultadosEnBaseDatos != undefined) {
-                        if(esInstruccionSQL != undefined) {
-                            if(!isNaN(objetoPadreID)) {
-                                if(!isNaN(nuevoNivel)) {
-                                    if(variablesSQL.length > 0) {
-                                        if(instruccionSQL.length > 0) {
-                                            var nuevaVariable = {nombre: nombreVariable, descripcion: descripcionVariable, esObjeto: esObjeto, esColeccion: false, objetoPadreID: objetoPadreID, esInstruccionSQL: esInstruccionSQL, guardar: guardarResultadosEnBaseDatos};
-                                            if (this.props.tipoVariable.localeCompare("variable") == 0) {
-                                                this.updateVariable(nuevaVariable);
+            if(!this.tieneEspaciosEnBlanco(nombreVariable)) {
+                if (this.verificarNoExisteNombreVar(nombreVariable)) {
+                    if(descripcionVariable.length < 701) {      //if(operacionSeleccionada.valor != undefined) {
+                        if(esObjeto != undefined) {
+                            if(guardarResultadosEnBaseDatos != undefined) {
+                                if(esInstruccionSQL != undefined) {
+                                    if(!isNaN(objetoPadreID)) {
+                                        if(periodicidad.length > 0) {
+                                            if(this.isValidDate(fechaInicioCalculo) ) {
+                                                if(responsable.length > 0) {
+                                                    if(categoria.length < 101) {
+                                                        if(!isNaN(nuevoNivel)) {
+                                                            if(variablesSQL.length > 0) {
+                                                                if(instruccionSQL.length > 0) {
+                                                                    if (this.props.tipoVariable.localeCompare("excel") == 0) {
+                                                                        this.eliminarVarExcel(false);
+                                                                    }
+                                                                    if (this.props.tipoVariable.localeCompare("variable") == 0) {
+                                                                        this.eliminarVariable(false);
+                                                                    }
+                                                                    if (this.props.tipoVariable.localeCompare("forma") == 0) {
+                                                                        this.eliminarVarForma(false);
+                                                                    }
+                                                                    var nuevaVariable = {nombre: nombreVariable, descripcion: descripcionVariable, esObjeto: esObjeto, esColeccion: false, objetoPadreID: objetoPadreID, esInstruccionSQL: esInstruccionSQL, guardar: guardarResultadosEnBaseDatos, periodicidad: periodicidad, fechaInicioCalculo: fechaInicioCalculo, responsable: responsable, categoriaVariable: categoria};
+                                                                    if(this.props.tipoVariable.localeCompare("variable") == 0) {
+                                                                        this.updateVariable(nuevaVariable);
+                                                                    } else {
+                                                                        this.createVariable(nuevaVariable);
+                                                                    }
+                                                                    contadorObjetosAGuardar++;
+                                                                } else {
+                                                                    alert("Cree una instrucción SQL.");
+                                                                }
+                                                            } else {
+                                                                alert("Cree una variable SQL.");
+                                                            }
+                                                        } else {
+                                                            alert("Seleccione un nivel para el campo.");
+                                                        }
+                                                    } else {
+                                                        alert("La categoria de variable debe ser menor a 101 caracteres.");
+                                                    }
+                                                } else {
+                                                    alert("Ingrese un valor para el responsable.");
+                                                }
                                             } else {
-                                                this.createVariable(nuevaVariable);
+                                                alert("Ingrese una fecha válida para el inicio de cálculo.");
                                             }
-                                            contadorObjetosAGuardar++;
                                         } else {
-                                            alert("Cree una instrucción SQL.");
+                                            alert("Ingrese un valor para la periodicidad.");
                                         }
                                     } else {
-                                        alert("Cree una variable SQL.");
+                                        alert("Tiene que ingresar un valor para objeto padre.");
                                     }
                                 } else {
-                                    alert("Seleccione un nivel para el campo.");
+                                    alert("Tiene que ingresar si la variable se calcula con intrucciones SQL.");
                                 }
                             } else {
-                                alert("Tiene que ingresar un valor para objeto padre.");
+                                alert("Tiene que ingresar si guardar o no variable.");
                             }
                         } else {
-                            alert("Tiene que ingresar si la variable se calcula con intrucciones SQL.");
+                            alert("Tiene que ingresar si la variable tiene un atributo o muchos.");
                         }
                     } else {
-                        alert("Tiene que ingresar si guardar o no variable.");
+                        alert("Tiene que ingresar una descripción de la variable menor a 701 caracteres.");
                     }
                 } else {
-                    alert("Tiene que ingresar si la variable tiene un atributo o muchos.");
+                    alert("El nombre de la variable debe ser unico.");
                 }
             } else {
-                alert("Tiene que ingresar una descripción de la variable menor a 701 caracteres.");
+                alert('El nombre de la variable no debe contener espacios en blanco');
             }
         } else {
             alert("Tiene que ingresar un nombre de la variable.");
@@ -1885,8 +2086,8 @@ export default class EditarVariablesHome extends React.Component {
         else
             guardarResultadosEnBaseDatos = false;
         var objetoPadreID = -1;
-        if ($("#esObjetoFuenteDato").is(':checked'))
-            objetoPadreID = $("#objetoPadreID").val();
+        /*if ($("#esObjetoFuenteDato").is(':checked'))
+            objetoPadreID = $("#objetoPadreID").val();*/
         var nuevoNivel = 0;
         if(banderaEsObjeto) {
             nuevoNivel = nivelNuevoAtributoVarios;
@@ -1898,62 +2099,98 @@ export default class EditarVariablesHome extends React.Component {
             esInstruccionSQL = true;
         else
             esInstruccionSQL = false;
+        var periodicidad = $("#periodicidad").val();
+        var fechaInicioCalculo;
+        if(periodicidad.localeCompare("-1") == 0) {
+            fechaInicioCalculo = new Date(1964, 4, 28);
+        } else {
+            fechaInicioCalculo = $("#fecha").datepicker('getDate');
+        }
+        var responsable = $("#responsable").val();
+        var categoria = $("#categoriaVariable").val();
         if(nombreVariable.length < 101 && nombreVariable.length > 0) {
-            if (this.verificarNoExisteNombreVar(nombreVariable)) {
-                if(descripcionVariable.length < 701) {      //if(operacionSeleccionada.valor != undefined) {
-                    if(esObjeto != undefined) {
-                        if(esColeccion != undefined) {
-                            if(guardarResultadosEnBaseDatos != undefined) {
-                                if(esInstruccionSQL != undefined) {
-                                    if(!isNaN(objetoPadreID)) {
-                                        if(tipoDeAsignacionSeleccionado != undefined && tipoDeAsignacionSeleccionado.length > 0) {
-                                            if(!isNaN(nuevoNivel)) {
-                                                var nuevoAtributo = {nombre: nombreVariable, tipo: tipoDeAsignacionSeleccionado, nivel: nuevoNivel};
-                                                //si la formula ya fue asignada, no agregar tipo
-                                                /*if(atributosUnico[0].tipo == undefined) {
-                                                    nuevoAtributo = {nombre: nombreVariable, tipo: '', campoEsArreglo: campoEsArreglo,  nivel: nivelNuevoAtributoUnico};
+            if(!this.tieneEspaciosEnBlanco(nombreVariable)) {
+                if (this.verificarNoExisteNombreVar(nombreVariable)) {
+                    if(descripcionVariable.length < 701) {      //if(operacionSeleccionada.valor != undefined) {
+                        if(esObjeto != undefined) {
+                            if(esColeccion != undefined) {
+                                if(guardarResultadosEnBaseDatos != undefined) {
+                                    if(esInstruccionSQL != undefined) {
+                                        if(!isNaN(objetoPadreID)) {
+                                            if(periodicidad.length > 0) {
+                                                if(this.isValidDate(fechaInicioCalculo) ) {
+                                                    if(categoria.length < 101) {
+                                                        if(responsable.length > 0) {
+                                                            //if(tipoDeAsignacionSeleccionado != undefined && tipoDeAsignacionSeleccionado.length > 0) {
+                                                                if(!isNaN(nuevoNivel)) {
+                                                                    if (this.props.tipoVariable.localeCompare("excel") == 0) {
+                                                                        this.eliminarVarExcel(false);
+                                                                    }
+                                                                    if (this.props.tipoVariable.localeCompare("variable") == 0) {
+                                                                        this.eliminarVariable(false);
+                                                                    }
+                                                                    if (this.props.tipoVariable.localeCompare("forma") == 0) {
+                                                                        this.eliminarVarForma(false);
+                                                                    }
+                                                                    var nuevoAtributo = {nombre: nombreVariable, tipo: tipoDeAsignacionSeleccionado, nivel: nuevoNivel};
+                                                                    //si la formula ya fue asignada, no agregar tipo
+                                                                    /*if(atributosUnico[0].tipo == undefined) {
+                                                                        nuevoAtributo = {nombre: nombreVariable, tipo: '', campoEsArreglo: campoEsArreglo,  nivel: nivelNuevoAtributoUnico};
+                                                                    } else {
+                                                                        nuevoAtributo = atributosUnico[0];
+                                                                        nuevoAtributo.nombre = nombreVariable;
+                                                                        nuevoAtributo.campoEsArreglo = campoEsArreglo;
+                                                                        nuevoAtributo.nivel = nivelNuevoAtributoUnico;
+                                                                    }*/
+                                                                    var nuevaVariable = {nombre: nombreVariable, descripcion: descripcionVariable, esObjeto: esObjeto, esColeccion: esColeccion, objetoPadreID: objetoPadreID, esInstruccionSQL: esInstruccionSQL, guardar: guardarResultadosEnBaseDatos, periodicidad: periodicidad, fechaInicioCalculo: fechaInicioCalculo, responsable: responsable, categoriaVariable: categoria};
+                                                                    //nivelNuevoAtributoUnico = 0;
+                                                                    if(this.props.tipoVariable.localeCompare("variable") == 0) {
+                                                                        this.updateVariable(nuevaVariable, [nuevoAtributo]);
+                                                                    } else {
+                                                                        this.createVariable(nuevaVariable, [nuevoAtributo]);
+                                                                    }
+                                                                    contadorObjetosAGuardar++;
+                                                                } else {
+                                                                    alert("Seleccione un nivel para el campo.");
+                                                                }
+                                                            /*} else {
+                                                                alert("Seleccione un tipo de asignación.");
+                                                            }*/
+                                                        } else {
+                                                            alert("Ingrese un valor para el responsable.");
+                                                        }
+                                                    } else {
+                                                        alert("La categoria de variable debe ser menor a 101 caracteres.");
+                                                    }
                                                 } else {
-                                                    nuevoAtributo = atributosUnico[0];
-                                                    nuevoAtributo.nombre = nombreVariable;
-                                                    nuevoAtributo.campoEsArreglo = campoEsArreglo;
-                                                    nuevoAtributo.nivel = nivelNuevoAtributoUnico;
-                                                }*/
-                                                var nuevaVariable = {nombre: nombreVariable, descripcion: descripcionVariable, esObjeto: esObjeto, esColeccion: esColeccion, objetoPadreID: objetoPadreID, esInstruccionSQL: esInstruccionSQL, guardar: guardarResultadosEnBaseDatos};
-                                                nivelNuevoAtributoUnico = 0;
-                                                console.log('nuevoAtributo');
-                                                console.log(nuevoAtributo);
-                                                if (this.props.tipoVariableOriginal.localeCompare("variable") == 0) {
-                                                    this.updateVariable(nuevaVariable, [nuevoAtributo]);
-                                                } else {
-                                                    this.createVariable(nuevaVariable, [nuevoAtributo]);
+                                                    alert("Ingrese una fecha válida para el inicio de cálculo.");
                                                 }
-                                                contadorObjetosAGuardar++;
                                             } else {
-                                                alert("Seleccione un nivel para el campo.");
+                                                alert("Ingrese un valor para la periodicidad.");
                                             }
                                         } else {
-                                            alert("Seleccione un tipo de asignación.");
+                                            alert("Tiene que ingresar un valor para objeto padre.");
                                         }
                                     } else {
-                                        alert("Tiene que ingresar un valor para objeto padre.");
+                                        alert("Tiene que ingresar si la variable se calcula con intrucciones SQL.");
                                     }
                                 } else {
-                                    alert("Tiene que ingresar si la variable se calcula con intrucciones SQL.");
+                                    alert("Tiene que ingresar si guardar o no variable.");
                                 }
                             } else {
-                                alert("Tiene que ingresar si guardar o no variable.");
+                                alert("Tiene que ingresar si la variable es coleccion o no.");
                             }
                         } else {
-                            alert("Tiene que ingresar si la variable es coleccion o no.");
+                            alert("Tiene que ingresar si la variable tiene un atributo o muchos.");
                         }
                     } else {
-                        alert("Tiene que ingresar si la variable tiene un atributo o muchos.");
+                        alert("Tiene que ingresar una descripción de la variable menor a 701 caracteres.");
                     }
                 } else {
-                    alert("Tiene que ingresar una descripción de la variable menor a 701 caracteres.");
+                    alert("El nombre de la variable debe ser unico.");
                 }
             } else {
-                alert("El nombre de la variable debe ser unico.");
+                alert('El nombre de la variable no debe contener espacios en blanco');
             }
         } else {
             alert("Tiene que ingresar un nombre de la variable.");
@@ -1979,8 +2216,8 @@ export default class EditarVariablesHome extends React.Component {
         else
             guardarResultadosEnBaseDatos = false;
         var objetoPadreID = -1;
-        if ($("#esObjetoFuenteDato").is(':checked'))
-            objetoPadreID = $("#objetoPadreID").val();
+        /*if ($("#esObjetoFuenteDato").is(':checked'))
+            objetoPadreID = $("#objetoPadreID").val();*/
         var nuevoNivel = 0;
         if(banderaEsObjeto) {
             nuevoNivel = nivelNuevoAtributoVarios;
@@ -1992,60 +2229,94 @@ export default class EditarVariablesHome extends React.Component {
             esInstruccionSQL = true;
         else
             esInstruccionSQL = false;
+        var periodicidad = $("#periodicidad").val();
+        var fechaInicioCalculo;
+        if(periodicidad.localeCompare("-1") == 0) {
+            fechaInicioCalculo = new Date(1964, 4, 28);
+        } else {
+            fechaInicioCalculo = $("#fecha").datepicker('getDate');
+        }
+        var responsable = $("#responsable").val();
+        var categoria = $("#categoriaVariable").val();
         if(nombreVariable.length < 101 && nombreVariable.length > 0) {
-            if (this.verificarNoExisteNombreVar(nombreVariable)) {
-                if(descripcionVariable.length < 701) {      //if(operacionSeleccionada.valor != undefined) {
-                    if(esObjeto != undefined) {
-                        if(esColeccion != undefined) {
-                            if(guardarResultadosEnBaseDatos != undefined) {
-                                if(esInstruccionSQL != undefined) {
-                                    if(!isNaN(objetoPadreID)) {
-                                        //if(tipoDeAsignacionSeleccionado != undefined && tipoDeAsignacionSeleccionado.length > 0) {
-                                            if(!isNaN(nuevoNivel)) {
-                                                //var nuevoAtributo = {nombre: nombreVariable, tipo: tipoDeAsignacionSeleccionado, nivel: nuevoNivel};
-                                                //si la formula ya fue asignada, no agregar tipo
-                                                /*if(atributosUnico[0].tipo == undefined) {
-                                                    nuevoAtributo = {nombre: nombreVariable, tipo: '', campoEsArreglo: campoEsArreglo,  nivel: nivelNuevoAtributoUnico};
+            if(!this.tieneEspaciosEnBlanco(nombreVariable)) {
+                if (this.verificarNoExisteNombreVar(nombreVariable)) {
+                    if(descripcionVariable.length < 701) {      //if(operacionSeleccionada.valor != undefined) {
+                        if(esObjeto != undefined) {
+                            if(esColeccion != undefined) {
+                                if(guardarResultadosEnBaseDatos != undefined) {
+                                    if(esInstruccionSQL != undefined) {
+                                        if(!isNaN(objetoPadreID)) {
+                                            if(periodicidad.length > 0) {
+                                                if(this.isValidDate(fechaInicioCalculo) ) {
+                                                    if(categoria.length < 101) {
+                                                        if(responsable.length > 0) {
+                                                            if(!isNaN(nuevoNivel)) {
+                                                                if (this.props.tipoVariable.localeCompare("excel") == 0) {
+                                                                    this.eliminarVarExcel(false);
+                                                                }
+                                                                if (this.props.tipoVariable.localeCompare("variable") == 0) {
+                                                                    this.eliminarVariable(false);
+                                                                }
+                                                                if (this.props.tipoVariable.localeCompare("forma") == 0) {
+                                                                    this.eliminarVarForma(false);
+                                                                }
+                                                                //var nuevoAtributo = {nombre: nombreVariable, tipo: tipoDeAsignacionSeleccionado, nivel: nuevoNivel};
+                                                                //si la formula ya fue asignada, no agregar tipo
+                                                                /*if(atributosUnico[0].tipo == undefined) {
+                                                                    nuevoAtributo = {nombre: nombreVariable, tipo: '', campoEsArreglo: campoEsArreglo,  nivel: nivelNuevoAtributoUnico};
+                                                                } else {
+                                                                    nuevoAtributo = atributosUnico[0];
+                                                                    nuevoAtributo.nombre = nombreVariable;
+                                                                    nuevoAtributo.campoEsArreglo = campoEsArreglo;
+                                                                    nuevoAtributo.nivel = nivelNuevoAtributoUnico;
+                                                                }*/
+                                                                var nuevaVariable = {nombre: nombreVariable, descripcion: descripcionVariable, esObjeto: esObjeto, esColeccion: esColeccion, objetoPadreID: objetoPadreID, esInstruccionSQL: esInstruccionSQL, guardar: guardarResultadosEnBaseDatos, periodicidad: periodicidad, fechaInicioCalculo: fechaInicioCalculo, responsable: responsable, categoriaVariable: categoria};
+                                                                if(this.props.tipoVariable.localeCompare("variable") == 0) {
+                                                                    this.updateVariable(nuevaVariable, atributosVario);
+                                                                } else {
+                                                                    this.createVariable(nuevaVariable, atributosVario);
+                                                                }
+                                                                //nivelNuevoAtributoVarios = 0;
+                                                                contadorObjetosAGuardar++;
+                                                            } else {
+                                                                alert("Seleccione un nivel para el campo.");
+                                                            }
+                                                        } else {
+                                                            alert("Ingrese un valor para el responsable.");
+                                                        }
+                                                    } else {
+                                                        alert("La categoria de variable debe ser menor a 101 caracteres.");
+                                                    }
                                                 } else {
-                                                    nuevoAtributo = atributosUnico[0];
-                                                    nuevoAtributo.nombre = nombreVariable;
-                                                    nuevoAtributo.campoEsArreglo = campoEsArreglo;
-                                                    nuevoAtributo.nivel = nivelNuevoAtributoUnico;
-                                                }*/
-                                                var nuevaVariable = {nombre: nombreVariable, descripcion: descripcionVariable, esObjeto: esObjeto, esColeccion: esColeccion, objetoPadreID: objetoPadreID, esInstruccionSQL: esInstruccionSQL, guardar: guardarResultadosEnBaseDatos};
-                                                if (this.props.tipoVariableOriginal.localeCompare("variable") == 0) {
-                                                    this.updateVariable(nuevaVariable, atributosVario);
-                                                } else {
-                                                    this.createVariable(nuevaVariable, atributosVario);
+                                                    alert("Ingrese una fecha válida para el inicio de cálculo.");
                                                 }
-                                                nivelNuevoAtributoVarios = 0;
-                                                contadorObjetosAGuardar++;
                                             } else {
-                                                alert("Seleccione un nivel para el campo.");
+                                                alert("Ingrese un valor para la periodicidad.");
                                             }
-                                        /*} else {
-                                            alert("Seleccione un tipo de asignación.");
-                                        }*/
+                                        } else {
+                                            alert("Tiene que ingresar un valor para objeto padre.");
+                                        }
                                     } else {
-                                        alert("Tiene que ingresar un valor para objeto padre.");
+                                        alert("Tiene que ingresar si la variable se calcula con intrucciones SQL.");
                                     }
                                 } else {
-                                    alert("Tiene que ingresar si la variable se calcula con intrucciones SQL.");
+                                    alert("Tiene que ingresar si guardar o no variable.");
                                 }
                             } else {
-                                alert("Tiene que ingresar si guardar o no variable.");
+                                alert("Tiene que ingresar si la variable es coleccion o no.");
                             }
                         } else {
-                            alert("Tiene que ingresar si la variable es coleccion o no.");
+                            alert("Tiene que ingresar si la variable tiene un atributo o muchos.");
                         }
                     } else {
-                        alert("Tiene que ingresar si la variable tiene un atributo o muchos.");
+                        alert("Tiene que ingresar una descripción de la variable menor a 701 caracteres.");
                     }
                 } else {
-                    alert("Tiene que ingresar una descripción de la variable menor a 701 caracteres.");
+                    alert("El nombre de la variable debe ser unico.");
                 }
             } else {
-                alert("El nombre de la variable debe ser unico.");
+                alert('El nombre de la variable no debe contener espacios en blanco');
             }
         } else {
             alert("Tiene que ingresar un nombre de la variable.");
@@ -2055,45 +2326,49 @@ export default class EditarVariablesHome extends React.Component {
     crearAtributoVariable () {              //agrega valor a arreglo, pero no guarda en base de datos
         var nombreAtributo = $("#nombreAtributoNuevoCampo").val();
         if(nombreAtributo.length > 0) {
-            if(this.verificarNoExisteNombreCampo(nombreAtributo)) {
-                if(tipoDeAsignacionSeleccionado != undefined && tipoDeAsignacionSeleccionado.length > 0) {
-                    //seleccionar arreglo a insertar, si de varios atributos o unico
-                    var arreglo, nivel;
-                    if(banderaEsObjeto) {
-                        arreglo = atributosVario;
-                        nivel = nivelNuevoAtributoVarios;
+            if(!this.tieneEspaciosEnBlanco(nombreAtributo)) {
+                if(this.verificarNoExisteNombreCampo(nombreAtributo)) {
+                    if(tipoDeAsignacionSeleccionado != undefined && tipoDeAsignacionSeleccionado.length > 0) {
+                        //seleccionar arreglo a insertar, si de varios atributos o unico
+                        var arreglo, nivel;
+                        if(banderaEsObjeto) {
+                            arreglo = atributosVario;
+                            nivel = nivelNuevoAtributoVarios;
+                        } else {
+                            arreglo = atributosUnico;
+                            nivel = nivelNuevoAtributoUnico;
+                        }
+                        var nuevoAtributo = {nombre: nombreAtributo, tipo: tipoDeAsignacionSeleccionado, nivel: nivel};
+                        //si la formula ya fue asignada, no agregar tipo
+                        /*if(this.state.atributos[this.state.posicionNuevoAtributo].nombre == undefined) {
+                            nuevoAtributo = {nombre: nombreAtributo, tipo: tipoDeAsignacionSeleccionado, campoEsArreglo: campoEsArreglo};
+                        } else {
+                            nuevoAtributo = this.state.atributos[this.state.posicionNuevoAtributo];
+                            nuevoAtributo.nombre = nombreAtributo;
+                            nuevoAtributo.campoEsArreglo = campoEsArreglo;
+                        }*/
+                        arreglo.push(nuevoAtributo);
+                        this.setState({
+                            atributos: arreglo,
+                            tipoNuevaVariable: ""
+                        });
+                        nivelNuevoAtributoVarios = 0;
+                        if(banderaEsObjeto) {
+                            atributosVario = arreglo;
+                        } else {
+                            atributosUnico = arreglo;
+                        }
+                        nombreCampoNuevoAtributosVario = '';
+                        $("#nombreAtributoNuevoCampo").val("");
+                        alert("Campo creado.");
                     } else {
-                        arreglo = atributosUnico;
-                        nivel = nivelNuevoAtributoUnico;
+                        alert("Seleccione un tipo de asignación.");
                     }
-                    var nuevoAtributo = {nombre: nombreAtributo, tipo: tipoDeAsignacionSeleccionado, nivel: nivel};
-                    //si la formula ya fue asignada, no agregar tipo
-                    /*if(this.state.atributos[this.state.posicionNuevoAtributo].nombre == undefined) {
-                        nuevoAtributo = {nombre: nombreAtributo, tipo: tipoDeAsignacionSeleccionado, campoEsArreglo: campoEsArreglo};
-                    } else {
-                        nuevoAtributo = this.state.atributos[this.state.posicionNuevoAtributo];
-                        nuevoAtributo.nombre = nombreAtributo;
-                        nuevoAtributo.campoEsArreglo = campoEsArreglo;
-                    }*/
-                    arreglo.push(nuevoAtributo);
-                    this.setState({
-                        atributos: arreglo,
-                        tipoNuevaVariable: ""
-                    });
-                    nivelNuevoAtributoVarios = 0;
-                    if(banderaEsObjeto) {
-                        atributosVario = arreglo;
-                    } else {
-                        atributosUnico = arreglo;
-                    }
-                    nombreCampoNuevoAtributosVario = '';
-                    $("#nombreAtributoNuevoCampo").val("");
-                    alert("Campo creado.");
                 } else {
-                    alert("Seleccione un tipo de asignación.");
+                    alert("El nombre del campo debe ser unico.");
                 }
             } else {
-                alert("El nombre del campo debe ser unico.");
+                alert('El nombre del atributo no debe contener espacios en blanco');
             }
         } else {
             alert("Ingrese un valor para el nombre del atributo.");
@@ -2128,27 +2403,35 @@ export default class EditarVariablesHome extends React.Component {
     modificarNombreVariable(index) {
         var copyAtributos = [...this.state.atributos];
         copyAtributos[index].nombre = $("#nombreAtributo"+index).val();
-        this.setState({
-            atributos: copyAtributos
-        });
+        if(!this.tieneEspaciosEnBlanco(copyAtributos[index].nombre)) {
+            this.setState({
+                atributos: copyAtributos
+            });
+        } else {
+            alert('El nombre del atributo no debe contener espacios en blanco');
+        }
     }
 
     crearVariableSQL () {
         var nombreCampo = $("#nuevoCampo").val();
         var tipo = $("#tipo").val();
         if(nombreCampo.length < 101) {
-            if(this.verificarNoExisteNombreCampo(nombreCampo)) {
-                if(tipo.length < 101) {
-                    var nuevaVar = {nombre: nombreCampo, tipo: tipo};
-                    variablesSQL.push(nuevaVar);
-                    this.setState({
-                        camposInstruccionSQL: variablesSQL
-                    });
+            if(!this.tieneEspaciosEnBlanco(nombreCampo)) {
+                if(this.verificarNoExisteNombreCampo(nombreCampo)) {
+                    if(tipo.length < 101) {
+                        var nuevaVar = {nombre: nombreCampo, tipo: tipo};
+                        variablesSQL.push(nuevaVar);
+                        this.setState({
+                            camposInstruccionSQL: variablesSQL
+                        });
+                    } else {
+                        alert("El tipo del campo debe tener una longitud menor a 31 caracteres.");
+                    }
                 } else {
-                    alert("El tipo del campo debe tener una longitud menor a 31 caracteres.");
+                    alert("El nombre del campo debe ser unico.");
                 }
             } else {
-                alert("El nombre del campo debe ser unico.");
+                alert('El nombre del campo no debe contener espacios en blanco');
             }
         } else {
             alert("El nombre del campo debe tener una longitud menor a 101 caracteres.");
@@ -2157,7 +2440,7 @@ export default class EditarVariablesHome extends React.Component {
 
     crearInstruccionSQL () {
         var instruccionSQLN = $("#comandoSQL").val();
-        if(instruccionSQL.length < 101) {
+        if(instruccionSQLN.length < 101) {
             instruccionSQL = instruccionSQLN;
             this.setState({
                 comandoSQL: instruccionSQL
@@ -2177,16 +2460,6 @@ export default class EditarVariablesHome extends React.Component {
 
         //indiceSeleccionadoReglas
         //tipoElementoSeleccionadoRegla
-        console.log('formulaSeleccionada');
-        console.log(formulaSeleccionada);
-        console.log('indiceSeleccionadoSegmentoReglas');
-        console.log(indiceSeleccionadoSegmentoReglas);
-        console.log('indiceSeleccionadoReglas');
-        console.log(indiceSeleccionadoReglas);
-        console.log('tipoElementoSeleccionadoRegla');
-        console.log(tipoElementoSeleccionadoRegla);
-        console.log('posicionFormulaSeleccionada');
-        console.log(posicionFormulaSeleccionada);
         var reglas, segmentoRegla;
         if (banderaEsObjeto) {
             reglas = reglasVariosAtributos;
@@ -2195,8 +2468,6 @@ export default class EditarVariablesHome extends React.Component {
             reglas = reglasUnAtributo;
             segmentoRegla = segmentoReglasUnAtributo;
         }
-        console.log('reglas');
-        console.log(reglas);
         var posicionAtributo = posicionAtributoSeleccionado;
         //posicionAtributoSeleccionado = -1 cuando se va a condiciones de un campo nuevo
         //cuando se presiona NavBar indice es igual indice anterior
@@ -2258,32 +2529,13 @@ export default class EditarVariablesHome extends React.Component {
                 var entrarACrearRegla = false;
                 if(indiceSeleccionadoReglas != -1 && tipoElementoSeleccionadoRegla.length > 0 && tipoElementoSeleccionadoRegla.localeCompare("abajo") != 0 && segmentoRegla[posicionAtributo] != undefined) {
                     //validando nueva regla tenga la misma variable o conexion tabla del mismo segmento
-                    console.log('segmentoRegla');
-                    console.log(segmentoRegla);
-                    console.log('campoSeleccionado');
-                    console.log(campoSeleccionado);
-                    console.log('formulaSeleccionada');
-                    console.log(formulaSeleccionada);
-                    console.log('formulasVariosAtributos');
-                    console.log(formulasVariosAtributos);
-                    console.log('posicionAtributo');
-                    console.log(posicionAtributo);
-                    console.log('indiceSeleccionadoSegmentoReglas');
-                    console.log(indiceSeleccionadoSegmentoReglas);
-                    console.log('segmentoRegla');
-                    console.log(segmentoRegla);
                     if(!esFormula) {
-                        console.log('1');
                         if(campoSeleccionado.tablaID != undefined) {
-                            console.log('1.1');
                             if (segmentoRegla[posicionAtributo][indiceSeleccionadoSegmentoReglas].conexionTablaID == campoSeleccionado.tablaID) {
-                                console.log('1.1.1');
                                 entrarACrearRegla = true;
                             }
                         } else if(campoSeleccionado.variableID != undefined) {
-                            console.log('1.2');
                             if (segmentoRegla[posicionAtributo][indiceSeleccionadoSegmentoReglas].variableID == campoSeleccionado.variableID) {
-                                console.log('1.2.2');
                                 entrarACrearRegla = true;
                             }
                             var variableSel = this.state.variables.filter(function (object) {
@@ -2299,18 +2551,12 @@ export default class EditarVariablesHome extends React.Component {
                             entrarACrearRegla = true;
                         }
                     } else {
-                        console.log('2');
-                        console.log(formulaSeleccionada);
-                        if(formulaSeleccionada.tablaID != undefined) {
-                            console.log('2.1');
+                        if(formulaSeleccionada.tablaID != undefined && !formulaSeleccionada.esValorManual) {
                             if (segmentoRegla[posicionAtributo][indiceSeleccionadoSegmentoReglas].conexionTablaID == formulaSeleccionada.tablaID) {
-                                console.log('2.1.1');
                                 entrarACrearRegla = true;
                             }
-                        } else if(formulaSeleccionada.variableID != undefined) {
-                            console.log('2.2');
+                        } else if(formulaSeleccionada.variableID != undefined && !formulaSeleccionada.esValorManual) {
                             if (segmentoRegla[posicionAtributo][indiceSeleccionadoSegmentoReglas].variableID == formulaSeleccionada.variableID) {
-                                console.log('2.2.2');
                                 entrarACrearRegla = true;
                             }
                             var variableSel = this.state.variables.filter(function (object) {
@@ -2320,9 +2566,11 @@ export default class EditarVariablesHome extends React.Component {
                                 if(!variableSel[0].esObjeto)
                                     entrarACrearRegla = true;
                             }
-                        } else if(formulaSeleccionada.excelArchivoID != undefined) {
+                        } else if(formulaSeleccionada.excelArchivoID != undefined && !formulaSeleccionada.esValorManual) {
                             entrarACrearRegla = true;
-                        } else if(formulaSeleccionada.formaVariableID != undefined) {
+                        } else if(formulaSeleccionada.formaVariableID != undefined && !formulaSeleccionada.esValorManual) {
+                            entrarACrearRegla = true;
+                        } else if(formulaSeleccionada.esValorManual) {
                             entrarACrearRegla = true;
                         }
                     }
@@ -2422,21 +2670,18 @@ export default class EditarVariablesHome extends React.Component {
                                             esConexionTabla: esConexionTabla,
                                             operacion: operacionSeleccionada.operacion,
                                             operacionTexto: operacionSeleccionada.operacionTexto,
-                                            valor: valor,
-                                            texto: campoSeleccionado.valor+" "+operacionSeleccionada.operacionTexto+" "+valor,
+                                            valor: valorSeleccionado,
+                                            texto: campoSeleccionado.valor+" "+operacionSeleccionada.operacionTexto+" "+valorSeleccionadoTexto,
                                             nivel: nuevoNivel,
                                             posicionSegmentoEnCampo: segmentoReglaIndex
                                         };
                         if(reglas.length == 0 || reglas[posicionInsertarReglaAtributo].length == 0 || reglas[posicionInsertarReglaAtributo][posicionInsertarReglaSegmento].length == 0) {
-                            console.log('1')
                             //cuando no existe regla creada para el campo
                             reglas[posicionInsertarReglaAtributo][posicionInsertarReglaSegmento].push(nuevaRegla);
                         } else {
-                            console.log('2')
                             //el campo ya tiene una regla o mas creada
 
                             if(tipoElementoSeleccionadoRegla.localeCompare("esOtraRegla") == 0 && $("#siRADIO").is(':checked') ) {
-                                console.log('2.1')
                                 //se seleciona el indice de la posicion de la regla dentro del arreglo, para que despues se pueda sacar el ID a base de la posicion
                                 //se pone de regla padre a la regla seleccionada
                                 nuevaRegla.reglaPadreID = indiceSeleccionadoReglas;
@@ -2451,7 +2696,6 @@ export default class EditarVariablesHome extends React.Component {
                                     };
                                 }
                             } else if(tipoElementoSeleccionadoRegla.localeCompare("esOtraRegla") == 0 && $("#sinoRADIO").is(':checked') ) {
-                                console.log('2.2')
                                 var posicionAInsertar = -1;
                                 nuevaRegla.reglaPadreID = reglas[posicionInsertarReglaAtributo][posicionInsertarReglaSegmento][indiceSeleccionadoReglas].reglaPadreID;
                                 nuevaRegla.nivel = reglas[posicionInsertarReglaAtributo][posicionInsertarReglaSegmento][indiceSeleccionadoReglas].nivel;
@@ -2469,12 +2713,10 @@ export default class EditarVariablesHome extends React.Component {
                                     reglas[posicionInsertarReglaAtributo][posicionInsertarReglaSegmento].push(nuevaRegla);
                                 }
                             } else if(tipoElementoSeleccionadoRegla.localeCompare("abajo") == 0) {
-                                console.log('2.2')
                                 nuevaRegla.reglaPadreID = -1;
                                 nuevaRegla.nivel = -1;
                                 reglas[posicionInsertarReglaAtributo][posicionInsertarReglaSegmento].push(nuevaRegla);
                             } else if(tipoElementoSeleccionadoRegla.localeCompare("arriba") == 0) {
-                                console.log('2.2')
                                 nuevaRegla.reglaPadreID = reglas[posicionInsertarReglaAtributo][posicionInsertarReglaSegmento][indiceSeleccionadoReglas].reglaPadreID;
                                 nuevaRegla.nivel = reglas[posicionInsertarReglaAtributo][posicionInsertarReglaSegmento][indiceSeleccionadoReglas].nivel;
                                 reglas[posicionInsertarReglaAtributo][posicionInsertarReglaSegmento].splice(indiceSeleccionadoReglas, 0, nuevaRegla);
@@ -2501,19 +2743,6 @@ export default class EditarVariablesHome extends React.Component {
                         this.setState({
                             reglas: reglas[posicionInsertarReglaAtributo][posicionInsertarReglaSegmento]
                         });
-                        //reglas[posicionSel].push(nuevaRegla);
-                        console.log('reglas');
-                        console.log(reglas);
-                        console.log('segmentoRegla');
-                        console.log(segmentoRegla);
-                        console.log('posicionInsertarReglaAtributo');
-                        console.log(posicionInsertarReglaAtributo);
-                        console.log('posicionInsertarReglaSegmento');
-                        console.log(posicionInsertarReglaSegmento);
-                        console.log('indiceSeleccionadoReglas');
-                        console.log(indiceSeleccionadoReglas);
-                        console.log('campoSeleccionado')
-                        console.log(campoSeleccionado)
                         campoSeleccionado = null;
                         valorSeleccionado = '';
                     } else {
@@ -2525,10 +2754,28 @@ export default class EditarVariablesHome extends React.Component {
                         if(posicionAtributoSeleccionado == -1) {
                             posicionSel = this.state.atributos.length;
                         }
+                        var elementosFormulas;
+                        if(banderaEsObjeto) {
+                            elementosFormulas = elementosFormulasVariosAtributos;
+                        } else {
+                            elementosFormulas = elementosFormulasUnAtributos;
+                        }
+                        var tipoNuevaAsig = tipoDeAsignacionSeleccionado;
+                        for (var i = 0; i < elementosFormulas[posicionSel][indiceFormulaSeleccionadaEdit].length; i++) {
+                            if(elementosFormulas[posicionSel][indiceFormulaSeleccionadaEdit][i].operacion.localeCompare("ASIG") == 0)
+                                tipoNuevaAsig = elementosFormulas[posicionSel][indiceFormulaSeleccionadaEdit][i].tipoColumnaEnTabla;
+                            else if(elementosFormulas[posicionSel][indiceFormulaSeleccionadaEdit][i].operacion.localeCompare("MAX") == 0 || elementosFormulas[posicionSel][indiceFormulaSeleccionadaEdit][i].operacion.localeCompare("MIN") == 0)
+                                tipoNuevaAsig = elementosFormulas[posicionSel][indiceFormulaSeleccionadaEdit][i].tipoColumnaEnTabla;
+                            else if(elementosFormulas[posicionSel][indiceFormulaSeleccionadaEdit][i].operacion.localeCompare("AUTOSUM") == 0 || elementosFormulas[posicionSel][indiceFormulaSeleccionadaEdit][i].operacion.localeCompare("SUM") == 0 || elementosFormulas[posicionSel][indiceFormulaSeleccionadaEdit][i].operacion.localeCompare("COUNT") == 0)
+                                tipoNuevaAsig = 'int'
+                            else
+                                tipoNuevaAsig = 'decimal'
+                            break;
+                        };
                         //verificando que campo de formula seleccionado es mismo tipo variable
                         //tipoDeAsignacionSeleccionado
-                        if(this.state.tipoNuevaVariable.localeCompare(tipoDeAsignacionSeleccionado) == 0 || this.state.tipoNuevaVariable.length == 0 ) {
-                            console.log("INICIO AGREGAR FORMULA");
+                        //if(this.state.tipoNuevaVariable.localeCompare(tipoDeAsignacionSeleccionado) == 0 || this.state.tipoNuevaVariable.length == 0 ) {
+                        if( (posicionAtributoSeleccionado == -1 && (this.state.tipoNuevaVariable.localeCompare(tipoNuevaAsig) == 0 || this.state.tipoNuevaVariable.length == 0)) || (posicionAtributoSeleccionado != -1 && (this.state.atributos[posicionSel].tipo.localeCompare(tipoNuevaAsig) == 0 || this.state.atributos[posicionSel].tipo.length == 0)) ) {
                             var nuevoNivel = 0;
                             var segmentoRegla;
                             if(banderaEsObjeto) {
@@ -2628,15 +2875,12 @@ export default class EditarVariablesHome extends React.Component {
                                                 posicionSegmentoEnCampo: segmentoReglaIndex
                                             };
                             if(reglas.length == 0 || reglas[posicionInsertarReglaAtributo].length == 0 || reglas[posicionInsertarReglaAtributo][posicionInsertarReglaSegmento].length == 0) {
-                                console.log('1')
                                 //cuando no existe regla creada para el campo
                                 reglas[posicionInsertarReglaAtributo][posicionInsertarReglaSegmento].push(nuevaRegla);
                             } else {
-                                console.log('2')
                                 //el campo ya tiene una regla o mas creada
 
                                 if( (tipoElementoSeleccionadoRegla.localeCompare("esOtraRegla") == 0 && $("#siRADIO").is(':checked')) || (tipoElementoSeleccionadoRegla.localeCompare("esOtraRegla") == 0 && !$("#siRADIO").is(':checked') && !$("#sinoRADIO").is(':checked')) ) {
-                                    console.log('2.1')
                                     //se seleciona el indice de la posicion de la regla dentro del arreglo, para que despues se pueda sacar el ID a base de la posicion
                                     //se pone de regla padre a la regla seleccionada
                                     nuevaRegla.reglaPadreID = indiceSeleccionadoReglas;
@@ -2651,7 +2895,6 @@ export default class EditarVariablesHome extends React.Component {
                                         };
                                     }
                                 } else if(tipoElementoSeleccionadoRegla.localeCompare("esOtraRegla") == 0 && $("#sinoRADIO").is(':checked') ) {
-                                    console.log('2.2')
                                     var posicionAInsertar = -1;
                                     nuevaRegla.reglaPadreID = reglas[posicionInsertarReglaAtributo][posicionInsertarReglaSegmento][indiceSeleccionadoReglas].reglaPadreID;
                                     nuevaRegla.nivel = reglas[posicionInsertarReglaAtributo][posicionInsertarReglaSegmento][indiceSeleccionadoReglas].nivel;
@@ -2669,12 +2912,10 @@ export default class EditarVariablesHome extends React.Component {
                                         reglas[posicionInsertarReglaAtributo][posicionInsertarReglaSegmento].push(nuevaRegla);
                                     }
                                 } else if(tipoElementoSeleccionadoRegla.localeCompare("abajo") == 0) {
-                                    console.log('2.2')
                                     nuevaRegla.reglaPadreID = -1;
                                     nuevaRegla.nivel = -1;
                                     reglas[posicionInsertarReglaAtributo][posicionInsertarReglaSegmento].push(nuevaRegla);
                                 } else if(tipoElementoSeleccionadoRegla.localeCompare("arriba") == 0) {
-                                    console.log('2.2')
                                     nuevaRegla.reglaPadreID = reglas[posicionInsertarReglaAtributo][posicionInsertarReglaSegmento][indiceSeleccionadoReglas].reglaPadreID;
                                     nuevaRegla.nivel = reglas[posicionInsertarReglaAtributo][posicionInsertarReglaSegmento][indiceSeleccionadoReglas].nivel;
                                     reglas[posicionInsertarReglaAtributo][posicionInsertarReglaSegmento].splice(indiceSeleccionadoReglas, 0, nuevaRegla);
@@ -2694,29 +2935,13 @@ export default class EditarVariablesHome extends React.Component {
                             var tempNewCopy = [...reglas[posicionInsertarReglaAtributo][posicionInsertarReglaSegmento]];
                             this.setState({
                                 reglas: reglas[posicionInsertarReglaAtributo][posicionInsertarReglaSegmento]
-                            }, console.log(this.state.reglas) );
-                            console.log('reglas');
-                            console.log(reglas);
-                            console.log('segmentoRegla');
-                            console.log(segmentoRegla);
-                            console.log('posicionInsertarReglaAtributo');
-                            console.log(posicionInsertarReglaAtributo);
-                            console.log('posicionInsertarReglaSegmento');
-                            console.log(posicionInsertarReglaSegmento);
-                            console.log('indiceSeleccionadoReglas');
-                            console.log(indiceSeleccionadoReglas);
-                            console.log('formulaSeleccionada')
-                            console.log(formulaSeleccionada)
-                            var self = this;
-                            setTimeout(function(){
-                                console.log(self.state.reglas)
-                            }, 2000);
+                            });
                             formulaSeleccionada = null;
-                            if(this.state.tipoNuevaVariable.length == 0) {
+                            //if(this.state.tipoNuevaVariable.length == 0) {
                                 this.setState({
-                                    tipoNuevaVariable: tipoDeAsignacionSeleccionado
+                                    tipoNuevaVariable: tipoNuevaAsig
                                 });
-                            }
+                            //}
                             if (banderaEsObjeto) {
                                 reglasVariosAtributos = reglas;
                                 segmentoReglasVariosAtributos = segmentoRegla;
@@ -2732,7 +2957,7 @@ export default class EditarVariablesHome extends React.Component {
                     }
                 } else {
                     var texto2 = 'variable';
-                    if(campoSeleccionado.tablaID != undefined)
+                    if(campoSeleccionado != null && campoSeleccionado.tablaID != undefined)
                         texto2 = 'tabla';
                     var texto = 'formula';
                     if(!esFormula)
@@ -2769,12 +2994,6 @@ export default class EditarVariablesHome extends React.Component {
         if(posicionAtributoSeleccionado == -1) {
             posicionSel = this.state.atributos.length;
         }
-        console.log('formula');
-        console.log(formula);
-        console.log('formulaArreglo');
-        console.log(formulaArreglo);
-        console.log('posicionSel');
-        console.log(posicionSel);
         //copia antigua formulas
         var elementosFormulas, copiaAntiguaFormulas;
         if(banderaEsObjeto) {
@@ -2851,20 +3070,6 @@ export default class EditarVariablesHome extends React.Component {
             formulasUnAtributo = copiaAntiguaFormulas;
             elementosFormulasUnAtributos = elementosFormulas;
         }
-        console.log('elementosFormulas');
-        console.log(elementosFormulas);
-        console.log('copiaAntiguaFormulas[posicionSel]');
-        console.log(copiaAntiguaFormulas[posicionSel]);
-        console.log('copiaAntiguaFormulas');
-        console.log(copiaAntiguaFormulas);
-        console.log('posicionSel');
-        console.log(posicionSel);
-        console.log('posicionFormulaEnCampo');
-        console.log(posicionFormulaEnCampo);
-        var self = this;
-        setTimeout(function(){
-            console.log(self.state.formulas)
-        }, 2000);
     }
 
     getElementsFromFormula (formulaArreglo, array) {
@@ -2928,8 +3133,6 @@ export default class EditarVariablesHome extends React.Component {
             segmentoRegla = segmentoReglasUnAtributo;
         }
         if(reglas[0].length > 0 || (reglas[0][0] != undefined && reglas[0][0].length > 0)) {
-            console.log('reglas');
-            console.log(reglas);
             var posicionAtributo = posicionAtributoSeleccionado;
             //posicionAtributoSeleccionado = -1 cuando se va a condiciones de un campo nuevo
             //cuando se presiona NavBar indice es igual indice anterior
@@ -2991,32 +3194,13 @@ export default class EditarVariablesHome extends React.Component {
                     var entrarACrearRegla = false;
                     if(indiceSeleccionadoReglas != -1 && tipoElementoSeleccionadoRegla.length > 0 && tipoElementoSeleccionadoRegla.localeCompare("abajo") != 0 && segmentoRegla[posicionAtributo] != undefined) {
                         //validando nueva regla tenga la misma variable o conexion tabla del mismo segmento
-                        console.log('segmentoRegla');
-                        console.log(segmentoRegla);
-                        console.log('campoSeleccionado');
-                        console.log(campoSeleccionado);
-                        console.log('formulaSeleccionada');
-                        console.log(formulaSeleccionada);
-                        console.log('formulasVariosAtributos');
-                        console.log(formulasVariosAtributos);
-                        console.log('posicionAtributo');
-                        console.log(posicionAtributo);
-                        console.log('indiceSeleccionadoSegmentoReglas');
-                        console.log(indiceSeleccionadoSegmentoReglas);
-                        console.log('segmentoRegla');
-                        console.log(segmentoRegla);
                         if(!esFormula) {
-                            console.log('1');
                             if(campoSeleccionado.tablaID != undefined) {
-                                console.log('1.1');
                                 if (segmentoRegla[posicionAtributo][indiceSeleccionadoSegmentoReglas].conexionTablaID == campoSeleccionado.tablaID) {
-                                    console.log('1.1.1');
                                     entrarACrearRegla = true;
                                 }
                             } else if(campoSeleccionado.variableID != undefined) {
-                                console.log('1.2');
                                 if (segmentoRegla[posicionAtributo][indiceSeleccionadoSegmentoReglas].variableID == campoSeleccionado.variableID) {
-                                    console.log('1.2.2');
                                     entrarACrearRegla = true;
                                 }
                                 if(indiceSeleccionadoSegmentoReglas == 0)
@@ -3034,18 +3218,12 @@ export default class EditarVariablesHome extends React.Component {
                                 entrarACrearRegla = true;
                             }
                         } else {
-                            console.log('2');
-                            console.log(formulaSeleccionada);
-                            if(formulaSeleccionada.tablaID != undefined) {
-                                console.log('2.1');
+                            if(formulaSeleccionada.tablaID != undefined && !formulaSeleccionada.esValorManual) {
                                 if (segmentoRegla[posicionAtributo][indiceSeleccionadoSegmentoReglas].conexionTablaID == formulaSeleccionada.tablaID) {
-                                    console.log('2.1.1');
                                     entrarACrearRegla = true;
                                 }
-                            } else if(formulaSeleccionada.variableID != undefined) {
-                                console.log('2.2');
+                            } else if(formulaSeleccionada.variableID != undefined && !formulaSeleccionada.esValorManual) {
                                 if (segmentoRegla[posicionAtributo][indiceSeleccionadoSegmentoReglas].variableID == formulaSeleccionada.variableID) {
-                                    console.log('2.2.2');
                                     entrarACrearRegla = true;
                                 }
                                 if(indiceSeleccionadoSegmentoReglas == 0)
@@ -3057,9 +3235,11 @@ export default class EditarVariablesHome extends React.Component {
                                     if(!variableSel[0].esObjeto)
                                         entrarACrearRegla = true;
                                 }
-                            } else if(formulaSeleccionada.excelArchivoID != undefined) {
+                            } else if(formulaSeleccionada.excelArchivoID != undefined && !formulaSeleccionada.esValorManual) {
                                 entrarACrearRegla = true;
-                            } else if(formulaSeleccionada.formaVariableID != undefined) {
+                            } else if(formulaSeleccionada.formaVariableID != undefined && !formulaSeleccionada.esValorManual) {
+                                entrarACrearRegla = true;
+                            } else if(formulaSeleccionada.esValorManual) {
                                 entrarACrearRegla = true;
                             }
                         }
@@ -3097,23 +3277,23 @@ export default class EditarVariablesHome extends React.Component {
                             }
                             var nuevoNivel = 0;
                             var nuevaRegla = {
-                                                segmentoReglaID: segmentoReglaIndex,
-                                                conexionTablaID: conexionTablaID,
-                                                nombreColumnaEnTabla: nombreColumnaEnTabla,
-                                                formulaID: -1,
-                                                variableID: -1,
-                                                variableCampoID: -1,
-                                                reglaPadreID: -1,
-                                                tipoCampoObjetivo: campoSeleccionado.tipo,
-                                                esCondicion: esCondicion,
-                                                esConexionTabla: esConexionTabla,
-                                                operacion: operacionSeleccionada.operacion,
-                                                operacionTexto: operacionSeleccionada.operacionTexto,
-                                                valor: valor,
-                                                texto: campoSeleccionado.valor+" "+operacionSeleccionada.operacionTexto+" "+valor,
-                                                nivel: nuevoNivel,
-                                                posicionSegmentoEnCampo: segmentoReglaIndex
-                                            };
+                                            segmentoReglaID: segmentoReglaIndex,
+                                            conexionTablaID: conexionTablaID,
+                                            nombreColumnaEnTabla: nombreColumnaEnTabla,
+                                            formulaID: -1,
+                                            variableID: -1,
+                                            variableCampoID: -1,
+                                            reglaPadreID: -1,
+                                            tipoCampoObjetivo: campoSeleccionado.tipo,
+                                            esCondicion: esCondicion,
+                                            esConexionTabla: esConexionTabla,
+                                            operacion: operacionSeleccionada.operacion,
+                                            operacionTexto: operacionSeleccionada.operacionTexto,
+                                            valor: valorSeleccionado,
+                                            texto: campoSeleccionado.valor+" "+operacionSeleccionada.operacionTexto+" "+valorSeleccionadoTexto,
+                                            nivel: nuevoNivel,
+                                            posicionSegmentoEnCampo: segmentoReglaIndex
+                                        };
                             reglas[posicionInsertarReglaAtributo][posicionInsertarReglaSegmento].splice(indiceSeleccionadoReglas, 1, nuevaRegla);
                             //deseleccionado regla seleccionada
                             indiceSeleccionadoReglas = -1;
@@ -3127,19 +3307,6 @@ export default class EditarVariablesHome extends React.Component {
                             this.setState({
                                 reglas: reglas[posicionInsertarReglaAtributo][posicionInsertarReglaSegmento]
                             });
-                            //reglas[posicionSel].push(nuevaRegla);
-                            console.log('reglas');
-                            console.log(reglas);
-                            console.log('segmentoRegla');
-                            console.log(segmentoRegla);
-                            console.log('posicionInsertarReglaAtributo');
-                            console.log(posicionInsertarReglaAtributo);
-                            console.log('posicionInsertarReglaSegmento');
-                            console.log(posicionInsertarReglaSegmento);
-                            console.log('indiceSeleccionadoReglas');
-                            console.log(indiceSeleccionadoReglas);
-                            console.log('campoSeleccionado')
-                            console.log(campoSeleccionado)
                         } else {
                             //es regla formula
                             var posicionSel = posicionAtributoSeleccionado;
@@ -3149,10 +3316,41 @@ export default class EditarVariablesHome extends React.Component {
                             if(posicionAtributoSeleccionado == -1) {
                                 posicionSel = this.state.atributos.length;
                             }
+                            var elementosFormulas;
+                            if(banderaEsObjeto) {
+                                elementosFormulas = elementosFormulasVariosAtributos;
+                            } else {
+                                elementosFormulas = elementosFormulasUnAtributos;
+                            }
+                            var tipoNuevaAsig = tipoDeAsignacionSeleccionado;
+                            for (var i = 0; i < elementosFormulas[posicionSel][indiceFormulaSeleccionadaEdit].length; i++) {
+                                if(elementosFormulas[posicionSel][indiceFormulaSeleccionadaEdit][i].operacion.localeCompare("ASIG") == 0)
+                                    tipoNuevaAsig = elementosFormulas[posicionSel][indiceFormulaSeleccionadaEdit][i].tipoColumnaEnTabla;
+                                else if(elementosFormulas[posicionSel][indiceFormulaSeleccionadaEdit][i].operacion.localeCompare("MAX") == 0 || elementosFormulas[posicionSel][indiceFormulaSeleccionadaEdit][i].operacion.localeCompare("MIN") == 0)
+                                    tipoNuevaAsig = elementosFormulas[posicionSel][indiceFormulaSeleccionadaEdit][i].tipoColumnaEnTabla;
+                                else if(elementosFormulas[posicionSel][indiceFormulaSeleccionadaEdit][i].operacion.localeCompare("AUTOSUM") == 0 || elementosFormulas[posicionSel][indiceFormulaSeleccionadaEdit][i].operacion.localeCompare("SUM") == 0 || elementosFormulas[posicionSel][indiceFormulaSeleccionadaEdit][i].operacion.localeCompare("COUNT") == 0)
+                                    tipoNuevaAsig = 'int'
+                                else
+                                    tipoNuevaAsig = 'decimal'
+                                break;
+                            };
+                            //verificando que si modifica con un tipoDeAsignacionSeleccionado diferente al existente, que pueda entrar y actualizar tipo, si existe mas de una formula no se puede
+                            var existeSoloUnaFormula = false, contadorFormulas = 0;
+                            ForReglas:
+                            for (var i = 0; i < reglas[posicionSel].length; i++) {
+                                for (var j = 0; j < reglas[posicionSel][i].length; j++) {
+                                    if(!reglas[posicionSel][i][j].esCondicion) {
+                                        contadorFormulas++;
+                                    }
+                                };
+                            };
+                            if(contadorFormulas == 1) {
+                                existeSoloUnaFormula = true;
+                            }
                             //verificando que campo de formula seleccionado es mismo tipo variable
                             //tipoDeAsignacionSeleccionado
-                            if(this.state.tipoNuevaVariable.localeCompare(tipoDeAsignacionSeleccionado) == 0 || this.state.tipoNuevaVariable.length == 0 ) {
-                                console.log("INICIO AGREGAR FORMULA");
+                            //if(this.state.tipoNuevaVariable.localeCompare(tipoDeAsignacionSeleccionado) == 0 || this.state.tipoNuevaVariable.length == 0 ) {
+                            if( (posicionAtributoSeleccionado == -1 && (this.state.tipoNuevaVariable.localeCompare(tipoNuevaAsig) == 0 || this.state.tipoNuevaVariable.length == 0)) || (posicionAtributoSeleccionado != -1 && (this.state.atributos[posicionSel].tipo.localeCompare(tipoNuevaAsig) == 0 || this.state.atributos[posicionSel].tipo.length == 0)) || existeSoloUnaFormula ) {
                                 var nuevoNivel = 0;
                                 if(banderaEsObjeto) {
                                     nuevoNivel = nivelNuevoAtributoVarios;
@@ -3173,10 +3371,10 @@ export default class EditarVariablesHome extends React.Component {
                                     segmentoReglaIndex = indiceSeleccionadoSegmentoReglas+1;
                                 }
                                 var conexionTablaID = -1, esConexionTabla = false, nombreColumnaEnTabla = '';
-                                if(campoSeleccionado.tablaID != undefined) {
-                                    conexionTablaID = campoSeleccionado.tablaID;
+                                if(formulaSeleccionada.tablaID != undefined) {
+                                    conexionTablaID = formulaSeleccionada.tablaID;
                                     esConexionTabla = true;
-                                    nombreColumnaEnTabla = campoSeleccionado.valor;
+                                    nombreColumnaEnTabla = formulaSeleccionada.valor;
                                 }
                                 var nuevaRegla = {
                                                     segmentoReglaID: segmentoReglaIndex,
@@ -3201,28 +3399,12 @@ export default class EditarVariablesHome extends React.Component {
                                 var tempNewCopy = [...reglas[posicionInsertarReglaAtributo][posicionInsertarReglaSegmento]];
                                 this.setState({
                                     reglas: reglas[posicionInsertarReglaAtributo][posicionInsertarReglaSegmento]
-                                }, console.log(this.state.reglas) );
-                                console.log('reglas');
-                                console.log(reglas);
-                                console.log('segmentoRegla');
-                                console.log(segmentoRegla);
-                                console.log('posicionInsertarReglaAtributo');
-                                console.log(posicionInsertarReglaAtributo);
-                                console.log('posicionInsertarReglaSegmento');
-                                console.log(posicionInsertarReglaSegmento);
-                                console.log('indiceSeleccionadoReglas');
-                                console.log(indiceSeleccionadoReglas);
-                                console.log('formulaSeleccionada')
-                                console.log(formulaSeleccionada)
-                                var self = this;
-                                setTimeout(function(){
-                                    console.log(self.state.reglas)
-                                }, 2000);
-                                if(this.state.tipoNuevaVariable.length == 0) {
+                                });
+                                //if(this.state.tipoNuevaVariable.length == 0) {
                                     this.setState({
-                                        tipoNuevaVariable: tipoDeAsignacionSeleccionado
+                                        tipoNuevaVariable: tipoNuevaAsig
                                     });
-                                }
+                                //}
                                 if (banderaEsObjeto) {
                                     reglasVariosAtributos = reglas;
                                     segmentoReglasVariosAtributos = segmentoRegla;
@@ -3287,10 +3469,6 @@ export default class EditarVariablesHome extends React.Component {
                 reglas[posicionInsertarReglaAtributo].splice(posicionInsertarReglaSegmento, 1);
                 segmentoRegla[posicionInsertarReglaAtributo].splice(posicionInsertarReglaSegmento, 1);
             }
-            console.log('reglas');
-            console.log(reglas);
-            console.log('segmentoRegla');
-            console.log(segmentoRegla);
             if(reglas[posicionInsertarReglaAtributo] == undefined || reglas[posicionInsertarReglaAtributo][posicionInsertarReglaSegmento] == undefined || reglas[posicionInsertarReglaAtributo][posicionInsertarReglaSegmento].length == 0) {
                 this.setState({
                     reglas: []
@@ -3360,20 +3538,6 @@ export default class EditarVariablesHome extends React.Component {
             formulasUnAtributo = copiaAntiguaFormulas;
             elementosFormulasUnAtributos = elementosFormulas;
         }
-        console.log('elementosFormulas');
-        console.log(elementosFormulas);
-        console.log('copiaAntiguaFormulas[posicionSel]');
-        console.log(copiaAntiguaFormulas[posicionSel]);
-        console.log('copiaAntiguaFormulas');
-        console.log(copiaAntiguaFormulas);
-        console.log('posicionSel');
-        console.log(posicionSel);
-        console.log('posicionFormulaEnCampo');
-        console.log(posicionFormulaEnCampo);
-        var self = this;
-        setTimeout(function(){
-            console.log(self.state.formulas)
-        }, 2000);
     }
 
     eliminarFormula() {
@@ -3410,24 +3574,16 @@ export default class EditarVariablesHome extends React.Component {
         });
         var posicionFormulaEnCampo = indiceFormulaSeleccionadaEdit;
         elementosFormulas[posicionSel].splice(posicionFormulaEnCampo, 1);
-        console.log('elementosFormulas');
-        console.log(elementosFormulas);
-        console.log('copiaAntiguaFormulas[posicionSel]');
-        console.log(copiaAntiguaFormulas[posicionSel]);
-        console.log('copiaAntiguaFormulas');
-        console.log(copiaAntiguaFormulas);
-        console.log('posicionSel');
-        console.log(posicionSel);
-        console.log('posicionFormulaEnCampo');
-        console.log(posicionFormulaEnCampo);
-        var self = this;
-        setTimeout(function(){
-            console.log(self.state.formulas)
-        }, 2000);
     }
 
-    retornoCampoFormula (tipoVariableOriginal) {
-        tipoDeAsignacionSeleccionado = tipoVariableOriginal;
+    retornoCampoFormula (tipoVariable) {
+        if(banderaEsObjeto) {
+            tipoDeAsignacionSeleccionadoVarios = tipoVariable;
+            tipoDeAsignacionSeleccionado = tipoVariable;
+        } else {
+            tipoDeAsignacionSeleccionadoUnico = tipoVariable;
+            tipoDeAsignacionSeleccionado = tipoVariable;
+        }
     }
 
     retornoCampoCondicion (campo) {
@@ -3448,6 +3604,14 @@ export default class EditarVariablesHome extends React.Component {
 
     actualizarEstadoSiEsObjeto (esObjeto) {
         banderaEsObjeto = esObjeto;
+        if(banderaEsObjeto) {
+            tipoDeAsignacionSeleccionado = tipoDeAsignacionSeleccionadoVarios;
+        } else {
+            tipoDeAsignacionSeleccionado = tipoDeAsignacionSeleccionadoUnico;
+        }
+        this.setState({
+            tipoNuevaVariable: tipoDeAsignacionSeleccionado
+        });
     }
 
     actualizarEstadoSiEsInstruccionSQL (esObjeto) {
@@ -3499,8 +3663,13 @@ export default class EditarVariablesHome extends React.Component {
     }
 
     actualizarNombreEncargado () {
-        var analista = $("#analista").val();
-        analistaVariable = analista;
+        var responsable = $("#responsable").val();
+        responsableVariable = responsable;
+    }
+
+    actualizarCategoriaVariable () {
+        var categoria = $("#categoriaVariable").val();
+        categoriaVariable = categoria;
     }
 
     retornarCodigoOperacion (codigo) {
@@ -3608,9 +3777,16 @@ export default class EditarVariablesHome extends React.Component {
     verificarNoExisteNombreVar (nombre) {
         var noExiste = true;
         for (var i = 0; i < this.state.variables.length; i++) {
-            if (this.state.variables[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
-                noExiste = false;
-                break;
+            if(this.props.tipoVariable.localeCompare("variable") == 0) {
+                if (this.state.variables[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0 && this.state.variables[i].ID != this.props.idVariable) {
+                    noExiste = false;
+                    break;
+                }
+            } else {
+                if (this.state.variables[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
+                    noExiste = false;
+                    break;
+                }
             }
         };
         if(noExiste) {
@@ -3653,24 +3829,28 @@ export default class EditarVariablesHome extends React.Component {
     }
 
     actualizarCampoSQL (index, nombreN, tipoN) {
-        variablesSQL[index].nombre = nombreN;
-        variablesSQL[index].tipo = tipoN;
+        var tempCopy = [...variablesSQL];
+        tempCopy[index].nombre = nombreN;
+        tempCopy[index].tipo = tipoN;
+        if(!this.tieneEspaciosEnBlanco(tempCopy[index].nombre)) {
+            this.setState({
+                camposInstruccionSQL: tempCopy
+            });
+        } else {
+            alert('El nombre del campo no debe contener espacios en blanco');
+        }
     }
 
     eliminarCampoSQL (index) {
+        var tempCopy = [...variablesSQL];
+        tempCopy.splice(index, 1);
         variablesSQL.splice(index, 1);
+        this.setState({
+            camposInstruccionSQL: tempCopy
+        });
     }
 
-    actualizarCampoSQL (index, nombreN, tipoN) {
-        variablesSQL[index].nombre = nombreN;
-        variablesSQL[index].tipo = tipoN;
-    }
-
-    eliminarCampoSQL (index) {
-        variablesSQL.splice(index, 1);
-    }
-
-    eliminarVarForma () {
+    eliminarVarForma (mostrar) {
         const transaction = new sql.Transaction( this.props.pool );
         transaction.begin(err => {
             var rolledBack = false;
@@ -3687,13 +3867,17 @@ export default class EditarVariablesHome extends React.Component {
                     }
                 } else {
                     transaction.commit(err => {
+                        if(mostrar) {
+                            alert("Variable eliminada.");
+                            this.props.retornoSeleccionVariables();
+                        }
                     });
                 }
             });
         }); // fin transaction
     }
 
-    eliminarVarExcel () {
+    eliminarVarExcel (mostrar) {
         const transaction1 = new sql.Transaction( this.props.pool );
         transaction1.begin(err => {
             var rolledBack = false;
@@ -3710,6 +3894,10 @@ export default class EditarVariablesHome extends React.Component {
                     }
                 } else {
                     transaction1.commit(err => {
+                        if(mostrar) {
+                            alert("Variable eliminada.");
+                            this.props.retornoSeleccionVariables();
+                        }
                     });
                 }
             });
@@ -3736,7 +3924,31 @@ export default class EditarVariablesHome extends React.Component {
         }); // fin transaction2
     }
 
-    eliminarVariable () {
+    eliminarVariable (mostrar) {
+        if(mostrar) {
+            const transaction1 = new sql.Transaction( this.props.pool );
+            transaction1.begin(err => {
+                var rolledBack = false;
+                transaction1.on('rollback', aborted => {
+                    rolledBack = true;
+                });
+                const request2 = new sql.Request(transaction1);
+                request2.query("DELETE FROM Variables WHERE ID = "+this.props.idVariable, (err, result) => {
+                    if (err) {
+                        console.log(err);
+                        if (!rolledBack) {
+                            transaction1.rollback(err => {
+                            });
+                        }
+                    } else {
+                        transaction1.commit(err => {
+                            alert("Variable eliminada.");
+                            this.props.retornoSeleccionVariables();
+                        });
+                    }
+                });
+            }); // fin transaction1
+        }
         const transaction2 = new sql.Transaction( this.props.pool );
         transaction2.begin(err => {
             var rolledBack = false;
@@ -3880,6 +4092,24 @@ export default class EditarVariablesHome extends React.Component {
             });
         }); // fin transaction8
     }
+
+    tieneEspaciosEnBlanco (s) {
+        return /\s/g.test(s);
+    }
+
+    isValidDate (fecha) {
+        if (Object.prototype.toString.call(fecha) === "[object Date]") {
+            if (isNaN(fecha.getTime())) {
+                alert("Ingrese una fecha valida.");
+                return false;
+            } else {
+                return true;
+            }
+        } else {
+            alert("Ingrese una fecha valida.");
+            return false;
+        }
+    }
     
     render() {
         if(this.state.componenteActual.localeCompare("editarVariable") == 0) {
@@ -3922,9 +4152,14 @@ export default class EditarVariablesHome extends React.Component {
                                                 actualizarFechaInicio={this.actualizarFechaInicio}
                                                 actualizarPeriodicidad={this.actualizarPeriodicidad}
                                                 actualizarNombreEncargado={this.actualizarNombreEncargado}
+                                                actualizarCategoriaVariable={this.actualizarCategoriaVariable}
                                                 fechaInicioVariable={fechaInicioVariable}
                                                 periodicidadVariable={periodicidadVariable}
-                                                analistaVariable={analistaVariable}>
+                                                responsableVariable={responsableVariable}
+                                                categoriaVariable={categoriaVariable}
+                                                getExcel={this.getExcel}
+                                                getFormas={this.getFormas}
+                                                limpiarArreglos={this.limpiarArreglos}>
                     </EditarVariable>
                 </div>
             );
@@ -3957,7 +4192,8 @@ export default class EditarVariablesHome extends React.Component {
                                                 tablaBorrarFormulas={"FormulasVariablesCampos"}
                                                 tablaBorrarElementos={"ElementoFormulasVariablesCampos"}
                                                 condicionFormula={this.state.condicionFormula}
-                                                condicionElemento={this.state.condicionElemento}>
+                                                condicionElemento={this.state.condicionElemento}
+                                                limpiarArreglos={this.limpiarArreglos}>
                     </InstruccionVariable>
                 </div>
             );
@@ -3998,7 +4234,7 @@ export default class EditarVariablesHome extends React.Component {
             return (
                 <div style={{width: "100%", height: "100%"}}>
                     <TimelineVariable pool={this.props.pool}
-                                            variable={{ID: this.props.idVariable, esObjeto: this.props.esObjetoVariable, esInstruccionSQL: this.props.esInstruccionSQLVariable, esColeccion: this.state.esColeccion}}
+                                            variable={{ID: this.state.idVariable, esObjeto: this.state.esObjetoVariable, esInstruccionSQL: this.state.esInstruccionSQLVariable, esColeccion: this.state.esColeccion}}
                                             esVariable={true}
                                             tablaInstruccion={"ResultadosNombreVariables where nombreVariable = '"+this.state.nombreVariable+"' "}
                                             navbar={this.state.navbar}>

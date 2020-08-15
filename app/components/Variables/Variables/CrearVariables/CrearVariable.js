@@ -172,13 +172,17 @@ function (_React$Component) {
         actualizarFechaInicio: this.props.actualizarFechaInicio,
         actualizarPeriodicidad: this.props.actualizarPeriodicidad,
         actualizarNombreEncargado: this.props.actualizarNombreEncargado,
+        actualizarCategoriaVariable: this.props.actualizarCategoriaVariable,
         fechaInicioVariable: this.props.fechaInicioVariable,
         periodicidadVariable: this.props.periodicidadVariable,
-        analistaVariable: this.props.analistaVariable
+        responsableVariable: this.props.responsableVariable,
+        categoriaVariable: this.props.categoriaVariable
       }) : null, this.state.mostrarFuenteDatoForma ? _react["default"].createElement(_FuenteDatoForma["default"], {
-        pool: this.props.pool
+        pool: this.props.pool,
+        getFormas: this.props.getFormas
       }) : null, this.state.mostrarFuenteDatoExcel ? _react["default"].createElement(_FuenteDatoExcel["default"], {
-        pool: this.props.pool
+        pool: this.props.pool,
+        getExcel: this.props.getExcel
       }) : null), _react["default"].createElement("div", {
         className: "border-bottom",
         style: {

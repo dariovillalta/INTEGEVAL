@@ -42,7 +42,8 @@ export default class FuenteDatoForma extends React.Component {
             forma: null,
             showModalForma: false,
             tituloVariableForma: "",
-            htmlForma: ''
+            htmlForma: '',
+            usuarios: []
         }
         this.crearVariable = this.crearVariable.bind(this);
         this.traerForma = this.traerForma.bind(this);
@@ -81,6 +82,10 @@ export default class FuenteDatoForma extends React.Component {
         this.verificarPeriodicidadGuardar = this.verificarPeriodicidadGuardar.bind(this);
         this.updatePeriodicidad = this.updatePeriodicidad.bind(this);
         this.guardarPeriodicidad = this.guardarPeriodicidad.bind(this);
+
+        this.tieneEspaciosEnBlanco = this.tieneEspaciosEnBlanco.bind(this);
+
+        this.getUsuarios = this.getUsuarios.bind(this);
     }
 
     componentDidMount() {
@@ -90,6 +95,7 @@ export default class FuenteDatoForma extends React.Component {
         this.getVariables();
         this.getExcel();
         this.getFormas();
+        this.getUsuarios();
     }
 
     traerForma() {
@@ -124,7 +130,7 @@ export default class FuenteDatoForma extends React.Component {
                             else
                                 $("#guardarVariable").prop('checked', false);
                             $("#periodicidad").val(result.recordset[0].periodicidad);
-                            $("#analista").val(result.recordset[0].analista);
+                            $("#responsable").val(result.recordset[0].responsable);
                             if(result.recordset[0].fechaInicioCalculo.getFullYear() == 1964 && result.recordset[0].fechaInicioCalculo.getMonth() == 4 && result.recordset[0].fechaInicioCalculo.getDate() == 28){
                                 //
                             } else {
@@ -151,99 +157,105 @@ export default class FuenteDatoForma extends React.Component {
             fecha = new Date(1964, 4, 28);
         else
             fecha = $("#fecha").datepicker('getDate');
-        var analista = $("#analista").val();
+        var responsable = $("#responsable").val();
         if(nombreVariable.length > 0 && nombreVariable.length < 1001) {
-            if(this.verificarNoExisteNombreVar(nombreVariable)) {
-                if(tipo.length > 0 && tipo.length < 1001) {
-                    if(periodicidad.length > 0 && periodicidad.length < 51) {
-                        if(this.isValidDate(fecha)) {
-                            if(analista.length > 0 && analista.length < 101) {
-                                if (this.props.tipoVariableOriginal.localeCompare("excel") == 0) {
-                                    this.eliminarVarExcel();
-                                }
-                                if (this.props.tipoVariableOriginal.localeCompare("variable") == 0) {
-                                    this.eliminarVariable();
-                                }
-                                if (this.props.tipoVariableOriginal.localeCompare("forma") != 0) {
-                                    const transaction = new sql.Transaction( this.props.pool );
-                                    transaction.begin(err => {
-                                        var rolledBack = false;
-                                        transaction.on('rollback', aborted => {
-                                            rolledBack = true;
-                                        });
-                                        const request = new sql.Request(transaction);
-                                        request.query("insert into FormasVariables (nombre, tipo, periodicidad, fechaInicioCalculo, analista, guardar) values ('"+nombreVariable+"', '"+tipo+"', '"+periodicidad+"', '"+fecha.getFullYear()+"-"+(fecha.getMonth()+1)+"-"+fecha.getDate()+"', '"+analista+"', '"+guardarVariable+"')", (err, result) => {
-                                            if (err) {
-                                                console.log(err);
-                                                if (!rolledBack) {
-                                                    transaction.rollback(err => {
+            if(!this.tieneEspaciosEnBlanco(nombreVariable)) {
+                if(this.verificarNoExisteNombreVar(nombreVariable)) {
+                    if(tipo.length > 0 && tipo.length < 1001) {
+                        if(periodicidad.length > 0 && periodicidad.length < 51) {
+                            if(this.isValidDate(fecha)) {
+                                if(responsable.length > 0 && responsable.length < 101) {
+                                    if (this.props.tipoVariableOriginal.localeCompare("excel") == 0) {
+                                        this.eliminarVarExcel();
+                                    }
+                                    if (this.props.tipoVariableOriginal.localeCompare("variable") == 0) {
+                                        this.eliminarVariable();
+                                    }
+                                    if (this.props.tipoVariableOriginal.localeCompare("forma") != 0) {
+                                        const transaction = new sql.Transaction( this.props.pool );
+                                        transaction.begin(err => {
+                                            var rolledBack = false;
+                                            transaction.on('rollback', aborted => {
+                                                rolledBack = true;
+                                            });
+                                            const request = new sql.Request(transaction);
+                                            request.query("insert into FormasVariables (nombre, tipo, periodicidad, fechaInicioCalculo, responsable, guardar) values ('"+nombreVariable+"', '"+tipo+"', '"+periodicidad+"', '"+fecha.getFullYear()+"-"+(fecha.getMonth()+1)+"-"+fecha.getDate()+"', '"+responsable+"', '"+guardarVariable+"')", (err, result) => {
+                                                if (err) {
+                                                    console.log(err);
+                                                    if (!rolledBack) {
+                                                        transaction.rollback(err => {
+                                                        });
+                                                    }
+                                                } else {
+                                                    transaction.commit(err => {
+                                                        alert("Variable Modificada");
+                                                        this.getFormas();
+                                                        this.props.actualizarIDVariableModificada("forma");
+                                                        var forma = {
+                                                            nombreVariable: nombreVariable,
+                                                            tipo: tipo,
+                                                            guardarVariable: guardarVariable,
+                                                            periodicidad: periodicidad,
+                                                            fecha: fecha,
+                                                            responsable: responsable
+                                                        }
+                                                        this.verificarSiExisteExcelEnResultadosHistoricosModificar(forma);
+                                                        this.props.getFormas();
                                                     });
                                                 }
-                                            } else {
-                                                transaction.commit(err => {
-                                                    alert("Variable Modificada");
-                                                    this.getFormas();
-                                                    this.props.actualizarIDVariableModificada("forma");
-                                                    var forma = {
-                                                        nombreVariable: nombreVariable,
-                                                        tipo: tipo,
-                                                        guardarVariable: guardarVariable,
-                                                        periodicidad: periodicidad,
-                                                        fecha: fecha,
-                                                        analista: analista
+                                            });
+                                        }); // fin transaction
+                                    } else {
+                                        const transaction = new sql.Transaction( this.props.pool );
+                                        transaction.begin(err => {
+                                            var rolledBack = false;
+                                            transaction.on('rollback', aborted => {
+                                                rolledBack = true;
+                                            });
+                                            const request = new sql.Request(transaction);
+                                            request.query("update FormasVariables set nombre = '"+nombreVariable+"', tipo = '"+tipo+"', periodicidad = '"+periodicidad+"', guardar = '"+guardarVariable+"', fechaInicioCalculo = '"+fecha.getFullYear()+"-"+(fecha.getMonth()+1)+"-"+fecha.getDate()+"', responsable = '"+responsable+"' where ID = "+this.props.idVariable, (err, result) => {
+                                                if (err) {
+                                                    console.log(err);
+                                                    if (!rolledBack) {
+                                                        transaction.rollback(err => {
+                                                        });
                                                     }
-                                                    this.verificarSiExisteExcelEnResultadosHistoricosModificar(forma);
-                                                });
-                                            }
-                                        });
-                                    }); // fin transaction
+                                                } else {
+                                                    transaction.commit(err => {
+                                                        alert("Variable Modificada");
+                                                        this.getFormas();
+                                                        var forma = {
+                                                            nombreVariable: nombreVariable,
+                                                            tipo: tipo,
+                                                            guardarVariable: guardarVariable,
+                                                            periodicidad: periodicidad,
+                                                            fecha: fecha,
+                                                            responsable: responsable
+                                                        }
+                                                        this.verificarSiExisteExcelEnResultadosHistoricosModificar(forma);
+                                                        this.props.getFormas();
+                                                    });
+                                                }
+                                            });
+                                        }); // fin transaction
+                                    }
                                 } else {
-                                    const transaction = new sql.Transaction( this.props.pool );
-                                    transaction.begin(err => {
-                                        var rolledBack = false;
-                                        transaction.on('rollback', aborted => {
-                                            rolledBack = true;
-                                        });
-                                        const request = new sql.Request(transaction);
-                                        request.query("update FormasVariables set nombre = '"+nombreVariable+"', tipo = '"+tipo+"', periodicidad = '"+periodicidad+"', guardar = '"+guardarVariable+"', fechaInicioCalculo = '"+fecha.getFullYear()+"-"+(fecha.getMonth()+1)+"-"+fecha.getDate()+"', analista = '"+analista+"' where ID = "+this.props.idVariable, (err, result) => {
-                                            if (err) {
-                                                console.log(err);
-                                                if (!rolledBack) {
-                                                    transaction.rollback(err => {
-                                                    });
-                                                }
-                                            } else {
-                                                transaction.commit(err => {
-                                                    alert("Variable Modificada");
-                                                    this.getFormas();
-                                                    var forma = {
-                                                        nombreVariable: nombreVariable,
-                                                        tipo: tipo,
-                                                        guardarVariable: guardarVariable,
-                                                        periodicidad: periodicidad,
-                                                        fecha: fecha,
-                                                        analista: analista
-                                                    }
-                                                    this.verificarSiExisteExcelEnResultadosHistoricosModificar(forma);
-                                                });
-                                            }
-                                        });
-                                    }); // fin transaction
+                                    alert('Ingrese un valor para el responsable que debe ser menor a 51 caracteres');
                                 }
                             } else {
-                                alert('Ingrese un valor para el analista que debe ser menor a 51 caracteres');
+                                alert('Ingrese un valor para la fecha');
                             }
                         } else {
-                            alert('Ingrese un valor para la fecha');
+                            alert('Ingrese un valor para el valor de periodicidad que debe ser menor a 51 caracteres');
                         }
                     } else {
-                        alert('Ingrese un valor para el valor de periodicidad que debe ser menor a 51 caracteres');
+                        alert('Ingrese un valor para el tipo de la variable que debe ser menor a 31 caracteres');
                     }
                 } else {
-                    alert('Ingrese un valor para el tipo de la variable que debe ser menor a 31 caracteres');
+                    alert('El nombre de la variable debe ser único.');
                 }
             } else {
-                alert('El nombre de la variable debe ser único.');
+                alert('El nombre de la variable no debe contener espacios en blanco');
             }
         } else {
             alert('Ingrese un valor para el nombre de la variable que debe ser menor a 101 caracteres');
@@ -294,6 +306,9 @@ export default class FuenteDatoForma extends React.Component {
     }
 
     eliminarVariable () {
+        this.props.limpiarArreglos();
+        $("#nombreFuenteDato").val("");
+        $("#descripcionFuenteDato").val("");
         const transaction1 = new sql.Transaction( this.props.pool );
         transaction1.begin(err => {
             var rolledBack = false;
@@ -1377,6 +1392,36 @@ export default class FuenteDatoForma extends React.Component {
         **************************************
     */
 
+    tieneEspaciosEnBlanco (s) {
+        return /\s/g.test(s);
+    }
+
+    getUsuarios () {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("select * from Usuarios", (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        this.setState({
+                            usuarios: result.recordset
+                        });
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
     render() {
         return (
             <div>
@@ -1430,10 +1475,15 @@ export default class FuenteDatoForma extends React.Component {
                 }
                 <div className={"row"} style={{width: "100%"}}>
                     <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
-                        <label htmlFor="analista" className="col-form-label">Nombre Encargado</label>
+                        <label htmlFor="responsable" className="col-form-label">Nombre Encargado</label>
                     </div>
                     <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"}>
-                        <input id="analista" defaultValue={this.props.analistaVariable} onKeyUp={this.props.actualizarNombreEncargado} type="text" className="form-control form-control-sm"/>
+                        <select id="responsable" defaultValue={this.props.responsableVariable} onChange={this.props.actualizarNombreEncargado} className="form-control">
+                            <option value="-1">Ninguno</option>
+                            {this.state.usuarios.map((usuario, i) =>
+                                <option value={usuario.ID} key={usuario.ID}>{usuario.usuario}</option>
+                            )}
+                        </select>
                     </div>
                 </div>
                 <div className={"row"} style={{width: "100%"}}>
@@ -1453,12 +1503,17 @@ export default class FuenteDatoForma extends React.Component {
                     <a href="#" className="btn btn-brand active" onClick={this.crearVariable}>Modificar Variable</a>
                     {
                         this.props.tipoVariableOriginal.localeCompare("forma") == 0
-                        ? <a href="#" className="btn btn-secondary active" style={{marginLeft: "10px"}}  onClick={this.props.eliminarVarForma}>Eliminar Variable</a>
+                        ? <a href="#" className="btn btn-secondary active" style={{marginLeft: "10px"}}  onClick={() => this.props.eliminarVarForma(true)}>Eliminar Variable</a>
                         : null
                     }
                     {
                         this.props.tipoVariableOriginal.localeCompare("forma") == 0
                         ? <a href="#" className="btn btn-primary active" style={{marginLeft: "10px"}} onClick={this.verificarPeriodicidad}>Realizar Cálculo</a>
+                        : null
+                    }
+                    {
+                        this.props.tipoVariableOriginal.localeCompare("forma") == 0
+                        ? <a href="#" className="btn btn-info active" style={{marginLeft: "10px"}} onClick={() => this.props.goToTimeline(false)}>Historial de Variable</a>
                         : null
                     }
                 </div>

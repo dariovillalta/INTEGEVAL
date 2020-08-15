@@ -1,6 +1,7 @@
 import React from 'react';
 import electron from 'electron';
 import sql from 'mssql';
+import XLSX from 'xlsx-style';
 
 var variables = [];
 var excel = [];
@@ -15,7 +16,9 @@ export default class FuenteDatoExcel extends React.Component {
             ubicacionArchivo: '',
             variables: [],
             valorPeriodicidad: '-1',
-            valoresPeriodicidad: []
+            valoresPeriodicidad: [],
+            usuarios: [],
+            hojas: []
         }
         this.seleccionarArchivo = this.seleccionarArchivo.bind(this);
         this.guardarUbicacionArchivo = this.guardarUbicacionArchivo.bind(this);
@@ -34,12 +37,16 @@ export default class FuenteDatoExcel extends React.Component {
         this.actualizarPeriodicidadUpdate = this.actualizarPeriodicidadUpdate.bind(this);
         this.inicializarFecha = this.inicializarFecha.bind(this);
         this.isValidDate = this.isValidDate.bind(this);
+        this.tieneEspaciosEnBlanco = this.tieneEspaciosEnBlanco.bind(this);
+
+        this.getUsuarios = this.getUsuarios.bind(this);
     }
 
     componentDidMount() {
         this.getVariables();
         this.getExcel();
         this.getFormas();
+        this.getUsuarios();
     }
 
     seleccionarArchivo () {
@@ -54,9 +61,20 @@ export default class FuenteDatoExcel extends React.Component {
             properties: ['openFile']
         });
         if(fileExcel != undefined && fileExcel.length > 0) {
-            this.setState({
-                ubicacionArchivo: fileExcel[0]
-            });
+            var workbook = null;
+            workbook = XLSX.readFile(fileExcel[0]);
+            var hojas = [];
+            if(workbook != null) {
+                for (var i = 0; i < workbook.SheetNames.length; i++) {
+                    hojas.push(workbook.SheetNames[i]);
+                };
+                this.setState({
+                    ubicacionArchivo: fileExcel[0],
+                    hojas: hojas
+                });
+            } else {
+                alert("no se pudo abrir el archivo.");
+            }
         }
     }
 
@@ -161,7 +179,7 @@ export default class FuenteDatoExcel extends React.Component {
             let tipo = this.state.variables[i].tipo;
             let periodicidad = this.state.variables[i].periodicidad;
             let fechaInicioCalculo = this.state.variables[i].fechaInicioCalculo;
-            let analista = this.state.variables[i].analista;
+            let responsable = this.state.variables[i].responsable;
             let guardarVariable = this.state.variables[i].guardar;
             const transaction = new sql.Transaction( this.props.pool );
             transaction.begin(err => {
@@ -170,7 +188,7 @@ export default class FuenteDatoExcel extends React.Component {
                     rolledBack = true;
                 });
                 const request = new sql.Request(transaction);
-                request.query("insert into ExcelVariables (excelArchivoID, nombreHoja, nombre, operacion, celdas, tipo, periodicidad, fechaInicioCalculo, analista, guardar) values ("+archivoExcelID+", '"+nombreHoja+"', '"+nombre+"', '"+operacion+"', '"+celdas+"', '"+tipo+"', '"+periodicidad+"', '"+fechaInicioCalculo.getFullYear()+"-"+(fechaInicioCalculo.getMonth()+1)+"-"+fechaInicioCalculo.getDate()+"', '"+analista+"', '"+guardarVariable+"')", (err, result) => {
+                request.query("insert into ExcelVariables (excelArchivoID, nombreHoja, nombre, operacion, celdas, tipo, periodicidad, fechaInicioCalculo, responsable, guardar) values ("+archivoExcelID+", '"+nombreHoja+"', '"+nombre+"', '"+operacion+"', '"+celdas+"', '"+tipo+"', '"+periodicidad+"', '"+fechaInicioCalculo.getFullYear()+"-"+(fechaInicioCalculo.getMonth()+1)+"-"+fechaInicioCalculo.getDate()+"', '"+responsable+"', '"+guardarVariable+"')", (err, result) => {
                     if (err) {
                         console.log(err);
                         if (!rolledBack) {
@@ -184,6 +202,7 @@ export default class FuenteDatoExcel extends React.Component {
                                     variables: []
                                 });
                                 this.getExcel();
+                                this.props.getExcel();
                             }
                         });
                     }
@@ -209,52 +228,56 @@ export default class FuenteDatoExcel extends React.Component {
             fecha = new Date(1964, 4, 28);
         else
             fecha = $("#fecha").datepicker('getDate');
-        var analista = $("#analista").val();
+        var responsable = $("#responsable").val();
         if(nombre.length > 0 && nombre.length < 101) {
             if(this.verificarNoExisteNombreVar(nombre)) {
-                if(operacion.length > 0 && operacion.length < 31) {
-                    if(celdas.length > 0 && celdas.length < 101) {
-                        if(hoja.length > 0 && hoja.length < 201) {
-                            if(tipo.length > 0 && tipo.length < 31) {
-                                if(periodicidad.length > 0 && periodicidad.length < 51) {
-                                    if(this.isValidDate(fecha)) {
-                                        if(analista.length > 0 && analista.length < 101) {
-                                            var copyTemp = [...this.state.variables];
-                                            var nuevaVar = {nombreHoja: hoja, nombre: nombre, operacion: operacion, celdas: celdas, tipo: tipo , periodicidad: periodicidad, fechaInicioCalculo: fecha, analista: analista, guardar: guardarVariable};
-                                            var copyTempPeriodicidad = [...this.state.valoresPeriodicidad];
-                                            copyTemp.push(nuevaVar);
-                                            copyTempPeriodicidad.push(periodicidad);
-                                            this.setState({
-                                                variables: copyTemp,
-                                                valoresPeriodicidad: copyTempPeriodicidad
-                                            });
-                                            $("#nombreVariable").val("");
-                                            $("#operacion").val("ASIG");
-                                            $("#hojaExcelVariable").val("");
-                                            $("#tipoVariable").val("numero");
-                                            $("#celdasVariable").val("");
-                                            //$("#periodicidad").val("");
-                                            $("#analista").val("");
+                if(!this.tieneEspaciosEnBlanco(nombre)) {
+                    if(operacion.length > 0 && operacion.length < 31) {
+                        if(celdas.length > 0 && celdas.length < 101) {
+                            if(hoja.length > 0 && hoja.length < 201) {
+                                if(tipo.length > 0 && tipo.length < 31) {
+                                    if(periodicidad.length > 0 && periodicidad.length < 51) {
+                                        if(this.isValidDate(fecha)) {
+                                            if(responsable.length > 0 && responsable.length < 101) {
+                                                var copyTemp = [...this.state.variables];
+                                                var nuevaVar = {nombreHoja: hoja, nombre: nombre, operacion: operacion, celdas: celdas, tipo: tipo , periodicidad: periodicidad, fechaInicioCalculo: fecha, responsable: responsable, guardar: guardarVariable};
+                                                var copyTempPeriodicidad = [...this.state.valoresPeriodicidad];
+                                                copyTemp.push(nuevaVar);
+                                                copyTempPeriodicidad.push(periodicidad);
+                                                this.setState({
+                                                    variables: copyTemp,
+                                                    valoresPeriodicidad: copyTempPeriodicidad
+                                                });
+                                                $("#nombreVariable").val("");
+                                                $("#operacion").val("ASIG");
+                                                $("#hojaExcelVariable").val(this.state.hojas[0]);
+                                                $("#tipoVariable").val("numero");
+                                                $("#celdasVariable").val("");
+                                                //$("#periodicidad").val("");
+                                                $("#responsable").val("-1");
+                                            } else {
+                                                alert('Ingrese un valor para el valor de responsable que debe ser menor a 101 caracteres');
+                                            }
                                         } else {
-                                            alert('Ingrese un valor para el valor de analista que debe ser menor a 101 caracteres');
+                                            alert('Ingrese un valor para el valor de inicio de cálculo.');
                                         }
                                     } else {
-                                        alert('Ingrese un valor para el valor de inicio de cálculo.');
+                                        alert('Ingrese un valor para el valor de periodicidad que debe ser menor a 51 caracteres');
                                     }
                                 } else {
-                                    alert('Ingrese un valor para el valor de periodicidad que debe ser menor a 51 caracteres');
+                                    alert('Ingrese un valor para el valor de tipo de variable que debe ser menor a 31 caracteres');
                                 }
                             } else {
-                                alert('Ingrese un valor para el valor de tipo de variable que debe ser menor a 31 caracteres');
+                                alert('Ingrese un valor para el valor de hoja de excel que debe ser menor a 201 caracteres');
                             }
                         } else {
-                            alert('Ingrese un valor para el valor de hoja de excel que debe ser menor a 201 caracteres');
+                            alert('Ingrese un valor para el valor de celdas que debe ser menor a 101 caracteres');
                         }
                     } else {
-                        alert('Ingrese un valor para el valor de celdas que debe ser menor a 101 caracteres');
+                        alert('Ingrese un valor para el valor de operación que debe ser menor a 31 caracteres');
                     }
                 } else {
-                    alert('Ingrese un valor para el valor de operación que debe ser menor a 31 caracteres');
+                    alert('El nombre del archivo no debe contener espacios en blanco');
                 }
             } else {
                 alert('El nombre de la variable debe ser único.');
@@ -276,37 +299,39 @@ export default class FuenteDatoExcel extends React.Component {
                                     fecha = new Date(1964, 4, 28);
                                 else
                                     fecha = $("#fecha"+index).datepicker('getDate');
-                                console.log('fecha')
-                                console.log(fecha)
                                 if(this.isValidDate(fecha)) {
-                                    if($("#analista"+index).val().length > 0 && $("#analista"+index).val().length < 101) {
+                                    if($("#responsable"+index).val().length > 0 && $("#responsable"+index).val().length < 101) {
                                         if(this.verificarNoExisteNombreVarUpdate($("#nombreVariable"+index).val(), index)) {
-                                            var copyTemp = [...this.state.variables];
-                                            copyTemp[index].nombre = $("#nombreVariable"+index).val();
-                                            copyTemp[index].operacion = $("#operacion"+index).val();
-                                            copyTemp[index].celdas = $("#celdasVariable"+index).val();
-                                            copyTemp[index].nombreHoja = $("#hojaExcelVariable"+index).val();
-                                            copyTemp[index].tipo = $("#tipoVariable"+index).val();
-                                            copyTemp[index].periodicidad = $("#periodicidad"+index).val();
-                                            copyTemp[index].fechaInicioCalculo = fecha;
-                                            copyTemp[index].analista = $("#analista"+index).val();
-                                            var guardarVariable;
-                                            if ($("#guardarVariable"+index).is(':checked'))
-                                                guardarVariable = true;
-                                            else
-                                                guardarVariable = false;
-                                            copyTemp[index].guardar = guardarVariable;
-                                            var copyTempPeriodicidad = [...this.state.valoresPeriodicidad];
-                                            copyTempPeriodicidad[index] = $("#periodicidad"+index).val();
-                                            this.setState({
-                                                variables: copyTemp,
-                                                valoresPeriodicidad: copyTempPeriodicidad
-                                            });
+                                            if(!this.tieneEspaciosEnBlanco($("#nombreVariable"+index).val())) {
+                                                var copyTemp = [...this.state.variables];
+                                                copyTemp[index].nombre = $("#nombreVariable"+index).val();
+                                                copyTemp[index].operacion = $("#operacion"+index).val();
+                                                copyTemp[index].celdas = $("#celdasVariable"+index).val();
+                                                copyTemp[index].nombreHoja = $("#hojaExcelVariable"+index).val();
+                                                copyTemp[index].tipo = $("#tipoVariable"+index).val();
+                                                copyTemp[index].periodicidad = $("#periodicidad"+index).val();
+                                                copyTemp[index].fechaInicioCalculo = fecha;
+                                                copyTemp[index].responsable = $("#responsable"+index).val();
+                                                var guardarVariable;
+                                                if ($("#guardarVariable"+index).is(':checked'))
+                                                    guardarVariable = true;
+                                                else
+                                                    guardarVariable = false;
+                                                copyTemp[index].guardar = guardarVariable;
+                                                var copyTempPeriodicidad = [...this.state.valoresPeriodicidad];
+                                                copyTempPeriodicidad[index] = $("#periodicidad"+index).val();
+                                                this.setState({
+                                                    variables: copyTemp,
+                                                    valoresPeriodicidad: copyTempPeriodicidad
+                                                });
+                                            } else {
+                                                alert('El nombre del archivo no debe contener espacios en blanco');
+                                            }
                                         } else {
                                             alert('El nombre de la variable debe ser único.');
                                         }
                                     } else {
-                                        alert('Ingrese un valor para el valor de analista que debe ser menor a 101 caracteres');
+                                        alert('Ingrese un valor para el valor de responsable que debe ser menor a 101 caracteres');
                                     }
                                 } else {
                                     alert('Ingrese un valor para el valor de inicio de cálculo.');
@@ -521,7 +546,6 @@ export default class FuenteDatoExcel extends React.Component {
                 if(fecha.getFullYear() == 1964 && fecha.getMonth() == 4 && fecha.getDate() == 28) {
                     //
                 } else {
-                    console.log('YEAAAH')
                     $("#fecha"+index).datepicker("setDate", fecha);
                 }
             }, 500);
@@ -540,6 +564,36 @@ export default class FuenteDatoExcel extends React.Component {
         } else {
             return false;
         }
+    }
+
+    tieneEspaciosEnBlanco (s) {
+        return /\s/g.test(s);
+    }
+
+    getUsuarios () {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("select * from Usuarios", (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        this.setState({
+                            usuarios: result.recordset
+                        });
+                    });
+                }
+            });
+        }); // fin transaction
     }
 
     render() {
@@ -567,7 +621,7 @@ export default class FuenteDatoExcel extends React.Component {
                 </div>
                 <br/>
 
-                <div style={{width: "100%"}}>
+                <div style={{width: "100%", display: (this.state.ubicacionArchivo.length > 0 ? "inline" : "none")}}>
                     <div className={"row"} style={{width: "100%"}}>
                         <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
                             <label htmlFor="nombreVariable" className="col-form-label">Nombre de Variable:</label>
@@ -596,7 +650,11 @@ export default class FuenteDatoExcel extends React.Component {
                             <label htmlFor="hojaExcelVariable" className="col-form-label">Hoja de Excel:</label>
                         </div>
                         <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
-                            <input id="hojaExcelVariable" type="text" className="form-control form-control-sm"/>
+                            <select id="hojaExcelVariable" className="form-control">
+                                {this.state.hojas.map((hoja, i) =>
+                                    <option value={hoja} key={hoja}>{hoja}</option>
+                                )}
+                            </select>
                         </div>
                     </div>
                     <div className={"row"} style={{width: "100%"}}>
@@ -648,10 +706,15 @@ export default class FuenteDatoExcel extends React.Component {
                     }
                     <div className={"row"} style={{width: "100%"}}>
                         <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
-                            <label htmlFor="analista" className="col-form-label">Nombre Encargado</label>
+                            <label htmlFor="responsable" className="col-form-label">Nombre Encargado</label>
                         </div>
                         <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"}>
-                            <input id="analista" defaultValue={this.props.analistaVariable} onKeyUp={this.props.actualizarNombreEncargado} type="text" className="form-control form-control-sm"/>
+                            <select id="responsable" defaultValue={this.props.responsableVariable} onChange={this.props.actualizarNombreEncargado} className="form-control">
+                                <option value="-1">Ninguno</option>
+                                {this.state.usuarios.map((usuario, i) =>
+                                    <option value={usuario.ID} key={usuario.ID}>{usuario.usuario}</option>
+                                )}
+                            </select>
                         </div>
                     </div>
                     <div className={"row"} style={{width: "100%"}}>
@@ -703,7 +766,11 @@ export default class FuenteDatoExcel extends React.Component {
                                 <label htmlFor={"hojaExcelVariable"+i} className="col-form-label">Hoja de Excel:</label>
                             </div>
                             <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
-                                <input id={"hojaExcelVariable"+i} type="text" defaultValue={variable.nombreHoja} className="form-control form-control-sm"/>
+                                <select id={"hojaExcelVariable"+i} defaultValue={variable.nombreHoja} className="form-control">
+                                    {this.state.hojas.map((hoja, i) =>
+                                        <option value={hoja} key={hoja}>{hoja}</option>
+                                    )}
+                                </select>
                             </div>
                         </div>
                         <div className={"row"} style={{width: "100%"}}>
@@ -755,10 +822,15 @@ export default class FuenteDatoExcel extends React.Component {
                         }
                         <div className={"row"} style={{width: "100%"}}>
                             <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
-                                <label htmlFor={"analista"+i} className="col-form-label">Nombre Encargado</label>
+                                <label htmlFor={"responsable"+i} className="col-form-label">Nombre Encargado</label>
                             </div>
                             <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"}>
-                                <input id={"analista"+i} defaultValue={variable.analista} type="text" className="form-control form-control-sm"/>
+                                <select id={"responsable"+i} defaultValue={variable.responsable} className="form-control">
+                                    <option value="-1">Ninguno</option>
+                                    {this.state.usuarios.map((usuario, i) =>
+                                        <option value={usuario.ID} key={usuario.ID}>{usuario.usuario}</option>
+                                    )}
+                                </select>
                             </div>
                         </div>
                         <div className={"row"} style={{width: "100%"}}>

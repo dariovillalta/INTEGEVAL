@@ -89,18 +89,21 @@ export default class SeleccionarIndicador extends React.Component {
         var pesoRiesgoTotal = 100;
         var pesoExistente = 0;
         for (var i = 0; i < this.state.indicadores[indexRiesgo].length; i++) {
-            console.log('i = '+i);
-            console.log(this.state.indicadores[indexRiesgo][i]);
             pesoExistente += this.state.indicadores[indexRiesgo][i].peso;
         };
-        console.log('pesoExistente');
-        console.log(pesoExistente);
-        console.log('pesoRiesgoTotal');
-        console.log(pesoRiesgoTotal);
-        var pesoDisponible = pesoRiesgoTotal-pesoExistente
-        console.log('pesoDisponible');
-        console.log(pesoDisponible);
+        var pesoDisponible = pesoRiesgoTotal-pesoExistente;
         this.props.goCrearIndicador(riesgo.ID, riesgo.formula, pesoDisponible);
+    }
+
+    calcularPesoDisponibleEdit (riesgo, indexRiesgo, indexIndicador) {
+        var pesoRiesgoTotal = 100;
+        var pesoExistente = 0;
+        var indicador = this.state.indicadores[indexRiesgo][indexIndicador];
+        for (var i = 0; i < this.state.indicadores[indexRiesgo].length; i++) {
+            pesoExistente += this.state.indicadores[indexRiesgo][i].peso;
+        };
+        var pesoDisponible = pesoRiesgoTotal-pesoExistente;
+        this.props.goEditarIndicador(riesgo.ID, riesgo.formula, riesgo.pesoDisponible, indicador.ID, indicador.nombre, indicador.codigo, indicador.formula, indicador.peso, indicador.tolerancia, indicador.tipoValorIdeal, indicador.valorIdeal, indicador.periodicidad, indicador.tipoIndicador, indicador.analista, indicador.fechaInicioCalculo, this.state.indicadores[indexRiesgo]);
     }
 
     render() {
@@ -109,12 +112,12 @@ export default class SeleccionarIndicador extends React.Component {
                 <div className={"row"}>
                     <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
                         <div className={"page-header"}>
-                            <h2 className={"pageheader-title"}>Seleccionar Riesgo</h2>
+                            <h2 className={"pageheader-title"}>Seleccionar Indicador</h2>
                             <div className={"page-breadcrumb"}>
                                 <nav aria-label="breadcrumb">
                                     <ol className={"breadcrumb"}>
                                         <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.props.configuracionHome}><a href="#" className={"breadcrumb-link"}>Configuraci&oacute;n</a></li>
-                                        <li className={"breadcrumb-item active font-16"} aria-current="page">Seleccionar Riesgo</li>
+                                        <li className={"breadcrumb-item active font-16"} aria-current="page">Seleccionar Indicador</li>
                                     </ol>
                                 </nav>
                             </div>
@@ -131,7 +134,7 @@ export default class SeleccionarIndicador extends React.Component {
                                         { this.state.indicadores[i] != undefined ? (
                                             <div>
                                                 {this.state.indicadores[i].map((indicador, j) =>
-                                                    <a className={"btn btn-outline-info btn-block btnWhiteColorHover fontSize1EM"} key={indicador.ID}>{indicador.nombre}</a>
+                                                    <a className={"btn btn-outline-info btn-block btnWhiteColorHover fontSize1EM"} onClick={() => this.calcularPesoDisponibleEdit(riesgo, i, j)} key={indicador.ID}>{indicador.nombre}</a>
                                                 )}
                                                 <div className={"row"}>
                                                     <a className={"btn btn-success btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={() => this.calcularPesoDisponible(riesgo, i)}>Crear Indicador</a>

@@ -11,6 +11,8 @@ var _electron = _interopRequireDefault(require("electron"));
 
 var _mssql = _interopRequireDefault(require("mssql"));
 
+var _xlsxStyle = _interopRequireDefault(require("xlsx-style"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -71,7 +73,9 @@ function (_React$Component) {
       ubicacionArchivo: '',
       variables: [],
       valorPeriodicidad: '-1',
-      valoresPeriodicidad: []
+      valoresPeriodicidad: [],
+      usuarios: [],
+      hojas: []
     };
     _this.seleccionarArchivo = _this.seleccionarArchivo.bind(_assertThisInitialized(_this));
     _this.guardarUbicacionArchivo = _this.guardarUbicacionArchivo.bind(_assertThisInitialized(_this));
@@ -90,6 +94,8 @@ function (_React$Component) {
     _this.actualizarPeriodicidadUpdate = _this.actualizarPeriodicidadUpdate.bind(_assertThisInitialized(_this));
     _this.inicializarFecha = _this.inicializarFecha.bind(_assertThisInitialized(_this));
     _this.isValidDate = _this.isValidDate.bind(_assertThisInitialized(_this));
+    _this.tieneEspaciosEnBlanco = _this.tieneEspaciosEnBlanco.bind(_assertThisInitialized(_this));
+    _this.getUsuarios = _this.getUsuarios.bind(_assertThisInitialized(_this));
     return _this;
   }
 
@@ -99,6 +105,7 @@ function (_React$Component) {
       this.getVariables();
       this.getExcel();
       this.getFormas();
+      this.getUsuarios();
     }
   }, {
     key: "seleccionarArchivo",
@@ -115,9 +122,23 @@ function (_React$Component) {
       });
 
       if (fileExcel != undefined && fileExcel.length > 0) {
-        this.setState({
-          ubicacionArchivo: fileExcel[0]
-        });
+        var workbook = null;
+        workbook = _xlsxStyle["default"].readFile(fileExcel[0]);
+        var hojas = [];
+
+        if (workbook != null) {
+          for (var i = 0; i < workbook.SheetNames.length; i++) {
+            hojas.push(workbook.SheetNames[i]);
+          }
+
+          ;
+          this.setState({
+            ubicacionArchivo: fileExcel[0],
+            hojas: hojas
+          });
+        } else {
+          alert("no se pudo abrir el archivo.");
+        }
       }
     }
   }, {
@@ -234,7 +255,7 @@ function (_React$Component) {
         var tipo = _this4.state.variables[i].tipo;
         var periodicidad = _this4.state.variables[i].periodicidad;
         var fechaInicioCalculo = _this4.state.variables[i].fechaInicioCalculo;
-        var analista = _this4.state.variables[i].analista;
+        var responsable = _this4.state.variables[i].responsable;
         var guardarVariable = _this4.state.variables[i].guardar;
         var transaction = new _mssql["default"].Transaction(_this4.props.pool);
         transaction.begin(function (err) {
@@ -243,7 +264,7 @@ function (_React$Component) {
             rolledBack = true;
           });
           var request = new _mssql["default"].Request(transaction);
-          request.query("insert into ExcelVariables (excelArchivoID, nombreHoja, nombre, operacion, celdas, tipo, periodicidad, fechaInicioCalculo, analista, guardar) values (" + archivoExcelID + ", '" + nombreHoja + "', '" + nombre + "', '" + operacion + "', '" + celdas + "', '" + tipo + "', '" + periodicidad + "', '" + fechaInicioCalculo.getFullYear() + "-" + (fechaInicioCalculo.getMonth() + 1) + "-" + fechaInicioCalculo.getDate() + "', '" + analista + "', '" + guardarVariable + "')", function (err, result) {
+          request.query("insert into ExcelVariables (excelArchivoID, nombreHoja, nombre, operacion, celdas, tipo, periodicidad, fechaInicioCalculo, responsable, guardar) values (" + archivoExcelID + ", '" + nombreHoja + "', '" + nombre + "', '" + operacion + "', '" + celdas + "', '" + tipo + "', '" + periodicidad + "', '" + fechaInicioCalculo.getFullYear() + "-" + (fechaInicioCalculo.getMonth() + 1) + "-" + fechaInicioCalculo.getDate() + "', '" + responsable + "', '" + guardarVariable + "')", function (err, result) {
             if (err) {
               console.log(err);
 
@@ -258,6 +279,8 @@ function (_React$Component) {
                   });
 
                   _this4.getExcel();
+
+                  _this4.props.getExcel();
                 }
               });
             }
@@ -284,66 +307,70 @@ function (_React$Component) {
       var periodicidad = $("#periodicidad").val();
       var fecha;
       if (periodicidad.localeCompare("-1") == 0) fecha = new Date(1964, 4, 28);else fecha = $("#fecha").datepicker('getDate');
-      var analista = $("#analista").val();
+      var responsable = $("#responsable").val();
 
       if (nombre.length > 0 && nombre.length < 101) {
         if (this.verificarNoExisteNombreVar(nombre)) {
-          if (operacion.length > 0 && operacion.length < 31) {
-            if (celdas.length > 0 && celdas.length < 101) {
-              if (hoja.length > 0 && hoja.length < 201) {
-                if (tipo.length > 0 && tipo.length < 31) {
-                  if (periodicidad.length > 0 && periodicidad.length < 51) {
-                    if (this.isValidDate(fecha)) {
-                      if (analista.length > 0 && analista.length < 101) {
-                        var copyTemp = _toConsumableArray(this.state.variables);
+          if (!this.tieneEspaciosEnBlanco(nombre)) {
+            if (operacion.length > 0 && operacion.length < 31) {
+              if (celdas.length > 0 && celdas.length < 101) {
+                if (hoja.length > 0 && hoja.length < 201) {
+                  if (tipo.length > 0 && tipo.length < 31) {
+                    if (periodicidad.length > 0 && periodicidad.length < 51) {
+                      if (this.isValidDate(fecha)) {
+                        if (responsable.length > 0 && responsable.length < 101) {
+                          var copyTemp = _toConsumableArray(this.state.variables);
 
-                        var nuevaVar = {
-                          nombreHoja: hoja,
-                          nombre: nombre,
-                          operacion: operacion,
-                          celdas: celdas,
-                          tipo: tipo,
-                          periodicidad: periodicidad,
-                          fechaInicioCalculo: fecha,
-                          analista: analista,
-                          guardar: guardarVariable
-                        };
+                          var nuevaVar = {
+                            nombreHoja: hoja,
+                            nombre: nombre,
+                            operacion: operacion,
+                            celdas: celdas,
+                            tipo: tipo,
+                            periodicidad: periodicidad,
+                            fechaInicioCalculo: fecha,
+                            responsable: responsable,
+                            guardar: guardarVariable
+                          };
 
-                        var copyTempPeriodicidad = _toConsumableArray(this.state.valoresPeriodicidad);
+                          var copyTempPeriodicidad = _toConsumableArray(this.state.valoresPeriodicidad);
 
-                        copyTemp.push(nuevaVar);
-                        copyTempPeriodicidad.push(periodicidad);
-                        this.setState({
-                          variables: copyTemp,
-                          valoresPeriodicidad: copyTempPeriodicidad
-                        });
-                        $("#nombreVariable").val("");
-                        $("#operacion").val("ASIG");
-                        $("#hojaExcelVariable").val("");
-                        $("#tipoVariable").val("numero");
-                        $("#celdasVariable").val(""); //$("#periodicidad").val("");
+                          copyTemp.push(nuevaVar);
+                          copyTempPeriodicidad.push(periodicidad);
+                          this.setState({
+                            variables: copyTemp,
+                            valoresPeriodicidad: copyTempPeriodicidad
+                          });
+                          $("#nombreVariable").val("");
+                          $("#operacion").val("ASIG");
+                          $("#hojaExcelVariable").val(this.state.hojas[0]);
+                          $("#tipoVariable").val("numero");
+                          $("#celdasVariable").val(""); //$("#periodicidad").val("");
 
-                        $("#analista").val("");
+                          $("#responsable").val("-1");
+                        } else {
+                          alert('Ingrese un valor para el valor de responsable que debe ser menor a 101 caracteres');
+                        }
                       } else {
-                        alert('Ingrese un valor para el valor de analista que debe ser menor a 101 caracteres');
+                        alert('Ingrese un valor para el valor de inicio de cálculo.');
                       }
                     } else {
-                      alert('Ingrese un valor para el valor de inicio de cálculo.');
+                      alert('Ingrese un valor para el valor de periodicidad que debe ser menor a 51 caracteres');
                     }
                   } else {
-                    alert('Ingrese un valor para el valor de periodicidad que debe ser menor a 51 caracteres');
+                    alert('Ingrese un valor para el valor de tipo de variable que debe ser menor a 31 caracteres');
                   }
                 } else {
-                  alert('Ingrese un valor para el valor de tipo de variable que debe ser menor a 31 caracteres');
+                  alert('Ingrese un valor para el valor de hoja de excel que debe ser menor a 201 caracteres');
                 }
               } else {
-                alert('Ingrese un valor para el valor de hoja de excel que debe ser menor a 201 caracteres');
+                alert('Ingrese un valor para el valor de celdas que debe ser menor a 101 caracteres');
               }
             } else {
-              alert('Ingrese un valor para el valor de celdas que debe ser menor a 101 caracteres');
+              alert('Ingrese un valor para el valor de operación que debe ser menor a 31 caracteres');
             }
           } else {
-            alert('Ingrese un valor para el valor de operación que debe ser menor a 31 caracteres');
+            alert('El nombre del archivo no debe contener espacios en blanco');
           }
         } else {
           alert('El nombre de la variable debe ser único.');
@@ -363,38 +390,40 @@ function (_React$Component) {
                 if ($("#periodicidad" + index).val().length > 0 && $("#periodicidad" + index).val().length < 51) {
                   var fecha;
                   if ($("#periodicidad" + index).val().localeCompare("-1") == 0) fecha = new Date(1964, 4, 28);else fecha = $("#fecha" + index).datepicker('getDate');
-                  console.log('fecha');
-                  console.log(fecha);
 
                   if (this.isValidDate(fecha)) {
-                    if ($("#analista" + index).val().length > 0 && $("#analista" + index).val().length < 101) {
+                    if ($("#responsable" + index).val().length > 0 && $("#responsable" + index).val().length < 101) {
                       if (this.verificarNoExisteNombreVarUpdate($("#nombreVariable" + index).val(), index)) {
-                        var copyTemp = _toConsumableArray(this.state.variables);
+                        if (!this.tieneEspaciosEnBlanco($("#nombreVariable" + index).val())) {
+                          var copyTemp = _toConsumableArray(this.state.variables);
 
-                        copyTemp[index].nombre = $("#nombreVariable" + index).val();
-                        copyTemp[index].operacion = $("#operacion" + index).val();
-                        copyTemp[index].celdas = $("#celdasVariable" + index).val();
-                        copyTemp[index].nombreHoja = $("#hojaExcelVariable" + index).val();
-                        copyTemp[index].tipo = $("#tipoVariable" + index).val();
-                        copyTemp[index].periodicidad = $("#periodicidad" + index).val();
-                        copyTemp[index].fechaInicioCalculo = fecha;
-                        copyTemp[index].analista = $("#analista" + index).val();
-                        var guardarVariable;
-                        if ($("#guardarVariable" + index).is(':checked')) guardarVariable = true;else guardarVariable = false;
-                        copyTemp[index].guardar = guardarVariable;
+                          copyTemp[index].nombre = $("#nombreVariable" + index).val();
+                          copyTemp[index].operacion = $("#operacion" + index).val();
+                          copyTemp[index].celdas = $("#celdasVariable" + index).val();
+                          copyTemp[index].nombreHoja = $("#hojaExcelVariable" + index).val();
+                          copyTemp[index].tipo = $("#tipoVariable" + index).val();
+                          copyTemp[index].periodicidad = $("#periodicidad" + index).val();
+                          copyTemp[index].fechaInicioCalculo = fecha;
+                          copyTemp[index].responsable = $("#responsable" + index).val();
+                          var guardarVariable;
+                          if ($("#guardarVariable" + index).is(':checked')) guardarVariable = true;else guardarVariable = false;
+                          copyTemp[index].guardar = guardarVariable;
 
-                        var copyTempPeriodicidad = _toConsumableArray(this.state.valoresPeriodicidad);
+                          var copyTempPeriodicidad = _toConsumableArray(this.state.valoresPeriodicidad);
 
-                        copyTempPeriodicidad[index] = $("#periodicidad" + index).val();
-                        this.setState({
-                          variables: copyTemp,
-                          valoresPeriodicidad: copyTempPeriodicidad
-                        });
+                          copyTempPeriodicidad[index] = $("#periodicidad" + index).val();
+                          this.setState({
+                            variables: copyTemp,
+                            valoresPeriodicidad: copyTempPeriodicidad
+                          });
+                        } else {
+                          alert('El nombre del archivo no debe contener espacios en blanco');
+                        }
                       } else {
                         alert('El nombre de la variable debe ser único.');
                       }
                     } else {
-                      alert('Ingrese un valor para el valor de analista que debe ser menor a 101 caracteres');
+                      alert('Ingrese un valor para el valor de responsable que debe ser menor a 101 caracteres');
                     }
                   } else {
                     alert('Ingrese un valor para el valor de inicio de cálculo.');
@@ -648,7 +677,6 @@ function (_React$Component) {
 
           if (fecha.getFullYear() == 1964 && fecha.getMonth() == 4 && fecha.getDate() == 28) {//
           } else {
-            console.log('YEAAAH');
             $("#fecha" + index).datepicker("setDate", fecha);
           }
         }, 500);
@@ -671,9 +699,43 @@ function (_React$Component) {
       }
     }
   }, {
+    key: "tieneEspaciosEnBlanco",
+    value: function tieneEspaciosEnBlanco(s) {
+      return /\s/g.test(s);
+    }
+  }, {
+    key: "getUsuarios",
+    value: function getUsuarios() {
+      var _this5 = this;
+
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("select * from Usuarios", function (err, result) {
+          if (err) {
+            console.log(err);
+
+            if (!rolledBack) {
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              _this5.setState({
+                usuarios: result.recordset
+              });
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
     key: "render",
     value: function render() {
-      var _this5 = this;
+      var _this6 = this;
 
       return _react["default"].createElement("div", null, _react["default"].createElement("br", null), _react["default"].createElement("div", {
         className: "row",
@@ -726,7 +788,8 @@ function (_React$Component) {
         onClick: this.seleccionarArchivo
       }, "Seleccionar Ubicaci\xF3n")), _react["default"].createElement("br", null), _react["default"].createElement("div", {
         style: {
-          width: "100%"
+          width: "100%",
+          display: this.state.ubicacionArchivo.length > 0 ? "inline" : "none"
         }
       }, _react["default"].createElement("div", {
         className: "row",
@@ -798,11 +861,15 @@ function (_React$Component) {
           alignItems: "center",
           justifyContent: "center"
         }
-      }, _react["default"].createElement("input", {
+      }, _react["default"].createElement("select", {
         id: "hojaExcelVariable",
-        type: "text",
-        className: "form-control form-control-sm"
-      }))), _react["default"].createElement("div", {
+        className: "form-control"
+      }, this.state.hojas.map(function (hoja, i) {
+        return _react["default"].createElement("option", {
+          value: hoja,
+          key: hoja
+        }, hoja);
+      })))), _react["default"].createElement("div", {
         className: "row",
         style: {
           width: "100%"
@@ -899,17 +966,23 @@ function (_React$Component) {
       }, _react["default"].createElement("div", {
         className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
       }, _react["default"].createElement("label", {
-        htmlFor: "analista",
+        htmlFor: "responsable",
         className: "col-form-label"
       }, "Nombre Encargado")), _react["default"].createElement("div", {
         className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
-      }, _react["default"].createElement("input", {
-        id: "analista",
-        defaultValue: this.props.analistaVariable,
-        onKeyUp: this.props.actualizarNombreEncargado,
-        type: "text",
-        className: "form-control form-control-sm"
-      }))), _react["default"].createElement("div", {
+      }, _react["default"].createElement("select", {
+        id: "responsable",
+        defaultValue: this.props.responsableVariable,
+        onChange: this.props.actualizarNombreEncargado,
+        className: "form-control"
+      }, _react["default"].createElement("option", {
+        value: "-1"
+      }, "Ninguno"), this.state.usuarios.map(function (usuario, i) {
+        return _react["default"].createElement("option", {
+          value: usuario.ID,
+          key: usuario.ID
+        }, usuario.usuario);
+      })))), _react["default"].createElement("div", {
         className: "row",
         style: {
           width: "100%"
@@ -1021,12 +1094,16 @@ function (_React$Component) {
             alignItems: "center",
             justifyContent: "center"
           }
-        }, _react["default"].createElement("input", {
+        }, _react["default"].createElement("select", {
           id: "hojaExcelVariable" + i,
-          type: "text",
           defaultValue: variable.nombreHoja,
-          className: "form-control form-control-sm"
-        }))), _react["default"].createElement("div", {
+          className: "form-control"
+        }, _this6.state.hojas.map(function (hoja, i) {
+          return _react["default"].createElement("option", {
+            value: hoja,
+            key: hoja
+          }, hoja);
+        })))), _react["default"].createElement("div", {
           className: "row",
           style: {
             width: "100%"
@@ -1093,7 +1170,7 @@ function (_React$Component) {
           id: "periodicidad" + i,
           defaultValue: variable.periodicidad,
           onChange: function onChange() {
-            return _this5.actualizarPeriodicidadUpdate(i);
+            return _this6.actualizarPeriodicidadUpdate(i);
           },
           className: "form-control"
         }, _react["default"].createElement("option", {
@@ -1103,7 +1180,7 @@ function (_React$Component) {
             value: periodicidad.nombre,
             key: periodicidad.nombre
           }, periodicidad.nombre);
-        })))), _this5.state.valoresPeriodicidad[i].localeCompare("-1") != 0 && _this5.inicializarFecha(i, variable.fechaInicioCalculo) ? _react["default"].createElement("div", {
+        })))), _this6.state.valoresPeriodicidad[i].localeCompare("-1") != 0 && _this6.inicializarFecha(i, variable.fechaInicioCalculo) ? _react["default"].createElement("div", {
           className: "row",
           style: {
             width: "100%"
@@ -1127,16 +1204,22 @@ function (_React$Component) {
         }, _react["default"].createElement("div", {
           className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
         }, _react["default"].createElement("label", {
-          htmlFor: "analista" + i,
+          htmlFor: "responsable" + i,
           className: "col-form-label"
         }, "Nombre Encargado")), _react["default"].createElement("div", {
           className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
-        }, _react["default"].createElement("input", {
-          id: "analista" + i,
-          defaultValue: variable.analista,
-          type: "text",
-          className: "form-control form-control-sm"
-        }))), _react["default"].createElement("div", {
+        }, _react["default"].createElement("select", {
+          id: "responsable" + i,
+          defaultValue: variable.responsable,
+          className: "form-control"
+        }, _react["default"].createElement("option", {
+          value: "-1"
+        }, "Ninguno"), _this6.state.usuarios.map(function (usuario, i) {
+          return _react["default"].createElement("option", {
+            value: usuario.ID,
+            key: usuario.ID
+          }, usuario.usuario);
+        })))), _react["default"].createElement("div", {
           className: "row",
           style: {
             width: "100%"
@@ -1170,13 +1253,13 @@ function (_React$Component) {
           href: "#",
           className: "btn btn-success active",
           onClick: function onClick() {
-            return _this5.updateVariable(i);
+            return _this6.updateVariable(i);
           }
         }, "Modificar Variable"), _react["default"].createElement("a", {
           href: "#",
           className: "btn btn-danger active",
           onClick: function onClick() {
-            return _this5.deleteVariable(i);
+            return _this6.deleteVariable(i);
           },
           style: {
             marginLeft: "10px"

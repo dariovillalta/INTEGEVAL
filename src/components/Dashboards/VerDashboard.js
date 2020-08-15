@@ -2,7 +2,7 @@ import React from 'react';
 import sql from 'mssql';
 import Slider from 'react-input-slider';
 
-const tipoCampos = [ {nombre: "texto"}, {nombre: "booleano"}, {nombre: "fecha"}, {nombre: "número"}, {nombre: "arreglo"}];
+var c3 = require("c3");
 
 var seccionesDashboard = [];
 
@@ -17,56 +17,236 @@ export default class VerDashboard extends React.Component {
         this.state = {
             html: ''
         }
-        this.crearRiesgo = this.crearRiesgo.bind(this);
+        this.crearHTML = this.crearHTML.bind(this);
+        this.crearArreglosDeInstrucciones = this.crearArreglosDeInstrucciones.bind(this);
+        this.crearArreglosDeInstrucciones = this.crearArreglosDeInstrucciones.bind(this);
+        this.cargarDatos = this.cargarDatos.bind(this);
+        this.retornarVariable = this.retornarVariable.bind(this);
+        this.styleDate = this.styleDate.bind(this);
     }
 
-    crearDashboard () {
-        var nombre = $("#nombreDashboard").val();
-        var descripcion = $("#descripcionDashboard").val();;
+    componentDidMount() {
+        this.getDashboardsSections();
+    }
+
+    getDashboardsSections() {
+        console.log(this.props);
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("select * from SeccionDashboard where dashboardID = "+this.props.dashboardSeleccionado.ID, (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        seccionesDashboard = result.recordset;
+                        //this.crearArreglosDeInstrucciones();
+                        this.crearHTML();
+                    });
+                }
+            });
+        }); // fin transaction
     }
 
     crearHTML() {
-        var htmlSecciones = [];
-        var contadorCol6PorRow = 0;
+        var htmlSecciones = []; //el arreglo final a poner por html
+        var htmlRows = [];  //arreglo de col segun cada row (maximo 2 por row)
+        var contadorRows = 0, contadorCol6PorRow = 0;
+        //contadorRows: para saber a que row de htmlRows estamos agregando
+        //contadorCol6PorRow: para saber cuando agregar a contadorRows dependiendo si es col6 o col12
         for (var i = 0; i < seccionesDashboard.length; i++) {
-            if (seccionesDashboard[i].tipoObjeto.localeCompare("grafica") == 0) {
-                if (seccionesDashboard[i].tamano.localeCompare("col-6") == 0) {
-                    contadorCol6PorRow++;
-                    if(contadorCol6PorRow == 2) {
+            //if (seccionesDashboard[i].tamano.localeCompare("col-6") == 0) {
+                contadorCol6PorRow++;
+                if (seccionesDashboard[i].tipoObjeto.localeCompare("grafica") == 0) {
+                    //if( (i+1 < seccionesDashboard.length && seccionesDashboard[i+1].tamano.localeCompare("col-6") == 0) || (i == seccionesDashboard.length-1 && seccionesDashboard[i].tamano.localeCompare("col-6") == 0) ) {
+                    if( (seccionesDashboard[i].tamano.localeCompare("col-6") == 0) ) {
+                        var htmlSeccion = {clase: "col-xl-6 col-lg-6 col-md-6 col-sm-6 col-6", grafica: <div id={"grafica"+i}></div>};
+                        if(htmlRows[contadorRows] == undefined) {
+                            htmlRows[contadorRows] = [];
+                        }
+                        htmlRows[contadorRows].push(htmlSeccion);
+                        if(contadorCol6PorRow == 2) {
+                            contadorCol6PorRow = 0;
+                            contadorRows++;
+                        }
+                    } else {
+                        var htmlSeccion = {clase: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12", grafica: <div id={"grafica"+i}></div>};
+                        if(htmlRows[contadorRows] == undefined) {
+                            htmlRows[contadorRows] = [];
+                        }
+                        htmlRows[contadorRows].push(htmlSeccion);
                         contadorCol6PorRow = 0;
+                        contadorRows++;
                     }
-                    var htmlSeccion =   <div className={"col-xl-6 col-lg-6 col-md-6 col-sm-6 col-6"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
-                                            <div id={"grafica"+i}></div>
-                                        </div>
-                    htmlSecciones.push(htmlSeccion);
-                    /*html += '<div className={"col-xl-6 col-lg-6 col-md-6 col-sm-6 col-6"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>';
-                    html += this.getObjetoCodigo(seccionesDashboard[i].tipoObjeto, seccionesDashboard[i].instrucciones, i);*/
-                }
-            } else if (seccionesDashboard[i].tipoObjeto.localeCompare("tabla") == 0) {
-                if (seccionesDashboard[i].tamano.localeCompare("col-6") == 0) {
-                    contadorCol6PorRow++;
-                    if(contadorCol6PorRow == 2) {
+                } else if (seccionesDashboard[i].tipoObjeto.localeCompare("tabla") == 0) {
+                    //TABLA=>[{esVariable:false,esIndicador:false,esRiesgo:true,nombreRiesgo:"undefined",nombreCampo:"RIESGO_1",valor:"RIESGO_1"}]
+                    if( (seccionesDashboard[i].tamano.localeCompare("col-6") == 0) ) {
+                        var cadenaValores = seccionesDashboard[i].instruccion.split("=>")[1];
+                        var cadenaValoresSinCorchetes = cadenaValores.substring(1, cadenaValores.indexOf("]"));
+                        var arregloValores = cadenaValoresSinCorchetes.split("<>");
+                        tipoObjetoUpdate[i] = 'tabla';
+                        if(variablesSeleccionadasSeccionesDashboardTablaUpdate[i] == undefined)
+                            variablesSeleccionadasSeccionesDashboardTablaUpdate[i] = [];
+                        var variablesDeTabla = [];
+                        for (var j = 0; j < arregloValores.length; j++) {
+                            var objeto = arregloValores[j].substring(arregloValores[j].indexOf("{")+1, arregloValores[j].lastIndexOf("}"));
+                            eval("variablesSeleccionadasSeccionesDashboardTablaUpdate[i].push({"+objeto+"})");
+                            variablesDeTabla.push( this.retornarVariable(variablesSeleccionadasSeccionesDashboardTablaUpdate[i][j]) );
+                        };
+                        var arregloTH = [];
+                        arregloTH.push(<th scope="col">#</th>);
+                        for (var p = 0; p < variablesDeTabla[0].atributos.length; p++) {
+                            if(variablesDeTabla[0].atributos[p].nombre.localeCompare("f3ch4Gu4rd4do") == 0) {
+                                arregloTH.push(<th scope="col">Fecha Creación</th>);
+                            } else {
+                                arregloTH.push(<th scope="col">{variablesDeTabla[0].atributos[p].nombre}</th>);
+                            }
+                        };
+                        var objetoTHEAD =   <thead>
+                                                <tr>
+                                                    {arregloTH}
+                                                </tr>
+                                            </thead>;
+                        var arregloTR = [], contador = 0;
+                        for (var p = 0; p < variablesDeTabla.length; p++) {
+                            for (var j = 0; j < variablesDeTabla[p].resultados.length; j++) {
+                                var arregloTD = [];
+                                arregloTD.push(<td scope="row">{contador}</td>);
+                                for (var k = 0; k < variablesDeTabla[p].atributos.length; k++) {
+                                    if(variablesDeTabla[p].atributos[k].tipo.localeCompare("date") == 0) {
+                                        arregloTD.push(<td scope="col">{this.styleDate(variablesDeTabla[p].resultados[j][variablesDeTabla[p].atributos[k].nombre])}</td>);
+                                    } else {
+                                        arregloTD.push(<td scope="col">{variablesDeTabla[p].resultados[j][variablesDeTabla[p].atributos[k].nombre]}</td>);
+                                    }
+                                };
+                                var objetoTR =  <tr>
+                                                    {arregloTD}
+                                                </tr>;
+                                arregloTR.push(objetoTR)
+                                contador++;
+                            };
+                        };
+                        var objetoTabla =   <div style={{width: "100%", overflowX: "scroll"}}>
+                                                <table className="table table-striped table-bordered">
+                                                    {objetoTHEAD}
+                                                    <tbody>
+                                                        {arregloTR}
+                                                    </tbody>
+                                                </table>
+                                            </div>;
+                        var htmlSeccion = {clase: "col-xl-6 col-lg-6 col-md-6 col-sm-6 col-6", grafica: objetoTabla};
+                        if(htmlRows[contadorRows] == undefined) {
+                            htmlRows[contadorRows] = [];
+                        }
+                        htmlRows[contadorRows].push(htmlSeccion);
+                        if(contadorCol6PorRow == 2) {
+                            contadorCol6PorRow = 0;
+                            contadorRows++;
+                        }
+                    } else {
+                        var cadenaValores = seccionesDashboard[i].instruccion.split("=>")[1];
+                        var cadenaValoresSinCorchetes = cadenaValores.substring(1, cadenaValores.indexOf("]"));
+                        var arregloValores = cadenaValoresSinCorchetes.split("<>");
+                        tipoObjetoUpdate[i] = 'tabla';
+                        if(variablesSeleccionadasSeccionesDashboardTablaUpdate[i] == undefined)
+                            variablesSeleccionadasSeccionesDashboardTablaUpdate[i] = [];
+                        var variablesDeTabla = [];
+                        for (var j = 0; j < arregloValores.length; j++) {
+                            var objeto = arregloValores[j].substring(arregloValores[j].indexOf("{")+1, arregloValores[j].lastIndexOf("}"));
+                            eval("variablesSeleccionadasSeccionesDashboardTablaUpdate[i].push({"+objeto+"})");
+                            variablesDeTabla.push( this.retornarVariable(variablesSeleccionadasSeccionesDashboardTablaUpdate[i][j]) );
+                        };
+                        var arregloTH = [];
+                        arregloTH.push(<th scope="col">#</th>);
+                        for (var p = 0; p < variablesDeTabla[0].atributos.length; p++) {
+                            if(variablesDeTabla[0].atributos[p].nombre.localeCompare("f3ch4Gu4rd4do") == 0) {
+                                arregloTH.push(<th scope="col">Fecha Creación</th>);
+                            } else {
+                                arregloTH.push(<th scope="col">{variablesDeTabla[0].atributos[p].nombre}</th>);
+                            }
+                        };
+                        var objetoTHEAD =   <thead>
+                                                <tr>
+                                                    {arregloTH}
+                                                </tr>
+                                            </thead>;
+                        var arregloTR = [], contador = 0;
+                        for (var p = 0; p < variablesDeTabla.length; p++) {
+                            for (var j = 0; j < variablesDeTabla[p].resultados.length; j++) {
+                                var arregloTD = [];
+                                arregloTD.push(<td scope="row">{contador}</td>);
+                                for (var k = 0; k < variablesDeTabla[p].atributos.length; k++) {
+                                    if(variablesDeTabla[p].atributos[k].tipo.localeCompare("date") == 0) {
+                                        arregloTD.push(<td scope="col">{this.styleDate(variablesDeTabla[p].resultados[j][variablesDeTabla[p].atributos[k].nombre])}</td>);
+                                    } else {
+                                        arregloTD.push(<td scope="col">{variablesDeTabla[p].resultados[j][variablesDeTabla[p].atributos[k].nombre]}</td>);
+                                    }
+                                };
+                                var objetoTR =  <tr>
+                                                    {arregloTD}
+                                                </tr>;
+                                arregloTR.push(objetoTR)
+                                contador++;
+                            };
+                        };
+                        var objetoTabla =   <div style={{width: "100%", overflowX: "scroll"}}>
+                                                <table className="table table-striped table-bordered">
+                                                    {objetoTHEAD}
+                                                    <tbody>
+                                                        {arregloTR}
+                                                    </tbody>
+                                                </table>
+                                            </div>;
+                        var htmlSeccion = {clase: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12", grafica: objetoTabla};
+                        if(htmlRows[contadorRows] == undefined) {
+                            htmlRows[contadorRows] = [];
+                        }
+                        htmlRows[contadorRows].push(htmlSeccion);
                         contadorCol6PorRow = 0;
+                        contadorRows++;
                     }
-                    html += '<div className={"col-xl-6 col-lg-6 col-md-6 col-sm-6 col-6"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>';
-                    html += this.getObjetoCodigo(seccionesDashboard[i].tipoObjeto, seccionesDashboard[i].instrucciones, i);
                 }
-            }
+            /*} else {
+                contadorCol6PorRow = 0;
+                if (seccionesDashboard[i].tipoObjeto.localeCompare("grafica") == 0) {
+                    if(i+1 < seccionesDashboard.length && seccionesDashboard[i+1].tamano.localeCompare("col-6") == 0) {
+                        var htmlSeccion = {clase: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12", grafica: <div id={"grafica"+i}></div>};
+                        if(htmlRows[contadorRows] == undefined) {
+                            htmlRows[contadorRows] = [];
+                        }
+                        htmlRows[contadorRows].push(htmlSeccion);
+                        if(contadorCol6PorRow == 2) {
+                            contadorCol6PorRow = 0;
+                            contadorRows++;
+                        }
+                    } else {
+                        var htmlSeccion = {clase: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12", grafica: <div id={"grafica"+i}></div>};
+                        if(htmlRows[contadorRows] == undefined) {
+                            htmlRows[contadorRows] = [];
+                        }
+                        htmlRows[contadorRows].push(htmlSeccion);
+                        contadorRows++;
+                    }
+                } else if (seccionesDashboard[i].tipoObjeto.localeCompare("tabla") == 0) {
+                }
+            }*/
         };
-    }
-
-    getObjetoCodigo(tipoObjeto, instrucciones, index) {
-        var html = '';
-        if(tipoObjeto.localeCompare("grafica") == 0) {
-            html += '\t<div id="grafica'+index+'"></div>';
-        } else if(tipoObjeto.localeCompare("tabla") == 0) {
-            //html += ;
-        }
+        this.setState({
+            html: htmlRows
+        }, this.crearArreglosDeInstrucciones );
+        //this.crearArreglosDeInstrucciones();
     }
 
     crearArreglosDeInstrucciones () {
-        contadorGetObjectsNameINICIO = 0;
-        contadorGetObjectsNameFIN = 0;
+        //limpiando valores nuevos
         tipoObjetoUpdate = [];
         tipoGraficoUpdate = [];
         displayGraphicsUpdate = [];
@@ -74,6 +254,7 @@ export default class VerDashboard extends React.Component {
         objetoEjeXUpdate = [];
         variablesSeleccionadasSeccionesDashboardUpdate = [];
         variablesSeleccionadasSeccionesDashboardTablaUpdate = [];
+
         for (var i = 0; i < seccionesDashboard.length; i++) {
             if(seccionesDashboard[i].instruccion.indexOf("GRAFICA") == 0) {
                 var cadenaValores = seccionesDashboard[i].instruccion.split("=>")[1];
@@ -99,8 +280,7 @@ export default class VerDashboard extends React.Component {
                     var objetoXCadena = arregloObjetoX.substring(arregloObjetoX.indexOf("{")+1, arregloObjetoX.indexOf("}"));
                     eval("objetoEjeXUpdate[i] = {"+objetoXCadena+"}");
                     objetoEjeXUpdate[i].nombre = '';
-                    contadorGetObjectsNameFIN++;
-                    this.getObject(objetoEjeXUpdate, i, objetoEjeXUpdate[i], "objetoEjeXUpdate");
+                    //this.getObject(objetoEjeXUpdate, i, objetoEjeXUpdate[i], "objetoEjeXUpdate");
                     var arregloObjetosY = cadenaValores.split("\\/")[1];
                     var arregloValores = arregloObjetosY.split("<>");
                     if(variablesSeleccionadasSeccionesDashboardUpdate[i] == undefined)
@@ -109,33 +289,28 @@ export default class VerDashboard extends React.Component {
                         var objeto = arregloValores[j].substring(arregloValores[j].indexOf("{")+1, arregloValores[j].lastIndexOf("}"));
                         eval("variablesSeleccionadasSeccionesDashboardUpdate[i].push({"+objeto+"})");
                         variablesSeleccionadasSeccionesDashboardUpdate[i][j].nombre = '';
-                        contadorGetObjectsNameFIN++;
-                        this.getObject(variablesSeleccionadasSeccionesDashboardUpdate, i, variablesSeleccionadasSeccionesDashboardUpdate[i][j], "variablesSeleccionadasSeccionesDashboardUpdate", j);
+                        //this.getObject(variablesSeleccionadasSeccionesDashboardUpdate, i, variablesSeleccionadasSeccionesDashboardUpdate[i][j], "variablesSeleccionadasSeccionesDashboardUpdate", j);
                     };
                 } else if(cadenaValores.indexOf("PIE") == 0) {
                     tipoGraficoUpdate[i] = 'PIE';
                     indiceGraphSelectUpdate[i] = 4;
                     if(objetoEjeXUpdate[i] == undefined)
                         objetoEjeXUpdate[i] = [];
-                    var arregloObjetoX = cadenaValores.split("\\/")[0];
-                    var objetoXCadena = arregloObjetoX.substring(arregloObjetoX.indexOf("{")+1, arregloObjetoX.lastIndexOf("}"));
-                    eval("objetoEjeXUpdate[i] = {"+objetoXCadena+"}");
-                    objetoEjeXUpdate[i].nombre = '';
-                    contadorGetObjectsNameFIN++;
-                    this.getObject(objetoEjeXUpdate, indice, objetoEjeXUpdate[i], "objetoEjeXUpdate");
-                    var arregloObjetosY = cadenaValores.split("\\/")[1];
+                    var arregloObjetosY = cadenaValores;
                     var arregloValores = arregloObjetosY.split("<>");
+                    if(variablesSeleccionadasSeccionesDashboardUpdate[i] == undefined)
+                        variablesSeleccionadasSeccionesDashboardUpdate[i] = [];
                     for (var j = 0; j < arregloValores.length; j++) {
                         var objeto = arregloValores[j].substring(arregloValores[j].indexOf("{")+1, arregloValores[j].lastIndexOf("}"));
                         eval("variablesSeleccionadasSeccionesDashboardUpdate[i].push({"+objeto+"})");
                         variablesSeleccionadasSeccionesDashboardUpdate[i][j].nombre = '';
-                        contadorGetObjectsNameFIN++;
-                        this.getObject(variablesSeleccionadasSeccionesDashboardUpdate, i, variablesSeleccionadasSeccionesDashboardUpdate[i][j], "variablesSeleccionadasSeccionesDashboardUpdate", j);
+                        //this.getObject(variablesSeleccionadasSeccionesDashboardUpdate, i, variablesSeleccionadasSeccionesDashboardUpdate[i][j], "variablesSeleccionadasSeccionesDashboardUpdate", j);
                     };
                 }
-            } else if(seccionesDashboard[i].instruccion.indexOf("TABLA") == 0) {
+            }/* else if(seccionesDashboard[i].instruccion.indexOf("TABLA") == 0) {
                 var cadenaValores = seccionesDashboard[i].instruccion.split("=>")[1];
-                var arregloValores = cadenaValores.split("<>");
+                var cadenaValoresSinCorchetes = cadenaValores.substring(1, cadenaValores.indexOf("]"));
+                var arregloValores = cadenaValoresSinCorchetes.split("<>");
                 tipoObjetoUpdate[i] = 'tabla';
                 if(variablesSeleccionadasSeccionesDashboardTablaUpdate[i] == undefined)
                     variablesSeleccionadasSeccionesDashboardTablaUpdate[i] = [];
@@ -143,12 +318,11 @@ export default class VerDashboard extends React.Component {
                     var objeto = arregloValores[j].substring(arregloValores[j].indexOf("{")+1, arregloValores[j].lastIndexOf("}"));
                     eval("variablesSeleccionadasSeccionesDashboardTablaUpdate[i].push({"+objeto+"})");
                     variablesSeleccionadasSeccionesDashboardTablaUpdate[i][j].nombre = '';
-                    contadorGetObjectsNameFIN++;
-                    this.getObject(variablesSeleccionadasSeccionesDashboardTablaUpdate, i, variablesSeleccionadasSeccionesDashboardTablaUpdate[i][j], "variablesSeleccionadasSeccionesDashboardTablaUpdate", j);
+                    //this.getObject(variablesSeleccionadasSeccionesDashboardTablaUpdate, i, variablesSeleccionadasSeccionesDashboardTablaUpdate[i][j], "variablesSeleccionadasSeccionesDashboardTablaUpdate", j);
                 };
-            }
+            }*/
         };
-        console.log('tipoObjetoUpdate')
+        /*console.log('tipoObjetoUpdate')
         console.log(tipoObjetoUpdate)
         console.log('tipoGraficoUpdate')
         console.log(tipoGraficoUpdate)
@@ -161,157 +335,394 @@ export default class VerDashboard extends React.Component {
         console.log('variablesSeleccionadasSeccionesDashboardUpdate')
         console.log(variablesSeleccionadasSeccionesDashboardUpdate)
         console.log('variablesSeleccionadasSeccionesDashboardTablaUpdate')
-        console.log(variablesSeleccionadasSeccionesDashboardTablaUpdate)
+        console.log(variablesSeleccionadasSeccionesDashboardTablaUpdate)*/
+        this.cargarDatos();
     }
 
-    getObject(arreglo, indiceSec, objeto, arregloNombre, indice) {
-        var instruccion = '';
-        if(objeto.esVariable) {
-            instruccion = 'SELECT * FROM Variables WHERE ID = '+objeto.variableID;
-        } else if(objeto.esSQL) {
-            instruccion = 'SELECT * FROM Variables WHERE ID = '+objeto.variableID;
-        } else if(objeto.esTabla) {
-            instruccion = 'SELECT * FROM Tablas WHERE ID = '+objeto.tablaID;
-        } else if(objeto.esExcel) {
-            instruccion = 'SELECT * FROM ExcelVariables WHERE ID = '+objeto.excelVariableID+' AND excelArchivoID = '+excelArchivoID;
-        } else if(objeto.esForma) {
-            instruccion = 'SELECT * FROM FormasVariables WHERE ID = '+objeto.formaVariableID;
-        }
+    cargarDatos() {
+        if(contadorGetObjectsNameINICIO == contadorGetObjectsNameFIN) {
+            for (var k = 0; k < seccionesDashboard.length; k++) {
+                if(seccionesDashboard[k].instruccion.indexOf("GRAFICA") == 0) {
+                    if(tipoGraficoUpdate[k].indexOf("LINEA") == 0 ) {
+                        //objetoEjeXUpdate
+                        var objetoEje = this.retornarVariable(objetoEjeXUpdate[k]);
+                        //variablesSeleccionadasSeccionesDashboardUpdate
+                        var variablesSeleccionadasSeccionesDashboard = [];
+                        for (var i = 0; i < variablesSeleccionadasSeccionesDashboardUpdate[k].length; i++) {
+                            variablesSeleccionadasSeccionesDashboard.push( this.retornarVariable(variablesSeleccionadasSeccionesDashboardUpdate[k][i]) );
+                        };
+                        var ejeX = [objetoEjeXUpdate[k].nombreCampo];
+                        for (var i = 0; i < objetoEje.resultados.length; i++) {
+                            ejeX.push( objetoEje.resultados[i][ objetoEjeXUpdate[k].nombreCampo ] );
+                        };
+                        var ejesY = [];
+                        for (var i = 0; i < variablesSeleccionadasSeccionesDashboard.length; i++) {
+                            for (var j = 0; j < variablesSeleccionadasSeccionesDashboard[i].resultados.length; j++) {
+                                if(j == 0) {
+                                    ejesY[i] = [];
+                                    if(variablesSeleccionadasSeccionesDashboardUpdate[k][i].esVariable) {
+                                        ejesY[i].push(variablesSeleccionadasSeccionesDashboardUpdate[k][i].nombreVariable);
+                                    } else if(variablesSeleccionadasSeccionesDashboardUpdate[k][i].esIndicador) {
+                                        ejesY[i].push(variablesSeleccionadasSeccionesDashboardUpdate[k][i].nombreIndicador);
+                                    } else if(variablesSeleccionadasSeccionesDashboardUpdate[k][i].esRiesgo) {
+                                        ejesY[i].push(variablesSeleccionadasSeccionesDashboardUpdate[k][i].nombreRiesgo);
+                                    }
+                                }
+                                ejesY[i].push( variablesSeleccionadasSeccionesDashboard[i].resultados[j][ variablesSeleccionadasSeccionesDashboardUpdate[k][i].nombreCampo ] );
+                            };
+                        };
+                        var columnas = [ejeX];
+                        columnas = columnas.concat(ejesY);
+                        var xObjectAxis;
+                        for (var i = 0; i < objetoEje.atributos.length; i++) {
+                            if (objetoEje.atributos[i].nombre.localeCompare(objetoEjeXUpdate[k].nombreCampo) == 0) {
+                                if(objetoEje.atributos[i].tipo.localeCompare("date") == 0) {
+                                    xObjectAxis = {
+                                            type: 'timeseries',
+                                            label: objetoEjeXUpdate[k].nombreCampo,
+                                            tick: {
+                                                rotate: 90,
+                                                multiline: false,
+                                                format: function (x) { return x.getFullYear()+"-"+x.getMonth()+"-"+x.getDate(); }
+                                            },
+                                            height: 130,
+                                            show: true
+                                        };
+                                } else {
+                                     xObjectAxis = {
+                                            type: 'category',
+                                            label: objetoEjeXUpdate[k].nombreCampo,
+                                            tick: {
+                                                rotate: 75,
+                                                multiline: false
+                                            },
+                                            height: 80,
+                                            show: true
+                                        };
+                                }
+                                break;
+                            }
+                        };
+                        var chart = c3.generate({
+                            bindto: "#grafica"+k,
+                            data: {
+                                x: objetoEjeXUpdate[k].nombreCampo,
+                                columns: columnas
 
-        const transaction = new sql.Transaction( this.props.pool );
-        transaction.begin(err => {
-            var rolledBack = false;
-            transaction.on('rollback', aborted => {
-                rolledBack = true;
-            });
-            const request = new sql.Request(transaction);
-            request.query(instruccion, (err, result) => {
-                if (err) {
-                    console.log(err);
-                    if (!rolledBack) {
-                        transaction.rollback(err => {
+                            },
+                            axis: {
+                                y: {
+                                    show: true
+                                },
+                                x: xObjectAxis
+                            }
+                        });
+                    } else if(tipoGraficoUpdate[k].indexOf("AREA") == 0 ) {
+                        //objetoEjeXUpdate
+                        var objetoEje = this.retornarVariable(objetoEjeXUpdate[k]);
+                        //variablesSeleccionadasSeccionesDashboardUpdate
+                        var variablesSeleccionadasSeccionesDashboard = [];
+                        for (var i = 0; i < variablesSeleccionadasSeccionesDashboardUpdate[k].length; i++) {
+                            variablesSeleccionadasSeccionesDashboard.push( this.retornarVariable(variablesSeleccionadasSeccionesDashboardUpdate[k][i]) );
+                        };
+                        var ejeX = [objetoEjeXUpdate[k].nombreCampo];
+                        for (var i = 0; i < objetoEje.resultados.length; i++) {
+                            ejeX.push( objetoEje.resultados[i][ objetoEjeXUpdate[k].nombreCampo ] );
+                        };
+                        var ejesY = [];
+                        for (var i = 0; i < variablesSeleccionadasSeccionesDashboard.length; i++) {
+                            for (var j = 0; j < variablesSeleccionadasSeccionesDashboard[i].resultados.length; j++) {
+                                if(j == 0) {
+                                    ejesY[i] = [];
+                                    if(variablesSeleccionadasSeccionesDashboardUpdate[k][i].esVariable) {
+                                        ejesY[i].push(variablesSeleccionadasSeccionesDashboardUpdate[k][i].nombreVariable);
+                                    } else if(variablesSeleccionadasSeccionesDashboardUpdate[k][i].esIndicador) {
+                                        ejesY[i].push(variablesSeleccionadasSeccionesDashboardUpdate[k][i].nombreIndicador);
+                                    } else if(variablesSeleccionadasSeccionesDashboardUpdate[k][i].esRiesgo) {
+                                        ejesY[i].push(variablesSeleccionadasSeccionesDashboardUpdate[k][i].nombreRiesgo);
+                                    }
+                                }
+                                ejesY[i].push( variablesSeleccionadasSeccionesDashboard[i].resultados[j][ variablesSeleccionadasSeccionesDashboardUpdate[k][i].nombreCampo ] );
+                            };
+                        };
+                        var columnas = [ejeX];
+                        columnas = columnas.concat(ejesY);
+                        var xObjectAxis;
+                        for (var i = 0; i < objetoEje.atributos.length; i++) {
+                            if (objetoEje.atributos[i].nombre.localeCompare(objetoEjeXUpdate[k].nombreCampo) == 0) {
+                                if(objetoEje.atributos[i].tipo.localeCompare("date") == 0) {
+                                    xObjectAxis = {
+                                            type: 'timeseries',
+                                            label: objetoEjeXUpdate[k].nombreCampo,
+                                            tick: {
+                                                rotate: 90,
+                                                multiline: false,
+                                                format: function (x) { return x.getFullYear()+"-"+x.getMonth()+"-"+x.getDate(); }
+                                            },
+                                            height: 130,
+                                            show: true
+                                        };
+                                } else {
+                                     xObjectAxis = {
+                                            type: 'category',
+                                            label: objetoEjeXUpdate[k].nombreCampo,
+                                            tick: {
+                                                rotate: 75,
+                                                multiline: false
+                                            },
+                                            height: 80,
+                                            show: true
+                                        };
+                                }
+                                break;
+                            }
+                        };
+                        var chart = c3.generate({
+                            bindto: "#grafica"+k,
+                            data: {
+                                x: objetoEjeXUpdate[k].nombreCampo,
+                                columns: columnas,
+                                type: 'area'
+
+                            },
+                            axis: {
+                                y: {
+                                    show: true
+                                },
+                                x: xObjectAxis
+                            }
+                        });
+                    } else if(tipoGraficoUpdate[k].indexOf("BARRA") == 0) {
+                        //objetoEjeXUpdate
+                        var objetoEje = this.retornarVariable(objetoEjeXUpdate[k]);
+                        //variablesSeleccionadasSeccionesDashboardUpdate
+                        var variablesSeleccionadasSeccionesDashboard = [];
+                        for (var i = 0; i < variablesSeleccionadasSeccionesDashboardUpdate[k].length; i++) {
+                            variablesSeleccionadasSeccionesDashboard.push( this.retornarVariable(variablesSeleccionadasSeccionesDashboardUpdate[k][i]) );
+                        };
+                        var ejeX = [objetoEjeXUpdate[k].nombreCampo];
+                        for (var i = 0; i < objetoEje.resultados.length; i++) {
+                            ejeX.push( objetoEje.resultados[i][ objetoEjeXUpdate[k].nombreCampo ] );
+                        };
+                        var ejesY = [];
+                        for (var i = 0; i < variablesSeleccionadasSeccionesDashboard.length; i++) {
+                            for (var j = 0; j < variablesSeleccionadasSeccionesDashboard[i].resultados.length; j++) {
+                                if(j == 0) {
+                                    ejesY[i] = [];
+                                    if(variablesSeleccionadasSeccionesDashboardUpdate[k][i].esVariable) {
+                                        ejesY[i].push(variablesSeleccionadasSeccionesDashboardUpdate[k][i].nombreVariable);
+                                    } else if(variablesSeleccionadasSeccionesDashboardUpdate[k][i].esIndicador) {
+                                        ejesY[i].push(variablesSeleccionadasSeccionesDashboardUpdate[k][i].nombreIndicador);
+                                    } else if(variablesSeleccionadasSeccionesDashboardUpdate[k][i].esRiesgo) {
+                                        ejesY[i].push(variablesSeleccionadasSeccionesDashboardUpdate[k][i].nombreRiesgo);
+                                    }
+                                }
+                                ejesY[i].push( variablesSeleccionadasSeccionesDashboard[i].resultados[j][ variablesSeleccionadasSeccionesDashboardUpdate[k][i].nombreCampo ] );
+                            };
+                        };
+                        var columnas = [ejeX];
+                        columnas = columnas.concat(ejesY);
+                        var xObjectAxis;
+                        for (var i = 0; i < objetoEje.atributos.length; i++) {
+                            if (objetoEje.atributos[i].nombre.localeCompare(objetoEjeXUpdate[k].nombreCampo) == 0) {
+                                if(objetoEje.atributos[i].tipo.localeCompare("date") == 0) {
+                                    xObjectAxis = {
+                                            type: 'timeseries',
+                                            label: objetoEjeXUpdate[k].nombreCampo,
+                                            tick: {
+                                                rotate: 90,
+                                                multiline: false,
+                                                format: function (x) { return x.getFullYear()+"-"+x.getMonth()+"-"+x.getDate(); }
+                                            },
+                                            height: 130,
+                                            show: true
+                                        };
+                                } else {
+                                     xObjectAxis = {
+                                            type: 'category',
+                                            label: objetoEjeXUpdate[k].nombreCampo,
+                                            tick: {
+                                                rotate: 75,
+                                                multiline: false
+                                            },
+                                            height: 80,
+                                            show: true
+                                        };
+                                }
+                                break;
+                            }
+                        };
+                        var chart = c3.generate({
+                            bindto: "#grafica"+k,
+                            data: {
+                                x: objetoEjeXUpdate[k].nombreCampo,
+                                columns: columnas,
+                                type: 'area'
+
+                            },
+                            axis: {
+                                y: {
+                                    show: true
+                                },
+                                x: xObjectAxis
+                            }
+                        });
+                    } else if(tipoGraficoUpdate[k].indexOf("DISPERSION") == 0) {
+                        //objetoEjeXUpdate
+                        var objetoEje = this.retornarVariable(objetoEjeXUpdate[k]);
+                        //variablesSeleccionadasSeccionesDashboardUpdate
+                        var variablesSeleccionadasSeccionesDashboard = [];
+                        for (var i = 0; i < variablesSeleccionadasSeccionesDashboardUpdate[k].length; i++) {
+                            variablesSeleccionadasSeccionesDashboard.push( this.retornarVariable(variablesSeleccionadasSeccionesDashboardUpdate[k][i]) );
+                        };
+                        var ejeX = [objetoEjeXUpdate[k].nombreCampo];
+                        for (var i = 0; i < objetoEje.resultados.length; i++) {
+                            ejeX.push( objetoEje.resultados[i][ objetoEjeXUpdate[k].nombreCampo ] );
+                        };
+                        var ejesY = [];
+                        for (var i = 0; i < variablesSeleccionadasSeccionesDashboard.length; i++) {
+                            for (var j = 0; j < variablesSeleccionadasSeccionesDashboard[i].resultados.length; j++) {
+                                if(j == 0) {
+                                    ejesY[i] = [];
+                                    if(variablesSeleccionadasSeccionesDashboardUpdate[k][i].esVariable) {
+                                        ejesY[i].push(variablesSeleccionadasSeccionesDashboardUpdate[k][i].nombreVariable);
+                                    } else if(variablesSeleccionadasSeccionesDashboardUpdate[k][i].esIndicador) {
+                                        ejesY[i].push(variablesSeleccionadasSeccionesDashboardUpdate[k][i].nombreIndicador);
+                                    } else if(variablesSeleccionadasSeccionesDashboardUpdate[k][i].esRiesgo) {
+                                        ejesY[i].push(variablesSeleccionadasSeccionesDashboardUpdate[k][i].nombreRiesgo);
+                                    }
+                                }
+                                ejesY[i].push( variablesSeleccionadasSeccionesDashboard[i].resultados[j][ variablesSeleccionadasSeccionesDashboardUpdate[k][i].nombreCampo ] );
+                            };
+                        };
+                        var columnas = [ejeX];
+                        columnas = columnas.concat(ejesY);
+                        var xObjectAxis;
+                        for (var i = 0; i < objetoEje.atributos.length; i++) {
+                            if (objetoEje.atributos[i].nombre.localeCompare(objetoEjeXUpdate[k].nombreCampo) == 0) {
+                                if(objetoEje.atributos[i].tipo.localeCompare("date") == 0) {
+                                    xObjectAxis = {
+                                            type: 'timeseries',
+                                            label: objetoEjeXUpdate[k].nombreCampo,
+                                            tick: {
+                                                rotate: 90,
+                                                multiline: false,
+                                                format: function (x) { return x.getFullYear()+"-"+x.getMonth()+"-"+x.getDate(); }
+                                            },
+                                            height: 130,
+                                            show: true
+                                        };
+                                } else {
+                                     xObjectAxis = {
+                                            type: 'category',
+                                            label: objetoEjeXUpdate[k].nombreCampo,
+                                            tick: {
+                                                rotate: 75,
+                                                multiline: false
+                                            },
+                                            height: 80,
+                                            show: true
+                                        };
+                                }
+                                break;
+                            }
+                        };
+                        var chart = c3.generate({
+                            bindto: "#grafica"+k,
+                            data: {
+                                x: objetoEjeXUpdate[k].nombreCampo,
+                                columns: columnas,
+                                type: 'scatter'
+
+                            },
+                            axis: {
+                                y: {
+                                    show: true
+                                },
+                                x: xObjectAxis
+                            }
+                        });
+                    } else if(tipoGraficoUpdate[k].indexOf("PIE") == 0) {
+                        //variablesSeleccionadasSeccionesDashboardUpdate
+                        var variablesSeleccionadasSeccionesDashboard = [];
+                        for (var i = 0; i < variablesSeleccionadasSeccionesDashboardUpdate[k].length; i++) {
+                            variablesSeleccionadasSeccionesDashboard.push( this.retornarVariable(variablesSeleccionadasSeccionesDashboardUpdate[k][i]) );
+                        };
+                        var ejesY = [];
+                        for (var i = 0; i < variablesSeleccionadasSeccionesDashboard.length; i++) {
+                            for (var j = 0; j < variablesSeleccionadasSeccionesDashboard[i].resultados.length; j++) {
+                                if(j == 0) {
+                                    ejesY[i] = [];
+                                    if(variablesSeleccionadasSeccionesDashboardUpdate[k][i].esVariable) {
+                                        ejesY[i].push(variablesSeleccionadasSeccionesDashboardUpdate[k][i].nombreVariable);
+                                    } else if(variablesSeleccionadasSeccionesDashboardUpdate[k][i].esIndicador) {
+                                        ejesY[i].push(variablesSeleccionadasSeccionesDashboardUpdate[k][i].nombreIndicador);
+                                    } else if(variablesSeleccionadasSeccionesDashboardUpdate[k][i].esRiesgo) {
+                                        ejesY[i].push(variablesSeleccionadasSeccionesDashboardUpdate[k][i].nombreRiesgo);
+                                    }
+                                }
+                                ejesY[i].push( variablesSeleccionadasSeccionesDashboard[i].resultados[j][ variablesSeleccionadasSeccionesDashboardUpdate[k][i].nombreCampo ] );
+                            };
+                        };
+                        var columnas = [];
+                        columnas = columnas.concat(ejesY);
+                        var chart = c3.generate({
+                            bindto: "#grafica"+k,
+                            data: {
+                                columns: columnas,
+                                type: 'pie'
+                            },
+                            axis: {
+                                y: {
+                                    show: true
+                                }
+                            }
                         });
                     }
-                } else {
-                    transaction.commit(err => {
-                        if(result.recordset.length > 0) {
-                            var nombre = result.recordset[0].nombre;
-                            if(objeto.esTabla) {
-                                nombre = objeto.nombreCampoTabla;
-                            }
-                            if(arregloNombre.localeCompare("objetoEjeXUpdate") == 0)
-                                arreglo[indiceSec].nombre = nombre;
-                            else
-                                arreglo[indiceSec][indice].nombre = nombre;
-                            contadorGetObjectsNameINICIO++;
-                            this.traerDatos();
-                        }
-                    });
-                }
-            });
-        }); // fin transaction
-    }
-
-    traerDatos() {
-        if(contadorGetObjectsNameINICIO == contadorGetObjectsNameFIN) {
-            for (var i = 0; i < seccionesDashboard.length; i++) {
-                if(seccionesDashboard[i].tipoObjeto.localeCompare("grafica") == 0) {
-                    if(tipoGraficoUpdate[i].indexOf("LINEA") == 0 || tipoGraficoUpdate[i].indexOf("AREA") == 0 || tipoGraficoUpdate[i].indexOf("BARRA") == 0 || tipoGraficoUpdate[i].indexOf("DISPERSION") == 0) {
-                        //objetoEjeXUpdate
-                        //variablesSeleccionadasSeccionesDashboardUpdate
-                    } else if(tipoGraficoUpdate[i].indexOf("PIE") == 0) {
-                        //
-                    }
-                } else {
+                } else if(seccionesDashboard[k].instruccion.indexOf("TABLA") == 0) {
                     //variablesSeleccionadasSeccionesDashboardTablaUpdate
                 }
             };
         }
     }
 
-    getResultsVariables (variable, arreglo) {
-        //OBTENER LA LISTA DE POSIBLES VARIABLES A VISUALIZAR
-        const transaction = new sql.Transaction( this.props.pool );
-        transaction.begin(err => {
-            var rolledBack = false;
-            transaction.on('rollback', aborted => {
-                rolledBack = true;
-            });
-            const request = new sql.Request(transaction);
-            request.query("select * from ResultadosNombreVariables where nombre = '"+variable.nombre+"'", (err, result) => {
-                if (err) {
-                    if (!rolledBack) {
-                        console.log(err);
-                        transaction.rollback(err => {
-                        });
-                        return [];
-                    }
-                } else {
-                    transaction.commit(err => {
-                        this.getResultsVariablesFieldsInit(result.recordset, arreglo);
-                    });
+    retornarVariable (variable) {
+        if(variable.esVariable) {
+            for (var i = 0; i < this.props.variables.length; i++) {
+                if (this.props.variables[i].nombreVariable.localeCompare(variable.nombreVariable) == 0) {
+                    /*for (var j = 0; j < this.props.variables[i].atributos.length; j++) {
+                        if(this.props.variables[i].atributos[j].nombre.localeCompare(variable.nombreCampo) == 0) {*/
+                            return this.props.variables[i];
+                        /*}
+                    };*/
                 }
-            });
-        }); // fin transaction
+            };
+        } else if(variable.esIndicador) {
+            for (var i = 0; i < this.props.indicadores.length; i++) {
+                if (this.props.indicadores[i].nombreIndicador.localeCompare(variable.nombreIndicador) == 0) {
+                    /*for (var j = 0; j < this.props.indicadores[i].atributos.length; j++) {
+                        if(this.props.indicadores[i].atributos[j].nombre.localeCompare(variable.nombreCampo) == 0) {*/
+                            return this.props.indicadores[i];
+                        /*}
+                    };*/
+                }
+            };
+        } else if(variable.esRiesgo) {
+            for (var i = 0; i < this.props.riesgos.length; i++) {
+                if (this.props.riesgos[i].nombreRiesgo.localeCompare(variable.nombreRiesgo) == 0) {
+                    /*for (var j = 0; j < this.props.riesgos[i].atributos.length; j++) {
+                        if(this.props.riesgos[i].atributos[j].nombre.localeCompare(variable.nombreCampo) == 0) {*/
+                            return this.props.riesgos[i];
+                        /*}
+                    };*/
+                }
+            };
+        }
+        return null;
     }
 
-    getResultsVariablesFieldsInit (resultados, arreglo) {
-        for (var i = 0; i < resultados.length; i++) {
-            this.getFieldAttributes(resultados[i], i, arreglo);
-            this.getFieldResults(resultados[i], i, arreglo);
-        };
-    }
-
-    getFieldAttributes(resultado, index, array) {
-        const transaction = new sql.Transaction( this.props.pool );
-        transaction.begin(err => {
-            var rolledBack = false;
-            transaction.on('rollback', aborted => {
-                rolledBack = true;
-            });
-            const request = new sql.Request(transaction);
-            request.query("select * from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME = '"+resultado.nombreVariable+'_'+resultado.inicioVigencia.getFullYear()+'_'+(resultado.inicioVigencia.getMonth()+1)+'_'+resultado.inicioVigencia.getDate()+'_'+resultado.inicioVigencia.getHours()+'_'+resultado.inicioVigencia.getMinutes()+'_'+resultado.inicioVigencia.getSeconds()+"'", (err, result) => {
-                if (err) {
-                    console.log(err);
-                    if (!rolledBack) {
-                        transaction.rollback(err => {
-                        });
-                    }
-                } else {
-                    transaction.commit(err => {
-                        var arrTemp = [];
-                        for (var i = 0; i < result.recordset.length; i++) {
-                            arrTemp.push({nombre: result.recordset[i].COLUMN_NAME, tipo: result.recordset[i].DATA_TYPE});
-                        };
-                        array[index].atributos = arrTemp;
-                    });
-                }
-            });
-        }); // fin transaction
-    }
-
-    getFieldResults(resultado, index, array) {
-        const transaction = new sql.Transaction( this.props.pool );
-        transaction.begin(err => {
-            var rolledBack = false;
-            transaction.on('rollback', aborted => {
-                rolledBack = true;
-            });
-            const request = new sql.Request(transaction);
-            request.query("select * from "+resultado.nombreVariable+'_'+resultado.inicioVigencia.getFullYear()+'_'+(resultado.inicioVigencia.getMonth()+1)+'_'+resultado.inicioVigencia.getDate()+'_'+resultado.inicioVigencia.getHours()+'_'+resultado.inicioVigencia.getMinutes()+'_'+resultado.inicioVigencia.getSeconds(), (err, result) => {
-                if (err) {
-                    console.log(err);
-                    if (!rolledBack) {
-                        transaction.rollback(err => {
-                        });
-                    }
-                } else {
-                    transaction.commit(err => {
-                        array[index].resultados = result.recordset;
-                    });
-                }
-            });
-        }); // fin transaction
+    styleDate (date) {
+        return date.getDate()+'-'+(date.getMonth()+1)+'-'+date.getFullYear();
     }
 
     render() {
@@ -320,105 +731,50 @@ export default class VerDashboard extends React.Component {
                 <div className={"row"}>
                     <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
                         <div className={"page-header"}>
-                            <h2 className={"pageheader-title"}>Crear Dashboard</h2>
+                            <h2 className={"pageheader-title"}>Ver Dashboard</h2>
                             <div className={"page-breadcrumb"}>
                                 <nav aria-label="breadcrumb">
                                     <ol className={"breadcrumb"}>
                                         <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.props.retornarSeleccionDashboards}><a href="#" className={"breadcrumb-link"}>Dashboards</a></li>
-                                        <li className={"breadcrumb-item active font-16"} aria-current="page">Dashboard: {this.props.tituloDashboard}</li>
+                                        <li className={"breadcrumb-item active font-16"} aria-current="page">Dashboard: {this.props.dashboardSeleccionado.nombre}</li>
                                     </ol>
                                 </nav>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div className={"row"}>
-                    <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
-                        <div className={"card influencer-profile-data"}>
-                            <div className={"card-body"}>
-                                <div className={"border-top border-bottom addPaddingToConfig"} style={{width: "100%"}}>
-                                    <div className={"row"} style={{width: "100%"}}>
-                                        <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3"}>
-                                            <label htmlFor="nombreDashboard" className="col-form-label">Nombre Dashboard</label>
-                                        </div>
-                                        <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"}>
-                                            <input id="nombreDashboard" type="text" className="form-control form-control-sm"/>
-                                        </div>
-                                    </div>
-                                    <div className={"row"} style={{width: "100%"}}>
-                                        <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3"}>
-                                            <label htmlFor="descripcionDashboard" className="col-form-label">Descripción de Dashboard:</label>
-                                        </div>
-                                        <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9"}>
-                                            <textarea className="form-control" id="descripcionDashboard" rows="3"></textarea>
-                                        </div>
-                                    </div>
-                                    <hr/>
-                                    <div className={"row"} style={{width: "100%", textAlign: "center"}}>
-                                        <h2 className="pageheader-title">Secciones de Dashboard</h2>
-                                    </div>
-                                    <hr/>
-                                    
-                                    <div className={"row"} style={{width: "100%"}}>
-                                        <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
-                                            <label htmlFor="tamano" className="col-form-label">Tipo de Indicador</label>
-                                        </div>
-                                        <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"}>
-                                            <select id="tamano" className="form-control">
-                                                <option value="col-6">Mitad de Página</option>
-                                                <option value="col-12">Riesgo Inherente</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div className={"row"} style={{width: "100%"}}>
-                                        <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
-                                            <label htmlFor="tipoObjeto" className="col-form-label">Tipo de Objeto</label>
-                                        </div>
-                                        <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"}>
-                                            <select id="tipoObjeto" className="form-control">
-                                                <option value="grafica">Gráfica</option>
-                                                <option value="tabla">Tabla</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div className={"row"} style={{width: "100%"}}>
-                                        <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
-                                            <label className="col-form-label">Variables Seleccionadas</label>
-                                        </div>
-                                        <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"}>
-                                            <div style={{width: "50%", textAlign: "center"}}>
-                                                <h4 className="pageheader-title">Variables Seleccionadas</h4>
-                                                <div style={{height: "25vh", width: "100%", overflowY: "scroll"}}>
-                                                    {this.state.variablesSeleccionadasSeccionesDashboard[i].map((variableSeleccionada, i) =>
-                                                        <div style={{height: "33%", width: "100%", display: "flex", alignItems: "center", justifyContent: "center"}}>
-                                                            {variableSeleccionada.nombre}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                            <div style={{width: "50%", textAlign: "center"}}>
-                                                <h4 className="pageheader-title">Variables Disponibles</h4>
-                                                <div style={{height: "25vh", width: "100%", overflowY: "scroll"}}>
-                                                    {this.state.variablesDisponiblesSeccionesDashboard[i].map((variableSeleccionada, i) =>
-                                                        <div style={{height: "33%", width: "100%", display: "flex", alignItems: "center", justifyContent: "center"}}>
-                                                            {variableSeleccionada.nombre}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
 
-                                    <br/>
-                                    <div className={"row"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
-                                        <a className={"btn btn-success btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.crearRiesgo}>Crear</a>
-                                    </div>
-                                    <br/>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                    <h2 style={{display: "flex", justifyContent: "center"}}>{this.props.dashboardSeleccionado.nombre}</h2>
+                    <ul className="list-unstyled" style={{display: "flex", justifyContent: "center"}}>
+                        <li>{this.props.dashboardSeleccionado.descripcion}</li>
+                    </ul>
                 </div>
+
+                {
+                    this.state.html.length != undefined && this.state.html.length > 0
+                    ?   <div className="card" style={{width: "100%"}}>
+                            <br/>
+                            {this.state.html.map((html_row, i) =>
+                                <div className="row" key={i} style={{width: "100%", display: "flex", alignItems: "center", justifyContent: "center", borderTop: (i > 0 ? "3px solid #d2d2e4" : "" ), paddingTop: (i > 0 ? "10px" : "" )}}>
+                                    {html_row.map((html, j) =>
+                                        <div className={html.clase} key={i+''+j} style={{display: "flex", alignItems: "center", justifyContent: "center", borderLeft: (j == 1 ? "3px solid #d2d2e4" : "" )}}>
+                                            {html.grafica}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                            <br/>
+                        </div>
+                    : null
+                }
+
+                <br/>
+                <div className={"row"}>
+                    <a className={"btn btn-success btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.props.editarDashboard}>Editar Dashboard</a>
+                </div>
+                <br/>
+                
             </div>
         );
     }

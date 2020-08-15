@@ -637,14 +637,6 @@ function (_React$Component) {
   }, {
     key: "retornarIndiceSeleccionadoParaMostrarCampoObjetivo",
     value: function retornarIndiceSeleccionadoParaMostrarCampoObjetivo(reglaSeleccionada, tipoIndiceSeleccionado, indiceI, indiceJ) {
-      console.log('reglaSeleccionada');
-      console.log(reglaSeleccionada);
-      console.log('tipoIndiceSeleccionado');
-      console.log(tipoIndiceSeleccionado);
-      console.log('this.props.reglas');
-      console.log(this.props.reglas);
-      console.log('this.props.reglas.length');
-      console.log(this.props.reglas.length);
       /*console.log('this.props.reglas[indiceI-1].length');
       console.log(this.props.reglas[indiceI-1].length);*/
 

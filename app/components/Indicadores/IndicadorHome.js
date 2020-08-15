@@ -13,7 +13,7 @@ var _SeleccionarIndicador = _interopRequireDefault(require("./SeleccionarIndicad
 
 var _CrearIndicador = _interopRequireDefault(require("./CrearIndicador/CrearIndicador.js"));
 
-var _EditarIndicador = _interopRequireDefault(require("./EditarIndicador.js"));
+var _EditarIndicador = _interopRequireDefault(require("./EditarIndicador/EditarIndicador.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
@@ -56,18 +56,21 @@ function (_React$Component) {
       formulaIndicadorSeleccionada: "",
       pesoIndicadorSeleccionada: "",
       toleranciaIndicadorSeleccionada: "",
-      tipoToleranciaIndicadorSeleccionada: "",
+      tipoValorIdealIndicadorSeleccionada: "",
       valorIdealIndicadorSeleccionada: "",
       periodicidadIndicadorSeleccionada: "",
       tipoIndicadorIndicadorSeleccionada: "",
       analistaIndicadorSeleccionada: "",
+      fechaInicioCalculoSeleccionada: "",
       idRiesgoPadreSeleccionado: -1,
       formulaRiesgo: "",
-      pesoDisponibleRiesgo: 0
+      pesoDisponibleRiesgo: 0,
+      indicadores: []
     };
     _this.terminoSeleccionIndicador = _this.terminoSeleccionIndicador.bind(_assertThisInitialized(_this));
     _this.retornoSeleccionIndicador = _this.retornoSeleccionIndicador.bind(_assertThisInitialized(_this));
     _this.goCrearIndicador = _this.goCrearIndicador.bind(_assertThisInitialized(_this));
+    _this.goEditarIndicador = _this.goEditarIndicador.bind(_assertThisInitialized(_this));
     _this.terminoCrearIndicadorPasarAEdit = _this.terminoCrearIndicadorPasarAEdit.bind(_assertThisInitialized(_this));
     return _this;
   }
@@ -102,7 +105,7 @@ function (_React$Component) {
     }
   }, {
     key: "goEditarIndicador",
-    value: function goEditarIndicador(idRiesgo, formula, pesoDisponible, idIndicador, nombreIndicador, codigoIndicador, formulaIndicador, pesoIndicador, toleranciaIndicador, tipoToleranciaIndicador, valorIdealIndicador, periodicidadIndicador, tipoIndicadorIndicador, analistaIndicador) {
+    value: function goEditarIndicador(idRiesgo, formula, pesoDisponible, idIndicador, nombreIndicador, codigoIndicador, formulaIndicador, pesoIndicador, toleranciaIndicador, tipoValorIdealIndicador, valorIdealIndicador, periodicidadIndicador, tipoIndicadorIndicador, analistaIndicador, fechaInicioCalculo, indicadores) {
       this.setState({
         componenteAMostrar: "editIndicador",
         idRiesgoPadreSeleccionado: idRiesgo,
@@ -114,11 +117,13 @@ function (_React$Component) {
         formulaIndicadorSeleccionada: formulaIndicador,
         pesoIndicadorSeleccionada: pesoIndicador,
         toleranciaIndicadorSeleccionada: toleranciaIndicador,
-        tipoToleranciaIndicadorSeleccionada: tipoToleranciaIndicador,
+        tipoValorIdealIndicadorSeleccionada: tipoValorIdealIndicador,
         valorIdealIndicadorSeleccionada: valorIdealIndicador,
         periodicidadIndicadorSeleccionada: periodicidadIndicador,
         tipoIndicadorIndicadorSeleccionada: tipoIndicadorIndicador,
-        analistaIndicadorSeleccionada: analistaIndicador
+        analistaIndicadorSeleccionada: analistaIndicador,
+        fechaInicioCalculoSeleccionada: fechaInicioCalculo,
+        indicadores: indicadores
       });
     }
   }, {
@@ -133,7 +138,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("select * from Indicadores where nombre = '" + nombreIndicador + "'", function (err, result) {
+        request.query("select top 1 * from Indicadores order by ID desc", function (err, result) {
           if (err) {
             if (!rolledBack) {
               console.log(err);
@@ -142,7 +147,7 @@ function (_React$Component) {
           } else {
             transaction.commit(function (err) {
               if (result.recordset.length) {
-                _this2.terminoSeleccionIndicador(result.recordset[0].ID, result.recordset[0].nombre);
+                _this2.goEditarIndicador(_this2.state.idRiesgoPadreSeleccionado, _this2.state.formulaRiesgo, _this2.state.pesoDisponibleRiesgo, result.recordset[0].ID, result.recordset[0].nombre, result.recordset[0].codigo, result.recordset[0].formula, result.recordset[0].peso, result.recordset[0].tolerancia, result.recordset[0].tipoValorIdeal, result.recordset[0].periodicidad, result.recordset[0].tipoIndicador, result.recordset[0].analista, result.recordset[0].fechaInicioCalculo);
               }
             });
           }
@@ -161,7 +166,7 @@ function (_React$Component) {
           terminoSeleccionIndicador: this.terminoSeleccionIndicador,
           goCrearIndicador: this.goCrearIndicador,
           showRiesgos: this.props.showRiesgos
-        }, _defineProperty(_React$createElement, "showRiesgos", this.props.showRiesgos), _defineProperty(_React$createElement, "updateBanderaCrearRiesgoTrue", this.props.updateBanderaCrearRiesgoTrue), _React$createElement)));
+        }, _defineProperty(_React$createElement, "showRiesgos", this.props.showRiesgos), _defineProperty(_React$createElement, "updateBanderaCrearRiesgoTrue", this.props.updateBanderaCrearRiesgoTrue), _defineProperty(_React$createElement, "goEditarIndicador", this.goEditarIndicador), _React$createElement)));
       } else if (this.state.componenteAMostrar.localeCompare("crearIndicador") == 0) {
         return _react["default"].createElement("div", null, _react["default"].createElement(_CrearIndicador["default"], {
           pool: this.props.pool,
@@ -193,7 +198,8 @@ function (_React$Component) {
           valorIdealIndicadorSeleccionada: this.state.valorIdealIndicadorSeleccionada,
           periodicidadIndicadorSeleccionada: this.state.periodicidadIndicadorSeleccionada,
           tipoIndicadorIndicadorSeleccionada: this.state.tipoIndicadorIndicadorSeleccionada,
-          analistaIndicadorSeleccionada: this.state.analistaIndicadorSeleccionada
+          analistaIndicadorSeleccionada: this.state.analistaIndicadorSeleccionada,
+          indicadores: this.state.indicadores
         }, " "));
       }
     }

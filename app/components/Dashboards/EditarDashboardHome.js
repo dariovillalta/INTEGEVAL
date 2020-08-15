@@ -9,7 +9,9 @@ var _react = _interopRequireDefault(require("react"));
 
 var _mssql = _interopRequireDefault(require("mssql"));
 
-var _SeleccionarDashboard = _interopRequireDefault(require("./SeleccionarDashboard.js"));
+var _VerDashboard = _interopRequireDefault(require("./VerDashboard.js"));
+
+var _EditarDashboard = _interopRequireDefault(require("./EditarDashboard.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
@@ -45,19 +47,11 @@ function (_React$Component) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(EditarDashboardHome).call(this, props));
     _this.state = {
-      componenteActual: "selVariables",
-      idVariable: -1,
-      tipoVariable: "",
-      esObjetoVariable: "",
-      esInstruccionSQLVariable: "",
-      esPrimeraVez: true
+      componenteActual: "verDashboard"
     };
-    _this.crearVariables = _this.crearVariables.bind(_assertThisInitialized(_this));
-    _this.retornoSeleccionVariables = _this.retornoSeleccionVariables.bind(_assertThisInitialized(_this));
-    _this.editarVariables = _this.editarVariables.bind(_assertThisInitialized(_this));
-    _this.changeStateFirstTimeToFalse = _this.changeStateFirstTimeToFalse.bind(_assertThisInitialized(_this));
-    _this.terminoCrearVariablesPasarAEdit = _this.terminoCrearVariablesPasarAEdit.bind(_assertThisInitialized(_this));
-    _this.actualizarIDVariableModificada = _this.actualizarIDVariableModificada.bind(_assertThisInitialized(_this));
+    _this.verDashboard = _this.verDashboard.bind(_assertThisInitialized(_this));
+    _this.retornoVerDashboard = _this.retornoVerDashboard.bind(_assertThisInitialized(_this));
+    _this.editarDashboard = _this.editarDashboard.bind(_assertThisInitialized(_this));
     return _this;
   }
 
@@ -66,191 +60,50 @@ function (_React$Component) {
     value: function componentDidMount() {//
     }
   }, {
-    key: "crearVariables",
-    value: function crearVariables() {
+    key: "verDashboard",
+    value: function verDashboard() {
       this.setState({
-        componenteActual: "crearVariables"
+        componenteActual: "verDashboard"
       });
     }
   }, {
-    key: "retornoSeleccionVariables",
-    value: function retornoSeleccionVariables() {
+    key: "retornoVerDashboard",
+    value: function retornoVerDashboard() {
       this.setState({
-        componenteActual: "selVariables",
-        idVariable: -1,
-        tipoVariable: "",
-        esObjetoVariable: "",
-        esInstruccionSQLVariable: ""
+        componenteActual: "verDashboard"
       });
     }
   }, {
-    key: "editarVariables",
-    value: function editarVariables(idVariable, esObjetoVariable, esInstruccionSQLVariable, tipoVariable) {
+    key: "editarDashboard",
+    value: function editarDashboard(idVariable) {
       this.setState({
-        idVariable: idVariable,
-        componenteActual: "editarVariables",
-        tipoVariable: tipoVariable,
-        esObjetoVariable: esObjetoVariable,
-        esInstruccionSQLVariable: esInstruccionSQLVariable,
-        esPrimeraVez: true
+        componenteActual: "editarDashboard"
       });
-    }
-  }, {
-    key: "changeStateFirstTimeToFalse",
-    value: function changeStateFirstTimeToFalse() {
-      this.setState({
-        esPrimeraVez: false
-      });
-    }
-  }, {
-    key: "terminoCrearVariablesPasarAEdit",
-    value: function terminoCrearVariablesPasarAEdit(nombreFuenteDatos) {
-      var _this2 = this;
-
-      var transaction = new _mssql["default"].Transaction(this.props.pool);
-      transaction.begin(function (err) {
-        var rolledBack = false;
-        transaction.on('rollback', function (aborted) {
-          rolledBack = true;
-        });
-        var request = new _mssql["default"].Request(transaction);
-        request.query("select * from Campos where nombre = '" + nombreFuenteDatos + "'", function (err, result) {
-          if (err) {
-            console.log(err);
-
-            if (!rolledBack) {
-              transaction.rollback(function (err) {});
-            }
-          } else {
-            transaction.commit(function (err) {
-              if (result.recordset != undefined) {
-                if (result.recordset.length) {
-                  _this2.editarFuenteDatos(result.recordset[0].ID, result.recordset[0].nombre, result.recordset[0].descripcion, result.recordset[0].esObjeto, result.recordset[0].objetoPadreID, result.recordset[0].guardar);
-                }
-              }
-            });
-          }
-        });
-      }); // fin transaction
-    }
-  }, {
-    key: "actualizarIDVariableModificada",
-    value: function actualizarIDVariableModificada(tablaDeVariableModificada) {
-      var _this3 = this;
-
-      if (tablaDeVariableModificada.localeCompare("excel") == 0) {
-        var transaction = new _mssql["default"].Transaction(this.props.pool);
-        transaction.begin(function (err) {
-          var rolledBack = false;
-          transaction.on('rollback', function (aborted) {
-            rolledBack = true;
-          });
-          var request = new _mssql["default"].Request(transaction);
-          request.query("select top 1 * from ExcelArchivos order by ID desc", function (err, result) {
-            if (err) {
-              console.log(err);
-
-              if (!rolledBack) {
-                transaction.rollback(function (err) {});
-              }
-            } else {
-              transaction.commit(function (err) {
-                if (result.recordset.length > 0) {
-                  _this3.editarVariables(result.recordset[0].ID, false, false, "excel");
-                }
-              });
-            }
-          });
-        }); // fin transaction
-      } else if (tablaDeVariableModificada.localeCompare("forma") == 0) {
-        var _transaction = new _mssql["default"].Transaction(this.props.pool);
-
-        _transaction.begin(function (err) {
-          var rolledBack = false;
-
-          _transaction.on('rollback', function (aborted) {
-            rolledBack = true;
-          });
-
-          var request = new _mssql["default"].Request(_transaction);
-          request.query("select top 1 * from FormasVariables order by ID desc", function (err, result) {
-            if (err) {
-              console.log(err);
-
-              if (!rolledBack) {
-                _transaction.rollback(function (err) {});
-              }
-            } else {
-              _transaction.commit(function (err) {
-                if (result.recordset.length > 0) {
-                  console.log("yeah");
-
-                  _this3.editarVariables(result.recordset[0].ID, false, false, "forma");
-                }
-              });
-            }
-          });
-        }); // fin transaction
-
-      } else if (tablaDeVariableModificada.localeCompare("variable") == 0) {
-        var _transaction2 = new _mssql["default"].Transaction(this.props.pool);
-
-        _transaction2.begin(function (err) {
-          var rolledBack = false;
-
-          _transaction2.on('rollback', function (aborted) {
-            rolledBack = true;
-          });
-
-          var request = new _mssql["default"].Request(_transaction2);
-          request.query("select top 1 * from Variables order by ID desc", function (err, result) {
-            if (err) {
-              console.log(err);
-
-              if (!rolledBack) {
-                _transaction2.rollback(function (err) {});
-              }
-            } else {
-              _transaction2.commit(function (err) {
-                if (result.recordset.length > 0) {
-                  _this3.editarVariables(result.recordset[0].ID, result.recordset[0].esObjeto, result.recordset[0].esInstruccionSQL, "variable");
-                }
-              });
-            }
-          });
-        }); // fin transaction
-
-      }
     }
   }, {
     key: "render",
     value: function render() {
-      if (this.state.componenteActual.localeCompare("selVariables") == 0) {
-        return _react["default"].createElement("div", null, _react["default"].createElement(_SeleccionarDashboard["default"], {
+      if (this.state.componenteActual.localeCompare("verDashboard") == 0) {
+        return _react["default"].createElement("div", null, _react["default"].createElement(_VerDashboard["default"], {
           pool: this.props.pool,
-          configuracionHome: this.props.configuracionHome,
-          crearVariables: this.crearVariables,
-          goOptions: this.props.goOptions,
-          editarVariable: this.editarVariables
+          variables: this.props.variables,
+          indicadores: this.props.indicadores,
+          riesgos: this.props.riesgos,
+          dashboardSeleccionado: this.props.dashboardSeleccionado,
+          retornarSeleccionDashboards: this.props.retornarSeleccionDashboards,
+          editarDashboard: this.editarDashboard
+        }));
+      } else if (this.state.componenteActual.localeCompare("editarDashboard") == 0) {
+        return _react["default"].createElement("div", null, _react["default"].createElement(_EditarDashboard["default"], {
+          pool: this.props.pool,
+          variables: this.props.variables,
+          indicadores: this.props.indicadores,
+          riesgos: this.props.riesgos,
+          retornoVerDashboard: this.retornoVerDashboard,
+          dashboardSeleccionado: this.props.dashboardSeleccionado,
+          retornarSeleccionDashboards: this.props.retornarSeleccionDashboards
         }));
       }
-      /*else if(this.state.componenteActual.localeCompare("crearVariables") == 0) {
-        return (
-            <div>
-                <CrearVariablesHome pool={this.props.pool}
-                                        showCondicionVar={this.props.showCondicionVar}
-                                        terminoCrearCampo={this.terminoCrearFuenteDatosPasarAEdit}
-                                        idTablaSeleccionada={this.props.idTablaSeleccionada}
-                                        columnas={this.state.columnas}
-                                        nombreTablaSeleccionada={this.props.nombreTablaSeleccionada}
-                                        goOptions={this.props.goOptions}
-                                        retornoSeleccionVariables={this.retornoSeleccionVariables}
-                                        configuracionHome={this.props.configuracionHome}>
-                </CrearVariablesHome>
-            </div>
-        );
-      }*/
-
     }
   }]);
 

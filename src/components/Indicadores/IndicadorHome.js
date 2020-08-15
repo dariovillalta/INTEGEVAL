@@ -3,7 +3,7 @@ import sql from 'mssql';
 
 import SeleccionarIndicador from './SeleccionarIndicador.js';
 import CrearIndicador from './CrearIndicador/CrearIndicador.js';
-import EditarIndicador from './EditarIndicador.js';
+import EditarIndicador from './EditarIndicador/EditarIndicador.js';
 
 export default class IndicadorHome extends React.Component {
     constructor(props) {
@@ -16,18 +16,21 @@ export default class IndicadorHome extends React.Component {
             formulaIndicadorSeleccionada: "",
             pesoIndicadorSeleccionada: "",
             toleranciaIndicadorSeleccionada: "",
-            tipoToleranciaIndicadorSeleccionada: "",
+            tipoValorIdealIndicadorSeleccionada: "",
             valorIdealIndicadorSeleccionada: "",
             periodicidadIndicadorSeleccionada: "",
             tipoIndicadorIndicadorSeleccionada: "",
             analistaIndicadorSeleccionada: "",
+            fechaInicioCalculoSeleccionada: "",
             idRiesgoPadreSeleccionado: -1,
             formulaRiesgo: "",
-            pesoDisponibleRiesgo: 0
+            pesoDisponibleRiesgo: 0,
+            indicadores: []
         }
         this.terminoSeleccionIndicador = this.terminoSeleccionIndicador.bind(this);
         this.retornoSeleccionIndicador = this.retornoSeleccionIndicador.bind(this);
         this.goCrearIndicador = this.goCrearIndicador.bind(this);
+        this.goEditarIndicador = this.goEditarIndicador.bind(this);
         this.terminoCrearIndicadorPasarAEdit = this.terminoCrearIndicadorPasarAEdit.bind(this);
     }
 
@@ -56,7 +59,7 @@ export default class IndicadorHome extends React.Component {
         });
     }
 
-    goEditarIndicador (idRiesgo, formula, pesoDisponible, idIndicador, nombreIndicador, codigoIndicador, formulaIndicador, pesoIndicador, toleranciaIndicador, tipoToleranciaIndicador, valorIdealIndicador, periodicidadIndicador, tipoIndicadorIndicador, analistaIndicador) {
+    goEditarIndicador (idRiesgo, formula, pesoDisponible, idIndicador, nombreIndicador, codigoIndicador, formulaIndicador, pesoIndicador, toleranciaIndicador, tipoValorIdealIndicador, valorIdealIndicador, periodicidadIndicador, tipoIndicadorIndicador, analistaIndicador, fechaInicioCalculo, indicadores) {
         this.setState({
             componenteAMostrar: "editIndicador",
             idRiesgoPadreSeleccionado: idRiesgo,
@@ -68,11 +71,13 @@ export default class IndicadorHome extends React.Component {
             formulaIndicadorSeleccionada: formulaIndicador,
             pesoIndicadorSeleccionada: pesoIndicador,
             toleranciaIndicadorSeleccionada: toleranciaIndicador,
-            tipoToleranciaIndicadorSeleccionada: tipoToleranciaIndicador,
+            tipoValorIdealIndicadorSeleccionada: tipoValorIdealIndicador,
             valorIdealIndicadorSeleccionada: valorIdealIndicador,
             periodicidadIndicadorSeleccionada: periodicidadIndicador,
             tipoIndicadorIndicadorSeleccionada: tipoIndicadorIndicador,
-            analistaIndicadorSeleccionada: analistaIndicador
+            analistaIndicadorSeleccionada: analistaIndicador,
+            fechaInicioCalculoSeleccionada: fechaInicioCalculo,
+            indicadores: indicadores
         });
     }
 
@@ -84,7 +89,7 @@ export default class IndicadorHome extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("select * from Indicadores where nombre = '"+nombreIndicador+"'", (err, result) => {
+            request.query("select top 1 * from Indicadores order by ID desc", (err, result) => {
                 if (err) {
                     if (!rolledBack) {
                         console.log(err);
@@ -94,7 +99,7 @@ export default class IndicadorHome extends React.Component {
                 } else {
                     transaction.commit(err => {
                         if(result.recordset.length) {
-                            this.terminoSeleccionIndicador(result.recordset[0].ID, result.recordset[0].nombre);
+                            this.goEditarIndicador(this.state.idRiesgoPadreSeleccionado, this.state.formulaRiesgo, this.state.pesoDisponibleRiesgo, result.recordset[0].ID, result.recordset[0].nombre, result.recordset[0].codigo, result.recordset[0].formula, result.recordset[0].peso, result.recordset[0].tolerancia, result.recordset[0].tipoValorIdeal, result.recordset[0].periodicidad, result.recordset[0].tipoIndicador, result.recordset[0].analista, result.recordset[0].fechaInicioCalculo);
                         }
                     });
                 }
@@ -112,7 +117,8 @@ export default class IndicadorHome extends React.Component {
                                         goCrearIndicador={this.goCrearIndicador}
                                         showRiesgos={this.props.showRiesgos}
                                         showRiesgos={this.props.showRiesgos}
-                                        updateBanderaCrearRiesgoTrue={this.props.updateBanderaCrearRiesgoTrue}></SeleccionarIndicador>
+                                        updateBanderaCrearRiesgoTrue={this.props.updateBanderaCrearRiesgoTrue}
+                                        goEditarIndicador={this.goEditarIndicador}></SeleccionarIndicador>
                 </div>
             );
         } else if(this.state.componenteAMostrar.localeCompare("crearIndicador") == 0) {
@@ -149,7 +155,8 @@ export default class IndicadorHome extends React.Component {
                                     valorIdealIndicadorSeleccionada={this.state.valorIdealIndicadorSeleccionada}
                                     periodicidadIndicadorSeleccionada={this.state.periodicidadIndicadorSeleccionada}
                                     tipoIndicadorIndicadorSeleccionada={this.state.tipoIndicadorIndicadorSeleccionada}
-                                    analistaIndicadorSeleccionada={this.state.analistaIndicadorSeleccionada}> </EditarIndicador>
+                                    analistaIndicadorSeleccionada={this.state.analistaIndicadorSeleccionada}
+                                    indicadores={this.state.indicadores}> </EditarIndicador>
                 </div>
             );
         }

@@ -115,9 +115,6 @@ function (_React$Component) {
           } else {
             transaction.commit(function (err) {
               if (result.recordset.length > 0) {
-                console.log('result.recordset');
-                console.log(result.recordset);
-
                 _this2.setState({
                   umbralSeleccionadoID: result.recordset[0].ID,
                   umbralNombreSeleccionado: 'Umbral ' + _this2.props.tituloUmbral,
@@ -158,8 +155,6 @@ function (_React$Component) {
                 }
               } else {
                 transaction.commit(function (err) {
-                  console.log("Umbral creado.");
-
                   _this3.traerUmbral(); //alert("Umbral Creado");
 
                 });
@@ -351,7 +346,10 @@ function (_React$Component) {
         seccionUmbralNombreSeleccionado: this.state.seccionesUmbral[index].nombre,
         colorSeccionUmbralSeleccionado: this.state.seccionesUmbral[index].color
       }, this.traerRangosSeccionUmbral);
-      $("#seccionUmbralSeleccionado").val(this.state.seccionesUmbral[index].nombre);
+      var self = this;
+      setTimeout(function () {
+        $("#seccionUmbralSeleccionado").val(self.state.seccionesUmbral[index].nombre);
+      }, 400);
     }
   }, {
     key: "retornoSeccionSeleccionUmbral",
@@ -525,6 +523,8 @@ function (_React$Component) {
                 } else {
                   transaction.commit(function (err) {
                     _this9.traerRangosSeccionUmbral();
+
+                    _this9.props.traerUmbralesPADRE();
                   });
                 }
               });
@@ -632,6 +632,8 @@ function (_React$Component) {
                     alert("Rango modificado.");
 
                     _this10.traerRangosSeccionUmbral();
+
+                    _this10.props.traerUmbralesPADRE();
                   });
                 }
               });
@@ -863,12 +865,12 @@ function (_React$Component) {
         }, "Modificar Secci\xF3n de Umbral")), _react["default"].createElement("hr", null), _react["default"].createElement("div", {
           className: "row"
         }, _react["default"].createElement("div", {
-          className: "col-xl-6 col-lg-6 col-md-6 col-sm-6 col-6 form-group text-center"
+          className: "col-xl-4 col-lg-4 col-md-4 col-sm-4 col-4 form-group text-center"
         }, _react["default"].createElement("label", {
           htmlFor: "nuevoRangoValorMinimo",
           className: "col-form-label"
         }, "Valor m\xEDnimo:")), _react["default"].createElement("div", {
-          className: "col-xl-6 col-lg-6 col-md-6 col-sm-6 col-6 form-group text-center"
+          className: "col-xl-8 col-lg-8 col-md-8 col-sm-8 col-8 form-group text-center"
         }, _react["default"].createElement("label", {
           htmlFor: "nuevoRangoValorMaximo",
           className: "col-form-label"
@@ -923,12 +925,12 @@ function (_React$Component) {
           }, _react["default"].createElement("hr", null), _react["default"].createElement("div", {
             className: "row"
           }, _react["default"].createElement("div", {
-            className: "col-xl-6 col-lg-6 col-md-6 col-sm-6 col-6 form-group text-center"
+            className: "col-xl-4 col-lg-4 col-md-4 col-sm-4 col-4 form-group text-center"
           }, _react["default"].createElement("label", {
             htmlFor: "rangoValorMinimo" + i,
             className: "col-form-label"
           }, "Valor M\xEDnimo Nuevo:")), _react["default"].createElement("div", {
-            className: "col-xl-6 col-lg-6 col-md-6 col-sm-6 col-6 form-group text-center"
+            className: "col-xl-8 col-lg-8 col-md-8 col-sm-8 col-8 form-group text-center"
           }, _react["default"].createElement("label", {
             htmlFor: "rangoValorMaximo" + i,
             className: "col-form-label"

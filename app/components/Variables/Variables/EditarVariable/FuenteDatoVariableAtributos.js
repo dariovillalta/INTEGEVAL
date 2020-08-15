@@ -108,7 +108,7 @@ function (_React$Component) {
         onClick: function onClick() {
           return _this2.props.goCreateVariableFieldSQL();
         }
-      }, "Crear Instrucci\xF3n SQL "), _react["default"].createElement("br", null))) : _react["default"].createElement("div", {
+      }, "Editar Instrucci\xF3n SQL "), _react["default"].createElement("br", null))) : _react["default"].createElement("div", {
         className: "row"
       }, _react["default"].createElement("div", {
         className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
@@ -132,7 +132,7 @@ function (_React$Component) {
       }, _react["default"].createElement("a", {
         className: "breadcrumb-item active font-20",
         "aria-current": "page"
-      }, this.props.tipoNuevaVariable))), _react["default"].createElement("br", null), _react["default"].createElement("a", {
+      }, this.props.tipoNuevaVariable))), _react["default"].createElement("br", null), this.props.tipoVariable.localeCompare("escalar") == 0 ? _react["default"].createElement("a", {
         href: "#",
         className: "btn btn-success active font-20",
         style: {
@@ -141,7 +141,16 @@ function (_React$Component) {
         onClick: function onClick() {
           return _this2.actualizarIndiceAtributoSeleccionado(0);
         }
-      }, "Crear Instrucci\xF3n Personalizada "), _react["default"].createElement("br", null)))) : _react["default"].createElement("div", null, this.props.mostrarInstruccionSQL ? _react["default"].createElement("div", {
+      }, "Editar Instrucci\xF3n Personalizada ") : _react["default"].createElement("a", {
+        href: "#",
+        className: "btn btn-success active font-20",
+        style: {
+          width: "100%"
+        },
+        onClick: function onClick() {
+          return _this2.actualizarIndiceAtributoSeleccionado(-1);
+        }
+      }, "Editar Instrucci\xF3n Personalizada "), _react["default"].createElement("br", null)))) : _react["default"].createElement("div", null, this.props.mostrarInstruccionSQL ? _react["default"].createElement("div", {
         className: "row"
       }, _react["default"].createElement("div", {
         className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
@@ -161,7 +170,7 @@ function (_React$Component) {
         onClick: function onClick() {
           return _this2.props.goCreateVariableFieldSQL();
         }
-      }, "Crear Instrucci\xF3n SQL "))), _react["default"].createElement("br", null))) : _react["default"].createElement("div", {
+      }, "Editar Instrucci\xF3n SQL "))), _react["default"].createElement("br", null))) : _react["default"].createElement("div", {
         className: "row"
       }, _react["default"].createElement("div", {
         className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
@@ -305,7 +314,7 @@ function (_React$Component) {
           onClick: function onClick() {
             return _this2.actualizarIndiceAtributoSeleccionado(i);
           }
-        }, "Editar Instrucci\xF3n Personalizada "), _react["default"].createElement("br", null), _react["default"].createElement("div", {
+        }, "Editar Instrucci\xF3n Personalizada "), _react["default"].createElement("br", null), _react["default"].createElement("br", null), _react["default"].createElement("div", {
           className: "text-center",
           style: {
             width: "100%"

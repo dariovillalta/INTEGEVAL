@@ -28,7 +28,8 @@ export default class FuenteDatoVariable extends React.Component {
             titulo: tituloGlobal,
             mostrarInstruccionSQL: mostrarInstruccionSQLGlobal,
             mostrarEsColeccion: mostrarEsColeccionGlobal,
-            valorPeriodicidad: valorPeriodicidadGlobal
+            valorPeriodicidad: valorPeriodicidadGlobal,
+            usuarios: []
         }
         this.cambioInstruccionSQL = this.cambioInstruccionSQL.bind(this);
         this.cambioAColeccion = this.cambioAColeccion.bind(this);
@@ -36,6 +37,8 @@ export default class FuenteDatoVariable extends React.Component {
         this.cambiarTitulo = this.cambiarTitulo.bind(this);
         this.actualizarPeriodicidad = this.actualizarPeriodicidad.bind(this);
         this.cargarDatePicker = this.cargarDatePicker.bind(this);
+
+        this.getUsuarios = this.getUsuarios.bind(this);
     }
 
     componentDidMount () {
@@ -125,6 +128,32 @@ export default class FuenteDatoVariable extends React.Component {
         });
     }
 
+    getUsuarios () {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("select * from Usuarios", (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        this.setState({
+                            usuarios: result.recordset
+                        });
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
     render() {
         return (
             <div>
@@ -162,7 +191,7 @@ export default class FuenteDatoVariable extends React.Component {
                     ?
                         <div className={"row"} style={{width: "100%"}}>
                             <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
-                                <label htmlFor="esColeccion" className="col-form-label">Es colección de Datos:</label>
+                                <label htmlFor="esColeccion" className="col-form-label">Tipo de Conjunto:</label>
                             </div>
                             <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"}>
                                 <div className={"switch-button-coleccion switch-button-yesno"} style={{margin:"0 auto", display:"block"}}>
@@ -177,7 +206,7 @@ export default class FuenteDatoVariable extends React.Component {
                     ?
                         <div className={"row"} style={{width: "100%"}}>
                             <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
-                                <label htmlFor="esObjetoFuenteDato" className="col-form-label">Es variable compuesta:</label>
+                                <label htmlFor="esObjetoFuenteDato" className="col-form-label">Tipo de Variable:</label>
                             </div>
                             <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"}>
                                 <div className={"switch-button-variable switch-button-yesno"} style={{margin:"0 auto", display:"block"}}>
@@ -215,10 +244,23 @@ export default class FuenteDatoVariable extends React.Component {
                 }
                 <div className={"row"} style={{width: "100%"}}>
                     <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
-                        <label htmlFor="analista" className="col-form-label">Nombre Encargado</label>
+                        <label htmlFor="responsable" className="col-form-label">Nombre Encargado</label>
                     </div>
                     <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"}>
-                        <input id="analista" defaultValue={this.props.analistaVariable} onKeyUp={this.props.actualizarNombreEncargado} type="text" className="form-control form-control-sm"/>
+                        <select id="responsable" defaultValue={this.props.responsableVariable} onChange={this.props.actualizarNombreEncargado} className="form-control">
+                            <option value="-1">Ninguno</option>
+                            {this.state.usuarios.map((usuario, i) =>
+                                <option value={usuario.ID} key={usuario.ID}>{usuario.usuario}</option>
+                            )}
+                        </select>
+                    </div>
+                </div>
+                <div className={"row"} style={{width: "100%"}}>
+                    <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
+                        <label htmlFor="categoriaVariable" className="col-form-label">Categoría de Variable</label>
+                    </div>
+                    <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
+                        <input id="categoriaVariable" defaultValue={this.props.categoriaVariable} onKeyUp={this.props.actualizarCategoriaVariable} type="text" className="form-control form-control-sm"/>
                     </div>
                 </div>
                 <div className={"row"} style={{width: "100%"}}>
@@ -231,16 +273,6 @@ export default class FuenteDatoVariable extends React.Component {
                             <input type="checkbox" defaultChecked name={"guardarFuenteDato"} id={"guardarFuenteDato"}/><span>
                             <label htmlFor={"guardarFuenteDato"}></label></span>
                         </div>
-                    </div>
-                </div>
-                <div className={"row"} style={{width: "100%", display: this.state.mostrarEsObjeto ? "" : "none"}}>
-                    <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3"}>
-                        <label htmlFor="objetoPadreID" className="col-form-label">Variable Padre:</label>
-                    </div>
-                    <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9"}>
-                        <select className="form-control" id="objetoPadreID">
-                            <option value="-1">Ninguno</option>
-                        </select>
                     </div>
                 </div>
                 <br/>
@@ -268,3 +300,14 @@ export default class FuenteDatoVariable extends React.Component {
         );
     }
 }
+
+/*<div className={"row"} style={{width: "100%", display: this.state.mostrarEsObjeto ? "" : "none"}}>
+    <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3"}>
+        <label htmlFor="objetoPadreID" className="col-form-label">Variable Padre:</label>
+    </div>
+    <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9"}>
+        <select className="form-control" id="objetoPadreID">
+            <option value="-1">Ninguno</option>
+        </select>
+    </div>
+</div>*/

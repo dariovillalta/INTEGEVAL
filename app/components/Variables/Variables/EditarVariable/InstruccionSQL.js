@@ -7,6 +7,8 @@ exports["default"] = void 0;
 
 var _react = _interopRequireDefault(require("react"));
 
+var _mssql = _interopRequireDefault(require("mssql"));
+
 var _Modal = _interopRequireDefault(require("../../../Modal/Modal.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
@@ -67,7 +69,10 @@ function (_React$Component) {
 
   _createClass(InstruccionSQL, [{
     key: "componentDidMount",
-    value: function componentDidMount() {//this.getCampos();
+    value: function componentDidMount() {
+      //this.getCampos();
+      console.log('this.props.comandoSQL');
+      console.log(this.props.comandoSQL);
     }
   }, {
     key: "openModal",
@@ -122,13 +127,13 @@ function (_React$Component) {
 
       if (instruccionSQL.length > 0) {
         if (this.props.camposInstruccionSQL.length > 0) {
-          var transaction = new sql.Transaction(this.props.pool);
+          var transaction = new _mssql["default"].Transaction(this.props.pool);
           transaction.begin(function (err) {
             var rolledBack = false;
             transaction.on('rollback', function (aborted) {
               rolledBack = true;
             });
-            var request = new sql.Request(transaction);
+            var request = new _mssql["default"].Request(transaction);
             request.query(instruccionSQL, function (err, result) {
               if (err) {
                 console.log(err);

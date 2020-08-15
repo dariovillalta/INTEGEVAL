@@ -3,6 +3,7 @@ import sql from 'mssql';
 
 import VistaUmbral from './VistaUmbral.js';
 import CrearUmbral from './EditarUmbral.js';
+import ListaRestoUmbrales from './ListaRestoUmbrales.js';
 
 const secciones = [{nombre: "MONO 1", color: "#00c853", width: "25"}, {nombre: "MONO 2", color: "#ffab40", width: "50"}, {nombre: "MONO 1", color: "#00c853", width: "25"}];
 var seccionesConRango = [];
@@ -22,7 +23,6 @@ export default class Umbral extends React.Component {
         this.traerSeccionRango = this.traerSeccionRango.bind(this);
         this.inicioCrearArregloSeccionRango = this.inicioCrearArregloSeccionRango.bind(this);
         this.ingresarSeccion = this.ingresarSeccion.bind(this);
-        console.log(this.props.navbar)
     }
 
     componentDidMount() {
@@ -154,8 +154,6 @@ export default class Umbral extends React.Component {
             var totSec = arrOrdenado[i].valorMaximo - arrOrdenado[i].valorMinimo;
             arrOrdenado[i].width = (totSec / sumTot) * 100;
         };
-        console.log('arrOrdenado');
-        console.log(arrOrdenado);
         this.setState({
             secciones: arrOrdenado
         });
@@ -184,10 +182,12 @@ export default class Umbral extends React.Component {
         return (
             <div>
                 {this.props.navbar}
+                <ListaRestoUmbrales lista={this.props.lista}> </ListaRestoUmbrales>
                 <VistaUmbral umbrales={this.state.secciones}> </VistaUmbral>
                 <CrearUmbral idVariable={this.props.idVariable} pool={this.props.pool}
                                                         tablaVariable={this.props.tablaVariable}
-                                                        tituloUmbral={this.props.tituloUmbral}> </CrearUmbral>
+                                                        tituloUmbral={this.props.tituloUmbral}
+                                                        traerUmbralesPADRE={this.traerUmbrales}> </CrearUmbral>
             </div>
         );
     }

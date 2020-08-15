@@ -100,7 +100,7 @@ export default class ReporteriaHome extends React.Component {
             );
         } else if(this.state.componenteActual.localeCompare("visualizarReporteria") == 0) {
             return (
-                <div>
+                <div style={{width: "100%"}}>
                     <Reporteria pool={this.props.pool}
                                             variables={this.state.variables}
                                             indicadores={this.state.indicadores}

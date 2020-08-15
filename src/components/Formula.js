@@ -167,7 +167,6 @@ export default class Formula extends React.Component {
         if(this.props.esEditarVar) {
             banderaCargaVariablesINICIO = 0;
             banderaCargaVariablesFIN = 0;
-            console.log(this.props)
         }
         variableSeleccionada = [];
         operacionSeleccionada = [];
@@ -187,9 +186,11 @@ export default class Formula extends React.Component {
         this.loadFormas();
     }
 
+
+
     findVariableInFormula (arreglo, variable, posicionEnArreglo, index) {
         for (var i = 0; i < arreglo.length; i++) {
-            if( !Array.isArray(arreglo[i].valor) && arreglo[i].valor.localeCompare(variable) == 0 && index == i) {
+            if( !Array.isArray(arreglo[i].valor) /*&& !arreglo[i].esValorManual*/ && arreglo[i].valor.toString().localeCompare(variable) == 0 && index == i) {
                 posicionDeIndicadorSeleccionadoEnFormula = posicionEnArreglo+'['+i+']';
             } else if( Array.isArray(arreglo[i].valor) ) {
                 this.findVariableInFormula (arreglo[i].valor, variable, posicionEnArreglo+'['+i+'].valor', index);
@@ -279,20 +280,12 @@ export default class Formula extends React.Component {
                 formula: copyTemp
             });
         }
-        console.log('posicion')
-        console.log(posicion)
-        console.log('nombre')
-        console.log(nombre)
-        console.log('index')
-        console.log(index)
         this.clearSelectsInFormulaIndicadores(this.state.formula);
         if(posicion == null) {
             posicionIndicador = '';
             this.findVariableInFormula(this.state.formula, nombre, '', index);
             var temp = [...this.state.formula];
             var tempVar;
-            console.log('posicionDeIndicadorSeleccionadoEnFormula')
-            console.log(posicionDeIndicadorSeleccionadoEnFormula)
             eval("tempVar = temp"+posicionDeIndicadorSeleccionadoEnFormula);
             tempVar.activa = !tempVar.activa;
             //temp.splice(index, 1, tempVar);
@@ -335,8 +328,6 @@ export default class Formula extends React.Component {
     retornoSeleccionCampo (esOperacion, variable, posicionTabla) {
         if(variable[0].valor.length > 0) {
             var columnaSeleccionada = variable[0];
-            console.log('columnaSeleccionada')
-            console.log(columnaSeleccionada)
             variableSeleccionada = jQuery.extend(true, {}, variable[0]);
             if(variableSeleccionada.tipo.localeCompare("numero") == 0)
                 variableSeleccionada.tipo = "decimal";
@@ -385,10 +376,6 @@ export default class Formula extends React.Component {
             var nivelRegla = 0;
             if(variableSeleccionada.nivel != undefined)
                 nivelRegla = variableSeleccionada.nivel+1;
-            console.log('variableSeleccionada')
-            console.log(variableSeleccionada)
-            console.log('nivelRegla')
-            console.log(nivelRegla)
             this.props.actualizarNivelNuevaRegla(nivelRegla);
         }
     }
@@ -482,13 +469,7 @@ export default class Formula extends React.Component {
     }
 
     agregarAFormula () {
-        console.log('variableSeleccionada')
-        console.log(variableSeleccionada)
-        console.log('operacionSeleccionada')
-        console.log(operacionSeleccionada)
         if (variableSeleccionada.valor != undefined || seleccionManual || operacionSeleccionada.valor.localeCompare("Borrar") == 0) {
-            console.log('seleccionManual')
-            console.log(seleccionManual)
             if(seleccionManual) {
                 var valor = $("#valorManual").val();
                 var tipo = 'varchar';
@@ -525,7 +506,6 @@ export default class Formula extends React.Component {
                 }
             }
             if(this.state.formula.length == 0 && $("div").hasClass("colorPunteroFormula")) {        //caso inicial, agregar primera variable
-                console.log('1')
                 var formulaTemp = [...this.state.formula];
                 variableSeleccionada.activa = false;
                 var tipoOriginal = variableSeleccionada.tipo;
@@ -551,16 +531,6 @@ export default class Formula extends React.Component {
                     operaciones: [],
                     formula: formulaTemp
                 });
-                var self = this;
-                setTimeout(function(){
-                    console.log(self.state.formula)
-                }, 2000);
-                console.log('tipoOriginal');
-                console.log(tipoOriginal);
-                console.log('camposTablasOriginales');
-                console.log(camposTablasOriginales);
-                console.log('camposTablasOriginales');
-                console.log(camposTablasOriginales);
 
                 //actualizando campos de variables a mostrar segun el campo que se acaba de agregar
                 if(variableSeleccionada.esFuenteDato) {
@@ -612,7 +582,6 @@ export default class Formula extends React.Component {
                                 break;
                             }
                         };
-                        console.log(variablesEscalaresOriginales)
                         this.setState({
                             tablas: [],
                             camposTablas: [],
@@ -665,70 +634,36 @@ export default class Formula extends React.Component {
             } else if (operacionSeleccionada.valor != undefined && operacionSeleccionada.valor.localeCompare("Borrar") == 0) {
                 var arregloVarSeleccionadas = [];
                 this.getSelectedVariables (this.state.formula, arregloVarSeleccionadas, '');
-                console.log('arregloVarSeleccionadas')
-                console.log(arregloVarSeleccionadas)
                 if(arregloVarSeleccionadas.length == 1) {
                     //viendo si tiene variable antes de var a eliminar
                     var ultimoIndice1 = arregloVarSeleccionadas[0].substring(0, arregloVarSeleccionadas[0].lastIndexOf(']'));
-                    console.log('ultimoIndice1')
-                    console.log(ultimoIndice1)
                     var ultimoIndice2 = ultimoIndice1.substring(ultimoIndice1.lastIndexOf('[')+1);
-                    console.log('ultimoIndice2')
-                    console.log(ultimoIndice2)
                     if(parseInt(ultimoIndice2) != 0) {
                         var indiceVarAEliminar1 = arregloVarSeleccionadas[0].substring(0, arregloVarSeleccionadas[0].lastIndexOf(']'));
                         var indiceVarAEliminar2 = indiceVarAEliminar1.substring(indiceVarAEliminar1.lastIndexOf('[')+1);
-                        console.log('indiceVarAEliminar1')
-                        console.log(indiceVarAEliminar1)
-                        console.log('indiceVarAEliminar2')
-                        console.log(indiceVarAEliminar2)
                         var indiceVarAEliminarAnterior1 = arregloVarSeleccionadas[0].substring(0, arregloVarSeleccionadas[0].lastIndexOf(']'));
                         var indiceVarAEliminarAnterior2 = indiceVarAEliminar1.substring(indiceVarAEliminar1.lastIndexOf('[')+1);
                         indiceVarAEliminarAnterior2 = parseInt(indiceVarAEliminarAnterior2)-1;
-                        console.log('indiceVarAEliminarAnterior1')
-                        console.log(indiceVarAEliminarAnterior1)
-                        console.log('indiceVarAEliminarAnterior2')
-                        console.log(indiceVarAEliminarAnterior2)
                         var variableAEliminar, variableAntesEliminar;
                         var copyFormula = [...this.state.formula];
                         eval("variableAEliminar = this.state.formula"+arregloVarSeleccionadas[0]);
                         eval("copyFormula"+arregloVarSeleccionadas[0].substring(0, arregloVarSeleccionadas[0].lastIndexOf('['))+".splice(indiceVarAEliminar2, 1)")
-                        console.log('arregloVarSeleccionadas[0].substring(0, arregloVarSeleccionadas[0].lastIndexOf([))')
-                        console.log( arregloVarSeleccionadas[0].substring(arregloVarSeleccionadas[0].lastIndexOf('[')) )
                         eval("variableAntesEliminar = this.state.formula"+arregloVarSeleccionadas[0].substring(0, arregloVarSeleccionadas[0].lastIndexOf('['))+"[indiceVarAEliminarAnterior2]");
                         if(variableAntesEliminar.tipo.localeCompare("signo") == 0)     
-                            eval("copyFormula"+arregloVarSeleccionadas[0].substring(0, arregloVarSeleccionadas[0].lastIndexOf('['))+".splice(indiceVarAEliminarAnterior2, 1)")                   
-                        console.log('variableAEliminar')
-                        console.log(variableAEliminar)
-                        console.log('variableAntesEliminar')
-                        console.log(variableAntesEliminar)
+                            eval("copyFormula"+arregloVarSeleccionadas[0].substring(0, arregloVarSeleccionadas[0].lastIndexOf('['))+".splice(indiceVarAEliminarAnterior2, 1)")
                         this.agregarFormulaAnchuraYAltura(copyFormula, true);
                         this.setState({
                             formula: copyFormula
                         });
-                        var self = this;
-                        setTimeout(function(){
-                            console.log(self.state.formula)
-                        }, 2000);
                     } else {
                         var indiceVarAEliminar1 = arregloVarSeleccionadas[0].substring(0, arregloVarSeleccionadas[0].lastIndexOf(']'));
                         var indiceVarAEliminar2 = indiceVarAEliminar1.substring(indiceVarAEliminar1.lastIndexOf('[')+1);
-                        console.log('indiceVarAEliminar1')
-                        console.log(indiceVarAEliminar1)
-                        console.log('indiceVarAEliminar2')
-                        console.log(indiceVarAEliminar2)
                         var copyFormula = [...this.state.formula];
-                        console.log('arregloVarSeleccionadas[0].substring(0, arregloVarSeleccionadas[0].lastIndexOf([)+')
-                        console.log( arregloVarSeleccionadas[0].substring(0, arregloVarSeleccionadas[0].lastIndexOf('[')) )
                         eval("copyFormula"+arregloVarSeleccionadas[0].substring(0, arregloVarSeleccionadas[0].lastIndexOf('['))+".splice(indiceVarAEliminar2, 1)")
                         this.agregarFormulaAnchuraYAltura(copyFormula, true);
                         this.setState({
                             formula: copyFormula
                         });
-                        var self = this;
-                        setTimeout(function(){
-                            console.log(self.state.formula)
-                        }, 2000);
                     }
                 } else if(arregloVarSeleccionadas.length > 1) {
                     alert("Solo debe seleccionar una variable a eliminar.");
@@ -736,7 +671,6 @@ export default class Formula extends React.Component {
                     alert("Debe seleccionar por lo menos la variable a eliminar.");
                 }
             } else if(this.state.formula.length > 0 && $("div").hasClass("colorPunteroFormula") && operacionSeleccionada.valor != undefined && operacionSeleccionada.valor.localeCompare("/") != 0) {
-                console.log('2')
                 var formulaTemp = [...this.state.formula];
                 //quitar cualquier operacion seleccionada anteriormente
                 for (var i = 0; i < formulaTemp.length; i++) {
@@ -771,15 +705,7 @@ export default class Formula extends React.Component {
                 var arregloVarSeleccionadas = [];
                 //this.getSelectedIndicador (this.state.formula, arregloVarSeleccionadas, '');
                 //this.findVariableInFormula(this.state.formula, nombre, '');
-                console.log('posicionDeIndicadorSeleccionadoEnFormula');
-                console.log(posicionDeIndicadorSeleccionadoEnFormula);
-                console.log('posicionArreglo');
-                console.log(posicionArreglo);
-                console.log('posicionIndicadorAgregarEnFormula antes');
-                console.log(posicionIndicadorAgregarEnFormula);
                 this.findSelectedIndicador (this.state.formula, '');
-                console.log('posicionIndicadorAgregarEnFormula despues');
-                console.log(posicionIndicadorAgregarEnFormula);
                 var indicadorSeleccionado;
                 //eval("indicadorSeleccionado = this.state.formula["+posicionIndicadorAgregarEnFormula.substring(0, posicionIndicadorAgregarEnFormula.lastIndexOf(".")))
                 //var tempVar;
@@ -795,22 +721,10 @@ export default class Formula extends React.Component {
                         formulaTemp.splice(parseInt(ultimoIndice)+1, 0, operacionSeleccionada);
                     }*/
                     if(posicionIndicadorAgregarEnFormula.split("[").length > 2) {
-                        console.log('1');
                         var pos1 = posicionIndicadorAgregarEnFormula.substring(posicionIndicadorAgregarEnFormula.lastIndexOf("[")+1);
-                        console.log('pos1');
-                        console.log(pos1);
                         var pos2 = pos1.substring(0, pos1.lastIndexOf("]"));
-                        console.log('pos2');
-                        console.log(pos2);
-                        console.log('posicionIndicadorAgregarEnFormula.substring(0, posicionIndicadorAgregarEnFormula.lastIndexOf("["))');
-                        console.log(posicionIndicadorAgregarEnFormula.substring(0, posicionIndicadorAgregarEnFormula.lastIndexOf("[")));
-                        console.log("console.log(formulaTemp"+posicionIndicadorAgregarEnFormula.substring(0, posicionIndicadorAgregarEnFormula.lastIndexOf("["))+".length)" );
-                        eval("console.log(formulaTemp"+posicionIndicadorAgregarEnFormula.substring(0, posicionIndicadorAgregarEnFormula.lastIndexOf("["))+".length)" );
-                        eval("console.log(formulaTemp"+posicionIndicadorAgregarEnFormula.substring(0, posicionIndicadorAgregarEnFormula.lastIndexOf("["))+".length == parseInt(pos2)+1)" );
                         var esUltimoIndice = false;
                         eval("if (formulaTemp"+posicionIndicadorAgregarEnFormula.substring(0, posicionIndicadorAgregarEnFormula.lastIndexOf("["))+".length == parseInt(pos2)+1) esUltimoIndice = true" );
-                        console.log('esUltimoIndice');
-                        console.log(esUltimoIndice);
                         eval("formulaTemp"+posicionIndicadorAgregarEnFormula.substring(0, posicionIndicadorAgregarEnFormula.lastIndexOf("["))+".splice( parseInt(pos2)+1, 0, operacionSeleccionada)" );
                         eval("formulaTemp"+posicionIndicadorAgregarEnFormula.substring(0, posicionIndicadorAgregarEnFormula.lastIndexOf("["))+".splice( parseInt(pos2)+2, 0, varAInsertar)" );
                         /*if(esUltimoIndice) {
@@ -822,34 +736,17 @@ export default class Formula extends React.Component {
                         }*/
                     } else {
                         var pos1 = posicionIndicadorAgregarEnFormula.substring(posicionIndicadorAgregarEnFormula.lastIndexOf("[")+1);
-                        console.log('2');
-                        console.log('pos1');
-                        console.log(pos1);
                         var pos2 = pos1.substring(0, pos1.lastIndexOf("]"));
-                        console.log('pos2');
-                        console.log(pos2);
                         eval("formulaTemp.splice( parseInt(pos2)+1, 0, operacionSeleccionada)" );
                         eval("formulaTemp.splice( parseInt(pos2)+2, 0, varAInsertar)" );
                     }
                     //eval("formulaTemp[posicionArreglo].splice(parseInt(ultimoIndice)+1, 0, variableSeleccionada[0])");
                 } else {
                     if(posicionIndicadorAgregarEnFormula.split("[").length > 2) {
-                        console.log('1');
                         var pos1 = posicionIndicadorAgregarEnFormula.substring(posicionIndicadorAgregarEnFormula.lastIndexOf("[")+1);
-                        console.log('pos1');
-                        console.log(pos1);
                         var pos2 = pos1.substring(0, pos1.lastIndexOf("]"));
-                        console.log('pos2');
-                        console.log(pos2);
-                        console.log('posicionIndicadorAgregarEnFormula.substring(0, posicionIndicadorAgregarEnFormula.lastIndexOf("["))');
-                        console.log(posicionIndicadorAgregarEnFormula.substring(0, posicionIndicadorAgregarEnFormula.lastIndexOf("[")));
-                        console.log("console.log(formulaTemp"+posicionIndicadorAgregarEnFormula.substring(0, posicionIndicadorAgregarEnFormula.lastIndexOf("["))+".length)" );
-                        eval("console.log(formulaTemp"+posicionIndicadorAgregarEnFormula.substring(0, posicionIndicadorAgregarEnFormula.lastIndexOf("["))+".length)" );
-                        eval("console.log(formulaTemp"+posicionIndicadorAgregarEnFormula.substring(0, posicionIndicadorAgregarEnFormula.lastIndexOf("["))+".length == parseInt(pos2)+1)" );
                         var esUltimoIndice = false;
                         eval("if (formulaTemp"+posicionIndicadorAgregarEnFormula.substring(0, posicionIndicadorAgregarEnFormula.lastIndexOf("["))+".length == parseInt(pos2)+1) esUltimoIndice = true" );
-                        console.log('esUltimoIndice');
-                        console.log(esUltimoIndice);
                         eval("formulaTemp"+posicionIndicadorAgregarEnFormula.substring(0, posicionIndicadorAgregarEnFormula.lastIndexOf("["))+".splice( parseInt(pos2), 0, operacionSeleccionada)" );
                         eval("formulaTemp"+posicionIndicadorAgregarEnFormula.substring(0, posicionIndicadorAgregarEnFormula.lastIndexOf("["))+".splice( parseInt(pos2), 0, varAInsertar)" );
                         /*if(esUltimoIndice) {
@@ -861,12 +758,7 @@ export default class Formula extends React.Component {
                         }*/
                     } else {
                         var pos1 = posicionIndicadorAgregarEnFormula.substring(posicionIndicadorAgregarEnFormula.lastIndexOf("[")+1);
-                        console.log('2');
-                        console.log('pos1');
-                        console.log(pos1);
                         var pos2 = pos1.substring(0, pos1.lastIndexOf("]"));
-                        console.log('pos2');
-                        console.log(pos2);
                         eval("formulaTemp.splice( parseInt(pos2), 0, operacionSeleccionada)" );
                         eval("formulaTemp.splice( parseInt(pos2), 0, varAInsertar)" );
                     }
@@ -878,21 +770,11 @@ export default class Formula extends React.Component {
                         formulaTemp.splice(parseInt(ultimoIndice), 0, varAInsertar);
                     }*/
                 }
-                console.log('varAInsertar');
-                console.log(varAInsertar);
-                console.log('operacionSeleccionada');
-                console.log(operacionSeleccionada);
-                console.log('formulaTemp');
-                console.log(formulaTemp);
                 this.agregarFormulaAnchuraYAltura(formulaTemp, true);
                 this.setState({
                     operaciones: [],
                     formula: formulaTemp
                 });
-                var self = this;
-                setTimeout(function(){
-                    console.log(self.state.formula)
-                }, 2000);
                 //actualizando campos de variables a mostrar segun el campo que se acaba de agregar
                 var tipoOriginal = variableSeleccionada.tipoOriginal;
                 if(variableSeleccionada.esFuenteDato) {
@@ -997,7 +879,6 @@ export default class Formula extends React.Component {
                 }
                 //FIN actualizando campos de variables a mostrar segun el campo que se acaba de agregar
             } else if(this.state.formula.length > 0  && operacionSeleccionada.valor != undefined && operacionSeleccionada.valor.localeCompare("/") == 0) {
-                console.log('3')
                 //quitar cualquier operacion seleccionada anteriormente
                 var formulaTemp = [...this.state.formula];
                 for (var i = 0; i < formulaTemp.length; i++) {
@@ -1009,8 +890,6 @@ export default class Formula extends React.Component {
                 });
                 var arregloVarSeleccionadas = [];
                 this.getSelectedVariables (this.state.formula, arregloVarSeleccionadas, '');
-                console.log('arregloVarSeleccionadas')
-                console.log(arregloVarSeleccionadas)
                 if($("div").hasClass("colorPunteroFormula") || arregloVarSeleccionadas.length == 0) {
                     alert("Para agregar una división, seleccione las variables a ser numerador en la fórmula.");
                 } else {
@@ -1099,14 +978,6 @@ export default class Formula extends React.Component {
                         }
                     };
 
-                    console.log('this.state.formula');
-                    console.log(this.state.formula);
-
-                    console.log('indicesVarSeleccionadas');
-                    console.log(indicesVarSeleccionadas);
-                    console.log('arregloVarSeleccionadasPorIndicesInicial');
-                    console.log(arregloVarSeleccionadasPorIndicesInicial);
-
                     if(indicesVarSeleccionadas.length > 1) {
                         //VER QUE DISTANCIA PRIMEROS INDICES DE ARREGLO
                         var seleccionVariablesContinuas = false;
@@ -1117,15 +988,11 @@ export default class Formula extends React.Component {
                             } else {
                                 eval("variableAEvaluar = this.state.formula"+indicesVarSeleccionadas[a]);
                             }
-                            console.log('variableAEvaluar');
-                            console.log(variableAEvaluar);
                             if(a != 0) {
                                 if (variableAEvaluar.tipo.localeCompare("contenedorDivision") == 0) {
                                     var variableDeComparacion;
                                     var indiceOriginal = parseInt(indicesVarSeleccionadas[a].split("]")[0].split("[")[1]);
                                     eval("variableDeComparacion = this.state.formula"+(indiceOriginal-3));
-                                    console.log('variableDeComparacion');
-                                    console.log(variableDeComparacion);
                                     if(variableDeComparacion.tipo.localeCompare("indicador") == 0 && variableDeComparacion.posicion.localeCompare("derecha") == 0) {
                                         seleccionVariablesContinuas = true;
                                     } else if(variableDeComparacion.tipo.localeCompare("variable") == 0) {
@@ -1138,8 +1005,6 @@ export default class Formula extends React.Component {
                                     var variableDeComparacion;
                                     var indiceOriginal = parseInt(indicesVarSeleccionadas[a].split("]")[0].split("[")[1]);
                                     eval("variableDeComparacion = this.state.formula"+(indiceOriginal-2));
-                                    console.log('variableDeComparacion');
-                                    console.log(variableDeComparacion);
                                     if(variableDeComparacion.tipo.localeCompare("indicador") == 0 && variableDeComparacion.posicion.localeCompare("derecha") == 0) {
                                         seleccionVariablesContinuas = true;
                                     } else if(variableDeComparacion.tipo.localeCompare("variable") == 0) {
@@ -1161,8 +1026,6 @@ export default class Formula extends React.Component {
                                 } else {
                                     eval("variableAEvaluar = this.state.formula"+indicesVarSeleccionadas[a]);
                                 }
-                                console.log('variableAEvaluar');
-                                console.log(variableAEvaluar);
                                 if( Array.isArray(variableAEvaluar.valor) ) {
                                     seleccionValidaVarDivision = true;
                                     this.verificarSeleccionoTodosDivision(variableAEvaluar);
@@ -1171,8 +1034,6 @@ export default class Formula extends React.Component {
                                     }
                                 }
                             };
-                            console.log('seleccionValidaVarDivision');
-                            console.log(seleccionValidaVarDivision);
                             /*if(seleccionValidaVarDivision) {
                                 //CREANDO ARREGLOS VALORES A INSERTAR
                                 var arregloAInsertarNuevo = [];
@@ -1243,8 +1104,6 @@ export default class Formula extends React.Component {
                         } else {
                             alert("La seleccion de variables deben ser seguidas en la formula.");
                         }
-                        console.log('seleccionVariablesContinuas');
-                        console.log(seleccionVariablesContinuas);
                     } else if(indicesVarSeleccionadas.length == 1) {
                         //VIENDO SI SE SELECCIONO SOLO UNA VARIABLE
                         if(arregloVarSeleccionadasPorIndicesInicial[0].length == 1) {
@@ -1255,8 +1114,6 @@ export default class Formula extends React.Component {
                             } else {
                                 eval("variableAEvaluar = this.state.formula"+arregloVarSeleccionadasPorIndicesInicial[0][0]);
                             }
-                            console.log('variableAEvaluar');
-                            console.log(variableAEvaluar);
                             var seleccionVarEnNumerador = true, esAntesDenominador = true;;
                             if(variableAEvaluar.length != undefined) {
                                 for (var i = 0; i < variableAEvaluar.length; i++) {
@@ -1268,8 +1125,6 @@ export default class Formula extends React.Component {
                                     }
                                 };
                             }
-                            console.log('seleccionVarEnNumerador');
-                            console.log(seleccionVarEnNumerador);
                             if(seleccionVarEnNumerador) {
                                 //CREANDO ARREGLOS VALORES A INSERTAR
                                 var copiaAntiguaVariable, arregloAInsertarNuevo = [];
@@ -1330,12 +1185,6 @@ export default class Formula extends React.Component {
                                     operaciones: [],
                                     formula: copyFormula
                                 });
-                                var self = this;
-                                setTimeout(function(){
-                                    console.log(self.state.formula)
-                                }, 2000);
-                                console.log('copyFormula')
-                                console.log(copyFormula);
                             } else {
                                 alert("la variable seleccionada debe ser del numerador");
                             }
@@ -1354,28 +1203,18 @@ export default class Formula extends React.Component {
                                     posicionAInsertarNuevaDivsion = indicesVarSeleccionadas[0];
                                 }
                             }
-                            console.log('variableAEvaluar');
-                            console.log(variableAEvaluar);
                             seleccionValidaVarDivision = true;
                             this.verificarSeleccionoTodosDivision(variableAEvaluar.valor);
-                            console.log('seleccionValidaVarDivision');
-                            console.log(seleccionValidaVarDivision);
-                            console.log('this.state.formula');
-                            console.log(this.state.formula);
                             if(seleccionValidaVarDivision) {
                                 var arregloAInsertarNuevo = [], divisionAInsertar;
                                 if(variableAEvaluar.tipo.localeCompare("contenedorDivision") == 0) {
-                                    console.log('1');
                                     var copiaAntiguaVariable = jQuery.extend(true, {}, variableAEvaluar);
                                     var indIzquierdo = {valor: "\\\\", width: "5%", height: "100%", tipo: "indicador", posicion: "izquierda"};
                                     var signoDivision = {valor: "division\\\\", width: "100%", height: "2%", tipo: "division\\\\"};
                                     var indDerecho = {valor: "\\\\", width: "5%", height: "100%", tipo: "indicador", posicion: "derecha"};
                                     var division = {valor: [indIzquierdo, copiaAntiguaVariable, indDerecho, signoDivision, variableSeleccionada], width: "90%", height: "49%", tipo: "contenedorDivision"};
                                     divisionAInsertar = division;
-                                    console.log('divisionAInsertar DESPUES');
-                                    console.log(divisionAInsertar.valor);
                                 } else {
-                                    console.log('2');
                                     var copiaAntiguaVariable = jQuery.extend(true, {}, variableAEvaluar);
                                     var indIzquierdo = {valor: "\\\\", width: "5%", height: "100%", tipo: "indicador", posicion: "izquierda"};
                                     arregloAInsertarNuevo.push(indIzquierdo);
@@ -1385,45 +1224,23 @@ export default class Formula extends React.Component {
                                     var indDerecho = {valor: "\\\\", width: "5%", height: "100%", tipo: "indicador", posicion: "derecha"};
                                     arregloAInsertarNuevo.push(indDerecho);
                                     divisionAInsertar = arregloAInsertarNuevo;
-                                    console.log('divisionAInsertar DESPUES');
-                                    console.log(divisionAInsertar.valor);
                                 }
                                 var copyFormula = [...this.state.formula];
-                                console.log('posicionAInsertarNuevaDivsion');
-                                console.log(posicionAInsertarNuevaDivsion);
-                                console.log('posicionAInsertarNuevaDivsion.substring(0, posicionAInsertarNuevaDivsion.lastIndexOf("[")) 1');
-                                console.log(posicionAInsertarNuevaDivsion.substring(0, posicionAInsertarNuevaDivsion.lastIndexOf("[")));
-                                console.log('posicionAInsertarNuevaDivsion.substring(0, posicionAInsertarNuevaDivsion.lastIndexOf("[").substring(0, posicionAInsertarNuevaDivsion.lastIndexOf("]")) 2');
-                                console.log( posicionAInsertarNuevaDivsion.substring(0, posicionAInsertarNuevaDivsion.lastIndexOf("[")).substring(0, posicionAInsertarNuevaDivsion.lastIndexOf("]")) );
-                                console.log('posicionAInsertarNuevaDivsion.substring(0, posicionAInsertarNuevaDivsion.lastIndexOf(".")) 2');
-                                console.log( posicionAInsertarNuevaDivsion.substring(0, posicionAInsertarNuevaDivsion.lastIndexOf(".")) );
                                 if(posicionAInsertarNuevaDivsion.split("[").length > 2) {
-                                    console.log('1');
                                     var pos1 = posicionAInsertarNuevaDivsion.substring(posicionAInsertarNuevaDivsion.lastIndexOf("[")+1);
-                                    console.log('pos1');
-                                    console.log(pos1);
                                     var pos2 = pos1.substring(0, pos1.lastIndexOf("]"));
-                                    console.log('pos2');
-                                    console.log(pos2);
                                     eval("copyFormula"+posicionAInsertarNuevaDivsion.substring(0, posicionAInsertarNuevaDivsion.lastIndexOf("["))+".splice("+pos2+", 1, divisionAInsertar)");
                                 } else {
-                                    console.log('2');
                                     eval("copyFormula"+posicionAInsertarNuevaDivsion.substring(0, posicionAInsertarNuevaDivsion.lastIndexOf("["))+".splice("+posicionAInsertarNuevaDivsion.substring(0, posicionAInsertarNuevaDivsion.lastIndexOf("."))+", 1, divisionAInsertar)");
                                 }
                                 //copyFormula[posicionAInsertarNuevaDivsion] = divisionAInsertar;
                                 //eval("copyFormula["+posicionAInsertarNuevaDivsion+"] = divisionAInsertar");
-                                console.log('copyFormula DESPUES');
-                                console.log(copyFormula);
                                 identificadorIndicador = 0;
                                 this.agregarFormulaAnchuraYAltura(copyFormula, true);
                                 this.setState({
                                     operaciones: [],
                                     formula: copyFormula
                                 });
-                                var self = this;
-                                setTimeout(function(){
-                                    console.log(self.state.formula)
-                                }, 2000);
                             } else {
                                 alert("Selección de división invalida. Falta selección de numerador.")
                             }
@@ -1480,7 +1297,6 @@ export default class Formula extends React.Component {
                                     break;
                                 }
                             };
-                            console.log(variablesEscalaresOriginales)
                             this.setState({
                                 tablas: [],
                                 camposTablas: [],
@@ -1543,17 +1359,11 @@ export default class Formula extends React.Component {
     }
 
     verificarSeleccionoTodosDivision (arreglo) {
-        console.log('arreglo')
-        console.log(arreglo)
         //se verifica que todas las variables esten seleccionadas que esten en el denominador, y tofas las vars de los numeradores
         if(seleccionValidaVarDivision) {
             for (var i = 0; i < arreglo.length; i++) {
-                console.log('arreglo[i]')
-                console.log(arreglo[i])
                 if( !Array.isArray(arreglo[i].valor) ) {
                     if( arreglo[i].tipo.localeCompare("variable") == 0 && !arreglo[i].activa ) {
-                        console.log('arreglo[i]');
-                        console.log(arreglo[i]);
                         seleccionValidaVarDivision = false;
                         return;
                     }
@@ -1572,83 +1382,140 @@ export default class Formula extends React.Component {
     crearArregloDeFormula () {
         if (this.props.esEditarVar && banderaCargaVariablesINICIO == banderaCargaVariablesFIN) {
             var nuevoArregloFormula = [];
-            this.crearObjetosDeArregloDeFormula(nuevoArregloFormula, 0, this.props.formulaSeleccionadaEdit.formula);
+            this.crearObjetosDeArregloDeFormula(nuevoArregloFormula, 0, this.props.formulaSeleccionadaEdit.formula, "arregloRef", this.props.formulaSeleccionadaEdit.formula.length);
             this.agregarFormulaAnchuraYAltura(nuevoArregloFormula, true);
-            console.log('nuevoArregloFormula')
-            console.log(nuevoArregloFormula)
             this.setState({
                 formula: nuevoArregloFormula
             });
         }
     }
 
-    crearObjetosDeArregloDeFormula (arreglo, index, formula) {
+    crearObjetosDeArregloDeFormula (arregloRef, index, formula, arreglo, ultimoIndice, esArregloOrig) {
+        var esArreglo = esArregloOrig;
         for (var i = index; i < formula.length; i++) {
-            if(formula.charAt(i).localeCompare('(') == 0 && !this.props.esEditarVar) {
-                //var copiaAntiguaVariable = jQuery.extend(true, {}, variableAEvaluar);
-                var indIzquierdo = {valor: "\\\\", width: "5%", height: "100%", tipo: "indicador", posicion: "izquierda"};
-                arreglo.push(indIzquierdo);
-                var signoDivision = {valor: "division\\\\", width: "100%", height: "2%", tipo: "division\\\\"};
-                var division = {valor: [], width: "90%", height: "49%", tipo: "contenedorDivision"};
-                arreglo.push(division);
-                var indDerecho = {valor: "\\\\", width: "5%", height: "100%", tipo: "indicador", posicion: "derecha"};
-                arreglo.push(indDerecho);
-                this.crearObjetosDeArregloDeFormula(arreglo[arreglo.length-2].valor, (i+1), formula);
-                var cierreParentesis = this.encontrarCierreParentesis(i, formula);
-                i += cierreParentesis;
-            } else if(formula.charAt(i).localeCompare("/") == 0) {
-                var signoDivision = {valor: "division\\\\", width: "100%", height: "2%", tipo: "division\\\\"};
-                arreglo.push(signoDivision);
-            } else if(this.esOperacionAritmetica(formula.charAt(i))) {
-                var objeto = {
-                    valor: formula.charAt(i),
-                    operacion: formula.charAt(i),
-                    activa: false,
-                    esFuenteDato: false,
-                    esObjeto: false,
-                    esInstruccionSQL: false,
-                    tipo: "signo"
-                };
-                arreglo.push(objeto);
-            } else if(this.esOperacionCompleja(formula, i)) {
-                var nombre = this.getPalabraFormula(formula, i);
-                nuevoArregloFormula.push({valor: nombre});
-            } else if(this.esVariable(formula, i) !== false && formula.charAt(i).localeCompare(')') != 0) {
-                var variable = this.esVariable(formula, i);
-                var operacion = 'FORMULA', texto = variable.valor;
-                if(this.props.esOperacionSQL)
-                    operacion = this.props.operacionSQL;
-                if(this.props.esOperacionSQL && this.exitseCodigoOperacion(this.props.operacionSQL)) {
-                    texto = this.retornarCodigoOperacion(this.props.operacionSQL) + "(" + variableSeleccionada.valor + ")";
-                    operacion = this.retornarCodigoOperacion(this.props.operacionSQL);
+            if(i <= ultimoIndice) {
+                if(formula.charAt(i).localeCompare('(') == 0/* && !this.props.esEditarVar*/) {
+                    //var copiaAntiguaVariable = jQuery.extend(true, {}, variableAEvaluar);
+                    var indIzquierdo = {valor: "\\\\", width: "5%", height: "100%", tipo: "indicador", posicion: "izquierda"};
+                    eval(arreglo+".push(indIzquierdo)");
+                    var division = {valor: [], width: "90%", height: "49%", tipo: "contenedorDivision"};
+                    eval(arreglo+".push(division)");
+                    var posIndex = eval(arreglo+".length-1");
+                    var cierreParentesis = this.encontrarCierreParentesis(i, formula);
+                    this.crearObjetosDeArregloDeFormula(arregloRef, (i+1), formula, arreglo+"["+posIndex+"].valor", cierreParentesis);
+                    i += cierreParentesis-1;
+                    /*arreglo.push(indIzquierdo);
+                    var signoDivision = {valor: "division\\\\", width: "100%", height: "2%", tipo: "division\\\\"};
+                    var division = {valor: [], width: "90%", height: "49%", tipo: "contenedorDivision"};
+                    arreglo.push(division);
+                    var indDerecho = {valor: "\\\\", width: "5%", height: "100%", tipo: "indicador", posicion: "derecha"};
+                    arreglo.push(indDerecho);
+                    this.crearObjetosDeArregloDeFormula(arreglo[arreglo.length-2].valor, (i+1), formula);
+                    var cierreParentesis = this.encontrarCierreParentesis(i, formula);
+                    i += cierreParentesis;*/
+                } else if(formula.charAt(i).localeCompare("/") == 0) {
+                    var signoDivision = {valor: "division\\\\", width: "100%", height: "2%", tipo: "division\\\\"};
+                    eval(arreglo+".push(signoDivision)");
+                    //arreglo.push(signoDivision);
+                } else if(this.esOperacionAritmetica(formula.charAt(i))) {
+                    var objeto = {
+                        valor: formula.charAt(i),
+                        operacion: formula.charAt(i),
+                        activa: false,
+                        esFuenteDato: false,
+                        esObjeto: false,
+                        esInstruccionSQL: false,
+                        tipo: "signo"
+                    };
+                    eval(arreglo+".push(objeto)");
+                    //arreglo.push(objeto);
+                } else if(this.esOperacionCompleja(formula, i)) {
+                    var operacion = this.getPalabraFormula(formula, i);
+                    var cierreParentesis = this.encontrarCierreParentesis(i+operacion.length+1, formula);
+                    var nombre = this.getPalabraFormula(formula, i+operacion.length+1);
+                    eval(arreglo+".push({valor: nombre, operacion: operacion, activa: false, esFuenteDato: false, esObjeto: false, esInstruccionSQL: false, tipo: 'variable'})");
+                    //arreglo.push({valor: nombre});
+                    i += (i+operacion.length+1)+(cierreParentesis-1);
+                } else if(this.esVariable(formula, i) !== false && formula.charAt(i).localeCompare(')') != 0) {
+                    var variable = this.esVariable(formula, i);
+                    var operacion = 'FORMULA', texto = variable.valor;
+                    if(this.props.esOperacionSQL)
+                        operacion = this.props.operacionSQL;
+                    if(this.props.esOperacionSQL && this.exitseCodigoOperacion(this.props.operacionSQL)) {
+                        texto = this.retornarCodigoOperacion(this.props.operacionSQL) + "(" + variableSeleccionada.valor + ")";
+                        operacion = this.retornarCodigoOperacion(this.props.operacionSQL);
+                    }
+                    if (this.props.esOperacionSQL && this.props.operacionSQL.localeCompare('ASIG') == 0) {
+                        //cuando se agrega campo a formula para crear operacion ASIG
+                        operacion = 'ASIG';
+                        texto = variable.valor;
+                    }
+                    var objeto = {
+                        valor: variable.valor,
+                        operacion: operacion,
+                        tipo: "variable",
+                        activa: false,
+                        esFuenteDato: false,
+                        esObjeto: false,
+                        esInstruccionSQL: false,
+                        nivel: variable.nivel,
+                        texto: texto,
+                        tipoOriginal: variable.tipo
+                    };
+                    eval(arreglo+".push(objeto)");
+                    //arreglo.push(objeto);
+                    i+=variable.valor.length-1;
+                } else if( (!isNaN( this.getPalabraFormula(formula, i) ) || isNaN( this.getPalabraFormula(formula, i) )) && formula.charAt(i).localeCompare(')') != 0) {
+                    var variable = this.getPalabraFormula(formula, i);
+                    var operacion = 'FORMULA', texto = variable;
+                    if(this.props.esOperacionSQL)
+                        operacion = this.props.operacionSQL;
+                    if(this.props.esOperacionSQL && this.exitseCodigoOperacion(this.props.operacionSQL)) {
+                        texto = this.retornarCodigoOperacion(this.props.operacionSQL) + "(" + variableSeleccionada.valor + ")";
+                        operacion = this.retornarCodigoOperacion(this.props.operacionSQL);
+                    }
+                    if (this.props.esOperacionSQL && this.props.operacionSQL.localeCompare('ASIG') == 0) {
+                        //cuando se agrega campo a formula para crear operacion ASIG
+                        operacion = 'ASIG';
+                        texto = variable;
+                    }
+                    var tipo;
+                    if(!isNaN( this.getPalabraFormula(formula, i) ))
+                        tipo = 'decimal';
+                    else
+                        tipo = 'varchar';
+                    var objeto = {
+                        valor: variable,
+                        operacion: operacion,
+                        tipo: "variable",
+                        activa: false,
+                        esFuenteDato: false,
+                        esObjeto: false,
+                        esInstruccionSQL: false,
+                        nivel: 0,
+                        texto: texto,
+                        tipoOriginal: tipo
+                    };
+                    eval(arreglo+".push(objeto)");
+                    i+=variable.toString().length;
+                } else if(formula.charAt(i).localeCompare(')') == 0) {
+                    var indDerecho = {valor: "\\\\", width: "5%", height: "100%", tipo: "indicador", posicion: "derecha"};
+                    eval(arreglo+".push(indDerecho)");
                 }
-                if (this.props.esOperacionSQL && this.props.operacionSQL.localeCompare('ASIG') == 0) {
-                    //cuando se agrega campo a formula para crear operacion ASIG
-                    operacion = 'ASIG';
-                    texto = variable.valor;
-                }
-                var objeto = {
-                    valor: variable.valor,
-                    operacion: operacion,
-                    tipo: "variable",
-                    activa: false,
-                    esFuenteDato: false,
-                    esObjeto: false,
-                    esInstruccionSQL: false,
-                    nivel: variable.nivel,
-                    texto: texto,
-                    tipoOriginal: variable.tipo
-                };
-                arreglo.push(objeto);
-                i+=variable.valor.length-1;
             }
         };
     }
 
     encontrarCierreParentesis (index, formula) {
-        var count = 0;
+        var count = 0, contadorPar = 0;
         for (var i = index; i < formula.length; i++) {
+            if(formula.charAt(i).localeCompare('(') == 0) {
+                contadorPar++;
+            }
             if(formula.charAt(i).localeCompare(')') == 0) {
+                contadorPar--;
+            }
+            if(formula.charAt(i).localeCompare(')') == 0 && contadorPar == 0) {
                 return count;
             } else {
                 count++;
@@ -1683,6 +1550,26 @@ export default class Formula extends React.Component {
         } else if(palabra.localeCompare('AVERAJE') == 0) {
             return true;
         } else if(palabra.localeCompare('MEDIA') == 0) {
+            return true;
+        } else if(palabra.localeCompare('ASIG') == 0) {
+            return true;
+        } else if(palabra.localeCompare('COUNT') == 0) {
+            return true;
+        } else if(palabra.localeCompare('PROM') == 0) {
+            return true;
+        } else if(palabra.localeCompare('MAX') == 0) {
+            return true;
+        } else if(palabra.localeCompare('MIN') == 0) {
+            return true;
+        } else if(palabra.localeCompare('AUTOSUM') == 0) {
+            return true;
+        } else if(palabra.localeCompare('SUM') == 0) {
+            return true;
+        } else if(palabra.localeCompare('DATE') == 0) {
+            return true;
+        } else if(palabra.localeCompare('MONTH') == 0) {
+            return true;
+        } else if(palabra.localeCompare('YEAR') == 0) {
             return true;
         }
         return false;
@@ -1856,10 +1743,6 @@ export default class Formula extends React.Component {
     getFormulaAndOperationText (arreglo, esNivelRaiz) {
         for (var i = 0; i < arreglo.length; i++) {
             if(arreglo[i].tablaID != undefined || arreglo[i].variableID != undefined || arreglo[i].excelVariableID != undefined || arreglo[i].formaVariableID != undefined || arreglo[i].esValorManual != undefined) {
-                console.log('arreglo[i]');
-                console.log(arreglo[i]);
-                console.log('objetoFormulaParaSacarID');
-                console.log(objetoFormulaParaSacarID);
                 if(objetoFormulaParaSacarID.tablaID == undefined && arreglo[i].tablaID != undefined) {
                     objetoFormulaParaSacarID.tablaID = arreglo[i].tablaID;
                 } else if((objetoFormulaParaSacarID.variableID == undefined && arreglo[i].variableID != undefined) || (objetoFormulaParaSacarID.variableID != undefined && arreglo[i].variableID != undefined && arreglo[i].esObjeto)) {
@@ -1896,10 +1779,14 @@ export default class Formula extends React.Component {
                     formulaGuardarFormula += "AUTOSUM("+arreglo[i].valor+")";
                     operacionGuardarFormula = "AUTOSUM";
                 } else if(arreglo[i].operacion != undefined && arreglo[i].operacion.localeCompare("FORMULA") == 0) {
-                    if(!esNivelRaiz && i == 0)
+                    if(arreglo[i].valor.toString().localeCompare("\\\\") != 0) {
+                        if(!esNivelRaiz && i == 0)
+                            formulaGuardarFormula += "(";
+                        formulaGuardarFormula += arreglo[i].valor;
+                        operacionGuardarFormula = "FORMULA";
+                    } else if(arreglo[i].valor.toString().localeCompare("\\\\") == 0 && arreglo[i].posicion.localeCompare("derecha") != 0) {
                         formulaGuardarFormula += "(";
-                    formulaGuardarFormula += arreglo[i].valor;
-                    operacionGuardarFormula = "FORMULA";
+                    }
                 } else if(arreglo[i].tipo != undefined && arreglo[i].tipo.localeCompare("signo") == 0) {
                     formulaGuardarFormula += arreglo[i].valor;
                     operacionGuardarFormula = "FORMULA";
@@ -1914,8 +1801,6 @@ export default class Formula extends React.Component {
     }
 
     iniciarGuardarFormula () {
-        console.log('this.state.formula')
-        console.log(this.state.formula)
         formulaGuardarFormula = '';
         operacionGuardarFormula = '';
         objetoFormulaParaSacarID = {};
@@ -1944,12 +1829,6 @@ export default class Formula extends React.Component {
                 operacion = "FORMULA";
             }
         };*/
-        console.log('formulaGuardarFormula');
-        console.log(formulaGuardarFormula);
-        console.log('operacionGuardarFormula');
-        console.log(operacionGuardarFormula);
-        console.log('variableSeleccionada');
-        console.log(variableSeleccionada);
         var objetoFormula = {variableID: -1, variableCampoID: -1, numeroDeFormulaDeVariable: -1, tablaID: -1, excelArchivoID: -1, excelVariableID: -1, formaVariableID: -1, formula: formulaGuardarFormula, operacion: operacionGuardarFormula, esValorManual: false};
         if(objetoFormulaParaSacarID.tablaID != undefined) {
             objetoFormula.tablaID = objetoFormulaParaSacarID.tablaID;
@@ -1964,8 +1843,6 @@ export default class Formula extends React.Component {
         } else if (objetoFormulaParaSacarID.esValorManual) {
             objetoFormula.esValorManual = objetoFormulaParaSacarID.esValorManual;
         }
-        console.log('objetoFormula');
-        console.log(objetoFormula);
         /*console.log('formula');
         console.log(this.state.formula);*/
         //this.props.anadirFormula(formula, this.state.formula);

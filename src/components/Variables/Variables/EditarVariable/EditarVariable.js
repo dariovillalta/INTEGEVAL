@@ -7,9 +7,9 @@ import FuenteDatoExcel from './FuenteDatoExcel.js';
 
 var mostrarFuenteDatoVariableGlobal = false;
 var mostrarFuenteDatoFormaGlobal = false;
-var mostrarFuenteDatoExcelGlobal = true;
+var mostrarFuenteDatoExcelGlobal = false;
 
-var esPrimeraVez = true;
+//var esPrimeraVez = true;
 
 /*COMPONENTE QUE CONTROLA TIPOS DE VARIABLES (EXCEL, FORMA, VARIABLE)*/
 
@@ -31,24 +31,25 @@ export default class EditarVariable extends React.Component {
             mostrarFuenteDatoVariableGlobal = false;
             mostrarFuenteDatoFormaGlobal = false;
             mostrarFuenteDatoExcelGlobal = true;
-            esPrimeraVez = false;
+            this.props.changeStateFirstTimeToFalse();
+            //esPrimeraVez = false;
         } else if (this.props.tipoVariableOriginal.localeCompare("forma") == 0 && this.props.esPrimeraVez) {
             mostrarFuenteDatoVariableGlobal = false;
             mostrarFuenteDatoFormaGlobal = true;
             mostrarFuenteDatoExcelGlobal = false;
-            esPrimeraVez = false;
+            this.props.changeStateFirstTimeToFalse();
+            //esPrimeraVez = false;
         } else if (this.props.tipoVariableOriginal.localeCompare("variable") == 0 && this.props.esPrimeraVez) {
             mostrarFuenteDatoVariableGlobal = true;
             mostrarFuenteDatoFormaGlobal = false;
             mostrarFuenteDatoExcelGlobal = false;
-            esPrimeraVez = false;
+            //esPrimeraVez = false;
         }
         this.setState({
             mostrarFuenteDatoVariable: mostrarFuenteDatoVariableGlobal,
             mostrarFuenteDatoForma: mostrarFuenteDatoFormaGlobal,
             mostrarFuenteDatoExcel: mostrarFuenteDatoExcelGlobal
         });
-        this.props.changeStateFirstTimeToFalse();
     }
 
     mostrarFuenteDatoVariable () {
@@ -90,7 +91,7 @@ export default class EditarVariable extends React.Component {
                 <div className={"row"}>
                     <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
                         <div className={"page-header"}>
-                            <h2 className={"pageheader-title"}>Crear Variable</h2>
+                            <h2 className={"pageheader-title"}>Modificar Variable</h2>
                             <div className={"page-breadcrumb"}>
                                 <nav aria-label="breadcrumb">
                                     <ol className={"breadcrumb"}>
@@ -138,9 +139,13 @@ export default class EditarVariable extends React.Component {
                                                                 actualizarFechaInicio={this.props.actualizarFechaInicio}
                                                                 actualizarPeriodicidad={this.props.actualizarPeriodicidad}
                                                                 actualizarNombreEncargado={this.props.actualizarNombreEncargado}
+                                                                actualizarCategoriaVariable={this.props.actualizarCategoriaVariable}
                                                                 fechaInicioVariable={this.props.fechaInicioVariable}
                                                                 periodicidadVariable={this.props.periodicidadVariable}
-                                                                analistaVariable={this.props.analistaVariable}>
+                                                                responsableVariable={this.props.responsableVariable}
+                                                                categoriaVariable={this.props.categoriaVariable}
+                                                                esPrimeraVez={this.props.esPrimeraVez}
+                                                                changeStateFirstTimeToFalse={this.props.changeStateFirstTimeToFalse}>
                                             </FuenteDatoVariable>
                                         : null
                                     }
@@ -153,7 +158,10 @@ export default class EditarVariable extends React.Component {
                                                                 idVariable={this.props.idVariable}
                                                                 tipoVariableOriginal={this.props.tipoVariableOriginal}
                                                                 actualizarIDVariableModificada={this.props.actualizarIDVariableModificada}
-                                                                eliminarVarForma={this.props.eliminarVarForma}>
+                                                                goToTimeline={this.props.goToTimeline}
+                                                                eliminarVarForma={this.props.eliminarVarForma}
+                                                                getFormas={this.props.getFormas}
+                                                                limpiarArreglos={this.props.limpiarArreglos}>
                                             </FuenteDatoForma>
                                         : null
                                     }
@@ -166,7 +174,10 @@ export default class EditarVariable extends React.Component {
                                                                 idVariable={this.props.idVariable}
                                                                 tipoVariableOriginal={this.props.tipoVariableOriginal}
                                                                 actualizarIDVariableModificada={this.props.actualizarIDVariableModificada}
-                                                                eliminarVarExcel={this.props.eliminarVarExcel}>
+                                                                goToTimeline={this.props.goToTimeline}
+                                                                eliminarVarExcel={this.props.eliminarVarExcel}
+                                                                getExcel={this.props.getExcel}
+                                                                limpiarArreglos={this.props.limpiarArreglos}>
                                             </FuenteDatoExcel>
                                         : null
                                     }

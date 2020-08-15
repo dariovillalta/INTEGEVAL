@@ -1,4 +1,5 @@
 import React from 'react';
+import sql from 'mssql';
 
 import Modal from '../../../Modal/Modal.js';
 
@@ -21,6 +22,8 @@ export default class InstruccionSQL extends React.Component {
 
     componentDidMount() {
         //this.getCampos();
+        console.log('this.props.comandoSQL')
+        console.log(this.props.comandoSQL)
     }
 
     openModal (index) {

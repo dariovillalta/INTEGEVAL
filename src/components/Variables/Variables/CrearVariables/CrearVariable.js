@@ -105,23 +105,27 @@ export default class CrearVariable extends React.Component {
                                                                 actualizarFechaInicio={this.props.actualizarFechaInicio}
                                                                 actualizarPeriodicidad={this.props.actualizarPeriodicidad}
                                                                 actualizarNombreEncargado={this.props.actualizarNombreEncargado}
+                                                                actualizarCategoriaVariable={this.props.actualizarCategoriaVariable}
                                                                 fechaInicioVariable={this.props.fechaInicioVariable}
                                                                 periodicidadVariable={this.props.periodicidadVariable}
-                                                                analistaVariable={this.props.analistaVariable}>
+                                                                responsableVariable={this.props.responsableVariable}
+                                                                categoriaVariable={this.props.categoriaVariable}>
                                             </FuenteDatoVariable>
                                         : null
                                     }
                                     {
                                         this.state.mostrarFuenteDatoForma
                                         ?
-                                            <FuenteDatoForma pool={this.props.pool}>
+                                            <FuenteDatoForma pool={this.props.pool}
+                                                                getFormas={this.props.getFormas}>
                                             </FuenteDatoForma>
                                         : null
                                     }
                                     {
                                         this.state.mostrarFuenteDatoExcel
                                         ?
-                                            <FuenteDatoExcel pool={this.props.pool}>
+                                            <FuenteDatoExcel pool={this.props.pool}
+                                                                getExcel={this.props.getExcel}>
                                             </FuenteDatoExcel>
                                         : null
                                     }

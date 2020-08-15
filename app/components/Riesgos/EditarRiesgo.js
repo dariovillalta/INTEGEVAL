@@ -44,6 +44,11 @@ var tipoCampos = [{
 }, {
   nombre: "arreglo"
 }];
+var peso = 0,
+    nombre = '',
+    formula = '',
+    nombreEncargadoRiesgo = '',
+    primeraVezCargado = true;
 
 var EditarRiesgo =
 /*#__PURE__*/
@@ -57,17 +62,79 @@ function (_React$Component) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(EditarRiesgo).call(this, props));
     _this.state = {
-      x: _this.props.pesoRiesgo,
+      x: peso,
       componentActual: "EditarRiesgo",
-      navbar: ""
+      navbar: "",
+      usuarios: []
     };
     _this.goCrearUmbral = _this.goCrearUmbral.bind(_assertThisInitialized(_this));
     _this.retornarEditRiesgo = _this.retornarEditRiesgo.bind(_assertThisInitialized(_this));
     _this.guardarRiesgo = _this.guardarRiesgo.bind(_assertThisInitialized(_this));
+    _this.tieneEspaciosEnBlanco = _this.tieneEspaciosEnBlanco.bind(_assertThisInitialized(_this));
+    _this.updateNombreRiesgo = _this.updateNombreRiesgo.bind(_assertThisInitialized(_this));
+    _this.updateFormulaRiesgo = _this.updateFormulaRiesgo.bind(_assertThisInitialized(_this));
+    _this.updateNombreEncargadoRiesgo = _this.updateNombreEncargadoRiesgo.bind(_assertThisInitialized(_this));
     return _this;
   }
 
   _createClass(EditarRiesgo, [{
+    key: "componentDidMount",
+    value: function componentDidMount() {
+      if (primeraVezCargado) {
+        nombre = this.props.nombreRiesgo;
+        peso = this.props.pesoRiesgo;
+        this.setState({
+          x: peso
+        });
+        formula = this.props.formulaRiesgo;
+        nombreEncargadoRiesgo = this.props.responsableRiesgo;
+        $("#nombreRiesgo").val(nombre);
+        $("#formula").val(formula);
+        primeraVezCargado = false;
+        this.getUsuarios();
+      }
+    }
+  }, {
+    key: "componentWillUnmount",
+    value: function componentWillUnmount() {
+      peso = 0;
+      nombre = '';
+      formula = '';
+      nombreEncargadoRiesgo = '';
+      primeraVezCargado = true;
+    }
+  }, {
+    key: "getUsuarios",
+    value: function getUsuarios() {
+      var _this2 = this;
+
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("select * from Usuarios", function (err, result) {
+          if (err) {
+            console.log(err);
+
+            if (!rolledBack) {
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              _this2.setState({
+                usuarios: result.recordset
+              });
+
+              $("#responsable").val(nombreEncargadoRiesgo);
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
     key: "goCrearUmbral",
     value: function goCrearUmbral() {
       var navbar = _react["default"].createElement("div", {
@@ -125,39 +192,83 @@ function (_React$Component) {
   }, {
     key: "guardarRiesgo",
     value: function guardarRiesgo() {
-      var _this2 = this;
+      var _this3 = this;
 
       var nombre = $("#nombreRiesgo").val();
       var formula = $("#formula").val();
+      var responsable = $("#responsable").val();
       var peso = this.state.x;
-      var transaction = new _mssql["default"].Transaction(this.props.pool);
-      transaction.begin(function (err) {
-        var rolledBack = false;
-        transaction.on('rollback', function (aborted) {
-          rolledBack = true;
-        });
-        var request = new _mssql["default"].Request(transaction);
-        request.query("update Riesgos set nombre = '" + nombre + "', peso = " + peso + ", formula = '" + formula + "' where ID = " + _this2.props.idRiesgoSeleccionado, function (err, result) {
-          if (err) {
-            console.log(err);
 
-            if (!rolledBack) {
-              transaction.rollback(function (err) {});
+      if (nombre.length > 0 && nombre.length < 101) {
+        if (!this.tieneEspaciosEnBlanco(nombre)) {
+          if (formula.length > 0 && formula.length < 501) {
+            if (responsable.length > 0) {
+              if (!isNaN(parseInt(peso))) {
+                var transaction = new _mssql["default"].Transaction(this.props.pool);
+                transaction.begin(function (err) {
+                  var rolledBack = false;
+                  transaction.on('rollback', function (aborted) {
+                    rolledBack = true;
+                  });
+                  var request = new _mssql["default"].Request(transaction);
+                  request.query("update Riesgos set nombre = '" + nombre + "', peso = " + peso + ", formula = '" + formula + "', responsable = '" + responsable + "' where ID = " + _this3.props.idRiesgoSeleccionado, function (err, result) {
+                    if (err) {
+                      console.log(err);
+
+                      if (!rolledBack) {
+                        transaction.rollback(function (err) {});
+                      }
+                    } else {
+                      transaction.commit(function (err) {
+                        alert("Riesgo Modificado.");
+
+                        _this3.props.getRiesgos();
+
+                        _this3.props.editarRiesgo(_this3.props.idRiesgoSeleccionado, nombre, peso, formula);
+                      });
+                    }
+                  });
+                }); // fin transaction
+              } else {
+                alert("el peso del riesgo debe ser un numero valido");
+              }
+            } else {
+              alert("Ingrese un valor para el responsable.");
             }
           } else {
-            transaction.commit(function (err) {
-              alert("Riesgo Modificado.");
-
-              _this2.props.getRiesgos();
-            });
+            alert("la formula del riesgo debe tener una longitud mayor a 0 y menor a 501");
           }
-        });
-      }); // fin transaction
+        } else {
+          alert('El nombre del riesgo no debe contener espacios en blanco');
+        }
+      } else {
+        alert("el nombre del riesgo debe tener una longitud mayor a 0 y menor a 101");
+      }
+    }
+  }, {
+    key: "tieneEspaciosEnBlanco",
+    value: function tieneEspaciosEnBlanco(s) {
+      return /\s/g.test(s);
+    }
+  }, {
+    key: "updateNombreRiesgo",
+    value: function updateNombreRiesgo() {
+      nombre = $("#nombreRiesgo").val();
+    }
+  }, {
+    key: "updateFormulaRiesgo",
+    value: function updateFormulaRiesgo() {
+      formula = $("#formula").val();
+    }
+  }, {
+    key: "updateNombreEncargadoRiesgo",
+    value: function updateNombreEncargadoRiesgo() {
+      nombreEncargadoRiesgo = $("#responsable").val();
     }
   }, {
     key: "render",
     value: function render() {
-      var _this3 = this;
+      var _this4 = this;
 
       if (this.state.componentActual.localeCompare("EditarRiesgo") == 0) {
         return _react["default"].createElement("div", null, _react["default"].createElement("div", {
@@ -219,8 +330,9 @@ function (_React$Component) {
         }, _react["default"].createElement("input", {
           id: "nombreRiesgo",
           type: "text",
-          className: "form-control form-control-sm",
-          defaultValue: this.props.nombreRiesgo
+          defaultValue: nombre,
+          onKeyUp: this.updateNombreRiesgo,
+          className: "form-control form-control-sm"
         }))), _react["default"].createElement("div", {
           className: "row",
           style: {
@@ -235,7 +347,7 @@ function (_React$Component) {
           className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
         }, _react["default"].createElement("select", {
           id: "formula",
-          defaultValue: this.props.formula,
+          defaultValue: formula,
           className: "form-control"
         }, _react["default"].createElement("option", {
           value: "ambos"
@@ -263,9 +375,12 @@ function (_React$Component) {
           x: this.state.x,
           onChange: function onChange(_ref) {
             var x = _ref.x;
-            return _this3.setState({
+
+            _this4.setState({
               x: x
             });
+
+            peso = x;
           },
           style: {
             width: "100%",
@@ -276,7 +391,31 @@ function (_React$Component) {
         }, _react["default"].createElement("label", {
           id: "pesoLabel",
           className: "col-form-label"
-        }, this.state.x))), _react["default"].createElement("a", {
+        }, this.state.x))), _react["default"].createElement("div", {
+          className: "row",
+          style: {
+            width: "100%"
+          }
+        }, _react["default"].createElement("div", {
+          className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
+        }, _react["default"].createElement("label", {
+          htmlFor: "responsable",
+          className: "col-form-label"
+        }, "Nombre Encargado")), _react["default"].createElement("div", {
+          className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
+        }, _react["default"].createElement("select", {
+          id: "responsable",
+          defaultValue: nombreEncargadoRiesgo,
+          onChange: this.updateNombreEncargadoRiesgo,
+          className: "form-control"
+        }, _react["default"].createElement("option", {
+          value: "-1"
+        }, "Ninguno"), this.state.usuarios.map(function (usuario, i) {
+          return _react["default"].createElement("option", {
+            value: usuario.ID,
+            key: usuario.ID
+          }, usuario.usuario);
+        })))), _react["default"].createElement("a", {
           className: "btn btn-brand btn-block btnWhiteColorHover font-bold font-20",
           style: {
             color: "#fafafa"
@@ -301,6 +440,7 @@ function (_React$Component) {
           navbar: this.state.navbar,
           idVariable: this.props.idRiesgoSeleccionado,
           pool: this.props.pool,
+          lista: [],
           tablaVariable: "Riesgo",
           tituloUmbral: "Riesgo: " + this.props.nombreRiesgo
         }, " "));

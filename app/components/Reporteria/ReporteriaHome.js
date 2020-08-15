@@ -137,7 +137,11 @@ function (_React$Component) {
           returnChooseDates: this.returnChooseDates
         }));
       } else if (this.state.componenteActual.localeCompare("visualizarReporteria") == 0) {
-        return _react["default"].createElement("div", null, _react["default"].createElement(_Reporteria["default"], {
+        return _react["default"].createElement("div", {
+          style: {
+            width: "100%"
+          }
+        }, _react["default"].createElement(_Reporteria["default"], {
           pool: this.props.pool,
           variables: this.state.variables,
           indicadores: this.state.indicadores,

@@ -22,6 +22,7 @@ export default class TimelineVariable extends React.Component {
         this.finImportacion = this.finImportacion.bind(this);
         this.insertarValorEnColeccion = this.insertarValorEnColeccion.bind(this);
         this.crearHTML = this.crearHTML.bind(this);
+        this.styleDate = this.styleDate.bind(this);
     }
 
     componentDidMount () {
@@ -29,8 +30,6 @@ export default class TimelineVariable extends React.Component {
     }
 
     getResultsVariables () {
-        console.log('this.props.tablaInstruccion')
-        console.log(this.props.tablaInstruccion)
         //OBTENER LA LISTA DE POSIBLES VARIABLES A VISUALIZAR
         const transaction = new sql.Transaction( this.props.pool );
         transaction.begin(err => {
@@ -62,7 +61,7 @@ export default class TimelineVariable extends React.Component {
         banderaImportacionInicio = 0;
         banderaImportacionFin = 0;
         for (var i = 0; i < resultados.length; i++) {
-            banderaImportacionFin++;
+            banderaImportacionFin+=2;
             arregloTemp.push(resultados[i]);
             this.getFieldAttributes(resultados[i], i, arregloTemp);
             this.getFieldResults(resultados[i], i, arregloTemp);
@@ -91,9 +90,10 @@ export default class TimelineVariable extends React.Component {
                             arrTemp.push({nombre: result.recordset[i].COLUMN_NAME, tipo: result.recordset[i].DATA_TYPE});
                         };
                         array[index].atributos = arrTemp;
+                        banderaImportacionInicio++;
                         this.setState({
                             resultados: array
-                        });
+                        }, this.finImportacion);
                     });
                 }
             });
@@ -119,10 +119,10 @@ export default class TimelineVariable extends React.Component {
                     transaction.commit(err => {
                         array[index].resultados = result.recordset;
                         banderaImportacionInicio++;
-                        this.finImportacion();
+                        //this.finImportacion();
                         this.setState({
                             resultados: array
-                        });
+                        }, this.finImportacion);
                     });
                 }
             });
@@ -196,8 +196,6 @@ export default class TimelineVariable extends React.Component {
 
 
         var htmlContent = [];
-        console.log('this.state.resultados');
-        console.log(this.state.resultados);
         for (var i = 0; i < this.state.resultados[0].resultados.length; i++) {
             if(this.props.esVariable && this.props.variable.esColeccion) {
                 var htmlRow = <div key={i} className="cd-timeline__block js-cd-block">
@@ -214,8 +212,19 @@ export default class TimelineVariable extends React.Component {
                 var htmlObjectDesc = [];
                 for (var k = 0; k < this.state.resultados[0].atributos.length; k++) {
                     if(this.state.resultados[0].atributos[k].nombre.localeCompare("f3ch4Gu4rd4do") != 0) {
-                        htmlObjectDesc.push(<span key={i+""+k+"a"} style={{fontWeight: "bold"}}>{this.state.resultados[0].atributos[k].nombre}</span>);
-                        htmlObjectDesc.push(<span key={i+""+k+"b"}>{this.state.resultados[0].resultados[i][this.state.resultados[0].atributos[k].nombre]}</span>);
+                        var divObj =    <div key={i+""+k+"z"} className="row border-bottom" style={{clear: "both", display: "block", overflow: "auto", width: "100%"}}>
+                                            <span key={i+""+k+"a"} style={{fontWeight: "bold", float: "left"}}>{this.state.resultados[0].atributos[k].nombre} :</span>
+                                            <span key={i+""+k+"b"} style={{float: "right"}}>
+                                                {
+                                                    this.state.resultados[0].atributos[k].tipo.localeCompare("date") == 0
+                                                    ?   this.styleDate(this.state.resultados[0].resultados[i][this.state.resultados[0].atributos[k].nombre])
+                                                    :   this.state.resultados[0].resultados[i][this.state.resultados[0].atributos[k].nombre]
+                                                }
+                                            </span>
+                                        </div>;
+                        htmlObjectDesc.push(divObj);
+                        /*htmlObjectDesc.push(<span key={i+""+k+"a"} style={{fontWeight: "bold"}}>{this.state.resultados[0].atributos[k].nombre}</span>);
+                        htmlObjectDesc.push(<span key={i+""+k+"b"}>{this.state.resultados[0].resultados[i][this.state.resultados[0].atributos[k].nombre]}</span>);*/
                     }
                 };
                 var htmlRow = <div key={i} className="cd-timeline__block js-cd-block">
@@ -240,15 +249,14 @@ export default class TimelineVariable extends React.Component {
         });
     }
 
+    styleDate (date) {
+        return date.getDate()+'-'+(date.getMonth()+1)+'-'+date.getFullYear();
+    }
+
     render() {
         return (
             <div>
                 {this.props.navbar}
-                <br/>
-                <div className={"row"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
-                    <a className={"btn btn-brand btnWhiteColorHover font-bold font-20"} onClick={this.crearRiesgo}>Realizar Cálculo</a>
-                </div>
-                <br/>
                 
                 {this.state.html}
                 
@@ -256,3 +264,11 @@ export default class TimelineVariable extends React.Component {
         );
     }
 }
+
+/*
+<br/>
+<div className={"row"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
+    <a className={"btn btn-brand btnWhiteColorHover font-bold font-20"} onClick={this.crearRiesgo}>Realizar Cálculo</a>
+</div>
+<br/>
+*/

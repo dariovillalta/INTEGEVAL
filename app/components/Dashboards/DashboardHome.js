@@ -19,14 +19,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "d
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
-
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
-
-function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
-
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -56,50 +48,39 @@ function (_React$Component) {
     _this = _possibleConstructorReturn(this, _getPrototypeOf(DashboardHome).call(this, props));
     _this.state = {
       componenteActual: "selDashboard",
-      conexiones: [],
-      camposConexiones: [],
-      variablesEscalares: [],
       variables: [],
-      camposVariables: [],
-      variablesSQL: [],
-      camposVariablesSQL: [],
-      excel: [],
-      camposDeExcel: [],
-      formas: []
+      camposDeVariables: [],
+      indicadores: [],
+      camposDeIndicadores: [],
+      riesgos: [],
+      camposDeRiesgos: [],
+      dashboardSeleccionado: null
     };
     _this.crearDashboard = _this.crearDashboard.bind(_assertThisInitialized(_this));
     _this.retornarSeleccionDashboards = _this.retornarSeleccionDashboards.bind(_assertThisInitialized(_this));
-    _this.editarVariables = _this.editarVariables.bind(_assertThisInitialized(_this));
-    _this.changeStateFirstTimeToFalse = _this.changeStateFirstTimeToFalse.bind(_assertThisInitialized(_this));
-    _this.terminoCrearVariablesPasarAEdit = _this.terminoCrearVariablesPasarAEdit.bind(_assertThisInitialized(_this));
-    _this.actualizarIDVariableModificada = _this.actualizarIDVariableModificada.bind(_assertThisInitialized(_this));
-    _this.getConections = _this.getConections.bind(_assertThisInitialized(_this));
-    _this.getFieldsConections = _this.getFieldsConections.bind(_assertThisInitialized(_this));
-    _this.getFieldConections = _this.getFieldConections.bind(_assertThisInitialized(_this));
-    _this.loadScalarVariables = _this.loadScalarVariables.bind(_assertThisInitialized(_this));
-    _this.loadScalarVariablesFields = _this.loadScalarVariablesFields.bind(_assertThisInitialized(_this));
-    _this.getVariables = _this.getVariables.bind(_assertThisInitialized(_this));
-    _this.getFieldsVariables = _this.getFieldsVariables.bind(_assertThisInitialized(_this));
-    _this.getFieldVariables = _this.getFieldVariables.bind(_assertThisInitialized(_this));
-    _this.loadVariablesSQL = _this.loadVariablesSQL.bind(_assertThisInitialized(_this));
-    _this.initLoadVariablesCamposSQL = _this.initLoadVariablesCamposSQL.bind(_assertThisInitialized(_this));
-    _this.loadVariablesCamposSQL = _this.loadVariablesCamposSQL.bind(_assertThisInitialized(_this));
-    _this.loadExcel = _this.loadExcel.bind(_assertThisInitialized(_this));
-    _this.initLoadExcelCampos = _this.initLoadExcelCampos.bind(_assertThisInitialized(_this));
-    _this.loadExcelCampos = _this.loadExcelCampos.bind(_assertThisInitialized(_this));
-    _this.loadFormas = _this.loadFormas.bind(_assertThisInitialized(_this));
+    _this.editarDashboard = _this.editarDashboard.bind(_assertThisInitialized(_this));
+    _this.terminoCrearDashboardPasarAEdit = _this.terminoCrearDashboardPasarAEdit.bind(_assertThisInitialized(_this));
+    _this.getResultsVariables = _this.getResultsVariables.bind(_assertThisInitialized(_this));
+    _this.getResultsVariablesFieldsInit = _this.getResultsVariablesFieldsInit.bind(_assertThisInitialized(_this));
+    _this.getFieldAttributes = _this.getFieldAttributes.bind(_assertThisInitialized(_this));
+    _this.getFieldResults = _this.getFieldResults.bind(_assertThisInitialized(_this));
+    _this.getResultsIndicators = _this.getResultsIndicators.bind(_assertThisInitialized(_this));
+    _this.getResultsIndicatorsFieldsInit = _this.getResultsIndicatorsFieldsInit.bind(_assertThisInitialized(_this));
+    _this.getFieldAttributesIndicators = _this.getFieldAttributesIndicators.bind(_assertThisInitialized(_this));
+    _this.getFieldResultsIndicators = _this.getFieldResultsIndicators.bind(_assertThisInitialized(_this));
+    _this.getResultsRisks = _this.getResultsRisks.bind(_assertThisInitialized(_this));
+    _this.getResultsRisksFieldsInit = _this.getResultsRisksFieldsInit.bind(_assertThisInitialized(_this));
+    _this.getFieldAttributesRisks = _this.getFieldAttributesRisks.bind(_assertThisInitialized(_this));
+    _this.getFieldResultsRisks = _this.getFieldResultsRisks.bind(_assertThisInitialized(_this));
     return _this;
   }
 
   _createClass(DashboardHome, [{
     key: "componentDidMount",
     value: function componentDidMount() {
-      this.getConections();
-      this.getVariables();
-      this.loadScalarVariables();
-      this.loadVariablesSQL();
-      this.loadExcel();
-      this.loadFormas();
+      this.getResultsVariables();
+      this.getResultsIndicators();
+      this.getResultsRisks();
     }
   }, {
     key: "crearDashboard",
@@ -116,27 +97,16 @@ function (_React$Component) {
       });
     }
   }, {
-    key: "editarVariables",
-    value: function editarVariables(idVariable, esObjetoVariable, esInstruccionSQLVariable, tipoVariable) {
+    key: "editarDashboard",
+    value: function editarDashboard(dashboard) {
       this.setState({
-        idVariable: idVariable,
-        componenteActual: "editarVariables",
-        tipoVariable: tipoVariable,
-        esObjetoVariable: esObjetoVariable,
-        esInstruccionSQLVariable: esInstruccionSQLVariable,
-        esPrimeraVez: true
+        dashboardSeleccionado: dashboard,
+        componenteActual: "editarDashboard"
       });
     }
   }, {
-    key: "changeStateFirstTimeToFalse",
-    value: function changeStateFirstTimeToFalse() {
-      this.setState({
-        esPrimeraVez: false
-      });
-    }
-  }, {
-    key: "terminoCrearVariablesPasarAEdit",
-    value: function terminoCrearVariablesPasarAEdit(nombreFuenteDatos) {
+    key: "terminoCrearDashboardPasarAEdit",
+    value: function terminoCrearDashboardPasarAEdit() {
       var _this2 = this;
 
       var transaction = new _mssql["default"].Transaction(this.props.pool);
@@ -146,118 +116,74 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("select * from Campos where nombre = '" + nombreFuenteDatos + "'", function (err, result) {
+        request.query("select top 1 * from Dashboard order by ID desc", function (err, result) {
           if (err) {
-            console.log(err);
-
             if (!rolledBack) {
+              console.log(err);
               transaction.rollback(function (err) {});
             }
           } else {
             transaction.commit(function (err) {
               if (result.recordset != undefined) {
                 if (result.recordset.length) {
-                  _this2.editarFuenteDatos(result.recordset[0].ID, result.recordset[0].nombre, result.recordset[0].descripcion, result.recordset[0].esObjeto, result.recordset[0].objetoPadreID, result.recordset[0].guardar);
+                  _this2.editarDashboard(result.recordset[0]);
                 }
               }
             });
           }
         });
       }); // fin transaction
-    }
-  }, {
-    key: "actualizarIDVariableModificada",
-    value: function actualizarIDVariableModificada(tablaDeVariableModificada) {
-      var _this3 = this;
-
-      if (tablaDeVariableModificada.localeCompare("excel") == 0) {
-        var transaction = new _mssql["default"].Transaction(this.props.pool);
-        transaction.begin(function (err) {
-          var rolledBack = false;
-          transaction.on('rollback', function (aborted) {
-            rolledBack = true;
-          });
-          var request = new _mssql["default"].Request(transaction);
-          request.query("select top 1 * from ExcelArchivos order by ID desc", function (err, result) {
-            if (err) {
-              console.log(err);
-
-              if (!rolledBack) {
-                transaction.rollback(function (err) {});
-              }
-            } else {
-              transaction.commit(function (err) {
-                if (result.recordset.length > 0) {
-                  _this3.editarVariables(result.recordset[0].ID, false, false, "excel");
-                }
-              });
-            }
-          });
-        }); // fin transaction
-      } else if (tablaDeVariableModificada.localeCompare("forma") == 0) {
-        var _transaction = new _mssql["default"].Transaction(this.props.pool);
-
-        _transaction.begin(function (err) {
-          var rolledBack = false;
-
-          _transaction.on('rollback', function (aborted) {
-            rolledBack = true;
-          });
-
-          var request = new _mssql["default"].Request(_transaction);
-          request.query("select top 1 * from FormasVariables order by ID desc", function (err, result) {
-            if (err) {
-              console.log(err);
-
-              if (!rolledBack) {
-                _transaction.rollback(function (err) {});
-              }
-            } else {
-              _transaction.commit(function (err) {
-                if (result.recordset.length > 0) {
-                  console.log("yeah");
-
-                  _this3.editarVariables(result.recordset[0].ID, false, false, "forma");
-                }
-              });
-            }
-          });
-        }); // fin transaction
-
-      } else if (tablaDeVariableModificada.localeCompare("variable") == 0) {
-        var _transaction2 = new _mssql["default"].Transaction(this.props.pool);
-
-        _transaction2.begin(function (err) {
-          var rolledBack = false;
-
-          _transaction2.on('rollback', function (aborted) {
-            rolledBack = true;
-          });
-
-          var request = new _mssql["default"].Request(_transaction2);
-          request.query("select top 1 * from Variables order by ID desc", function (err, result) {
-            if (err) {
-              console.log(err);
-
-              if (!rolledBack) {
-                _transaction2.rollback(function (err) {});
-              }
-            } else {
-              _transaction2.commit(function (err) {
-                if (result.recordset.length > 0) {
-                  _this3.editarVariables(result.recordset[0].ID, result.recordset[0].esObjeto, result.recordset[0].esInstruccionSQL, "variable");
-                }
-              });
-            }
-          });
-        }); // fin transaction
-
-      }
     } /////////////////////////////////////////////////////////
 
   }, {
-    key: "getConections",
-    value: function getConections() {
+    key: "getResultsVariables",
+    value: function getResultsVariables() {
+      var _this3 = this;
+
+      //OBTENER LA LISTA DE POSIBLES VARIABLES A VISUALIZAR
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("select * from ResultadosNombreVariables", function (err, result) {
+          if (err) {
+            if (!rolledBack) {
+              console.log(err);
+              transaction.rollback(function (err) {});
+              return [];
+            }
+          } else {
+            transaction.commit(function (err) {
+              _this3.getResultsVariablesFieldsInit(result.recordset);
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
+    key: "getResultsVariablesFieldsInit",
+    value: function getResultsVariablesFieldsInit(resultados) {
+      var arregloTemp = [],
+          arregloTempCampos = [];
+
+      for (var i = 0; i < resultados.length; i++) {
+        resultados[i].valor = resultados[i].nombreVariable;
+        resultados[i].esVariable = true;
+        resultados[i].esIndicador = false;
+        resultados[i].esRiesgo = false;
+        arregloTemp.push(resultados[i]);
+        this.getFieldAttributes(resultados[i], i, arregloTemp, arregloTempCampos);
+        this.getFieldResults(resultados[i], i, arregloTemp);
+      }
+
+      ;
+    }
+  }, {
+    key: "getFieldAttributes",
+    value: function getFieldAttributes(resultado, index, array, arregloTempCampos) {
       var _this4 = this;
 
       var transaction = new _mssql["default"].Transaction(this.props.pool);
@@ -267,54 +193,45 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("select * from Tablas", function (err, result) {
+        request.query("select * from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME = '" + resultado.nombreVariable + '_' + resultado.inicioVigencia.getFullYear() + '_' + (resultado.inicioVigencia.getMonth() + 1) + '_' + resultado.inicioVigencia.getDate() + '_' + resultado.inicioVigencia.getHours() + '_' + resultado.inicioVigencia.getMinutes() + '_' + resultado.inicioVigencia.getSeconds() + "'", function (err, result) {
           if (err) {
             console.log(err);
 
             if (!rolledBack) {
               transaction.rollback(function (err) {});
-              return [];
             }
           } else {
             transaction.commit(function (err) {
-              var temp = [];
+              var arrTemp = [];
 
               for (var i = 0; i < result.recordset.length; i++) {
-                temp.push({
-                  valor: result.recordset[i].tabla,
-                  ID: result.recordset[i].ID,
-                  esTabla: true
+                arrTemp.push({
+                  nombre: result.recordset[i].COLUMN_NAME,
+                  valor: result.recordset[i].COLUMN_NAME,
+                  tipo: result.recordset[i].DATA_TYPE,
+                  esVariable: true,
+                  esIndicador: false,
+                  esRiesgo: false,
+                  nombreVariable: resultado.nombreVariable
                 });
               }
 
               ;
-              /*this.setState({
-                  conexiones: temp
-              }, this.getFieldsConections );*/
+              array[index].atributos = arrTemp;
+              arregloTempCampos[index] = arrTemp;
 
               _this4.setState({
-                conexiones: temp
-              }, _this4.getFieldsConections); //this.getFieldsConections();
-
+                variables: array,
+                camposDeVariables: arregloTempCampos
+              });
             });
           }
         });
       }); // fin transaction
     }
   }, {
-    key: "getFieldsConections",
-    value: function getFieldsConections() {
-      var arregloTemp = [];
-
-      for (var i = 0; i < this.state.conexiones.length; i++) {
-        this.getFieldConections(this.state.conexiones[i].valor, i, arregloTemp, this.state.conexiones[i].ID);
-      }
-
-      ;
-    }
-  }, {
-    key: "getFieldConections",
-    value: function getFieldConections(nombreTabla, index, array, tablaID) {
+    key: "getFieldResults",
+    value: function getFieldResults(resultado, index, array) {
       var _this5 = this;
 
       var transaction = new _mssql["default"].Transaction(this.props.pool);
@@ -324,7 +241,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("select * from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME = '" + nombreTabla + "'", function (err, result) {
+        request.query("select * from " + resultado.nombreVariable + '_' + resultado.inicioVigencia.getFullYear() + '_' + (resultado.inicioVigencia.getMonth() + 1) + '_' + resultado.inicioVigencia.getDate() + '_' + resultado.inicioVigencia.getHours() + '_' + resultado.inicioVigencia.getMinutes() + '_' + resultado.inicioVigencia.getSeconds(), function (err, result) {
           if (err) {
             console.log(err);
 
@@ -333,26 +250,10 @@ function (_React$Component) {
             }
           } else {
             transaction.commit(function (err) {
-              var nombreColumnas = [];
-
-              for (var i = 0; i < result.recordset.length; i++) {
-                nombreColumnas.push({
-                  valor: result.recordset[i].COLUMN_NAME,
-                  tipo: result.recordset[i].DATA_TYPE,
-                  tablaID: tablaID
-                });
-              }
-
-              ;
-
-              if (array[index] == undefined) {
-                array[index] = [];
-              }
-
-              array[index] = $.merge(array[index], nombreColumnas);
+              array[index].resultados = result.recordset;
 
               _this5.setState({
-                camposConexiones: array
+                variables: array
               });
             });
           }
@@ -360,10 +261,11 @@ function (_React$Component) {
       }); // fin transaction
     }
   }, {
-    key: "loadScalarVariables",
-    value: function loadScalarVariables() {
+    key: "getResultsIndicators",
+    value: function getResultsIndicators() {
       var _this6 = this;
 
+      //OBTENER LA LISTA DE POSIBLES VARIABLES A VISUALIZAR
       var transaction = new _mssql["default"].Transaction(this.props.pool);
       transaction.begin(function (err) {
         var rolledBack = false;
@@ -371,85 +273,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("select * from Variables where esObjeto = 'false'", function (err, result) {
-          if (err) {
-            console.log(err);
-
-            if (!rolledBack) {
-              transaction.rollback(function (err) {});
-            }
-          } else {
-            transaction.commit(function (err) {
-              for (var i = 0; i < result.recordset.length; i++) {
-                _this6.loadScalarVariablesFields(result.recordset[i]);
-              }
-
-              ;
-            });
-          }
-        });
-      }); // fin transaction
-    }
-  }, {
-    key: "loadScalarVariablesFields",
-    value: function loadScalarVariablesFields(variable) {
-      var _this7 = this;
-
-      var transaction = new _mssql["default"].Transaction(this.props.pool);
-      transaction.begin(function (err) {
-        var rolledBack = false;
-        transaction.on('rollback', function (aborted) {
-          rolledBack = true;
-        });
-        var request = new _mssql["default"].Request(transaction);
-        request.query("select * from VariablesCampos where variableID = " + variable.ID, function (err, result) {
-          if (err) {
-            console.log(err);
-
-            if (!rolledBack) {
-              transaction.rollback(function (err) {});
-            }
-          } else {
-            transaction.commit(function (err) {
-              var temp = _toConsumableArray(_this7.state.variablesEscalares);
-
-              for (var i = 0; i < result.recordset.length; i++) {
-                temp.push({
-                  valor: result.recordset[i].nombre,
-                  tipo: result.recordset[i].tipo,
-                  esFuenteDato: false,
-                  variableID: variable.ID,
-                  variableCampoID: result.recordset[i].ID,
-                  esObjeto: variable.esObjeto,
-                  esInstruccionSQL: false,
-                  nivel: result.recordset[i].nivel,
-                  esVariable: true
-                });
-              }
-
-              ;
-
-              _this7.setState({
-                variablesEscalares: temp
-              });
-            });
-          }
-        });
-      }); // fin transaction
-    }
-  }, {
-    key: "getVariables",
-    value: function getVariables() {
-      var _this8 = this;
-
-      var transaction = new _mssql["default"].Transaction(this.props.pool);
-      transaction.begin(function (err) {
-        var rolledBack = false;
-        transaction.on('rollback', function (aborted) {
-          rolledBack = true;
-        });
-        var request = new _mssql["default"].Request(transaction);
-        request.query("select * from Variables where esObjeto = 'true'", function (err, result) {
+        request.query("select * from ResultadosNombreIndicadores", function (err, result) {
           if (err) {
             console.log(err);
 
@@ -459,94 +283,159 @@ function (_React$Component) {
             }
           } else {
             transaction.commit(function (err) {
-              var temp = [];
-
-              for (var i = 0; i < result.recordset.length; i++) {
-                temp.push({
-                  valor: result.recordset[i].nombre,
-                  ID: result.recordset[i].ID,
-                  esVariable: true
-                });
-              }
-
-              ;
-              /*this.setState({
-                  variables: temp
-              }, this.getFieldsVariables );*/
-
-              _this8.setState({
-                variables: temp
-              }, _this8.getFieldsVariables); //this.getFieldsVariables();
-
+              _this6.getResultsIndicatorsFieldsInit(result.recordset);
             });
           }
         });
       }); // fin transaction
     }
   }, {
-    key: "getFieldsVariables",
-    value: function getFieldsVariables() {
-      var arregloTemp = [];
+    key: "getResultsIndicatorsFieldsInit",
+    value: function getResultsIndicatorsFieldsInit(resultados) {
+      var arregloTemp = [],
+          arregloTempCampos = [];
 
-      for (var i = 0; i < this.state.variables.length; i++) {
-        this.getFieldVariables(this.state.variables[i].ID, i, arregloTemp);
+      for (var i = 0; i < resultados.length; i++) {
+        resultados[i].valor = resultados[i].nombreIndicador;
+        resultados[i].esVariable = false;
+        resultados[i].esIndicador = true;
+        resultados[i].esRiesgo = false;
+        arregloTemp.push(resultados[i]);
+        this.getFieldAttributesIndicators(resultados[i], i, arregloTemp, arregloTempCampos);
+        this.getFieldResultsIndicators(resultados[i], i, arregloTemp);
       }
 
       ;
     }
   }, {
-    key: "getFieldVariables",
-    value: function getFieldVariables(variableID, index, array) {
-      var _this9 = this;
+    key: "getFieldAttributesIndicators",
+    value: function getFieldAttributesIndicators(resultado, index, array, arregloTempCampos) {
+      var _this7 = this;
 
-      if (variableID != undefined) {
-        var transaction = new _mssql["default"].Transaction(this.props.pool);
-        transaction.begin(function (err) {
-          var rolledBack = false;
-          transaction.on('rollback', function (aborted) {
-            rolledBack = true;
-          });
-          var request = new _mssql["default"].Request(transaction);
-          request.query("select * from VariablesCampos where variableID = " + variableID, function (err, result) {
-            if (err) {
-              console.log(err);
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("select * from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME = '" + resultado.nombreIndicador + '_' + resultado.inicioVigencia.getFullYear() + '_' + (resultado.inicioVigencia.getMonth() + 1) + '_' + resultado.inicioVigencia.getDate() + '_' + resultado.inicioVigencia.getHours() + '_' + resultado.inicioVigencia.getMinutes() + '_' + resultado.inicioVigencia.getSeconds() + "'", function (err, result) {
+          if (err) {
+            console.log(err);
 
-              if (!rolledBack) {
-                transaction.rollback(function (err) {});
-              }
-            } else {
-              transaction.commit(function (err) {
-                var nombreColumnas = [];
-
-                for (var i = 0; i < result.recordset.length; i++) {
-                  nombreColumnas.push({
-                    valor: result.recordset[i].nombre,
-                    tipo: result.recordset[i].tipo,
-                    ID: result.recordset[i].ID,
-                    variableID: variableID
-                  });
-                }
-
-                ;
-
-                if (array[index] == undefined) {
-                  array[index] = [];
-                }
-
-                array[index] = $.merge(array[index], nombreColumnas);
-
-                _this9.setState({
-                  camposVariables: array
-                });
-              });
+            if (!rolledBack) {
+              transaction.rollback(function (err) {});
             }
-          });
-        }); // fin transaction
-      }
+          } else {
+            transaction.commit(function (err) {
+              var arrTemp = [];
+
+              for (var i = 0; i < result.recordset.length; i++) {
+                arrTemp.push({
+                  nombre: result.recordset[i].COLUMN_NAME,
+                  valor: result.recordset[i].COLUMN_NAME,
+                  tipo: result.recordset[i].DATA_TYPE,
+                  esVariable: false,
+                  esIndicador: true,
+                  esRiesgo: false,
+                  nombreIndicador: resultado.nombreIndicador
+                });
+              }
+
+              ;
+              array[index].atributos = arrTemp;
+              arregloTempCampos[index] = arrTemp;
+
+              _this7.setState({
+                indicadores: array,
+                camposDeIndicadores: arregloTempCampos
+              });
+            });
+          }
+        });
+      }); // fin transaction
     }
   }, {
-    key: "loadVariablesSQL",
-    value: function loadVariablesSQL() {
+    key: "getFieldResultsIndicators",
+    value: function getFieldResultsIndicators(resultado, index, array) {
+      var _this8 = this;
+
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("select * from " + resultado.nombreIndicador + '_' + resultado.inicioVigencia.getFullYear() + '_' + (resultado.inicioVigencia.getMonth() + 1) + '_' + resultado.inicioVigencia.getDate() + '_' + resultado.inicioVigencia.getHours() + '_' + resultado.inicioVigencia.getMinutes() + '_' + resultado.inicioVigencia.getSeconds(), function (err, result) {
+          if (err) {
+            console.log(err);
+
+            if (!rolledBack) {
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              array[index].resultados = result.recordset;
+
+              _this8.setState({
+                indicadores: array
+              });
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
+    key: "getResultsRisks",
+    value: function getResultsRisks() {
+      var _this9 = this;
+
+      //OBTENER LA LISTA DE POSIBLES VARIABLES A VISUALIZAR
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("select * from ResultadosNombreRiesgos", function (err, result) {
+          if (err) {
+            console.log(err);
+
+            if (!rolledBack) {
+              transaction.rollback(function (err) {});
+              return [];
+            }
+          } else {
+            transaction.commit(function (err) {
+              _this9.getResultsRisksFieldsInit(result.recordset);
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
+    key: "getResultsRisksFieldsInit",
+    value: function getResultsRisksFieldsInit(resultados) {
+      var arregloTemp = [],
+          arregloTempCampos = [];
+
+      for (var i = 0; i < resultados.length; i++) {
+        resultados[i].valor = resultados[i].nombreRiesgo;
+        resultados[i].esVariable = false;
+        resultados[i].esIndicador = false;
+        resultados[i].esRiesgo = true;
+        arregloTemp.push(resultados[i]);
+        this.getFieldAttributesRisks(resultados[i], i, arregloTemp, arregloTempCampos);
+        this.getFieldResultsRisks(resultados[i], i, arregloTemp);
+      }
+
+      ;
+    }
+  }, {
+    key: "getFieldAttributesRisks",
+    value: function getFieldAttributesRisks(resultado, index, array, arregloTempCampos) {
       var _this10 = this;
 
       var transaction = new _mssql["default"].Transaction(this.props.pool);
@@ -556,7 +445,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("select * from Variables where esInstruccionSQL = 'true'", function (err, result) {
+        request.query("select * from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME = '" + resultado.nombreRiesgo + '_' + resultado.inicioVigencia.getFullYear() + '_' + (resultado.inicioVigencia.getMonth() + 1) + '_' + resultado.inicioVigencia.getDate() + '_' + resultado.inicioVigencia.getHours() + '_' + resultado.inicioVigencia.getMinutes() + '_' + resultado.inicioVigencia.getSeconds() + "'", function (err, result) {
           if (err) {
             console.log(err);
 
@@ -565,37 +454,36 @@ function (_React$Component) {
             }
           } else {
             transaction.commit(function (err) {
-              var temp = [];
+              var arrTemp = [];
 
               for (var i = 0; i < result.recordset.length; i++) {
-                temp.push(result.recordset[i]);
-                temp[temp.length - 1].esSQL = true;
+                arrTemp.push({
+                  nombre: result.recordset[i].COLUMN_NAME,
+                  valor: result.recordset[i].COLUMN_NAME,
+                  tipo: result.recordset[i].DATA_TYPE,
+                  esVariable: false,
+                  esIndicador: false,
+                  esRiesgo: true,
+                  nombreRiesgo: resultado.nombreRiesgo
+                });
               }
 
               ;
+              array[index].atributos = arrTemp;
+              arregloTempCampos[index] = arrTemp;
 
               _this10.setState({
-                variablesSQL: temp
-              }, _this10.initLoadVariablesCamposSQL);
+                riesgos: array,
+                camposDeRiesgos: arregloTempCampos
+              });
             });
           }
         });
       }); // fin transaction
     }
   }, {
-    key: "initLoadVariablesCamposSQL",
-    value: function initLoadVariablesCamposSQL() {
-      var arregloTemp = [];
-
-      for (var i = 0; i < this.state.variablesSQL.length; i++) {
-        this.loadVariablesCamposSQL(this.state.variablesSQL[i], i, arregloTemp);
-      }
-
-      ;
-    }
-  }, {
-    key: "loadVariablesCamposSQL",
-    value: function loadVariablesCamposSQL(variable, index, array) {
+    key: "getFieldResultsRisks",
+    value: function getFieldResultsRisks(resultado, index, array) {
       var _this11 = this;
 
       var transaction = new _mssql["default"].Transaction(this.props.pool);
@@ -605,7 +493,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("select * from InstruccionSQLCampos where variableID = " + variable.ID, function (err, result) {
+        request.query("select * from " + resultado.nombreRiesgo + '_' + resultado.inicioVigencia.getFullYear() + '_' + (resultado.inicioVigencia.getMonth() + 1) + '_' + resultado.inicioVigencia.getDate() + '_' + resultado.inicioVigencia.getHours() + '_' + resultado.inicioVigencia.getMinutes() + '_' + resultado.inicioVigencia.getSeconds(), function (err, result) {
           if (err) {
             console.log(err);
 
@@ -614,186 +502,10 @@ function (_React$Component) {
             }
           } else {
             transaction.commit(function (err) {
-              var nombreColumnas = [];
-
-              for (var i = 0; i < result.recordset.length; i++) {
-                nombreColumnas.push({
-                  valor: result.recordset[i].nombre,
-                  tipo: result.recordset[i].tipo,
-                  esFuenteDato: false,
-                  variableID: variable.ID,
-                  variableCampoID: result.recordset[i].ID,
-                  esObjeto: variable.esObjeto,
-                  esInstruccionSQL: true,
-                  nivel: 0
-                });
-              }
-
-              ;
-
-              if (array[index] == undefined) {
-                array[index] = [];
-              }
-
-              array[index] = $.merge(array[index], nombreColumnas);
+              array[index].resultados = result.recordset;
 
               _this11.setState({
-                camposVariablesSQL: array
-              });
-            });
-          }
-        });
-      }); // fin transaction
-    }
-  }, {
-    key: "loadExcel",
-    value: function loadExcel() {
-      var _this12 = this;
-
-      var transaction = new _mssql["default"].Transaction(this.props.pool);
-      transaction.begin(function (err) {
-        var rolledBack = false;
-        transaction.on('rollback', function (aborted) {
-          rolledBack = true;
-        });
-        var request = new _mssql["default"].Request(transaction);
-        request.query("select * from ExcelArchivos", function (err, result) {
-          if (err) {
-            console.log(err);
-
-            if (!rolledBack) {
-              transaction.rollback(function (err) {});
-            }
-          } else {
-            transaction.commit(function (err) {
-              var temp = [];
-
-              for (var i = 0; i < result.recordset.length; i++) {
-                temp.push(result.recordset[i]);
-                temp[temp.length - 1].esExcel = true;
-              }
-
-              ;
-
-              _this12.setState({
-                excel: temp
-              }, _this12.initLoadExcelCampos);
-            });
-          }
-        });
-      }); // fin transaction
-    }
-  }, {
-    key: "initLoadExcelCampos",
-    value: function initLoadExcelCampos() {
-      var arregloTemp = [];
-
-      for (var i = 0; i < this.state.excel.length; i++) {
-        this.loadExcelCampos(this.state.excel[i], i, arregloTemp);
-      }
-
-      ;
-    }
-  }, {
-    key: "loadExcelCampos",
-    value: function loadExcelCampos(excel, index, array) {
-      var _this13 = this;
-
-      var transaction = new _mssql["default"].Transaction(this.props.pool);
-      transaction.begin(function (err) {
-        var rolledBack = false;
-        transaction.on('rollback', function (aborted) {
-          rolledBack = true;
-        });
-        var request = new _mssql["default"].Request(transaction);
-        request.query("select * from ExcelVariables where excelArchivoID = " + excel.ID, function (err, result) {
-          if (err) {
-            console.log(err);
-
-            if (!rolledBack) {
-              transaction.rollback(function (err) {});
-            }
-          } else {
-            transaction.commit(function (err) {
-              var nombreColumnas = [];
-
-              for (var i = 0; i < result.recordset.length; i++) {
-                var tipo;
-
-                if (result.recordset[i].operacion.localeCompare("SUM") == 0 || result.recordset[i].operacion.localeCompare("PROM") == 0 || result.recordset[i].operacion.localeCompare("COUNT") == 0) {
-                  tipo = 'decimal';
-                } else if (result.recordset[i].operacion.localeCompare("MIN") == 0 || result.recordset[i].operacion.localeCompare("MAX") == 0 || result.recordset[i].operacion.localeCompare("ASIG") == 0) {
-                  if (result.recordset[i].tipo.localeCompare("numero") == 0) tipo = 'decimal';else tipo = result.recordset[i].tipo;
-                }
-
-                nombreColumnas.push({
-                  valor: result.recordset[i].nombre,
-                  tipo: tipo,
-                  esFuenteDato: false,
-                  excelArchivoID: excel.ID,
-                  excelVariableID: result.recordset[i].ID,
-                  esObjeto: false,
-                  esInstruccionSQL: false,
-                  nivel: 0
-                });
-              }
-
-              ;
-
-              if (array[index] == undefined) {
-                array[index] = [];
-              }
-
-              array[index] = $.merge(array[index], nombreColumnas);
-
-              _this13.setState({
-                camposDeExcel: array
-              });
-            });
-          }
-        });
-      }); // fin transaction
-    }
-  }, {
-    key: "loadFormas",
-    value: function loadFormas() {
-      var _this14 = this;
-
-      var transaction = new _mssql["default"].Transaction(this.props.pool);
-      transaction.begin(function (err) {
-        var rolledBack = false;
-        transaction.on('rollback', function (aborted) {
-          rolledBack = true;
-        });
-        var request = new _mssql["default"].Request(transaction);
-        request.query("select * from FormasVariables", function (err, result) {
-          if (err) {
-            console.log(err);
-
-            if (!rolledBack) {
-              transaction.rollback(function (err) {});
-            }
-          } else {
-            transaction.commit(function (err) {
-              var nombreColumnas = [];
-
-              for (var i = 0; i < result.recordset.length; i++) {
-                nombreColumnas.push({
-                  valor: result.recordset[i].nombre,
-                  tipo: result.recordset[i].tipo,
-                  esFuenteDato: false,
-                  formaVariableID: result.recordset[i].ID,
-                  esObjeto: false,
-                  esInstruccionSQL: false,
-                  nivel: 0,
-                  esForma: true
-                });
-              }
-
-              ;
-
-              _this14.setState({
-                formas: nombreColumnas
+                riesgos: array
               });
             });
           }
@@ -809,37 +521,29 @@ function (_React$Component) {
           configuracionHome: this.props.configuracionHome,
           crearDashboard: this.crearDashboard,
           goOptions: this.props.goOptions,
-          editarVariable: this.editarVariables
+          editarDashboard: this.editarDashboard
         }));
       } else if (this.state.componenteActual.localeCompare("crearDashboard") == 0) {
         return _react["default"].createElement("div", null, _react["default"].createElement(_CrearDashboard["default"], {
           pool: this.props.pool,
           retornarSeleccionDashboards: this.retornarSeleccionDashboards,
           terminoCrearCampo: this.terminoCrearFuenteDatosPasarAEdit,
-          tablas: this.state.conexiones,
-          camposTablas: this.state.camposConexiones,
-          variablesEscalares: this.state.variablesEscalares,
-          objetos: this.state.variables,
-          camposDeObjetos: this.state.camposVariables,
-          excel: this.state.excel,
-          camposDeExcel: this.state.camposDeExcel,
-          formas: this.state.formas,
-          variablesSQL: this.state.variablesSQL,
-          camposVariablesSQL: this.state.camposVariablesSQL
+          variables: this.state.variables,
+          camposDeVariables: this.state.camposDeVariables,
+          indicadores: this.state.indicadores,
+          camposDeIndicadores: this.state.camposDeIndicadores,
+          riesgos: this.state.riesgos,
+          camposDeRiesgos: this.state.camposDeRiesgos,
+          terminoCrearDashboardPasarAEdit: this.terminoCrearDashboardPasarAEdit
         }));
-      } else if (this.state.componenteActual.localeCompare("editarVariables") == 0) {
-        return _react["default"].createElement("div", null, _react["default"].createElement(EditarVariablesHome, {
+      } else if (this.state.componenteActual.localeCompare("editarDashboard") == 0) {
+        return _react["default"].createElement("div", null, _react["default"].createElement(_EditarDashboardHome["default"], {
           pool: this.props.pool,
-          goOptions: this.props.goOptions,
-          idVariable: this.state.idVariable,
-          tipoVariable: this.state.tipoVariable,
-          esObjetoVariable: this.state.esObjetoVariable,
-          esInstruccionSQLVariable: this.state.esInstruccionSQLVariable,
-          retornoSeleccionVariables: this.retornoSeleccionVariables,
-          configuracionHome: this.props.configuracionHome,
-          actualizarIDVariableModificada: this.actualizarIDVariableModificada,
-          changeStateFirstTimeToFalse: this.changeStateFirstTimeToFalse,
-          esPrimeraVez: this.state.esPrimeraVez
+          retornarSeleccionDashboards: this.retornarSeleccionDashboards,
+          variables: this.state.variables,
+          indicadores: this.state.indicadores,
+          riesgos: this.state.riesgos,
+          dashboardSeleccionado: this.state.dashboardSeleccionado
         }));
       }
     }

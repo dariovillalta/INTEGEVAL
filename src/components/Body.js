@@ -10,6 +10,10 @@ import Calculo from './Calculo.js';
 import Dashboard from './Dashboard.js';
 import ReporteriaHome from './Reporteria/ReporteriaHome.js';
 import DashboardHome from './Dashboards/DashboardHome.js';
+import CrearYSeleccionarLista from './CrearYSeleccionarLista.js';
+import GraficosHome from './Graficos/GraficosHome.js';
+import MantenimientoUsuarios from './Usuarios/MantenimientoUsuarios.js';
+import Bitacora from './Bitacora/Bitacora.js';
 
 export default class Body extends React.Component {
     constructor(props) {
@@ -75,7 +79,7 @@ export default class Body extends React.Component {
         if(this.props.router.showRiskControlHome) {
             return (
                 <div>
-                    <ConfiguracionRiesgos showVariables={this.props.showVariables} showIndicador={this.props.showIndicador} showRiesgos={this.props.showRiesgos} pool={this.props.pool}> </ConfiguracionRiesgos>
+                    <ConfiguracionRiesgos showVariables={this.props.showVariables} showIndicador={this.props.showIndicador} showRiesgos={this.props.showRiesgos} pool={this.props.pool} showListas={this.props.showListas} showUsuarios={this.props.showUsuarios} showBitacora={this.props.showBitacora}> </ConfiguracionRiesgos>
                 </div>
             );
         } else if(this.props.router.showRiskMonitorHome) {
@@ -122,7 +126,7 @@ export default class Body extends React.Component {
             );
         } else if(this.props.router.showReporteria) {
             return (
-                <div>
+                <div style={{width: "100%"}}>
                     <ReporteriaHome pool={this.props.pool}> </ReporteriaHome>
                 </div>
             );
@@ -130,6 +134,30 @@ export default class Body extends React.Component {
             return (
                 <div>
                     <DashboardHome pool={this.props.pool}> </DashboardHome>
+                </div>
+            );
+        } else if(this.props.router.showListas) {
+            return (
+                <div>
+                    <CrearYSeleccionarLista pool={this.props.pool} configuracionHome={this.props.showRiskControlHome}> </CrearYSeleccionarLista>
+                </div>
+            );
+        } else if(this.props.router.showGraficos) {
+            return (
+                <div>
+                    <GraficosHome pool={this.props.pool}> </GraficosHome>
+                </div>
+            );
+        } else if(this.props.router.showUsuarios) {
+            return (
+                <div>
+                    <MantenimientoUsuarios pool={this.props.pool} configuracionHome={this.props.showRiskControlHome}> </MantenimientoUsuarios>
+                </div>
+            );
+        } else if(this.props.router.showBitacora) {
+            return (
+                <div>
+                    <Bitacora pool={this.props.pool} configuracionHome={this.props.showRiskControlHome}> </Bitacora>
                 </div>
             );
         } else {

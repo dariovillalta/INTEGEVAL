@@ -65,8 +65,6 @@ export default class CrearUmbral extends React.Component {
                 } else {
                     transaction.commit(err => {
                         if(result.recordset.length > 0) {
-                            console.log('result.recordset');
-                            console.log(result.recordset);
                             this.setState({
                                 umbralSeleccionadoID: result.recordset[0].ID,
                                 umbralNombreSeleccionado: 'Umbral '+this.props.tituloUmbral,
@@ -102,7 +100,6 @@ export default class CrearUmbral extends React.Component {
                             }
                         } else {
                             transaction.commit(err => {
-                                console.log("Umbral creado.");
                                 this.traerUmbral();
                                 //alert("Umbral Creado");
                             });
@@ -278,7 +275,10 @@ export default class CrearUmbral extends React.Component {
             seccionUmbralNombreSeleccionado: this.state.seccionesUmbral[index].nombre,
             colorSeccionUmbralSeleccionado: this.state.seccionesUmbral[index].color
         }, this.traerRangosSeccionUmbral );
-        $("#seccionUmbralSeleccionado").val(this.state.seccionesUmbral[index].nombre);
+        var self = this;
+        setTimeout(function() {
+            $("#seccionUmbralSeleccionado").val(self.state.seccionesUmbral[index].nombre);
+        }, 400);
     }
 
     retornoSeccionSeleccionUmbral () {
@@ -428,6 +428,7 @@ export default class CrearUmbral extends React.Component {
                             } else {
                                 transaction.commit(err => {
                                     this.traerRangosSeccionUmbral();
+                                    this.props.traerUmbralesPADRE();
                                 });
                             }
                         });
@@ -519,6 +520,7 @@ export default class CrearUmbral extends React.Component {
                                 transaction.commit(err => {
                                     alert("Rango modificado.");
                                     this.traerRangosSeccionUmbral();
+                                    this.props.traerUmbralesPADRE();
                                 });
                             }
                         });
@@ -662,10 +664,10 @@ export default class CrearUmbral extends React.Component {
                                                 </div>
                                                 <hr/>
                                                 <div className={"row"}>
-                                                    <div className={"col-xl-6 col-lg-6 col-md-6 col-sm-6 col-6 form-group text-center"}>
+                                                    <div className={"col-xl-4 col-lg-4 col-md-4 col-sm-4 col-4 form-group text-center"}>
                                                         <label htmlFor="nuevoRangoValorMinimo" className="col-form-label">Valor mínimo:</label>
                                                     </div>
-                                                    <div className={"col-xl-6 col-lg-6 col-md-6 col-sm-6 col-6 form-group text-center"}>
+                                                    <div className={"col-xl-8 col-lg-8 col-md-8 col-sm-8 col-8 form-group text-center"}>
                                                         <label htmlFor="nuevoRangoValorMaximo" className="col-form-label">Valor máximo:</label>
                                                     </div>
                                                 </div>
@@ -694,10 +696,10 @@ export default class CrearUmbral extends React.Component {
                                                     <div key={rangoSeccionUmbral.ID}>
                                                         <hr/>
                                                         <div className={"row"}>
-                                                            <div className={"col-xl-6 col-lg-6 col-md-6 col-sm-6 col-6 form-group text-center"}>
+                                                            <div className={"col-xl-4 col-lg-4 col-md-4 col-sm-4 col-4 form-group text-center"}>
                                                                 <label htmlFor={"rangoValorMinimo"+i} className="col-form-label">Valor Mínimo Nuevo:</label>
                                                             </div>
-                                                            <div className={"col-xl-6 col-lg-6 col-md-6 col-sm-6 col-6 form-group text-center"}>
+                                                            <div className={"col-xl-8 col-lg-8 col-md-8 col-sm-8 col-8 form-group text-center"}>
                                                                 <label htmlFor={"rangoValorMaximo"+i} className="col-form-label">Valor Máximo Nuevo:</label>
                                                             </div>
                                                         </div>

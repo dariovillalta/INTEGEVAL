@@ -19,7 +19,11 @@ export default class Layout extends React.Component {
                 showRiesgos: false,                 //vista home para el mantenimiento de riesgos
                 showCalulo: false,                  //vista para iniciar el calculo de las variables
                 showReporteria: false,              //vista home para hacer reporteria
-                showDashboard: false                //vista home para hacer dashboards
+                showDashboard: false,               //vista home para hacer dashboards
+                showListas: false,                  //vista administrar listas
+                showGraficos: false,                //vista administrar graficos
+                showUsuarios: false,                //vista administrar usuarios
+                showBitacora: false                 //vista para ver bitacoras
             },
             showChooseMode: true,                   //vista para elegir entre modo control riesgos y monitoreo riesgos
             navbar: ""
@@ -36,6 +40,10 @@ export default class Layout extends React.Component {
         this.showCalulo = this.showCalulo.bind(this);
         this.showReporteria = this.showReporteria.bind(this);
         this.showDashboard = this.showDashboard.bind(this);
+        this.showListas = this.showListas.bind(this);
+        this.showGraficos = this.showGraficos.bind(this);
+        this.showUsuarios = this.showUsuarios.bind(this);
+        this.showBitacora = this.showBitacora.bind(this);
     }
 
     showChooseMode() {
@@ -77,7 +85,11 @@ export default class Layout extends React.Component {
                 showRiesgos: false,
                 showCalulo: false,
                 showReporteria: false,
-                showDashboard: false
+                showDashboard: false,
+                showListas: false,
+                showGraficos: false,
+                showUsuarios: false,
+                showBitacora: false
             },
             showChooseMode: false,
             navbar: navbar
@@ -99,7 +111,7 @@ export default class Layout extends React.Component {
                             <a className={"nav-link"} onClick={this.showReporteria} href="#"><i className={"fa fa-fw fa-user-circle"}></i><h3 style={{color: "white"}}>Reporter&iacute;a</h3></a>
                         </li>
                         <li className={"nav-item "}>
-                            <a className={"nav-link"} /*onClick={this.showGraphics}*/ href="#"><i className={"fa fa-fw fa-user-circle"}></i><h3 style={{color: "white"}}>Gr&aacute;ficos</h3></a>
+                            <a className={"nav-link"} onClick={this.showGraficos} href="#"><i className={"fa fa-fw fa-user-circle"}></i><h3 style={{color: "white"}}>Gr&aacute;ficos</h3></a>
                         </li>
                     </ul>;
         this.setState({
@@ -113,7 +125,11 @@ export default class Layout extends React.Component {
                 showRiesgos: false,
                 showCalulo: false,
                 showReporteria: false,
-                showDashboard: false
+                showDashboard: false,
+                showListas: false,
+                showGraficos: false,
+                showUsuarios: false,
+                showBitacora: false
             },
             showChooseMode: false,
             navbar: navbar
@@ -132,7 +148,11 @@ export default class Layout extends React.Component {
                 showRiesgos: false,
                 showCalulo: false,
                 showReporteria: false,
-                showDashboard: false
+                showDashboard: false,
+                showListas: false,
+                showGraficos: false,
+                showUsuarios: false,
+                showBitacora: false
             },
             showChooseMode: false
         });
@@ -150,7 +170,11 @@ export default class Layout extends React.Component {
                 showRiesgos: false,
                 showCalulo: false,
                 showReporteria: false,
-                showDashboard: false
+                showDashboard: false,
+                showListas: false,
+                showGraficos: false,
+                showUsuarios: false,
+                showBitacora: false
             },
             showChooseMode: false
         });
@@ -168,7 +192,11 @@ export default class Layout extends React.Component {
                 showRiesgos: false,
                 showCalulo: false,
                 showReporteria: false,
-                showDashboard: false
+                showDashboard: false,
+                showListas: false,
+                showGraficos: false,
+                showUsuarios: false,
+                showBitacora: false
             },
             showChooseMode: false
         });
@@ -186,7 +214,11 @@ export default class Layout extends React.Component {
                 showRiesgos: false,
                 showCalulo: false,
                 showReporteria: false,
-                showDashboard: false
+                showDashboard: false,
+                showListas: false,
+                showGraficos: false,
+                showUsuarios: false,
+                showBitacora: false
             },
             showChooseMode: false
         });
@@ -204,7 +236,10 @@ export default class Layout extends React.Component {
                 showRiesgos: true,
                 showCalulo: false,
                 showReporteria: false,
-                showDashboard: false
+                showDashboard: false,
+                showListas: false,
+                showUsuarios: false,
+                showBitacora: false
             },
             showChooseMode: false
         });
@@ -222,7 +257,11 @@ export default class Layout extends React.Component {
                 showRiesgos: false,
                 showCalulo: true,
                 showReporteria: false,
-                showDashboard: false
+                showDashboard: false,
+                showListas: false,
+                showGraficos: false,
+                showUsuarios: false,
+                showBitacora: false
             },
             showChooseMode: false
         });
@@ -240,7 +279,11 @@ export default class Layout extends React.Component {
                 showRiesgos: false,
                 showCalulo: false,
                 showReporteria: true,
-                showDashboard: false
+                showDashboard: false,
+                showListas: false,
+                showGraficos: false,
+                showUsuarios: false,
+                showBitacora: false
             },
             showChooseMode: false
         });
@@ -258,7 +301,99 @@ export default class Layout extends React.Component {
                 showRiesgos: false,
                 showCalulo: false,
                 showReporteria: false,
-                showDashboard: true
+                showDashboard: true,
+                showListas: false,
+                showGraficos: false,
+                showUsuarios: false,
+                showBitacora: false
+            },
+            showChooseMode: false
+        });
+    }
+
+    showListas() {
+        this.setState({
+            router: {
+                showRiskControlHome: false,
+                showRiskMonitorHome: false,
+                showVariables: false,
+                showFormula: false,
+                showCondicionVar: false,
+                showIndicador: false,
+                showRiesgos: false,
+                showCalulo: false,
+                showReporteria: false,
+                showDashboard: false,
+                showListas: true,
+                showGraficos: false,
+                showUsuarios: false,
+                showBitacora: false
+            },
+            showChooseMode: false
+        });
+    }
+
+    showGraficos() {
+        this.setState({
+            router: {
+                showRiskControlHome: false,
+                showRiskMonitorHome: false,
+                showVariables: false,
+                showFormula: false,
+                showCondicionVar: false,
+                showIndicador: false,
+                showRiesgos: false,
+                showCalulo: false,
+                showReporteria: false,
+                showDashboard: false,
+                showListas: false,
+                showGraficos: true,
+                showUsuarios: false,
+                showBitacora: false
+            },
+            showChooseMode: false
+        });
+    }
+
+    showUsuarios() {
+        this.setState({
+            router: {
+                showRiskControlHome: false,
+                showRiskMonitorHome: false,
+                showVariables: false,
+                showFormula: false,
+                showCondicionVar: false,
+                showIndicador: false,
+                showRiesgos: false,
+                showCalulo: false,
+                showReporteria: false,
+                showDashboard: false,
+                showListas: false,
+                showGraficos: false,
+                showUsuarios: true,
+                showBitacora: false
+            },
+            showChooseMode: false
+        });
+    }
+
+    showBitacora() {
+        this.setState({
+            router: {
+                showRiskControlHome: false,
+                showRiskMonitorHome: false,
+                showVariables: false,
+                showFormula: false,
+                showCondicionVar: false,
+                showIndicador: false,
+                showRiesgos: false,
+                showCalulo: false,
+                showReporteria: false,
+                showDashboard: false,
+                showListas: false,
+                showGraficos: false,
+                showUsuarios: false,
+                showBitacora: true
             },
             showChooseMode: false
         });
@@ -277,7 +412,7 @@ export default class Layout extends React.Component {
                     <NavBar logOff={this.props.logOff} userName={this.props.userName} permision={this.props.permision} showConfigurationComponent={this.showConfigurationComponent}> </NavBar>
                     <LeftBar navbar={this.state.navbar}> </LeftBar>
                     <div className={"dashboard-wrapper"}>
-                        <div className={"container-fluid dashboard-content"}>
+                        <div className={!this.state.router.showReporteria ? ("dashboard-content") : "dashboard-content2"}>
                             <Body router={this.state.router} pool={this.props.pool}
                                 showUmbralHome={this.showUmbralHome}
                                 showVariables={this.showVariables}
@@ -285,7 +420,10 @@ export default class Layout extends React.Component {
                                 showCondicionVar={this.showCondicionVar}
                                 showIndicador={this.showIndicador}
                                 showRiskControlHome={this.showRiskControlHome}
-                                showRiesgos={this.showRiesgos}> </Body>
+                                showRiesgos={this.showRiesgos}
+                                showListas={this.showListas}
+                                showUsuarios={this.showUsuarios}
+                                showBitacora={this.showBitacora}> </Body>
                         </div>
                     </div>
                 </div>

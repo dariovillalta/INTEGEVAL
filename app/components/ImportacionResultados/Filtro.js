@@ -47,6 +47,7 @@ var textoOperacion = '',
     operacion = '',
     valor = '',
     valorTexto = '';
+var tipoDeVariableSeleccionada = '';
 
 var Filtro =
 /*#__PURE__*/
@@ -71,8 +72,9 @@ function (_React$Component) {
         esFecha: false,
         esTexto: false
       },
-      filtros: [],
-      textoValor: ""
+      filtros: []
+      /*textoValor: ""*/
+
     };
     _this.getResultsVariables = _this.getResultsVariables.bind(_assertThisInitialized(_this));
     _this.getResultsVariablesFieldsInit = _this.getResultsVariablesFieldsInit.bind(_assertThisInitialized(_this));
@@ -95,6 +97,16 @@ function (_React$Component) {
     _this.isValidDate = _this.isValidDate.bind(_assertThisInitialized(_this));
     _this.agregarFiltro = _this.agregarFiltro.bind(_assertThisInitialized(_this));
     _this.eliminarFiltro = _this.eliminarFiltro.bind(_assertThisInitialized(_this));
+    _this.crearCodigoFiltros = _this.crearCodigoFiltros.bind(_assertThisInitialized(_this));
+    _this.crearCodigoFiltro = _this.crearCodigoFiltro.bind(_assertThisInitialized(_this));
+    _this.arregloCodigoFiltro = _this.arregloCodigoFiltro.bind(_assertThisInitialized(_this));
+    _this.addDays = _this.addDays.bind(_assertThisInitialized(_this));
+    _this.addMonths = _this.addMonths.bind(_assertThisInitialized(_this));
+    _this.addYears = _this.addYears.bind(_assertThisInitialized(_this));
+    _this.minusDays = _this.minusDays.bind(_assertThisInitialized(_this));
+    _this.minusMonths = _this.minusMonths.bind(_assertThisInitialized(_this));
+    _this.minusYears = _this.minusYears.bind(_assertThisInitialized(_this));
+    _this.retornoVariables = _this.retornoVariables.bind(_assertThisInitialized(_this));
     textoOperacion = '';
     operacion = '';
     valor = '';
@@ -114,7 +126,25 @@ function (_React$Component) {
     value: function getResultsVariables() {
       var _this2 = this;
 
-      //OBTENER LA LISTA DE POSIBLES VARIABLES A VISUALIZAR
+      var condicion = '';
+
+      if (this.props.fechaInicial != null && this.props.fechaFinal != null) {
+        var mesInicio = this.props.fechaInicial.getMonth() + 1;
+        if (mesInicio.toString().length == 1) mesInicio = "0" + mesInicio;
+        var mesFinal = this.props.fechaFinal.getMonth() + 1;
+        if (mesFinal.toString().length == 1) mesFinal = "0" + mesFinal;
+        condicion = "WHERE inicioVigencia >= '" + this.props.fechaInicial.getFullYear() + "-" + mesInicio + "-" + this.props.fechaInicial.getDate() + "' and (finVigencia = '1964-05-28' or finVigencia <= '" + this.props.fechaFinal.getFullYear() + "-" + mesFinal + "-" + this.props.fechaFinal.getDate() + "')";
+      } else if (this.props.fechaInicial != null) {
+        var mesInicio = this.props.fechaInicial.getMonth() + 1;
+        if (mesInicio.toString().length == 1) mesInicio = "0" + mesInicio;
+        condicion = "WHERE inicioVigencia >= '" + this.props.fechaInicial.getFullYear() + "-" + mesInicio + "-" + this.props.fechaInicial.getDate() + "'";
+      } else if (this.props.fechaFinal != null) {
+        var mesFinal = this.props.fechaFinal.getMonth() + 1;
+        if (mesFinal.toString().length == 1) mesFinal = "0" + mesFinal;
+        condicion = "WHERE finVigencia = '1964-05-28' or finVigencia <= '" + this.props.fechaFinal.getFullYear() + "-" + mesFinal + "-" + this.props.fechaFinal.getDate() + "'";
+      } //OBTENER LA LISTA DE POSIBLES VARIABLES A VISUALIZAR
+
+
       var transaction = new _mssql["default"].Transaction(this.props.pool);
       transaction.begin(function (err) {
         var rolledBack = false;
@@ -122,7 +152,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("select * from ResultadosNombreVariables", function (err, result) {
+        request.query("select * from ResultadosNombreVariables " + condicion, function (err, result) {
           if (err) {
             if (!rolledBack) {
               console.log(err);
@@ -227,7 +257,25 @@ function (_React$Component) {
     value: function getResultsIndicators() {
       var _this5 = this;
 
-      //OBTENER LA LISTA DE POSIBLES VARIABLES A VISUALIZAR
+      var condicion = '';
+
+      if (this.props.fechaInicial != null && this.props.fechaFinal != null) {
+        var mesInicio = this.props.fechaInicial.getMonth() + 1;
+        if (mesInicio.toString().length == 1) mesInicio = "0" + mesInicio;
+        var mesFinal = this.props.fechaFinal.getMonth() + 1;
+        if (mesFinal.toString().length == 1) mesFinal = "0" + mesFinal;
+        condicion = "WHERE inicioVigencia >= '" + this.props.fechaInicial.getFullYear() + "-" + mesInicio + "-" + this.props.fechaInicial.getDate() + "' and (finVigencia = '1964-05-28' or finVigencia <= '" + this.props.fechaFinal.getFullYear() + "-" + mesFinal + "-" + this.props.fechaFinal.getDate() + "')";
+      } else if (this.props.fechaInicial != null) {
+        var mesInicio = this.props.fechaInicial.getMonth() + 1;
+        if (mesInicio.toString().length == 1) mesInicio = "0" + mesInicio;
+        condicion = "WHERE inicioVigencia >= '" + this.props.fechaInicial.getFullYear() + "-" + mesInicio + "-" + this.props.fechaInicial.getDate() + "'";
+      } else if (this.props.fechaFinal != null) {
+        var mesFinal = this.props.fechaFinal.getMonth() + 1;
+        if (mesFinal.toString().length == 1) mesFinal = "0" + mesFinal;
+        condicion = "WHERE finVigencia = '1964-05-28' or finVigencia <= '" + this.props.fechaFinal.getFullYear() + "-" + mesFinal + "-" + this.props.fechaFinal.getDate() + "'";
+      } //OBTENER LA LISTA DE POSIBLES VARIABLES A VISUALIZAR
+
+
       var transaction = new _mssql["default"].Transaction(this.props.pool);
       transaction.begin(function (err) {
         var rolledBack = false;
@@ -235,7 +283,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("select * from ResultadosNombreIndicadores", function (err, result) {
+        request.query("select * from ResultadosNombreIndicadores " + condicion, function (err, result) {
           if (err) {
             console.log(err);
 
@@ -341,7 +389,25 @@ function (_React$Component) {
     value: function getResultsRisks() {
       var _this8 = this;
 
-      //OBTENER LA LISTA DE POSIBLES VARIABLES A VISUALIZAR
+      var condicion = '';
+
+      if (this.props.fechaInicial != null && this.props.fechaFinal != null) {
+        var mesInicio = this.props.fechaInicial.getMonth() + 1;
+        if (mesInicio.toString().length == 1) mesInicio = "0" + mesInicio;
+        var mesFinal = this.props.fechaFinal.getMonth() + 1;
+        if (mesFinal.toString().length == 1) mesFinal = "0" + mesFinal;
+        condicion = "WHERE inicioVigencia >= '" + this.props.fechaInicial.getFullYear() + "-" + mesInicio + "-" + this.props.fechaInicial.getDate() + "' and (finVigencia = '1964-05-28' or finVigencia <= '" + this.props.fechaFinal.getFullYear() + "-" + mesFinal + "-" + this.props.fechaFinal.getDate() + "')";
+      } else if (this.props.fechaInicial != null) {
+        var mesInicio = this.props.fechaInicial.getMonth() + 1;
+        if (mesInicio.toString().length == 1) mesInicio = "0" + mesInicio;
+        condicion = "WHERE inicioVigencia >= '" + this.props.fechaInicial.getFullYear() + "-" + mesInicio + "-" + this.props.fechaInicial.getDate() + "'";
+      } else if (this.props.fechaFinal != null) {
+        var mesFinal = this.props.fechaFinal.getMonth() + 1;
+        if (mesFinal.toString().length == 1) mesFinal = "0" + mesFinal;
+        condicion = "WHERE finVigencia = '1964-05-28' or finVigencia <= '" + this.props.fechaFinal.getFullYear() + "-" + mesFinal + "-" + this.props.fechaFinal.getDate() + "'";
+      } //OBTENER LA LISTA DE POSIBLES VARIABLES A VISUALIZAR
+
+
       var transaction = new _mssql["default"].Transaction(this.props.pool);
       transaction.begin(function (err) {
         var rolledBack = false;
@@ -349,7 +415,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("select * from ResultadosNombreRiesgos", function (err, result) {
+        request.query("select * from ResultadosNombreRiesgos " + condicion, function (err, result) {
           if (err) {
             console.log(err);
 
@@ -457,10 +523,13 @@ function (_React$Component) {
 
       if (arreglo.localeCompare("variable") == 0) {
         ref = this.state.variables[index];
+        tipoDeVariableSeleccionada = "variable";
       } else if (arreglo.localeCompare("indicador") == 0) {
         ref = this.state.indicadores[index];
+        tipoDeVariableSeleccionada = "indicador";
       } else if (arreglo.localeCompare("riesgo") == 0) {
         ref = this.state.riesgos[index];
+        tipoDeVariableSeleccionada = "riesgo";
       }
 
       this.setState({
@@ -522,61 +591,74 @@ function (_React$Component) {
     }
   }, {
     key: "retornoSeleccionOperacion",
-    value: function retornoSeleccionOperacion(textoOperacionNuevo, operacion) {
+    value: function retornoSeleccionOperacion(textoOperacionNuevo, operacionNuevo) {
       textoOperacion = textoOperacionNuevo;
+      operacion = operacionNuevo;
     }
   }, {
     key: "actualizarValor",
     value: function actualizarValor(e) {
-      var valor = $("#valor").val();
-      this.setState({
-        textoValor: valor
-      });
+      var valorN = $("#valor").val();
+      /*this.setState({
+          textoValor: valorN
+      });*/
 
       if (this.state.tipoCampo.esNumero) {
-        var numero = parseFloat(valor);
+        var numero = parseFloat(valorN);
 
         if (!isNaN(numero)) {
           var valorARetornar = "MANUAL=NUMERO[" + numero + "]";
-          this.props.retornarValor(valorARetornar, valor);
-        } else if (this.state.campoSeleccionadoNombre.localeCompare("{campo}") != 0) {
+          console.log('1');
+          console.log(valorARetornar);
+          valor = valorARetornar;
+          valorTexto = valorN;
+        } else if (this.state.campoSeleccionado.nombre.localeCompare("{campo}") != 0) {
           alert('Valor Ingresado no es un número válido');
         }
       } else if (this.state.tipoCampo.esBoolean) {
         if (numero.localeCompare("true") == 0 || numero.localeCompare("false") == 0) {
-          var valorARetornar = "MANUAL=BOOL[" + valor + "]";
-          this.props.retornarValor(valorARetornar, valor);
-        } else if (this.state.campoSeleccionadoNombre.localeCompare("{campo}") != 0) {
+          var valorARetornar = "MANUAL=BOOL[" + valorN + "]";
+          console.log('2');
+          console.log(valorARetornar);
+          valor = valorARetornar;
+          valorTexto = valorN;
+        } else if (this.state.campoSeleccionado.nombre.localeCompare("{campo}") != 0) {
           alert('Valor Ingresado no es un valor booleano válido');
         }
       } else if (this.state.tipoCampo.esFecha) {
         var fecha = null;
 
-        if (valor.indexOf("-") != -1 && valor.split("-").length > 2) {
-          fecha = new Date(valor.split("-")[0], valor.split("-")[1], valor.split("-")[2]);
-        } else if (valor.indexOf("/") != -1 && valor.split("/").length > 2) {
-          fecha = new Date(valor.split("/")[0], valor.split("/")[1], valor.split("/")[2]);
+        if (valorN.indexOf("-") != -1 && valorN.split("-").length > 2) {
+          fecha = new Date(valorN.split("-")[0], valorN.split("-")[1], valorN.split("-")[2]);
+        } else if (valorN.indexOf("/") != -1 && valorN.split("/").length > 2) {
+          fecha = new Date(valorN.split("/")[0], valorN.split("/")[1], valorN.split("/")[2]);
         }
 
         if (fecha != null && this.isValidDate(fecha)) {
           var valorARetornar = "MANUAL=FECHA[";
 
-          if (valor.indexOf("-") != -1 && valor.split("-").length > 2) {
-            valorARetornar += valor.split("-")[0] + "," + valor.split("-")[1] + "," + valor.split("-")[2] + "]";
-          } else if (valor.indexOf("/") != -1 && valor.split("/").length > 2) {
-            valorARetornar += valor.split("/")[0] + "," + valor.split("/")[1] + "," + valor.split("/")[2] + "]";
+          if (valorN.indexOf("-") != -1 && valorN.split("-").length > 2) {
+            valorARetornar += valorN.split("-")[0] + "," + valorN.split("-")[1] + "," + valorN.split("-")[2] + "]";
+          } else if (valorN.indexOf("/") != -1 && valorN.split("/").length > 2) {
+            valorARetornar += valorN.split("/")[0] + "," + valorN.split("/")[1] + "," + valorN.split("/")[2] + "]";
           }
 
-          this.props.retornarValor(valorARetornar, valor);
-        } else if (this.state.campoSeleccionadoNombre.localeCompare("{campo}") != 0) {
+          console.log('3');
+          console.log(valorARetornar);
+          valor = valorARetornar;
+          valorTexto = valorN;
+        } else if (this.state.campoSeleccionado.nombre.localeCompare("{campo}") != 0) {
           alert('Valor Ingresado no es una fecha válida');
         }
       } else if (this.state.tipoCampo.esTexto) {
-        if (valor.length > 0 || valor.length < 984) {
-          var valorARetornar = "MANUAL=VARCHAR[" + valor + "]";
-          this.props.retornarValor(valorARetornar, valor);
-        } else if (this.state.campoSeleccionadoNombre.localeCompare("{campo}") != 0) {
-          if (valor.length > 0) alert('Valor Ingresado debe tener una longitud mayor a 0');else alert('Valor Ingresado debe tener una longitud menor a 984');
+        if (valorN.length > 0 || valorN.length < 984) {
+          var valorARetornar = "MANUAL=VARCHAR[" + valorN + "]";
+          console.log('4');
+          console.log(valorARetornar);
+          valor = valorARetornar;
+          valorTexto = valorN;
+        } else if (this.state.campoSeleccionado.nombre.localeCompare("{campo}") != 0) {
+          if (valorN.length > 0) alert('Valor Ingresado debe tener una longitud mayor a 0');else alert('Valor Ingresado debe tener una longitud menor a 984');
         }
       }
     }
@@ -588,7 +670,7 @@ function (_React$Component) {
     }
   }, {
     key: "retornarValorTime",
-    value: function retornarValorTime(valorN, valorTexto) {
+    value: function retornarValorTime(valorN, valorTextoN) {
       valor = valorN;
       valorTexto = valorTextoN;
     }
@@ -612,7 +694,7 @@ function (_React$Component) {
     value: function agregarFiltro() {
       var variableID = this.state.variableSeleccionada.ID;
       var nombreCampo = this.state.campoSeleccionado.nombre;
-      var tipoCampo = this.state.variableSeleccionada.tipo;
+      var tipoCampo = this.state.campoSeleccionado.tipo;
       var nuevoFiltro = {
         variableID: variableID,
         nombreCampo: nombreCampo,
@@ -622,6 +704,14 @@ function (_React$Component) {
         valor: valor,
         texto: nombreCampo + " " + textoOperacion + " " + valorTexto
       };
+
+      if (tipoDeVariableSeleccionada.localeCompare("variable") == 0) {
+        nuevoFiltro.esVariable = true;
+      } else if (tipoDeVariableSeleccionada.localeCompare("indicador") == 0) {
+        nuevoFiltro.esIndicador = true;
+      } else if (tipoDeVariableSeleccionada.localeCompare("riesgo") == 0) {
+        nuevoFiltro.esRiesgo = true;
+      }
 
       var copyFiltros = _toConsumableArray(this.state.filtros);
 
@@ -644,17 +734,21 @@ function (_React$Component) {
     key: "crearCodigoFiltros",
     value: function crearCodigoFiltros() {
       //agregar filtros por variable
+      console.log('this.state.filtros');
+      console.log(this.state.filtros);
       var filtrosAgrupadosPorVariables = [];
 
-      for (var i = 0; i < this.state.filtros.length; i++) {
-        if (this.state.filtros[i].esVariable) {
+      for (var k = 0; k < this.state.filtros.length; k++) {
+        if (this.state.filtros[k].esVariable) {
           var agregoFiltro = false;
 
-          for (var i = 0; i < filtrosAgrupadosPorVariables.length; i++) {
+          ForPrincipa: for (var i = 0; i < filtrosAgrupadosPorVariables.length; i++) {
             for (var j = 0; j < filtrosAgrupadosPorVariables[i].length; j++) {
-              if (filtrosAgrupadosPorVariables[i][j].variableID == this.state.filtros[i].variableID) {
-                filtrosAgrupadosPorVariables[i].push(this.state.filtros[i]);
-                filtrosAgrupadosPorVariables[i][filtrosAgrupadosPorVariables[i].length - 1].filtroPadre = filtrosAgrupadosPorVariables[i].length - 2;
+              if (filtrosAgrupadosPorVariables[i][j].variableID == this.state.filtros[k].variableID) {
+                agregoFiltro = true;
+                filtrosAgrupadosPorVariables[i].push(this.state.filtros[k]); //filtrosAgrupadosPorVariables[i][filtrosAgrupadosPorVariables[i].length-1].filtroPadre = filtrosAgrupadosPorVariables[i].length-2;
+
+                break ForPrincipa;
               }
             }
 
@@ -663,24 +757,28 @@ function (_React$Component) {
 
           ;
 
-          if (filtrosAgrupadosPorVariables.length == 0) {
-            filtrosAgrupadosPorVariables.push(this.state.filtros[i]);
+          if (!agregoFiltro) {
+            filtrosAgrupadosPorVariables.push([this.state.filtros[k]]);
           }
         }
       }
 
       ;
+      console.log('filtrosAgrupadosPorVariables');
+      console.log(filtrosAgrupadosPorVariables);
       var filtrosAgrupadosPorIndicadores = [];
 
-      for (var i = 0; i < this.state.filtros.length; i++) {
-        if (this.state.filtros[i].esIndicador) {
+      for (var k = 0; k < this.state.filtros.length; k++) {
+        if (this.state.filtros[k].esIndicador) {
           var agregoFiltro = false;
 
-          for (var i = 0; i < filtrosAgrupadosPorIndicadores.length; i++) {
+          ForPrincipa: for (var i = 0; i < filtrosAgrupadosPorIndicadores.length; i++) {
             for (var j = 0; j < filtrosAgrupadosPorIndicadores[i].length; j++) {
-              if (filtrosAgrupadosPorIndicadores[i][j].variableID == this.state.filtros[i].variableID) {
-                filtrosAgrupadosPorIndicadores[i].push(this.state.filtros[i]);
-                filtrosAgrupadosPorIndicadores[i][filtrosAgrupadosPorIndicadores[i].length - 1].filtroPadre = filtrosAgrupadosPorIndicadores[i].length - 2;
+              if (filtrosAgrupadosPorIndicadores[i][j].variableID == this.state.filtros[k].variableID) {
+                agregoFiltro = true;
+                filtrosAgrupadosPorIndicadores[i].push(this.state.filtros[k]); //filtrosAgrupadosPorIndicadores[i][filtrosAgrupadosPorIndicadores[i].length-1].filtroPadre = filtrosAgrupadosPorIndicadores[i].length-2;
+
+                break ForPrincipa;
               }
             }
 
@@ -689,24 +787,28 @@ function (_React$Component) {
 
           ;
 
-          if (filtrosAgrupadosPorIndicadores.length == 0) {
-            filtrosAgrupadosPorIndicadores.push(this.state.filtros[i]);
+          if (!agregoFiltro) {
+            filtrosAgrupadosPorIndicadores.push([this.state.filtros[k]]);
           }
         }
       }
 
       ;
+      console.log('filtrosAgrupadosPorIndicadores');
+      console.log(filtrosAgrupadosPorIndicadores);
       var filtrosAgrupadosPorRiesgos = [];
 
-      for (var i = 0; i < this.state.filtros.length; i++) {
-        if (this.state.filtros[i].esRiesgo) {
+      for (var k = 0; k < this.state.filtros.length; k++) {
+        if (this.state.filtros[k].esRiesgo) {
           var agregoFiltro = false;
 
-          for (var i = 0; i < filtrosAgrupadosPorRiesgos.length; i++) {
+          ForPrincipa: for (var i = 0; i < filtrosAgrupadosPorRiesgos.length; i++) {
             for (var j = 0; j < filtrosAgrupadosPorRiesgos[i].length; j++) {
-              if (filtrosAgrupadosPorRiesgos[i][j].variableID == this.state.filtros[i].variableID) {
-                filtrosAgrupadosPorRiesgos[i].push(this.state.filtros[i]);
-                filtrosAgrupadosPorRiesgos[i][filtrosAgrupadosPorRiesgos[i].length - 1].filtroPadre = filtrosAgrupadosPorRiesgos[i].length - 2;
+              if (filtrosAgrupadosPorRiesgos[i][j].variableID == this.state.filtros[k].variableID) {
+                agregoFiltro = true;
+                filtrosAgrupadosPorRiesgos[i].push(this.state.filtros[k]); //filtrosAgrupadosPorRiesgos[i][filtrosAgrupadosPorRiesgos[i].length-1].filtroPadre = filtrosAgrupadosPorRiesgos[i].length-2;
+
+                break ForPrincipa;
               }
             }
 
@@ -715,34 +817,89 @@ function (_React$Component) {
 
           ;
 
-          if (filtrosAgrupadosPorRiesgos.length == 0) {
-            filtrosAgrupadosPorRiesgos.push(this.state.filtros[i]);
+          if (!agregoFiltro) {
+            filtrosAgrupadosPorRiesgos.push([this.state.filtros[k]]);
           }
         }
       }
 
-      ; //crearCodigo
+      ;
+      console.log('filtrosAgrupadosPorRiesgos');
+      console.log(filtrosAgrupadosPorRiesgos);
+      console.log('this.state.variables');
+      console.log(this.state.variables);
+      console.log('this.state.indicadores');
+      console.log(this.state.indicadores);
+      console.log('this.state.riesgos');
+      console.log(this.state.riesgos); //crearCodigo
 
       var codigoVariables = '';
 
       for (var i = 0; i < filtrosAgrupadosPorVariables.length; i++) {
+        if (filtrosAgrupadosPorVariables[i].length > 0) {
+          codigoVariables += '\n\tfor (var x = variables[' + i + '].resultados.length-1; x >= 0; x--) {';
+        }
+
         for (var j = 0; j < filtrosAgrupadosPorVariables[i].length; j++) {
-          codigoVariables += this.crearCodigoFiltro(filtrosAgrupadosPorVariables[i]);
+          codigoVariables += this.crearCodigoFiltro(filtrosAgrupadosPorVariables[i][j], 2, 'variables[' + i + '].resultados');
         }
 
         ;
+
+        if (filtrosAgrupadosPorVariables[i].length > 0) {
+          codigoVariables += '\n\t}\n';
+        }
       }
 
       ;
+
+      for (var i = 0; i < filtrosAgrupadosPorIndicadores.length; i++) {
+        if (filtrosAgrupadosPorIndicadores[i].length > 0) {
+          codigoVariables += '\n\tfor (var x = indicadores[' + i + '].resultados.length-1; x >= 0; x--) {';
+        }
+
+        for (var j = 0; j < filtrosAgrupadosPorIndicadores[i].length; j++) {
+          codigoVariables += this.crearCodigoFiltro(filtrosAgrupadosPorIndicadores[i][j], 2, 'indicadores[' + i + '].resultados');
+        }
+
+        ;
+
+        if (filtrosAgrupadosPorIndicadores[i].length > 0) {
+          codigoVariables += '\n\t}\n';
+        }
+      }
+
+      ;
+
+      for (var i = 0; i < filtrosAgrupadosPorRiesgos.length; i++) {
+        if (filtrosAgrupadosPorRiesgos[i].length > 0) {
+          codigoVariables += '\n\tfor (var x = riesgos[' + i + '].resultados.length-1; x >= 0; x--) {';
+        }
+
+        for (var j = 0; j < filtrosAgrupadosPorRiesgos[i].length; j++) {
+          codigoVariables += this.crearCodigoFiltro(filtrosAgrupadosPorRiesgos[i][j], 2, 'riesgos[' + i + '].resultados');
+        }
+
+        ;
+
+        if (filtrosAgrupadosPorRiesgos[i].length > 0) {
+          codigoVariables += '\n\t}\n';
+        }
+      }
+
+      ;
+      window['aplicarFiltros'] = new Function('return function aplicarFiltros(isValidDate, retornoVariables, variables, indicadores, riesgos){' + '\n' + codigoVariables + '\n\tretornoVariables();\n' + '}')();
       console.log('codigoVariables');
       console.log(codigoVariables);
-      this.props.retornoVariables(this.state.variables, this.state.indicadores, this.state.riesgos);
+      window['aplicarFiltros'](this.isValidDate, this.retornoVariables, this.state.variables, this.state.indicadores, this.state.riesgos);
     }
   }, {
     key: "crearCodigoFiltro",
-    value: function crearCodigoFiltro(filtros, tabs, nombreReferenciaArregloEnCodigo) {
+    value: function crearCodigoFiltro(filtro, tabs, nombreReferenciaArregloEnCodigo) {
+      console.log('filtro');
+      console.log(filtro);
       var codigo = '';
-      var resultado = this.arregloCodigoFiltro(filtros[0], tabs, [], filtros, nombreReferenciaArregloEnCodigo);
+      var resultado = this.arregloCodigoFiltro(filtro, tabs, [], [], nombreReferenciaArregloEnCodigo);
       if (resultado.length > 0) resultado[0].codigo = "\n" + resultado[0].codigo; //$.merge( prestamosCuerpo, resultado );
 
       for (var i = 0; i < resultado.length; i++) {
@@ -762,6 +919,8 @@ function (_React$Component) {
       }
 
       ;
+      console.log('tabsText');
+      console.log(tabsText);
       var posicionesIF = [];
       var newTabsTextFormula = ''; //condiciones if
 
@@ -769,8 +928,11 @@ function (_React$Component) {
 
       if (filtro.valor.indexOf("LISTAID") == 0) {//
       } else if (filtro.valor.indexOf("FECHA") == 0) {
-        var fecha = filtro.valor.substring(filtro.valor.indexOf("[") + 1, filtro.valor.lastIndexOf("]"));
-        arregloValoresAComparar = ["new Date(" + fecha + ").getTime()"];
+        var fecha = filtro.valor.substring(filtro.valor.indexOf("(") + 1, filtro.valor.lastIndexOf(")"));
+        var anio = fecha.split("-")[0];
+        var mes = fecha.split("-")[1];
+        var dia = fecha.split("-")[2];
+        arregloValoresAComparar = ["new Date(" + anio + ", " + mes + ", " + dia + ").getTime()"];
       } else if (filtro.valor.indexOf("TIEMPO") == 0) {
         var stringValores = filtro.valor.substring(filtro.valor.indexOf("[") + 1, filtro.valor.lastIndexOf("]"));
         var diasAgregarCadena = stringValores.split(",")[0],
@@ -789,8 +951,8 @@ function (_React$Component) {
           hoy = this.addMonths(hoy, mesesAgregar);
           hoy = this.addDays(hoy, diasAgregar);
         } else {
-          hoy = this.minusDays(hoy, aniosAgregar);
-          hoy = this.minusMonths(hoy, aniosAgregar);
+          hoy = this.minusDays(hoy, diasAgregar);
+          hoy = this.minusMonths(hoy, mesesAgregar);
           hoy = this.minusYears(hoy, aniosAgregar);
         }
 
@@ -807,24 +969,24 @@ function (_React$Component) {
         var operacion = "";
 
         if (filtro.operacion.localeCompare("ES_MENOR") == 0) {
-          operacion = "<";
-        } else if (filtro.operacion.localeCompare("ES_MENOR_O_IGUAL") == 0) {
-          operacion = "<=";
-        } else if (filtro.operacion.localeCompare("ES_MAYOR_O_IGUAL") == 0) {
-          operacion = ">=";
-        } else if (filtro.operacion.localeCompare("ES_MAYOR") == 0) {
           operacion = ">";
+        } else if (filtro.operacion.localeCompare("ES_MENOR_O_IGUAL") == 0) {
+          operacion = ">=";
+        } else if (filtro.operacion.localeCompare("ES_MAYOR_O_IGUAL") == 0) {
+          operacion = "<=";
+        } else if (filtro.operacion.localeCompare("ES_MAYOR") == 0) {
+          operacion = "<";
         } else if (filtro.operacion.localeCompare("ES_IGUAL") == 0) {
-          operacion = "==";
-        } else if (filtro.operacion.localeCompare("NO_ES_IGUAL") == 0) {
           operacion = "!=";
+        } else if (filtro.operacion.localeCompare("NO_ES_IGUAL") == 0) {
+          operacion = "==";
         }
 
         if (filtro.tipoCampoObjetivo.localeCompare("date") == 0) {
           if (filtro.operacion.localeCompare("encuentra") == 0) {//
           } else if (filtro.operacion.localeCompare("no_encuentra") == 0) {//
           } else {
-            inicioComparacion = nombreReferenciaArregloEnCodigo + "[x]." + filtro.nombreCampo + " != undefined && isValidDate(" + nombreReferenciaArregloEnCodigo + "[x]." + nombreCampoDeArregloEnCodigo + ")";
+            inicioComparacion = nombreReferenciaArregloEnCodigo + "[x]." + filtro.nombreCampo + " != undefined && isValidDate(" + nombreReferenciaArregloEnCodigo + "[x]." + filtro.nombreCampo + ")";
             comparacion = nombreReferenciaArregloEnCodigo + "[x]." + filtro.nombreCampo + ".getTime() " + operacion + " " + arregloValoresAComparar[i];
           }
         } else if (filtro.tipoCampoObjetivo.localeCompare("varchar") == 0) {
@@ -838,7 +1000,7 @@ function (_React$Component) {
           if (filtro.operacion.localeCompare("encuentra") == 0) {//
           } else if (filtro.operacion.localeCompare("no_encuentra") == 0) {//
           } else {
-            inicioComparacion = nombreReferenciaArregloEnCodigo + "[x]." + filtro.nombreCampo + " != undefined && !isNaN(" + nombreReferenciaArregloEnCodigo + "[x]." + nombreCampoDeArregloEnCodigo + ")";
+            inicioComparacion = nombreReferenciaArregloEnCodigo + "[x]." + filtro.nombreCampo + " != undefined && !isNaN(" + nombreReferenciaArregloEnCodigo + "[x]." + filtro.nombreCampo + ")";
             comparacion = nombreReferenciaArregloEnCodigo + "[x]." + filtro.nombreCampo + " " + operacion + " " + arregloValoresAComparar[i];
           }
         } else if (filtro.tipoCampoObjetivo.localeCompare("bit") == 0) {
@@ -852,6 +1014,10 @@ function (_React$Component) {
 
         if (i == 0) {
           arreglo.push({
+            codigo: '\n' + tabsText + "console.log( " + comparacion.substring(0, comparacion.lastIndexOf(")")) + ");",
+            tipo: "COMPARACION"
+          });
+          arreglo.push({
             codigo: '\n' + tabsText + "if ( " + inicioComparacion + " && " + comparacion,
             tipo: "COMPARACION"
           });
@@ -864,6 +1030,10 @@ function (_React$Component) {
       /*console.log("ENTROOO j");
       };*/
 
+      arreglo.push({
+        codigo: '\n' + tabsText + "\t" + nombreReferenciaArregloEnCodigo + ".splice(x, 1);",
+        tipo: "COMPARACION"
+      });
       posicionesIF.push(arreglo.length);
       var cuerpo = arregloDeFiltros.filter(function (object, index) {
         return object.filtroPadre == index;
@@ -884,7 +1054,7 @@ function (_React$Component) {
           arreglo.splice.apply(arreglo, [posicionesIF[i], 0].concat(arregloCuerpo));
           if (filtro.esCondicion) arreglo.splice(posicionesIF[i] + arregloCuerpo.length, 0, {
             codigo: "\n" + tabsText + "}",
-            filtro: regla.filtro
+            filtro: ""
           });
 
           for (var j = i; j < posicionesIF.length; j++) {
@@ -903,7 +1073,7 @@ function (_React$Component) {
             if (newTabsTextFormula.length > 0) newTabsTextFormula = newTabsTextFormula.substring(0, newTabsTextFormula.length - 1);
             arreglo.splice(posicionesIF[i], 0, {
               codigo: "\n" + tabsText + newTabsTextFormula + "}",
-              filtro: regla.filtro
+              filtro: ""
             });
           }
 
@@ -912,6 +1082,74 @@ function (_React$Component) {
 
         return arreglo;
       }
+    }
+  }, {
+    key: "addDays",
+    value: function addDays(fecha, days) {
+      var date = new Date(fecha);
+      date.setDate(date.getDate() + days);
+      return date;
+    }
+  }, {
+    key: "addMonths",
+    value: function addMonths(fecha, months) {
+      var date = new Date(fecha);
+      date.setMonth(date.getMonth() + months);
+      return date;
+    }
+  }, {
+    key: "addYears",
+    value: function addYears(fecha, years) {
+      var date = new Date(fecha);
+      date.setYear(date.getYear() + years);
+      return date;
+    }
+  }, {
+    key: "minusDays",
+    value: function minusDays(fecha, days) {
+      var date = new Date(fecha);
+
+      if (date.getDate() >= days) {
+        date.setDate(date.getDate() - days);
+      } else {
+        date.setDate(days - date.getDate());
+      }
+
+      return date;
+    }
+  }, {
+    key: "minusMonths",
+    value: function minusMonths(fecha, months) {
+      var date = new Date(fecha);
+
+      if (date.getMonth() >= months) {
+        date.setMonth(date.getMonth() - months);
+      } else {
+        date.setMonth(months - date.getMonth());
+      }
+
+      return date;
+    }
+  }, {
+    key: "minusYears",
+    value: function minusYears(fecha, years) {
+      var date = new Date(fecha);
+
+      if (date.getFullYear() >= years) {
+        date.setYear(date.getFullYear() - years);
+      } else {
+        date.setYear(years - date.getFullYear());
+      }
+
+      return date;
+    }
+  }, {
+    key: "retornoVariables",
+    value: function retornoVariables() {
+      console.log('FIN');
+      console.log('this.state.variables');
+      console.log(this.state.variables);
+      this.props.retornoVariables(this.state.variables, this.state.indicadores, this.state.riesgos);
     }
   }, {
     key: "render",
@@ -1029,6 +1267,144 @@ function (_React$Component) {
             borderRadius: "50px"
           }
         })) : null);
+      })), _react["default"].createElement("div", {
+        style: {
+          width: "100%",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center"
+        }
+      }, _react["default"].createElement("div", {
+        style: {
+          width: "100%",
+          border: "1px solid #999297",
+          borderRadius: "50px"
+        }
+      })), _react["default"].createElement("div", {
+        style: _defineProperty({
+          display: "flex",
+          alignItems: "center",
+          paddingTop: "1%",
+          justifyContent: "center",
+          height: "8%",
+          width: "100%"
+        }, "paddingTop", "5px")
+      }, _react["default"].createElement("h2", null, "Indicadores")), _react["default"].createElement("div", {
+        style: {
+          width: "100%",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center"
+        }
+      }, _react["default"].createElement("div", {
+        style: {
+          width: "100%",
+          border: "1px solid #999297",
+          borderRadius: "50px"
+        }
+      })), _react["default"].createElement("br", null), _react["default"].createElement("div", {
+        style: {
+          paddingLeft: "5px",
+          overflowX: "scroll"
+        }
+      }, this.state.indicadores.map(function (indicador, i) {
+        return _react["default"].createElement("div", {
+          key: indicador.ID
+        }, _react["default"].createElement("label", {
+          className: "custom-control custom-radio"
+        }, _react["default"].createElement("input", {
+          id: "varRad" + indicador.ID,
+          onClick: function onClick() {
+            return _this11.selVar(i, "indicador");
+          },
+          type: "radio",
+          name: "sinoRadio",
+          className: "custom-control-input"
+        }), _react["default"].createElement("span", {
+          className: "custom-control-label"
+        }, indicador.nombreIndicador)), i != _this11.state.indicadores.length - 1 ? _react["default"].createElement("div", {
+          style: {
+            width: "100%",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center"
+          }
+        }, _react["default"].createElement("div", {
+          style: {
+            width: "80%",
+            border: "1px solid #d2d2e4",
+            borderRadius: "50px"
+          }
+        })) : null);
+      })), _react["default"].createElement("div", {
+        style: {
+          width: "100%",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center"
+        }
+      }, _react["default"].createElement("div", {
+        style: {
+          width: "100%",
+          border: "1px solid #999297",
+          borderRadius: "50px"
+        }
+      })), _react["default"].createElement("div", {
+        style: _defineProperty({
+          display: "flex",
+          alignItems: "center",
+          paddingTop: "1%",
+          justifyContent: "center",
+          height: "8%",
+          width: "100%"
+        }, "paddingTop", "5px")
+      }, _react["default"].createElement("h2", null, "Riesgos")), _react["default"].createElement("div", {
+        style: {
+          width: "100%",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center"
+        }
+      }, _react["default"].createElement("div", {
+        style: {
+          width: "100%",
+          border: "1px solid #999297",
+          borderRadius: "50px"
+        }
+      })), _react["default"].createElement("br", null), _react["default"].createElement("div", {
+        style: {
+          paddingLeft: "5px",
+          overflowX: "scroll"
+        }
+      }, this.state.riesgos.map(function (riesgo, i) {
+        return _react["default"].createElement("div", {
+          key: riesgo.ID
+        }, _react["default"].createElement("label", {
+          className: "custom-control custom-radio"
+        }, _react["default"].createElement("input", {
+          id: "varRad" + riesgo.ID,
+          onClick: function onClick() {
+            return _this11.selVar(i, "riesgo");
+          },
+          type: "radio",
+          name: "sinoRadio",
+          className: "custom-control-input"
+        }), _react["default"].createElement("span", {
+          className: "custom-control-label"
+        }, riesgo.nombreRiesgo)), i != _this11.state.riesgos.length - 1 ? _react["default"].createElement("div", {
+          style: {
+            width: "100%",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center"
+          }
+        }, _react["default"].createElement("div", {
+          style: {
+            width: "80%",
+            border: "1px solid #d2d2e4",
+            borderRadius: "50px"
+          }
+        })) : null);
       }))), _react["default"].createElement("div", {
         className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9",
         style: {
@@ -1053,6 +1429,8 @@ function (_React$Component) {
           whiteSpace: "nowrap"
         }
       }, this.state.variableSeleccionada.atributos.map(function (atributo, i) {
+        var _ref4;
+
         return _react["default"].createElement("div", {
           key: _this11.state.variableSeleccionada.nombre + atributo.nombre + atributo.ID,
           style: {
@@ -1076,7 +1454,12 @@ function (_React$Component) {
             justifyContent: "center"
           }
         }, _react["default"].createElement("p", {
-          className: "lead"
+          className: "lead",
+          style: (_ref4 = {
+            overflowWrap: "break-word",
+            wordWrap: "break-word",
+            whiteSpace: "-moz-pre-wrap"
+          }, _defineProperty(_ref4, "whiteSpace", "pre-wrap"), _defineProperty(_ref4, "wordBreak", "break-all"), _ref4)
         }, atributo.nombre)));
       })) : null), _react["default"].createElement("div", {
         className: "row",
@@ -1123,9 +1506,7 @@ function (_React$Component) {
         style: {
           color: "#fafafa"
         },
-        onClick: function onClick() {
-          return _this11.props.retornoVariables(_this11.state.variables, _this11.state.indicadores, _this11.state.riesgos);
-        }
+        onClick: this.crearCodigoFiltros
       }, "Visualizar Variables")), _react["default"].createElement("br", null), _react["default"].createElement("div", {
         className: "row"
       }, _react["default"].createElement("div", {
@@ -1142,7 +1523,7 @@ function (_React$Component) {
         scope: "col"
       }, "Borrar"))), _react["default"].createElement("tbody", null, this.state.filtros.map(function (filtro, i) {
         return _react["default"].createElement("tr", {
-          key: filtro.instruccion + "" + j
+          key: filtro.instruccion + "" + i
         }, _react["default"].createElement("td", {
           scope: "row"
         }, i + 1), _react["default"].createElement("td", {

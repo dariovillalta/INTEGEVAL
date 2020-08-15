@@ -126,20 +126,20 @@ function (_React$Component) {
       }, this.state.dashboards.map(function (dashboard, i) {
         return _react["default"].createElement("a", {
           onClick: function onClick() {
-            return _this3.props.editarVariable(variable.ID, variable.esObjeto, variable.esInstruccionSQL, variable.tipo);
+            return _this3.props.editarDashboard(dashboard);
           },
           style: {
             color: "#fafafa"
           },
           className: "btn btn-" + (i <= colores.length - 1 ? colores[i] : colores[i % colores.length]) + ' btn-block btnWhiteColorHover font-bold font-20',
-          key: variable.ID
-        }, variable.nombre);
+          key: dashboard.ID
+        }, dashboard.nombre);
       }), this.state.dashboards.length == 0 ? _react["default"].createElement("div", {
         className: "p-3 mb-2 bg-dark text-white font-bold font-20 text-center",
         style: {
           width: "100%"
         }
-      }, "No existen variables creadas") : null))))));
+      }, "No existen dashboards creados") : null))))));
     }
   }]);
 

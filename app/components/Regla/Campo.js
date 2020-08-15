@@ -580,7 +580,7 @@ function (_React$Component) {
           indicesVarSeleccionados: _this2.state.indicesVarSeleccionadosConexiones[i]
         }) : null);
       })), _react["default"].createElement("div", {
-        label: "Variables"
+        label: "Variables Compuestas"
       }, this.props.objetos.map(function (variable, i) {
         return _react["default"].createElement("div", {
           className: "row",
@@ -599,7 +599,7 @@ function (_React$Component) {
           indicesVarSeleccionados: _this2.state.indicesVarSeleccionadosVariables[i]
         }) : null);
       })), _react["default"].createElement("div", {
-        label: "Variables Escalares"
+        label: "Variables Individuales"
       }, _react["default"].createElement("div", {
         className: "row",
         style: {
@@ -615,7 +615,7 @@ function (_React$Component) {
         indiceTabla: false,
         indicesVarSeleccionados: this.state.indicesVarSeleccionadosVariablesEscalares
       }))), _react["default"].createElement("div", {
-        label: "Excel"
+        label: "Variables Excel"
       }, this.props.excel.map(function (excel, i) {
         return _react["default"].createElement("div", {
           className: "row",
@@ -635,7 +635,7 @@ function (_React$Component) {
           indicesVarSeleccionados: _this2.state.indicesVarSeleccionadosExcel[i]
         }) : null);
       })), _react["default"].createElement("div", {
-        label: "Formas"
+        label: "Variables Formas"
       }, _react["default"].createElement("div", {
         className: "row",
         style: {

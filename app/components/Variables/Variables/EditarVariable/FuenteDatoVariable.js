@@ -47,6 +47,7 @@ var mostrarEsColeccionGlobal = true;
 var mostrarInstruccionSQLGlobal = true;
 var tituloGlobal = "Instrucción SQL";
 var valorPeriodicidadGlobal = "-1";
+var tipoVariable = '';
 var periodicidad = [{
   nombre: "diario"
 }, {
@@ -183,7 +184,9 @@ function (_React$Component) {
       mostrarEsColeccion: mostrarEsColeccionGlobal,
       titulo: tituloGlobal,
       mostrarInstruccionSQL: mostrarInstruccionSQLGlobal,
-      valorPeriodicidad: valorPeriodicidadGlobal
+      valorPeriodicidad: valorPeriodicidadGlobal,
+      tipoVariable: tipoVariable,
+      usuarios: []
     };
     _this.cambioInstruccionSQL = _this.cambioInstruccionSQL.bind(_assertThisInitialized(_this));
     _this.cambioAColeccion = _this.cambioAColeccion.bind(_assertThisInitialized(_this));
@@ -289,8 +292,9 @@ function (_React$Component) {
     _this.guardarVariable = _this.guardarVariable.bind(_assertThisInitialized(_this));
     _this.verificarPeriodicidadGuardar = _this.verificarPeriodicidadGuardar.bind(_assertThisInitialized(_this));
     _this.updatePeriodicidad = _this.updatePeriodicidad.bind(_assertThisInitialized(_this));
-    _this.guardarPeriodicidad = _this.guardarPeriodicidad.bind(_assertThisInitialized(_this));
-    valorPeriodicidadGlobal = _this.props.periodicidadVariable;
+    _this.guardarPeriodicidad = _this.guardarPeriodicidad.bind(_assertThisInitialized(_this)); //valorPeriodicidadGlobal = this.props.periodicidadVariable;
+
+    _this.getUsuarios = _this.getUsuarios.bind(_assertThisInitialized(_this));
     return _this;
   }
 
@@ -312,8 +316,11 @@ function (_React$Component) {
         var fecha = $("#fecha").datepicker('getDate');
         self.props.actualizarFechaInicio(fecha);
       });
+      setTimeout(function () {
+        self.cargarDatePicker();
+      }, 600);
 
-      if (this.props.tipoVariableOriginal.localeCompare("variable") == 0) {
+      if (this.props.tipoVariableOriginal.localeCompare("variable") == 0 && this.props.esPrimeraVez) {
         var transaction = new _mssql["default"].Transaction(this.props.pool);
         transaction.begin(function (err) {
           var rolledBack = false;
@@ -334,7 +341,11 @@ function (_React$Component) {
                   var titulo = "Instrucción SQL";
 
                   if (!result.recordset[0].esInstruccionSQL) {
-                    if (result.recordset[0].esObjeto) titulo = "Variable Compuesta";else titulo = "Variable Individual";
+                    if (result.recordset[0].esObjeto) {
+                      titulo = "Variable Compuesta";
+                    } else {
+                      titulo = "Variable Individual";
+                    }
                   }
 
                   mostrarEsObjetoGlobal = result.recordset[0].esObjeto;
@@ -349,12 +360,61 @@ function (_React$Component) {
                     mostrarEsColeccion: result.recordset[0].esColeccion,
                     valorPeriodicidad: result.recordset[0].periodicidad
                   });
+
+                  _this2.props.changeStateFirstTimeToFalse();
                 }
               });
             }
           });
         }); // fin transaction
       }
+
+      if (this.props.tipoVariableOriginal.localeCompare("variable") == 0) {
+        var _transaction = new _mssql["default"].Transaction(this.props.pool);
+
+        _transaction.begin(function (err) {
+          var rolledBack = false;
+
+          _transaction.on('rollback', function (aborted) {
+            rolledBack = true;
+          });
+
+          var request = new _mssql["default"].Request(_transaction);
+          request.query("select * from Variables where ID = " + _this2.props.idVariable, function (err, result) {
+            if (err) {
+              console.log(err);
+
+              if (!rolledBack) {
+                _transaction.rollback(function (err) {});
+              }
+            } else {
+              _transaction.commit(function (err) {
+                if (result.recordset.length > 0) {
+                  if (!result.recordset[0].esInstruccionSQL) {
+                    if (result.recordset[0].esObjeto) {
+                      tipoVariable = 'objeto';
+                    } else {
+                      tipoVariable = 'escalar';
+                    }
+                  } else {
+                    tipoVariable = 'sql';
+                  }
+
+                  _this2.setState({
+                    tipoVariable: tipoVariable
+                  });
+                }
+              });
+            }
+          });
+        }); // fin transaction
+
+      }
+    }
+  }, {
+    key: "componentWillUnmount",
+    value: function componentWillUnmount() {
+      tipoVariable = '';
     }
   }, {
     key: "cambioInstruccionSQL",
@@ -412,6 +472,7 @@ function (_React$Component) {
     key: "actualizarPeriodicidad",
     value: function actualizarPeriodicidad() {
       var periodicidad = $("#periodicidad").val();
+      valorPeriodicidadGlobal = periodicidad;
       this.setState({
         valorPeriodicidad: periodicidad
       }, this.cargarDatePicker);
@@ -427,9 +488,7 @@ function (_React$Component) {
         minViewMode: "days",
         language: 'es'
       });
-      console.log("this.props.fechaInicioVariable");
-      console.log(this.props.fechaInicioVariable);
-      if (this.props.fechaInicioVariable.getFullYear() != 1964 && this.props.fechaInicioVariable.getMonth() != 4 && this.props.fechaInicioVariable.getDate() != 28) $("#fecha").datepicker("setDate", this.props.fechaInicioVariable);
+      if (this.props.fechaInicioVariable.toString().length > 0 && this.props.fechaInicioVariable.getFullYear() != 1964 && this.props.fechaInicioVariable.getMonth() != 4 && this.props.fechaInicioVariable.getDate() != 28) $("#fecha").datepicker("setDate", this.props.fechaInicioVariable);
       var self = this;
       $('#fecha').datepicker().on('changeDate', function () {
         var fecha = $("#fecha").datepicker('getDate');
@@ -6442,8 +6501,39 @@ function (_React$Component) {
     */
 
   }, {
+    key: "getUsuarios",
+    value: function getUsuarios() {
+      var _this37 = this;
+
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("select * from Usuarios", function (err, result) {
+          if (err) {
+            console.log(err);
+
+            if (!rolledBack) {
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              _this37.setState({
+                usuarios: result.recordset
+              });
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
     key: "render",
     value: function render() {
+      var _this38 = this;
+
       return _react["default"].createElement("div", null, _react["default"].createElement("br", null), _react["default"].createElement("div", {
         className: "row",
         style: {
@@ -6521,7 +6611,7 @@ function (_React$Component) {
       }, _react["default"].createElement("label", {
         htmlFor: "esColeccion",
         className: "col-form-label"
-      }, "Es colecci\xF3n de Datos:")), _react["default"].createElement("div", {
+      }, "Tipo de Conjunto:")), _react["default"].createElement("div", {
         className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
       }, _react["default"].createElement("div", {
         className: "switch-button-coleccion switch-button-yesno",
@@ -6547,7 +6637,7 @@ function (_React$Component) {
       }, _react["default"].createElement("label", {
         htmlFor: "esObjetoFuenteDato",
         className: "col-form-label"
-      }, "Es variable compuesta:")), _react["default"].createElement("div", {
+      }, "Tipo de Variable:")), _react["default"].createElement("div", {
         className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
       }, _react["default"].createElement("div", {
         className: "switch-button-variable switch-button-yesno",
@@ -6611,14 +6701,43 @@ function (_React$Component) {
       }, _react["default"].createElement("div", {
         className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
       }, _react["default"].createElement("label", {
-        htmlFor: "analista",
+        htmlFor: "responsable",
         className: "col-form-label"
       }, "Nombre Encargado")), _react["default"].createElement("div", {
         className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
+      }, _react["default"].createElement("select", {
+        id: "responsable",
+        defaultValue: this.props.responsableVariable,
+        onChange: this.props.actualizarNombreEncargado,
+        className: "form-control"
+      }, _react["default"].createElement("option", {
+        value: "-1"
+      }, "Ninguno"), this.state.usuarios.map(function (usuario, i) {
+        return _react["default"].createElement("option", {
+          value: usuario.ID,
+          key: usuario.ID
+        }, usuario.usuario);
+      })))), _react["default"].createElement("div", {
+        className: "row",
+        style: {
+          width: "100%"
+        }
+      }, _react["default"].createElement("div", {
+        className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
+      }, _react["default"].createElement("label", {
+        htmlFor: "categoriaVariable",
+        className: "col-form-label"
+      }, "Categor\xEDa de Variable")), _react["default"].createElement("div", {
+        className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group",
+        style: {
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center"
+        }
       }, _react["default"].createElement("input", {
-        id: "analista",
-        defaultValue: this.props.analistaVariable,
-        onKeyUp: this.props.actualizarNombreEncargado,
+        id: "categoriaVariable",
+        defaultValue: this.props.categoriaVariable,
+        onKeyUp: this.props.actualizarCategoriaVariable,
         type: "text",
         className: "form-control form-control-sm"
       }))), _react["default"].createElement("div", {
@@ -6646,25 +6765,7 @@ function (_React$Component) {
         id: "guardarFuenteDato"
       }), _react["default"].createElement("span", null, _react["default"].createElement("label", {
         htmlFor: "guardarFuenteDato"
-      }))))), _react["default"].createElement("div", {
-        className: "row",
-        style: {
-          width: "100%",
-          display: this.state.mostrarEsObjeto ? "" : "none"
-        }
-      }, _react["default"].createElement("div", {
-        className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3"
-      }, _react["default"].createElement("label", {
-        htmlFor: "objetoPadreID",
-        className: "col-form-label"
-      }, "Variable Padre:")), _react["default"].createElement("div", {
-        className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9"
-      }, _react["default"].createElement("select", {
-        className: "form-control",
-        id: "objetoPadreID"
-      }, _react["default"].createElement("option", {
-        value: "-1"
-      }, "Ninguno")))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
+      }))))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
         className: "row",
         style: {
           width: "100%",
@@ -6682,7 +6783,8 @@ function (_React$Component) {
         modificarNombreVariable: this.props.modificarNombreVariable,
         mostrarEsObjeto: this.state.mostrarEsObjeto,
         goToCreateConditions: this.props.goToCreateConditions,
-        goCreateVariableFieldSQL: this.props.goCreateVariableFieldSQL
+        goCreateVariableFieldSQL: this.props.goCreateVariableFieldSQL,
+        tipoVariable: this.state.tipoVariable
       })), _react["default"].createElement("br", null), _react["default"].createElement("div", {
         className: "row",
         style: {
@@ -6700,7 +6802,9 @@ function (_React$Component) {
         style: {
           marginLeft: "10px"
         },
-        onClick: this.props.eliminarVariable
+        onClick: function onClick() {
+          return _this38.props.eliminarVariable(true);
+        }
       }, "Eliminar Variable") : null, this.props.tipoVariableOriginal.localeCompare("variable") == 0 ? _react["default"].createElement("a", {
         href: "#",
         className: "btn btn-primary active",
@@ -6714,13 +6818,26 @@ function (_React$Component) {
         style: {
           marginLeft: "10px"
         },
-        onClick: this.props.goToTimeline
+        onClick: function onClick() {
+          return _this38.props.goToTimeline(false);
+        }
       }, "Historial de Variable") : null), _react["default"].createElement("br", null));
     }
   }]);
 
   return FuenteDatoVariable;
 }(_react["default"].Component);
+/*<div className={"row"} style={{width: "100%", display: this.state.mostrarEsObjeto ? "" : "none"}}>
+    <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3"}>
+        <label htmlFor="objetoPadreID" className="col-form-label">Variable Padre:</label>
+    </div>
+    <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9"}>
+        <select className="form-control" id="objetoPadreID">
+            <option value="-1">Ninguno</option>
+        </select>
+    </div>
+</div>*/
+
 
 exports["default"] = FuenteDatoVariable;
 //# sourceMappingURL=FuenteDatoVariable.js.map

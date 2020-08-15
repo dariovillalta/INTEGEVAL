@@ -9,6 +9,8 @@ var _react = _interopRequireDefault(require("react"));
 
 var _ListasSeleVariable = _interopRequireDefault(require("./ListasSeleVariable.js"));
 
+var _Accordion = _interopRequireDefault(require("./Accordion/Accordion.js"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -612,6 +614,12 @@ function (_React$Component) {
           width: "100%",
           height: "100%"
         }
+      }, _react["default"].createElement(_Accordion["default"], {
+        showTrash: false,
+        showEdit: false,
+        color: "#ffffff"
+      }, _react["default"].createElement("div", {
+        label: "Conexiones"
       }, this.props.tablas.map(function (tabla, i) {
         return _react["default"].createElement("div", {
           style: {
@@ -628,7 +636,9 @@ function (_React$Component) {
           indiceTabla: i,
           indicesVarSeleccionados: _this2.state.indicesVarSeleccionadosConexiones[i]
         }) : null);
-      }), this.props.variables.length > 0 ? _react["default"].createElement("div", {
+      })), _react["default"].createElement("div", {
+        label: "Variables Individuales"
+      }, this.props.variables.length > 0 ? _react["default"].createElement("div", {
         style: {
           width: "100%",
           height: "80%"
@@ -641,7 +651,9 @@ function (_React$Component) {
         titulo: "Variable Escalares",
         indiceTabla: false,
         indicesVarSeleccionados: this.state.indicesVarSeleccionadosVariablesEscalares
-      })) : null, this.props.objetos.map(function (objeto, i) {
+      })) : _react["default"].createElement("span", null)), _react["default"].createElement("div", {
+        label: "Variables Compuestas"
+      }, this.props.objetos.map(function (objeto, i) {
         return _react["default"].createElement("div", {
           style: {
             width: "100%",
@@ -658,7 +670,9 @@ function (_React$Component) {
           indiceTabla: i,
           indicesVarSeleccionados: _this2.state.indicesVarSeleccionadosVariables[i]
         }) : null);
-      }), this.props.excel.map(function (excel, i) {
+      })), _react["default"].createElement("div", {
+        label: "Variables Excel"
+      }, this.props.excel.map(function (excel, i) {
         return _react["default"].createElement("div", {
           style: {
             width: "100%",
@@ -675,7 +689,9 @@ function (_React$Component) {
           indiceTabla: i,
           indicesVarSeleccionados: _this2.state.indicesVarSeleccionadosExcel[i]
         }) : null);
-      }), this.props.formas.length > 0 ? _react["default"].createElement("div", {
+      })), _react["default"].createElement("div", {
+        label: "Variables Forma"
+      }, this.props.formas.length > 0 ? _react["default"].createElement("div", {
         style: {
           width: "100%",
           height: "80%"
@@ -688,7 +704,9 @@ function (_React$Component) {
         titulo: "Variables de Formas",
         indiceTabla: false,
         indicesVarSeleccionados: this.state.indicesVarSeleccionadosFormas
-      })) : null, this.props.variablesSQL.map(function (variableSQL, i) {
+      })) : _react["default"].createElement("span", null)), _react["default"].createElement("div", {
+        label: "Variables SQL"
+      }, this.props.variablesSQL.map(function (variableSQL, i) {
         return _react["default"].createElement("div", {
           style: {
             width: "100%",
@@ -705,7 +723,7 @@ function (_React$Component) {
           indiceTabla: i,
           indicesVarSeleccionados: _this2.state.indicesVarSeleccionadosVariablesSQL[i]
         }) : null);
-      }), _react["default"].createElement("div", {
+      }))), _react["default"].createElement("div", {
         style: {
           width: "100%",
           height: "80%"

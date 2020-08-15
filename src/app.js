@@ -47,7 +47,8 @@ export default class App extends React.Component {
             userName: null,
             permision: "",
             config: {},
-            pool: null
+            pool: null,
+            conexionAbierta: false
         }
         // connection2 is now an open Connection
         this.login = this.login.bind(this);
@@ -132,6 +133,9 @@ export default class App extends React.Component {
                 alert("Error en conección con la base de datos");
             } else {
                 console.log('pool loaded');
+                this.setState({
+                    conexionAbierta: true
+                });
             }
         });
         this.setState({
@@ -145,7 +149,7 @@ export default class App extends React.Component {
                 { this.state.isLoggedIn ? (
                     <Layout userName={this.state.userName} permision={this.state.permision} logOff={this.logOff} pool={this.state.pool}> </Layout>
                 ) : (
-                    <LoginPage login={this.login} pool={this.state.pool} readConfigFile={this.readConfigFile}> </LoginPage>
+                    <LoginPage login={this.login} pool={this.state.pool} readConfigFile={this.readConfigFile} conexionAbierta={this.state.conexionAbierta}> </LoginPage>
                 )}
             </div>
         );

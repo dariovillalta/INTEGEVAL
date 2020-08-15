@@ -27,6 +27,14 @@ var _ReporteriaHome = _interopRequireDefault(require("./Reporteria/ReporteriaHom
 
 var _DashboardHome = _interopRequireDefault(require("./Dashboards/DashboardHome.js"));
 
+var _CrearYSeleccionarLista = _interopRequireDefault(require("./CrearYSeleccionarLista.js"));
+
+var _GraficosHome = _interopRequireDefault(require("./Graficos/GraficosHome.js"));
+
+var _MantenimientoUsuarios = _interopRequireDefault(require("./Usuarios/MantenimientoUsuarios.js"));
+
+var _Bitacora = _interopRequireDefault(require("./Bitacora/Bitacora.js"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -131,7 +139,10 @@ function (_React$Component) {
           showVariables: this.props.showVariables,
           showIndicador: this.props.showIndicador,
           showRiesgos: this.props.showRiesgos,
-          pool: this.props.pool
+          pool: this.props.pool,
+          showListas: this.props.showListas,
+          showUsuarios: this.props.showUsuarios,
+          showBitacora: this.props.showBitacora
         }, " "));
       } else if (this.props.router.showRiskMonitorHome) {
         return _react["default"].createElement("div", null, _react["default"].createElement(_Dashboard["default"], {
@@ -187,12 +198,35 @@ function (_React$Component) {
           pool: this.props.pool
         }, " "));
       } else if (this.props.router.showReporteria) {
-        return _react["default"].createElement("div", null, _react["default"].createElement(_ReporteriaHome["default"], {
+        return _react["default"].createElement("div", {
+          style: {
+            width: "100%"
+          }
+        }, _react["default"].createElement(_ReporteriaHome["default"], {
           pool: this.props.pool
         }, " "));
       } else if (this.props.router.showDashboard) {
         return _react["default"].createElement("div", null, _react["default"].createElement(_DashboardHome["default"], {
           pool: this.props.pool
+        }, " "));
+      } else if (this.props.router.showListas) {
+        return _react["default"].createElement("div", null, _react["default"].createElement(_CrearYSeleccionarLista["default"], {
+          pool: this.props.pool,
+          configuracionHome: this.props.showRiskControlHome
+        }, " "));
+      } else if (this.props.router.showGraficos) {
+        return _react["default"].createElement("div", null, _react["default"].createElement(_GraficosHome["default"], {
+          pool: this.props.pool
+        }, " "));
+      } else if (this.props.router.showUsuarios) {
+        return _react["default"].createElement("div", null, _react["default"].createElement(_MantenimientoUsuarios["default"], {
+          pool: this.props.pool,
+          configuracionHome: this.props.showRiskControlHome
+        }, " "));
+      } else if (this.props.router.showBitacora) {
+        return _react["default"].createElement("div", null, _react["default"].createElement(_Bitacora["default"], {
+          pool: this.props.pool,
+          configuracionHome: this.props.showRiskControlHome
         }, " "));
       } else {
         return _react["default"].createElement("div", null);

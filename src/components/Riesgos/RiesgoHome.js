@@ -20,7 +20,8 @@ export default class RiesgoHome extends React.Component {
             componenteActual: componente,
             nombreRiesgo: "",
             pesoRiesgo: 0,
-            formulaRiesgo: ""
+            formulaRiesgo: "",
+            responsableRiesgo: ""
         }
         this.getRiesgos = this.getRiesgos.bind(this);
         this.acutalizarPesoMaximoDisponible = this.acutalizarPesoMaximoDisponible.bind(this);
@@ -63,14 +64,17 @@ export default class RiesgoHome extends React.Component {
     }
 
     acutalizarPesoMaximoDisponible () {
-        var pesoInstitucional = 100;
-        var pesoExistente = 0;
-        for (var i = 0; i < this.state.riesgos.length; i++) {
-            pesoExistente += this.state.riesgos[i].peso;
-        };
-        this.setState({
-            pesoDisponible: pesoInstitucional-pesoExistente
-        });
+        //validando para que despues de traer riesgos al crear uno nuevo no vuelva a sobrescribir pesoDisponible
+        if(this.state.idRiesgoSeleccionado == -1) {
+            var pesoInstitucional = 100;
+            var pesoExistente = 0;
+            for (var i = 0; i < this.state.riesgos.length; i++) {
+                pesoExistente += this.state.riesgos[i].peso;
+            };
+            this.setState({
+                pesoDisponible: pesoInstitucional-pesoExistente
+            });
+        }
     }
 
     crearRiesgo () {
@@ -83,16 +87,32 @@ export default class RiesgoHome extends React.Component {
         this.setState({
             idRiesgoSeleccionado: -1,
             componenteActual: "selRiesgo"
-        });
+        }, this.acutalizarPesoMaximoDisponible );
     }
 
-    editarRiesgo (id, nombreRiesgo, pesoRiesgo, formulaRiesgo) {
+    editarRiesgo (id, nombreRiesgo, pesoRiesgo, formulaRiesgo, responsableRiesgo) {
+        if(this.state.pesoDisponible == 0) {
+            this.setState({
+                pesoDisponible: pesoRiesgo
+            });
+        } else {
+            var pesoInstitucional = 100;
+            var pesoExistente = 0;
+            for (var i = 0; i < this.state.riesgos.length; i++) {
+                if(this.state.riesgos[i].ID != id)
+                    pesoExistente += this.state.riesgos[i].peso;
+            };
+            this.setState({
+                pesoDisponible: pesoInstitucional-pesoExistente
+            });
+        }
         this.setState({
             idRiesgoSeleccionado: id,
             componenteActual: "editarRiesgo",
             nombreRiesgo: nombreRiesgo,
             pesoRiesgo: pesoRiesgo,
             formulaRiesgo: formulaRiesgo,
+            responsableRiesgo: responsableRiesgo
         });
     }
 
@@ -115,7 +135,7 @@ export default class RiesgoHome extends React.Component {
                     transaction.commit(err => {
                         if(result.recordset != undefined) {
                             if(result.recordset.length) {
-                                this.editarRiesgo(result.recordset[0].ID, result.recordset[0].nombre, result.recordset[0].peso, result.recordset[0].tolerancia, result.recordset[0].valorIdeal, result.recordset[0].idRiesgoPadre);
+                                this.editarRiesgo(result.recordset[0].ID, result.recordset[0].nombre, result.recordset[0].peso, result.recordset[0].formula, result.recordset[0].responsable);
                             }
                         }
                     });
@@ -153,7 +173,12 @@ export default class RiesgoHome extends React.Component {
         if(this.state.componenteActual.localeCompare("selRiesgo") == 0) {
             return (
                 <div>
-                    <SeleccionarRiesgo pool={this.props.pool} deleteRiesgo={this.deleteRiesgo} configuracionHome={this.props.configuracionHome} crearRiesgo={this.crearRiesgo} editarRiesgo={this.editarRiesgo} riesgos={this.state.riesgos}> </SeleccionarRiesgo>
+                    <SeleccionarRiesgo pool={this.props.pool}
+                                        deleteRiesgo={this.deleteRiesgo}
+                                        configuracionHome={this.props.configuracionHome}
+                                        crearRiesgo={this.crearRiesgo}
+                                        editarRiesgo={this.editarRiesgo}
+                                        riesgos={this.state.riesgos}> </SeleccionarRiesgo>
                 </div>
             );
         } else if(this.state.componenteActual.localeCompare("crearRiesgo") == 0) {
@@ -185,7 +210,10 @@ export default class RiesgoHome extends React.Component {
                                     pesoRiesgo={this.state.pesoRiesgo}
                                     formulaRiesgo={this.state.formulaRiesgo}
                                     getRiesgos={this.getRiesgos}
-                                    idRiesgoSeleccionado={this.state.idRiesgoSeleccionado}> </EditarRiesgo>
+                                    idRiesgoSeleccionado={this.state.idRiesgoSeleccionado}
+                                    pesoMaximo={this.state.pesoDisponible}
+                                    responsableRiesgo={this.state.responsableRiesgo}
+                                    editarRiesgo={this.editarRiesgo}> </EditarRiesgo>
                 </div>
             );
         }

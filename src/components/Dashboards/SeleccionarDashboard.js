@@ -69,11 +69,11 @@ export default class SeleccionarDashboard extends React.Component {
                             <div className={"card-body"}>
                                 <div className={"row border-top border-bottom addPaddingToConfig"}>
                                     {this.state.dashboards.map((dashboard, i) =>
-                                        <a onClick={() => this.props.editarVariable(variable.ID, variable.esObjeto, variable.esInstruccionSQL, variable.tipo)} style={{color: "#fafafa"}} className={"btn btn-" + (i <= colores.length-1 ? colores[i] : colores[i%colores.length]) + ' btn-block btnWhiteColorHover font-bold font-20'} key={variable.ID}>{variable.nombre}</a>
+                                        <a onClick={() => this.props.editarDashboard(dashboard)} style={{color: "#fafafa"}} className={"btn btn-" + (i <= colores.length-1 ? colores[i] : colores[i%colores.length]) + ' btn-block btnWhiteColorHover font-bold font-20'} key={dashboard.ID}>{dashboard.nombre}</a>
                                     )}
                                     {
                                         this.state.dashboards.length == 0
-                                        ? <div className="p-3 mb-2 bg-dark text-white font-bold font-20 text-center" style={{width: "100%"}}>No existen variables creadas</div>
+                                        ? <div className="p-3 mb-2 bg-dark text-white font-bold font-20 text-center" style={{width: "100%"}}>No existen dashboards creados</div>
                                         : null
                                     }
                                 </div>

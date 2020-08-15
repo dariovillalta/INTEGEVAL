@@ -56,7 +56,8 @@ function (_React$Component) {
       componenteActual: componente,
       nombreRiesgo: "",
       pesoRiesgo: 0,
-      formulaRiesgo: ""
+      formulaRiesgo: "",
+      responsableRiesgo: ""
     };
     _this.getRiesgos = _this.getRiesgos.bind(_assertThisInitialized(_this));
     _this.acutalizarPesoMaximoDisponible = _this.acutalizarPesoMaximoDisponible.bind(_assertThisInitialized(_this));
@@ -105,17 +106,20 @@ function (_React$Component) {
   }, {
     key: "acutalizarPesoMaximoDisponible",
     value: function acutalizarPesoMaximoDisponible() {
-      var pesoInstitucional = 100;
-      var pesoExistente = 0;
+      //validando para que despues de traer riesgos al crear uno nuevo no vuelva a sobrescribir pesoDisponible
+      if (this.state.idRiesgoSeleccionado == -1) {
+        var pesoInstitucional = 100;
+        var pesoExistente = 0;
 
-      for (var i = 0; i < this.state.riesgos.length; i++) {
-        pesoExistente += this.state.riesgos[i].peso;
+        for (var i = 0; i < this.state.riesgos.length; i++) {
+          pesoExistente += this.state.riesgos[i].peso;
+        }
+
+        ;
+        this.setState({
+          pesoDisponible: pesoInstitucional - pesoExistente
+        });
       }
-
-      ;
-      this.setState({
-        pesoDisponible: pesoInstitucional - pesoExistente
-      });
     }
   }, {
     key: "crearRiesgo",
@@ -130,17 +134,36 @@ function (_React$Component) {
       this.setState({
         idRiesgoSeleccionado: -1,
         componenteActual: "selRiesgo"
-      });
+      }, this.acutalizarPesoMaximoDisponible);
     }
   }, {
     key: "editarRiesgo",
-    value: function editarRiesgo(id, nombreRiesgo, pesoRiesgo, formulaRiesgo) {
+    value: function editarRiesgo(id, nombreRiesgo, pesoRiesgo, formulaRiesgo, responsableRiesgo) {
+      if (this.state.pesoDisponible == 0) {
+        this.setState({
+          pesoDisponible: pesoRiesgo
+        });
+      } else {
+        var pesoInstitucional = 100;
+        var pesoExistente = 0;
+
+        for (var i = 0; i < this.state.riesgos.length; i++) {
+          if (this.state.riesgos[i].ID != id) pesoExistente += this.state.riesgos[i].peso;
+        }
+
+        ;
+        this.setState({
+          pesoDisponible: pesoInstitucional - pesoExistente
+        });
+      }
+
       this.setState({
         idRiesgoSeleccionado: id,
         componenteActual: "editarRiesgo",
         nombreRiesgo: nombreRiesgo,
         pesoRiesgo: pesoRiesgo,
-        formulaRiesgo: formulaRiesgo
+        formulaRiesgo: formulaRiesgo,
+        responsableRiesgo: responsableRiesgo
       });
     }
   }, {
@@ -165,7 +188,7 @@ function (_React$Component) {
             transaction.commit(function (err) {
               if (result.recordset != undefined) {
                 if (result.recordset.length) {
-                  _this3.editarRiesgo(result.recordset[0].ID, result.recordset[0].nombre, result.recordset[0].peso, result.recordset[0].tolerancia, result.recordset[0].valorIdeal, result.recordset[0].idRiesgoPadre);
+                  _this3.editarRiesgo(result.recordset[0].ID, result.recordset[0].nombre, result.recordset[0].peso, result.recordset[0].formula, result.recordset[0].responsable);
                 }
               }
             });
@@ -239,7 +262,10 @@ function (_React$Component) {
           pesoRiesgo: this.state.pesoRiesgo,
           formulaRiesgo: this.state.formulaRiesgo,
           getRiesgos: this.getRiesgos,
-          idRiesgoSeleccionado: this.state.idRiesgoSeleccionado
+          idRiesgoSeleccionado: this.state.idRiesgoSeleccionado,
+          pesoMaximo: this.state.pesoDisponible,
+          responsableRiesgo: this.state.responsableRiesgo,
+          editarRiesgo: this.editarRiesgo
         }, " "));
       }
     }

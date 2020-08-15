@@ -62,7 +62,8 @@ function (_React$Component) {
 
   _createClass(Valor, [{
     key: "componentDidMount",
-    value: function componentDidMount() {//this.getLists();
+    value: function componentDidMount() {
+      this.getLists();
     }
   }, {
     key: "getLists",
@@ -86,7 +87,7 @@ function (_React$Component) {
             transaction.commit(function (err) {
               _this2.setState({
                 listas: result.recordset
-              });
+              }, _this2.updateVariableList());
             });
           }
         });
@@ -97,63 +98,70 @@ function (_React$Component) {
     value: function updateVariableList() {
       var _this3 = this;
 
-      var listaID = $("#selectLista").val();
+      var listaID = $("#lista").val();
 
-      if (listaID.length > 0) {
-        if (listaID.localeCompare("table") != 0) {
-          console.log(listaID);
-          var transaction = new _mssql["default"].Transaction(this.props.pool);
-          transaction.begin(function (err) {
-            var rolledBack = false;
-            transaction.on('rollback', function (aborted) {
-              rolledBack = true;
-            });
-            var request = new _mssql["default"].Request(transaction);
-            request.query("select * from VariablesdeLista where listaID = " + listaID, function (err, result) {
-              if (err) {
-                if (!rolledBack) {
-                  console.log(err);
-                  transaction.rollback(function (err) {});
-                }
-              } else {
-                transaction.commit(function (err) {
-                  var arrTemp = [];
+      if (listaID != undefined && listaID.length > 0) {
+        console.log(listaID);
+        var transaction = new _mssql["default"].Transaction(this.props.pool);
+        transaction.begin(function (err) {
+          var rolledBack = false;
+          transaction.on('rollback', function (aborted) {
+            rolledBack = true;
+          });
+          var request = new _mssql["default"].Request(transaction);
+          request.query("select * from VariablesdeLista where listaID = " + listaID, function (err, result) {
+            if (err) {
+              if (!rolledBack) {
+                console.log(err);
+                transaction.rollback(function (err) {});
+              }
+            } else {
+              transaction.commit(function (err) {
+                var arrTemp = [];
 
-                  for (var i = 0; i < result.recordset.length; i++) {
+                for (var i = 0; i < result.recordset.length; i++) {
+                  if (_this3.props.esNumero && (result.recordset[i].tipo.localeCompare("int") == 0 || result.recordset[i].tipo.localeCompare("decimal") == 0)) {
                     arrTemp.push({
                       ID: result.recordset[i].ID,
+                      listaID: result.recordset[i].listaID,
+                      nombre: result.recordset[i].nombre,
+                      tipo: result.recordset[i].tipo
+                    });
+                  } else if (_this3.props.esBoolean && result.recordset[i].tipo.localeCompare("bit") == 0) {
+                    arrTemp.push({
+                      ID: result.recordset[i].ID,
+                      listaID: result.recordset[i].listaID,
+                      nombre: result.recordset[i].nombre,
+                      tipo: result.recordset[i].tipo
+                    });
+                  } else if (_this3.props.esFecha && result.recordset[i].tipo.localeCompare("date") == 0) {
+                    arrTemp.push({
+                      ID: result.recordset[i].ID,
+                      listaID: result.recordset[i].listaID,
+                      nombre: result.recordset[i].nombre,
+                      tipo: result.recordset[i].tipo
+                    });
+                  } else if (_this3.props.esTexto && result.recordset[i].tipo.localeCompare("varchar") == 0) {
+                    arrTemp.push({
+                      ID: result.recordset[i].ID,
+                      listaID: result.recordset[i].listaID,
                       nombre: result.recordset[i].nombre,
                       tipo: result.recordset[i].tipo
                     });
                   }
+                }
 
-                  ;
+                ;
 
-                  _this3.setState({
-                    variablesDeLista: arrTemp
-                  });
-
-                  console.log(arrTemp);
+                _this3.setState({
+                  variablesDeLista: arrTemp
                 });
-              }
-            });
-          }); // fin transaction
-        } else {
-          var arrTemp = [];
 
-          for (var i = 0; i < this.props.campos.length; i++) {
-            arrTemp.push({
-              ID: this.props.campos[i].ID,
-              nombre: this.props.campos[i].nombre,
-              tipo: this.props.campos[i].tipo
-            });
-          }
-
-          ;
-          this.setState({
-            variablesDeLista: arrTemp
+                console.log(arrTemp);
+              });
+            }
           });
-        }
+        }); // fin transaction
       } else {
         this.setState({
           variablesDeLista: []
@@ -178,7 +186,7 @@ function (_React$Component) {
         radioListas: true,
         radioFecha: false,
         radioTiempo: false
-      });
+      }, this.updateVariableList);
     }
   }, {
     key: "mostrarFecha",
@@ -451,7 +459,16 @@ function (_React$Component) {
           alignItems: "center",
           justifyContent: "center"
         }
-      }), _react["default"].createElement("div", {
+      }, _react["default"].createElement("select", {
+        id: "lista",
+        className: "form-control",
+        onChange: this.updateVariableList
+      }, this.state.listas.map(function (lista, i) {
+        return _react["default"].createElement("option", {
+          value: lista.ID,
+          key: lista.ID
+        }, lista.nombre);
+      }))), _react["default"].createElement("div", {
         className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
       }, _react["default"].createElement("label", {
         htmlFor: "valor",
@@ -463,7 +480,15 @@ function (_React$Component) {
           alignItems: "center",
           justifyContent: "center"
         }
-      })) : null, this.state.radioFecha && this.props.esFecha ? _react["default"].createElement("div", {
+      }, _react["default"].createElement("select", {
+        id: "elementosLista",
+        className: "form-control"
+      }, this.state.variablesDeLista.map(function (variableDeLista, i) {
+        return _react["default"].createElement("option", {
+          value: variableDeLista.ID,
+          key: variableDeLista.ID
+        }, variableDeLista.nombre);
+      })))) : null, this.state.radioFecha && this.props.esFecha ? _react["default"].createElement("div", {
         className: "row",
         style: {
           width: "100%"

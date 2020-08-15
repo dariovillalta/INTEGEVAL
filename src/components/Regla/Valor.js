@@ -24,7 +24,7 @@ export default class Valor extends React.Component {
     }
 
     componentDidMount () {
-        //this.getLists();
+        this.getLists();
     }
 
     getLists() {
@@ -46,7 +46,7 @@ export default class Valor extends React.Component {
                     transaction.commit(err => {
                         this.setState({
                             listas: result.recordset
-                        });
+                        }, this.updateVariableList() );
                     });
                 }
             });
@@ -54,47 +54,65 @@ export default class Valor extends React.Component {
     }
 
     updateVariableList() {
-        let listaID = $("#selectLista").val();
-        if (listaID.length > 0) {
-            if (listaID.localeCompare("table") != 0) {
-                console.log(listaID)
-                const transaction = new sql.Transaction( this.props.pool );
-                transaction.begin(err => {
-                    var rolledBack = false;
-                    transaction.on('rollback', aborted => {
-                        rolledBack = true;
-                    });
-                    const request = new sql.Request(transaction);
-                    request.query("select * from VariablesdeLista where listaID = "+listaID, (err, result) => {
-                        if (err) {
-                            if (!rolledBack) {
-                                console.log(err);
-                                transaction.rollback(err => {
-                                });
-                            }
-                        } else {
-                            transaction.commit(err => {
-                                let arrTemp = [];
-                                for (var i = 0; i < result.recordset.length; i++) {
-                                    arrTemp.push({ID: result.recordset[i].ID, nombre: result.recordset[i].nombre, tipo: result.recordset[i].tipo});
-                                };
-                                this.setState({
-                                    variablesDeLista: arrTemp
-                                });
-                                console.log(arrTemp)
+        let listaID = $("#lista").val();
+        if (listaID != undefined && listaID.length > 0) {
+            console.log(listaID)
+            const transaction = new sql.Transaction( this.props.pool );
+            transaction.begin(err => {
+                var rolledBack = false;
+                transaction.on('rollback', aborted => {
+                    rolledBack = true;
+                });
+                const request = new sql.Request(transaction);
+                request.query("select * from VariablesdeLista where listaID = "+listaID, (err, result) => {
+                    if (err) {
+                        if (!rolledBack) {
+                            console.log(err);
+                            transaction.rollback(err => {
                             });
                         }
-                    });
-                }); // fin transaction
-            } else {
-                let arrTemp = [];
-                for (var i = 0; i < this.props.campos.length; i++) {
-                    arrTemp.push({ID: this.props.campos[i].ID, nombre: this.props.campos[i].nombre, tipo: this.props.campos[i].tipo});
-                };
-                this.setState({
-                    variablesDeLista: arrTemp
+                    } else {
+                        transaction.commit(err => {
+                            let arrTemp = [];
+                            for (var i = 0; i < result.recordset.length; i++) {
+                                if(this.props.esNumero && (result.recordset[i].tipo.localeCompare("int") == 0 || result.recordset[i].tipo.localeCompare("decimal") == 0) ) {
+                                    arrTemp.push({
+                                        ID: result.recordset[i].ID,
+                                        listaID: result.recordset[i].listaID,
+                                        nombre: result.recordset[i].nombre,
+                                        tipo: result.recordset[i].tipo
+                                    });
+                                } else if(this.props.esBoolean && result.recordset[i].tipo.localeCompare("bit") == 0) {
+                                    arrTemp.push({
+                                        ID: result.recordset[i].ID,
+                                        listaID: result.recordset[i].listaID,
+                                        nombre: result.recordset[i].nombre,
+                                        tipo: result.recordset[i].tipo
+                                    });
+                                } else if(this.props.esFecha && result.recordset[i].tipo.localeCompare("date") == 0) {
+                                    arrTemp.push({
+                                        ID: result.recordset[i].ID,
+                                        listaID: result.recordset[i].listaID,
+                                        nombre: result.recordset[i].nombre,
+                                        tipo: result.recordset[i].tipo
+                                    });
+                                } else if(this.props.esTexto && result.recordset[i].tipo.localeCompare("varchar") == 0) {
+                                    arrTemp.push({
+                                        ID: result.recordset[i].ID,
+                                        listaID: result.recordset[i].listaID,
+                                        nombre: result.recordset[i].nombre,
+                                        tipo: result.recordset[i].tipo
+                                    });
+                                }
+                            };
+                            this.setState({
+                                variablesDeLista: arrTemp
+                            });
+                            console.log(arrTemp)
+                        });
+                    }
                 });
-            }
+            }); // fin transaction
         } else {
             this.setState({
                 variablesDeLista: []
@@ -117,7 +135,7 @@ export default class Valor extends React.Component {
             radioListas: true,
             radioFecha: false,
             radioTiempo: false
-        });
+        }, this.updateVariableList );
     }
 
     mostrarFecha () {
@@ -311,11 +329,21 @@ export default class Valor extends React.Component {
                                 <label htmlFor="valor" className="col-form-label">Lista:</label>
                             </div>
                             <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
+                                <select id="lista" className="form-control" onChange={this.updateVariableList}>
+                                    {this.state.listas.map((lista, i) =>
+                                        <option value={lista.ID} key={lista.ID}>{lista.nombre}</option>
+                                    )}
+                                </select>
                             </div>
                             <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
                                 <label htmlFor="valor" className="col-form-label">Valores Seleccionados:</label>
                             </div>
                             <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
+                                <select id="elementosLista" className="form-control">
+                                    {this.state.variablesDeLista.map((variableDeLista, i) =>
+                                        <option value={variableDeLista.ID} key={variableDeLista.ID}>{variableDeLista.nombre}</option>
+                                    )}
+                                </select>
                             </div>
                         </div>
                     : null

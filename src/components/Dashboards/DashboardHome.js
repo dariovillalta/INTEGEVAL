@@ -11,48 +11,39 @@ export default class DashboardHome extends React.Component {
         super(props);
         this.state = {
             componenteActual: "selDashboard",
-            conexiones: [],
-            camposConexiones: [],
-            variablesEscalares: [],
             variables: [],
-            camposVariables: [],
-            variablesSQL: [],
-            camposVariablesSQL: [],
-            excel: [],
-            camposDeExcel: [],
-            formas: []
+            camposDeVariables: [],
+            indicadores: [],
+            camposDeIndicadores: [],
+            riesgos: [],
+            camposDeRiesgos: [],
+            dashboardSeleccionado: null
         }
         this.crearDashboard = this.crearDashboard.bind(this);
         this.retornarSeleccionDashboards = this.retornarSeleccionDashboards.bind(this);
-        this.editarVariables = this.editarVariables.bind(this);
-        this.changeStateFirstTimeToFalse = this.changeStateFirstTimeToFalse.bind(this);
-        this.terminoCrearVariablesPasarAEdit = this.terminoCrearVariablesPasarAEdit.bind(this);
-        this.actualizarIDVariableModificada = this.actualizarIDVariableModificada.bind(this);
+        this.editarDashboard = this.editarDashboard.bind(this);
+        this.terminoCrearDashboardPasarAEdit = this.terminoCrearDashboardPasarAEdit.bind(this);
 
-        this.getConections = this.getConections.bind(this);
-        this.getFieldsConections = this.getFieldsConections.bind(this);
-        this.getFieldConections = this.getFieldConections.bind(this);
-        this.loadScalarVariables = this.loadScalarVariables.bind(this);
-        this.loadScalarVariablesFields = this.loadScalarVariablesFields.bind(this);
-        this.getVariables = this.getVariables.bind(this);
-        this.getFieldsVariables = this.getFieldsVariables.bind(this);
-        this.getFieldVariables = this.getFieldVariables.bind(this);
-        this.loadVariablesSQL = this.loadVariablesSQL.bind(this);
-        this.initLoadVariablesCamposSQL = this.initLoadVariablesCamposSQL.bind(this);
-        this.loadVariablesCamposSQL = this.loadVariablesCamposSQL.bind(this);
-        this.loadExcel = this.loadExcel.bind(this);
-        this.initLoadExcelCampos = this.initLoadExcelCampos.bind(this);
-        this.loadExcelCampos = this.loadExcelCampos.bind(this);
-        this.loadFormas = this.loadFormas.bind(this);
+        this.getResultsVariables = this.getResultsVariables.bind(this);
+        this.getResultsVariablesFieldsInit = this.getResultsVariablesFieldsInit.bind(this);
+        this.getFieldAttributes = this.getFieldAttributes.bind(this);
+        this.getFieldResults = this.getFieldResults.bind(this);
+
+        this.getResultsIndicators = this.getResultsIndicators.bind(this);
+        this.getResultsIndicatorsFieldsInit = this.getResultsIndicatorsFieldsInit.bind(this);
+        this.getFieldAttributesIndicators = this.getFieldAttributesIndicators.bind(this);
+        this.getFieldResultsIndicators = this.getFieldResultsIndicators.bind(this);
+
+        this.getResultsRisks = this.getResultsRisks.bind(this);
+        this.getResultsRisksFieldsInit = this.getResultsRisksFieldsInit.bind(this);
+        this.getFieldAttributesRisks = this.getFieldAttributesRisks.bind(this);
+        this.getFieldResultsRisks = this.getFieldResultsRisks.bind(this);
     }
 
     componentDidMount () {
-        this.getConections();
-        this.getVariables();
-        this.loadScalarVariables();
-        this.loadVariablesSQL();
-        this.loadExcel();
-        this.loadFormas();
+        this.getResultsVariables();
+        this.getResultsIndicators();
+        this.getResultsRisks();
     }
 
     crearDashboard () {
@@ -67,24 +58,14 @@ export default class DashboardHome extends React.Component {
         });
     }
 
-    editarVariables (idVariable, esObjetoVariable, esInstruccionSQLVariable, tipoVariable) {
+    editarDashboard (dashboard) {
         this.setState({
-            idVariable: idVariable,
-            componenteActual: "editarVariables",
-            tipoVariable: tipoVariable,
-            esObjetoVariable: esObjetoVariable,
-            esInstruccionSQLVariable: esInstruccionSQLVariable,
-            esPrimeraVez: true
+            dashboardSeleccionado: dashboard,
+            componenteActual: "editarDashboard"
         });
     }
 
-    changeStateFirstTimeToFalse() {
-        this.setState({
-            esPrimeraVez: false
-        });
-    }
-
-    terminoCrearVariablesPasarAEdit (nombreFuenteDatos) {
+    terminoCrearDashboardPasarAEdit () {
         const transaction = new sql.Transaction( this.props.pool );
         transaction.begin(err => {
             var rolledBack = false;
@@ -92,10 +73,10 @@ export default class DashboardHome extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("select * from Campos where nombre = '"+nombreFuenteDatos+"'", (err, result) => {
+            request.query("select top 1 * from Dashboard order by ID desc", (err, result) => {
                 if (err) {
-                    console.log(err);
                     if (!rolledBack) {
+                        console.log(err);
                         transaction.rollback(err => {
                         });
                     }
@@ -103,95 +84,19 @@ export default class DashboardHome extends React.Component {
                     transaction.commit(err => {
                         if(result.recordset != undefined) {
                             if(result.recordset.length) {
-                                this.editarFuenteDatos(result.recordset[0].ID, result.recordset[0].nombre, result.recordset[0].descripcion, result.recordset[0].esObjeto, result.recordset[0].objetoPadreID, result.recordset[0].guardar);
+                                this.editarDashboard(result.recordset[0]);
                             }
                         }
                     });
                 }
             });
         }); // fin transaction
-    }
-
-    actualizarIDVariableModificada (tablaDeVariableModificada) {
-        if(tablaDeVariableModificada.localeCompare("excel") == 0) {
-            const transaction = new sql.Transaction( this.props.pool );
-            transaction.begin(err => {
-                var rolledBack = false;
-                transaction.on('rollback', aborted => {
-                    rolledBack = true;
-                });
-                const request = new sql.Request(transaction);
-                request.query("select top 1 * from ExcelArchivos order by ID desc", (err, result) => {
-                    if (err) {
-                        console.log(err);
-                        if (!rolledBack) {
-                            transaction.rollback(err => {
-                            });
-                        }
-                    } else {
-                        transaction.commit(err => {
-                            if(result.recordset.length > 0) {
-                                this.editarVariables(result.recordset[0].ID, false, false, "excel");
-                            }
-                        });
-                    }
-                });
-            }); // fin transaction
-        } else if(tablaDeVariableModificada.localeCompare("forma") == 0) {
-            const transaction = new sql.Transaction( this.props.pool );
-            transaction.begin(err => {
-                var rolledBack = false;
-                transaction.on('rollback', aborted => {
-                    rolledBack = true;
-                });
-                const request = new sql.Request(transaction);
-                request.query("select top 1 * from FormasVariables order by ID desc", (err, result) => {
-                    if (err) {
-                        console.log(err);
-                        if (!rolledBack) {
-                            transaction.rollback(err => {
-                            });
-                        }
-                    } else {
-                        transaction.commit(err => {
-                            if(result.recordset.length > 0) {
-                                console.log("yeah");
-                                this.editarVariables(result.recordset[0].ID, false, false, "forma");
-                            }
-                        });
-                    }
-                });
-            }); // fin transaction
-        } else if(tablaDeVariableModificada.localeCompare("variable") == 0) {
-            const transaction = new sql.Transaction( this.props.pool );
-            transaction.begin(err => {
-                var rolledBack = false;
-                transaction.on('rollback', aborted => {
-                    rolledBack = true;
-                });
-                const request = new sql.Request(transaction);
-                request.query("select top 1 * from Variables order by ID desc", (err, result) => {
-                    if (err) {
-                        console.log(err);
-                        if (!rolledBack) {
-                            transaction.rollback(err => {
-                            });
-                        }
-                    } else {
-                        transaction.commit(err => {
-                            if(result.recordset.length > 0) {
-                                this.editarVariables(result.recordset[0].ID, result.recordset[0].esObjeto, result.recordset[0].esInstruccionSQL, "variable");
-                            }
-                        });
-                    }
-                });
-            }); // fin transaction
-        }
     }
 
     /////////////////////////////////////////////////////////
 
-    getConections () {
+    getResultsVariables () {
+        //OBTENER LA LISTA DE POSIBLES VARIABLES A VISUALIZAR
         const transaction = new sql.Transaction( this.props.pool );
         transaction.begin(err => {
             var rolledBack = false;
@@ -199,247 +104,37 @@ export default class DashboardHome extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("select * from Tablas", (err, result) => {
+            request.query("select * from ResultadosNombreVariables", (err, result) => {
                 if (err) {
-                    console.log(err);
                     if (!rolledBack) {
-                        transaction.rollback(err => {
-                        });
-                        return [];
-                    }
-                } else {
-                    transaction.commit(err => {
-                        var temp = [];
-                        for (var i = 0; i < result.recordset.length; i++) {
-                            temp.push({valor: result.recordset[i].tabla, ID: result.recordset[i].ID, esTabla: true});
-                        };
-                        /*this.setState({
-                            conexiones: temp
-                        }, this.getFieldsConections );*/
-                        this.setState({
-                            conexiones: temp
-                        }, this.getFieldsConections );
-                        //this.getFieldsConections();
-                    });
-                }
-            });
-        }); // fin transaction
-    }
-
-    getFieldsConections () {
-        var arregloTemp = [];
-        for (var i = 0; i < this.state.conexiones.length; i++) {
-            this.getFieldConections(this.state.conexiones[i].valor, i, arregloTemp, this.state.conexiones[i].ID);
-        };
-    }
-
-    getFieldConections(nombreTabla, index, array, tablaID) {
-        const transaction = new sql.Transaction( this.props.pool );
-        transaction.begin(err => {
-            var rolledBack = false;
-            transaction.on('rollback', aborted => {
-                rolledBack = true;
-            });
-            const request = new sql.Request(transaction);
-            request.query("select * from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME = '"+nombreTabla+"'", (err, result) => {
-                if (err) {
-                    console.log(err);
-                    if (!rolledBack) {
-                        transaction.rollback(err => {
-                        });
-                    }
-                } else {
-                    transaction.commit(err => {
-                        var nombreColumnas = [];
-                        for (var i = 0; i < result.recordset.length; i++) {
-                            nombreColumnas.push({valor: result.recordset[i].COLUMN_NAME, tipo: result.recordset[i].DATA_TYPE, tablaID: tablaID});
-                        };
-                        if(array[index] == undefined) {
-                            array[index] = [];
-                        }
-                        array[index] = $.merge(array[index], nombreColumnas);
-                        this.setState({
-                            camposConexiones: array
-                        });
-                    });
-                }
-            });
-        }); // fin transaction
-    }
-
-    loadScalarVariables () {
-        const transaction = new sql.Transaction( this.props.pool );
-        transaction.begin(err => {
-            var rolledBack = false;
-            transaction.on('rollback', aborted => {
-                rolledBack = true;
-            });
-            const request = new sql.Request(transaction);
-            request.query("select * from Variables where esObjeto = 'false'", (err, result) => {
-                if (err) {
-                    console.log(err);
-                    if (!rolledBack) {
-                        transaction.rollback(err => {
-                        });
-                    }
-                } else {
-                    transaction.commit(err => {
-                        for (var i = 0; i < result.recordset.length; i++) {
-                            this.loadScalarVariablesFields(result.recordset[i]);
-                        };
-                    });
-                }
-            });
-        }); // fin transaction
-    }
-
-    loadScalarVariablesFields (variable) {
-        const transaction = new sql.Transaction( this.props.pool );
-        transaction.begin(err => {
-            var rolledBack = false;
-            transaction.on('rollback', aborted => {
-                rolledBack = true;
-            });
-            const request = new sql.Request(transaction);
-            request.query("select * from VariablesCampos where variableID = "+variable.ID, (err, result) => {
-                if (err) {
-                    console.log(err);
-                    if (!rolledBack) {
-                        transaction.rollback(err => {
-                        });
-                    }
-                } else {
-                    transaction.commit(err => {
-                        var temp = [...this.state.variablesEscalares];
-                        for (var i = 0; i < result.recordset.length; i++) {
-                            temp.push({valor: result.recordset[i].nombre, tipo: result.recordset[i].tipo, esFuenteDato: false, variableID: variable.ID, variableCampoID: result.recordset[i].ID, esObjeto: variable.esObjeto, esInstruccionSQL: false, nivel: result.recordset[i].nivel, esVariable: true})
-                        };
-                        this.setState({
-                            variablesEscalares: temp
-                        } );
-                    });
-                }
-            });
-        }); // fin transaction
-    }
-
-    getVariables () {
-        const transaction = new sql.Transaction( this.props.pool );
-        transaction.begin(err => {
-            var rolledBack = false;
-            transaction.on('rollback', aborted => {
-                rolledBack = true;
-            });
-            const request = new sql.Request(transaction);
-            request.query("select * from Variables where esObjeto = 'true'", (err, result) => {
-                if (err) {
-                    console.log(err);
-                    if (!rolledBack) {
-                        transaction.rollback(err => {
-                        });
-                        return [];
-                    }
-                } else {
-                    transaction.commit(err => {
-                        var temp = [];
-                        for (var i = 0; i < result.recordset.length; i++) {
-                            temp.push({valor: result.recordset[i].nombre, ID: result.recordset[i].ID, esVariable: true});
-                        };
-                        /*this.setState({
-                            variables: temp
-                        }, this.getFieldsVariables );*/
-                        this.setState({
-                            variables: temp
-                        }, this.getFieldsVariables );
-                        //this.getFieldsVariables();
-                    });
-                }
-            });
-        }); // fin transaction
-    }
-
-    getFieldsVariables () {
-        var arregloTemp = [];
-        for (var i = 0; i < this.state.variables.length; i++) {
-            this.getFieldVariables(this.state.variables[i].ID, i, arregloTemp);
-        };
-    }
-
-    getFieldVariables(variableID, index, array) {
-        if(variableID != undefined) {
-            const transaction = new sql.Transaction( this.props.pool );
-            transaction.begin(err => {
-                var rolledBack = false;
-                transaction.on('rollback', aborted => {
-                    rolledBack = true;
-                });
-                const request = new sql.Request(transaction);
-                request.query("select * from VariablesCampos where variableID = "+variableID, (err, result) => {
-                    if (err) {
                         console.log(err);
-                        if (!rolledBack) {
-                            transaction.rollback(err => {
-                            });
-                        }
-                    } else {
-                        transaction.commit(err => {
-                            var nombreColumnas = [];
-                            for (var i = 0; i < result.recordset.length; i++) {
-                                nombreColumnas.push({valor: result.recordset[i].nombre, tipo: result.recordset[i].tipo, ID: result.recordset[i].ID, variableID: variableID});
-                            };
-                            if(array[index] == undefined) {
-                                array[index] = [];
-                            }
-                            array[index] = $.merge(array[index], nombreColumnas);
-                            this.setState({
-                                camposVariables: array
-                            });
-                        });
-                    }
-                });
-            }); // fin transaction
-        }
-    }
-
-    loadVariablesSQL () {
-        const transaction = new sql.Transaction( this.props.pool );
-        transaction.begin(err => {
-            var rolledBack = false;
-            transaction.on('rollback', aborted => {
-                rolledBack = true;
-            });
-            const request = new sql.Request(transaction);
-            request.query("select * from Variables where esInstruccionSQL = 'true'", (err, result) => {
-                if (err) {
-                    console.log(err);
-                    if (!rolledBack) {
                         transaction.rollback(err => {
                         });
+                        return [];
                     }
                 } else {
                     transaction.commit(err => {
-                        var temp = [];
-                        for (var i = 0; i < result.recordset.length; i++) {
-                            temp.push(result.recordset[i]);
-                            temp[temp.length-1].esSQL = true;
-                        };
-                        this.setState({
-                            variablesSQL: temp
-                        }, this.initLoadVariablesCamposSQL );
+                        this.getResultsVariablesFieldsInit(result.recordset);
                     });
                 }
             });
         }); // fin transaction
     }
 
-    initLoadVariablesCamposSQL() {
-        var arregloTemp = [];
-        for (var i = 0; i < this.state.variablesSQL.length; i++) {
-            this.loadVariablesCamposSQL(this.state.variablesSQL[i], i, arregloTemp);
+    getResultsVariablesFieldsInit (resultados) {
+        var arregloTemp = [], arregloTempCampos = [];
+        for (var i = 0; i < resultados.length; i++) {
+            resultados[i].valor = resultados[i].nombreVariable;
+            resultados[i].esVariable = true;
+            resultados[i].esIndicador = false;
+            resultados[i].esRiesgo = false;
+            arregloTemp.push(resultados[i]);
+            this.getFieldAttributes(resultados[i], i, arregloTemp, arregloTempCampos);
+            this.getFieldResults(resultados[i], i, arregloTemp);
         };
     }
 
-    loadVariablesCamposSQL (variable, index, array) {
+    getFieldAttributes(resultado, index, array, arregloTempCampos) {
         const transaction = new sql.Transaction( this.props.pool );
         transaction.begin(err => {
             var rolledBack = false;
@@ -447,7 +142,7 @@ export default class DashboardHome extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("select * from InstruccionSQLCampos where variableID = "+variable.ID, (err, result) => {
+            request.query("select * from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME = '"+resultado.nombreVariable+'_'+resultado.inicioVigencia.getFullYear()+'_'+(resultado.inicioVigencia.getMonth()+1)+'_'+resultado.inicioVigencia.getDate()+'_'+resultado.inicioVigencia.getHours()+'_'+resultado.inicioVigencia.getMinutes()+'_'+resultado.inicioVigencia.getSeconds()+"'", (err, result) => {
                 if (err) {
                     console.log(err);
                     if (!rolledBack) {
@@ -456,16 +151,15 @@ export default class DashboardHome extends React.Component {
                     }
                 } else {
                     transaction.commit(err => {
-                        var nombreColumnas = [];
+                        var arrTemp = [];
                         for (var i = 0; i < result.recordset.length; i++) {
-                            nombreColumnas.push({valor: result.recordset[i].nombre, tipo: result.recordset[i].tipo, esFuenteDato: false, variableID: variable.ID, variableCampoID: result.recordset[i].ID, esObjeto: variable.esObjeto, esInstruccionSQL: true,  nivel: 0});
+                            arrTemp.push({nombre: result.recordset[i].COLUMN_NAME, valor: result.recordset[i].COLUMN_NAME, tipo: result.recordset[i].DATA_TYPE, esVariable: true, esIndicador: false, esRiesgo: false, nombreVariable: resultado.nombreVariable});
                         };
-                        if(array[index] == undefined) {
-                            array[index] = [];
-                        }
-                        array[index] = $.merge(array[index], nombreColumnas);
+                        array[index].atributos = arrTemp;
+                        arregloTempCampos[index] = arrTemp;
                         this.setState({
-                            camposVariablesSQL: array
+                            variables: array,
+                            camposDeVariables: arregloTempCampos
                         });
                     });
                 }
@@ -473,7 +167,7 @@ export default class DashboardHome extends React.Component {
         }); // fin transaction
     }
 
-    loadExcel () {
+    getFieldResults(resultado, index, array) {
         const transaction = new sql.Transaction( this.props.pool );
         transaction.begin(err => {
             var rolledBack = false;
@@ -481,7 +175,7 @@ export default class DashboardHome extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("select * from ExcelArchivos", (err, result) => {
+            request.query("select * from "+resultado.nombreVariable+'_'+resultado.inicioVigencia.getFullYear()+'_'+(resultado.inicioVigencia.getMonth()+1)+'_'+resultado.inicioVigencia.getDate()+'_'+resultado.inicioVigencia.getHours()+'_'+resultado.inicioVigencia.getMinutes()+'_'+resultado.inicioVigencia.getSeconds(), (err, result) => {
                 if (err) {
                     console.log(err);
                     if (!rolledBack) {
@@ -490,70 +184,56 @@ export default class DashboardHome extends React.Component {
                     }
                 } else {
                     transaction.commit(err => {
-                        var temp = [];
-                        for (var i = 0; i < result.recordset.length; i++) {
-                            temp.push(result.recordset[i]);
-                            temp[temp.length-1].esExcel = true;
-                        };
+                        array[index].resultados = result.recordset;
                         this.setState({
-                            excel: temp
-                        }, this.initLoadExcelCampos );
+                            variables: array
+                        });
                     });
                 }
             });
         }); // fin transaction
     }
-    initLoadExcelCampos () {
-        var arregloTemp = [];
-        for (var i = 0; i < this.state.excel.length; i++) {
-            this.loadExcelCampos(this.state.excel[i], i, arregloTemp);
+
+    getResultsIndicators () {
+        //OBTENER LA LISTA DE POSIBLES VARIABLES A VISUALIZAR
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("select * from ResultadosNombreIndicadores", (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                        return [];
+                    }
+                } else {
+                    transaction.commit(err => {
+                        this.getResultsIndicatorsFieldsInit(result.recordset);
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    getResultsIndicatorsFieldsInit (resultados) {
+        var arregloTemp = [], arregloTempCampos = [];
+        for (var i = 0; i < resultados.length; i++) {
+            resultados[i].valor = resultados[i].nombreIndicador;
+            resultados[i].esVariable = false;
+            resultados[i].esIndicador = true;
+            resultados[i].esRiesgo = false;
+            arregloTemp.push(resultados[i]);
+            this.getFieldAttributesIndicators(resultados[i], i, arregloTemp, arregloTempCampos);
+            this.getFieldResultsIndicators(resultados[i], i, arregloTemp);
         };
     }
 
-    loadExcelCampos (excel, index, array) {
-         const transaction = new sql.Transaction( this.props.pool );
-        transaction.begin(err => {
-            var rolledBack = false;
-            transaction.on('rollback', aborted => {
-                rolledBack = true;
-            });
-            const request = new sql.Request(transaction);
-            request.query("select * from ExcelVariables where excelArchivoID = "+excel.ID, (err, result) => {
-                if (err) {
-                    console.log(err);
-                    if (!rolledBack) {
-                        transaction.rollback(err => {
-                        });
-                    }
-                } else {
-                    transaction.commit(err => {
-                        var nombreColumnas = [];
-                        for (var i = 0; i < result.recordset.length; i++) {
-                            var tipo;
-                            if(result.recordset[i].operacion.localeCompare("SUM") == 0 || result.recordset[i].operacion.localeCompare("PROM") == 0 || result.recordset[i].operacion.localeCompare("COUNT") == 0) {
-                                tipo = 'decimal';
-                            } else if(result.recordset[i].operacion.localeCompare("MIN") == 0 || result.recordset[i].operacion.localeCompare("MAX") == 0 || result.recordset[i].operacion.localeCompare("ASIG") == 0) {
-                                if(result.recordset[i].tipo.localeCompare("numero") == 0)
-                                    tipo = 'decimal';
-                                else
-                                    tipo = result.recordset[i].tipo;
-                            }
-                            nombreColumnas.push({valor: result.recordset[i].nombre, tipo: tipo, esFuenteDato: false, excelArchivoID: excel.ID, excelVariableID: result.recordset[i].ID, esObjeto: false, esInstruccionSQL: false, nivel: 0});
-                        };
-                        if(array[index] == undefined) {
-                            array[index] = [];
-                        }
-                        array[index] = $.merge(array[index], nombreColumnas);
-                        this.setState({
-                            camposDeExcel: array
-                        });
-                    });
-                }
-            });
-        }); // fin transaction
-    }
-
-    loadFormas () {
+    getFieldAttributesIndicators(resultado, index, array, arregloTempCampos) {
         const transaction = new sql.Transaction( this.props.pool );
         transaction.begin(err => {
             var rolledBack = false;
@@ -561,7 +241,7 @@ export default class DashboardHome extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("select * from FormasVariables", (err, result) => {
+            request.query("select * from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME = '"+resultado.nombreIndicador+'_'+resultado.inicioVigencia.getFullYear()+'_'+(resultado.inicioVigencia.getMonth()+1)+'_'+resultado.inicioVigencia.getDate()+'_'+resultado.inicioVigencia.getHours()+'_'+resultado.inicioVigencia.getMinutes()+'_'+resultado.inicioVigencia.getSeconds()+"'", (err, result) => {
                 if (err) {
                     console.log(err);
                     if (!rolledBack) {
@@ -570,12 +250,141 @@ export default class DashboardHome extends React.Component {
                     }
                 } else {
                     transaction.commit(err => {
-                        var nombreColumnas = [];
+                        var arrTemp = [];
                         for (var i = 0; i < result.recordset.length; i++) {
-                            nombreColumnas.push({valor: result.recordset[i].nombre, tipo: result.recordset[i].tipo, esFuenteDato: false, formaVariableID: result.recordset[i].ID, esObjeto: false, esInstruccionSQL: false, nivel: 0, esForma: true});
+                            arrTemp.push({nombre: result.recordset[i].COLUMN_NAME, valor: result.recordset[i].COLUMN_NAME, tipo: result.recordset[i].DATA_TYPE, esVariable: false, esIndicador: true, esRiesgo: false, nombreIndicador: resultado.nombreIndicador});
                         };
+                        array[index].atributos = arrTemp;
+                        arregloTempCampos[index] = arrTemp;
                         this.setState({
-                            formas: nombreColumnas
+                            indicadores: array,
+                            camposDeIndicadores: arregloTempCampos
+                        });
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    getFieldResultsIndicators(resultado, index, array) {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("select * from "+resultado.nombreIndicador+'_'+resultado.inicioVigencia.getFullYear()+'_'+(resultado.inicioVigencia.getMonth()+1)+'_'+resultado.inicioVigencia.getDate()+'_'+resultado.inicioVigencia.getHours()+'_'+resultado.inicioVigencia.getMinutes()+'_'+resultado.inicioVigencia.getSeconds(), (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        array[index].resultados = result.recordset;
+                        this.setState({
+                            indicadores: array
+                        });
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    getResultsRisks () {
+        //OBTENER LA LISTA DE POSIBLES VARIABLES A VISUALIZAR
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("select * from ResultadosNombreRiesgos", (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                        return [];
+                    }
+                } else {
+                    transaction.commit(err => {
+                        this.getResultsRisksFieldsInit(result.recordset);
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    getResultsRisksFieldsInit (resultados) {
+        var arregloTemp = [], arregloTempCampos = [];
+        for (var i = 0; i < resultados.length; i++) {
+            resultados[i].valor = resultados[i].nombreRiesgo;
+            resultados[i].esVariable = false;
+            resultados[i].esIndicador = false;
+            resultados[i].esRiesgo = true;
+            arregloTemp.push(resultados[i]);
+            this.getFieldAttributesRisks(resultados[i], i, arregloTemp, arregloTempCampos);
+            this.getFieldResultsRisks(resultados[i], i, arregloTemp);
+        };
+    }
+
+    getFieldAttributesRisks(resultado, index, array, arregloTempCampos) {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("select * from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME = '"+resultado.nombreRiesgo+'_'+resultado.inicioVigencia.getFullYear()+'_'+(resultado.inicioVigencia.getMonth()+1)+'_'+resultado.inicioVigencia.getDate()+'_'+resultado.inicioVigencia.getHours()+'_'+resultado.inicioVigencia.getMinutes()+'_'+resultado.inicioVigencia.getSeconds()+"'", (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        var arrTemp = [];
+                        for (var i = 0; i < result.recordset.length; i++) {
+                            arrTemp.push({nombre: result.recordset[i].COLUMN_NAME, valor: result.recordset[i].COLUMN_NAME, tipo: result.recordset[i].DATA_TYPE, esVariable: false, esIndicador: false, esRiesgo: true, nombreRiesgo: resultado.nombreRiesgo});
+                        };
+                        array[index].atributos = arrTemp;
+                        arregloTempCampos[index] = arrTemp;
+                        this.setState({
+                            riesgos: array,
+                            camposDeRiesgos: arregloTempCampos
+                        });
+                    });
+                }
+            });
+        }); // fin transaction
+    }
+
+    getFieldResultsRisks(resultado, index, array) {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("select * from "+resultado.nombreRiesgo+'_'+resultado.inicioVigencia.getFullYear()+'_'+(resultado.inicioVigencia.getMonth()+1)+'_'+resultado.inicioVigencia.getDate()+'_'+resultado.inicioVigencia.getHours()+'_'+resultado.inicioVigencia.getMinutes()+'_'+resultado.inicioVigencia.getSeconds(), (err, result) => {
+                if (err) {
+                    console.log(err);
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                        array[index].resultados = result.recordset;
+                        this.setState({
+                            riesgos: array
                         });
                     });
                 }
@@ -591,7 +400,7 @@ export default class DashboardHome extends React.Component {
                                             configuracionHome={this.props.configuracionHome}
                                             crearDashboard={this.crearDashboard}
                                             goOptions={this.props.goOptions}
-                                            editarVariable={this.editarVariables}>
+                                            editarDashboard={this.editarDashboard}>
                     </SeleccionarDashboard>
                 </div>
             );
@@ -601,34 +410,26 @@ export default class DashboardHome extends React.Component {
                     <CrearDashboard pool={this.props.pool}
                                             retornarSeleccionDashboards={this.retornarSeleccionDashboards}
                                             terminoCrearCampo={this.terminoCrearFuenteDatosPasarAEdit}
-                                            tablas={this.state.conexiones}
-                                            camposTablas={this.state.camposConexiones}
-                                            variablesEscalares={this.state.variablesEscalares}
-                                            objetos={this.state.variables}
-                                            camposDeObjetos={this.state.camposVariables}
-                                            excel={this.state.excel}
-                                            camposDeExcel={this.state.camposDeExcel}
-                                            formas={this.state.formas}
-                                            variablesSQL={this.state.variablesSQL}
-                                            camposVariablesSQL={this.state.camposVariablesSQL}>
+                                            variables={this.state.variables}
+                                            camposDeVariables={this.state.camposDeVariables}
+                                            indicadores={this.state.indicadores}
+                                            camposDeIndicadores={this.state.camposDeIndicadores}
+                                            riesgos={this.state.riesgos}
+                                            camposDeRiesgos={this.state.camposDeRiesgos}
+                                            terminoCrearDashboardPasarAEdit={this.terminoCrearDashboardPasarAEdit}>
                     </CrearDashboard>
                 </div>
             );
-        } else if(this.state.componenteActual.localeCompare("editarVariables") == 0) {
+        } else if(this.state.componenteActual.localeCompare("editarDashboard") == 0) {
             return (
                 <div>
-                    <EditarVariablesHome pool={this.props.pool}
-                                    goOptions={this.props.goOptions}
-                                    idVariable={this.state.idVariable}
-                                    tipoVariable={this.state.tipoVariable}
-                                    esObjetoVariable={this.state.esObjetoVariable}
-                                    esInstruccionSQLVariable={this.state.esInstruccionSQLVariable}
-                                    retornoSeleccionVariables={this.retornoSeleccionVariables}
-                                    configuracionHome={this.props.configuracionHome}
-                                    actualizarIDVariableModificada={this.actualizarIDVariableModificada}
-                                    changeStateFirstTimeToFalse={this.changeStateFirstTimeToFalse}
-                                    esPrimeraVez={this.state.esPrimeraVez}>
-                    </EditarVariablesHome>
+                    <EditarDashboardHome pool={this.props.pool}
+                                    retornarSeleccionDashboards={this.retornarSeleccionDashboards}
+                                    variables={this.state.variables}
+                                    indicadores={this.state.indicadores}
+                                    riesgos={this.state.riesgos}
+                                    dashboardSeleccionado={this.state.dashboardSeleccionado}>
+                    </EditarDashboardHome>
                 </div>
             );
         }
