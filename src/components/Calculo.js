@@ -1,7 +1,7 @@
 import React from 'react';
 import sql from 'mssql';
 import XLSX from 'xlsx-style';
-import { evaluate, round} from 'mathjs'
+import { evaluate, round} from 'mathjs';
 
 import Modal from './Modal/Modal.js';
 
@@ -93,8 +93,12 @@ export default class Calculo extends React.Component {
         this.state = {
             showModalForma: false,
             htmlForma: '',
-            tituloVariableForma: ''
+            tituloVariableForma: '',
+            showModal: false
         }
+
+        this.saveBitacora = this.saveBitacora.bind(this);
+
         this.iniciarCalculo = this.iniciarCalculo.bind(this);
 
         this.traerArchivosExcel = this.traerArchivosExcel.bind(this);
@@ -276,11 +280,41 @@ export default class Calculo extends React.Component {
         this.verificarPeriodicidadGuardar = this.verificarPeriodicidadGuardar.bind(this);
         this.updatePeriodicidad = this.updatePeriodicidad.bind(this);
         this.guardarPeriodicidad = this.guardarPeriodicidad.bind(this);
+
+        this.verificarExistenciaErroresExcel = this.verificarExistenciaErroresExcel.bind(this);
+        this.verificarExistenciaErroresForma = this.verificarExistenciaErroresForma.bind(this);
+        this.verificarExistenciaErroresVariable = this.verificarExistenciaErroresVariable.bind(this);
+
+        this.closeModal = this.closeModal.bind(this);
     }
 
     iniciarCalculo() {
         this.traerArchivosExcel();
         //this.getNivelMaximoVariables();
+    }
+
+    saveBitacora (fecha, descripcion, tipoVariable, idVariable) {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("insert into Bitacora (usuarioID, nombreUsuario, fecha, descripcion, tipoVariable, idVariable) values ("+this.props.userID+", '"+this.props.userName+"', '"+fecha.getFullYear()+"-"+(fecha.getMonth()+1)+"-"+fecha.getDate()+"', '"+descripcion+"', '"+tipoVariable+"', "+idVariable+")", (err, result) => {
+                if (err) {
+                    console.log(err);
+                    this.props.showMessage("Error", 'No se pudo guardar información de bitacora.', true, false, {});
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                    });
+                }
+            });
+        }); // fin transaction
     }
 
     traerArchivosExcel() {
@@ -308,7 +342,6 @@ export default class Calculo extends React.Component {
                             this.traerVariablesExcel(arregloDeExcel[i].ID, i);
                         };
                         if(arregloDeExcel.length == 0) {
-                            alert("No existen variables excel");
                             this.traerFormas();
                         }
                     });
@@ -745,7 +778,6 @@ export default class Calculo extends React.Component {
                             this.traerAtributosIndicadores(arregloDeIndicadores[i].ID, i);
                         };
                         if(arregloDeIndicadores.length == 0) {
-                            alert("No existen indicadores");
                             this.getNivelMaximoVariables();
                         }
                     });
@@ -1216,7 +1248,6 @@ export default class Calculo extends React.Component {
                             }
                         };
                         if(arregloDeVariables.length == 0) {
-                            alert("No existen variables");
                             this.iniciarCalculoExcel();
                         }
                     });
@@ -1727,7 +1758,7 @@ export default class Calculo extends React.Component {
                                 var ultimoCalculoVigente = false;
                                 var periodicidad = variable.periodicidad;
                                 var fechaSiguienteCalculo = new Date(fechaInicioCalculo);
-                                while(fechaSiguienteCalculo.getFullYear() < fechaUltimoCalculo.getFullYear() && fechaSiguienteCalculo.getMonth() < fechaUltimoCalculo.getMonth() && fechaSiguienteCalculo.getDate() < fechaUltimoCalculo.getDate()) {
+                                while(fechaSiguienteCalculo.getFullYear() <= fechaUltimoCalculo.getFullYear() && fechaSiguienteCalculo.getMonth() <= fechaUltimoCalculo.getMonth() && fechaSiguienteCalculo.getDate() <= fechaUltimoCalculo.getDate()) {
                                     if(periodicidad.localeCompare("diario") == 0) {
                                         fechaSiguienteCalculo = this.addDays(fechaSiguienteCalculo, 1);
                                     } else if(periodicidad.localeCompare("semanal") == 0) {
@@ -1918,13 +1949,12 @@ export default class Calculo extends React.Component {
                     transaction.commit(err => {
                         if(result.recordset.length > 0) {
                             if(tabla.localeCompare("excel") == 0 || tabla.localeCompare("forma") == 0) {
-                                window[variable.nombre] = result.recordset[0][variable.nombre];
+                                window[variable.nombre] = result.recordset[result.recordset.length-1][variable.nombre];
                             } else if(tabla.localeCompare("variable") == 0) {
-                                /// antes if(variable.esInstruccionSQL || variable.esObjeto) {
                                 if(variable.esInstruccionSQL || variable.esColeccion) {
-                                    window[variable.nombre] = result.recordset;
+                                    window[variable.nombre] = result.recordset[result.recordset.length-1];
                                 } else {
-                                    window[variable.nombre] = result.recordset[0][variable.nombre];
+                                    window[variable.nombre] = result.recordset[result.recordset.length-1][variable.nombre];
                                 }
                             }
                         } else {
@@ -2196,7 +2226,7 @@ export default class Calculo extends React.Component {
             '}'
         )();
 
-        //console.log(window['calculoPrincipal']);
+        console.log(window['calculoPrincipal']);
 
         if(!existeVarSQL) {
             window['calculoPrincipal'](evaluate, this.iniciarCalculoIndicadores, this.isValidDate, this.guardarOperacionSQL);
@@ -2532,8 +2562,6 @@ export default class Calculo extends React.Component {
 
     crearCodigoSQL (variable, siguienteMetodo) {
         var codigo = '';
-        console.log(window)
-        console.log(window["sql"])
         codigo += "\nconst transaction = new sql.Transaction( pool );";
         codigo += "\ntransaction.begin(err => {";
             codigo += "\n\tvar rolledBack = false;";
@@ -2551,8 +2579,6 @@ export default class Calculo extends React.Component {
                     codigo += "\n\t\t\t}";
                 codigo += "\n\t\t} else {";
                     codigo += "\n\t\t\ttransaction.commit(err => {";
-                        codigo += "\n\t\t\t\tconsole.log('result.recordset');";
-                        codigo += "\n\t\t\t\tconsole.log(result.recordset);";
                         codigo += "\n\t\t\t\tfor(var i = 0; i < result.recordset.length; i++) {";
                         codigo += '\n\t\t\t\t\t//INICIACION VARIABLE: '+variable.nombre;
                         codigo += '\n' + this.codigoIniciacion(variable, "variable", {}, '\t\t\t\t\t');
@@ -2570,10 +2596,6 @@ export default class Calculo extends React.Component {
                         codigo += '\n\t\t\t\t\t\twindow["'+variable.nombre+'"].push('+variable.nombre+'NU3V0);';
                         codigo += '\n\t\t\t\t\t}';
                         codigo += '\n\t\t\t\t};';
-                        /*codigo += '\n\t\t\t\tconsole.log("window["variable.nombre"]");';
-                        codigo += '\n\t\t\t\tconsole.log(window["'+variable.nombre+'"]);';
-                        codigo += '\n\t\t\t\tconsole.log("result.recordset");';
-                        codigo += '\n\t\t\t\tconsole.log(result.recordset);';*/
                         codigo += '\n\t\t\t\t'+siguienteMetodo+';';
                     codigo += "\n\t\t\t});";
                 codigo += "\n\t\t}";
@@ -2646,20 +2668,9 @@ export default class Calculo extends React.Component {
     }
 
     crearNivel (llamarSiguienteNivel, arregloAgrupacionElementosFormulaPorVariables, nivelACrear) {
-        /*var totalVarACrearNivel = 0;
-        for (var i = 0; i < arregloDeVariables.length; i++) {
-            for (var j = 0; j < arregloDeVariables[i].atributos.length; j++) {
-                if(arregloDeVariables[i].atributos[j].nivel == nivelACrear) {
-                    totalVarACrearNivel++;
-                }
-            };
-        };*/
         //arregloAgrupacionElementosFormulaPorVariables contiene todas las variables que se calculan a base de otras variables
             //cada posicion nivel 0 representa la posicion de la variable en el arreglo de variables
             //cada posicion nivel 1 tiene la variable de la cual se va a calcular, el campo, la variable a crear y el segmento que pertenece a la variable de la cual se va a calcular
-        console.log('[][][][][][][][][][][][][][][][][]]');
-        console.log('arregloAgrupacionElementosFormulaPorVariables');
-        console.log(arregloAgrupacionElementosFormulaPorVariables);
         var codigo = '';
         for (var i = 0; i < arregloDeVariables.length; i++) {
             var variablesInstanciadasID = [], variablesGuardadasID = [];
@@ -3034,10 +3045,6 @@ export default class Calculo extends React.Component {
                 }
             };
         };
-        console.log('arregloAgrupacionElementosFormulaPorVariables');
-        console.log(arregloAgrupacionElementosFormulaPorVariables);
-        console.log('codigo');
-        console.log(codigo);
         return codigo;
     }
 
@@ -3097,6 +3104,9 @@ export default class Calculo extends React.Component {
                     }
                     arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"GU4RD4RV4L0R = true;", tipo: "BANDERA_ASIG"});
                     arreglo.push({codigo: "\n"+tabsText+"}", tipo: "ASIG"});
+                    /*arreglo.push({codigo: "\n"+tabsText+"} else {\n", tipo: "ASIG"});
+                    arreglo.push({codigo: "\n"+tabsText+"\tarregloDeErroresVariables.push({nombre: nombreVariable, ID: id})\n", tipo: "ASIG"});
+                    arreglo.push({codigo: "\n"+tabsText+"} else {", tipo: "ASIG"});*/
                 }
             } else if(regla.operacion.indexOf('MAX') == 0) {
                 //trayendo formula correcta
@@ -6377,7 +6387,7 @@ export default class Calculo extends React.Component {
                             primeraVariableParaCreacionEnCodigo = arregloDeFormas[0];
                         }
                         if(entro)
-                            arregloAgrupacionElementosFormulaPorManualIndicadores[0].push({segmentoRegla: arregloDeIndicadores[i].atributos[j].segmentoReglas[k], variable: arregloDeIndicadores[i], variableCreacionCodigo: primeraVariableParaCreacionEnCodigo, atributo: arregloDeIndicadores[i].atributos[j], index: k});
+                            arregloAgrupacionElementosFormulaPorManualIndicadores[i].push({segmentoRegla: arregloDeIndicadores[i].atributos[j].segmentoReglas[k], variable: arregloDeIndicadores[i], variableCreacionCodigo: primeraVariableParaCreacionEnCodigo, atributo: arregloDeIndicadores[i].atributos[j], index: k});
                     } else {
                         for (var x = 0; x < arregloDeVariables.length; x++) {
                             if(arregloDeIndicadores[i].atributos[j].segmentoReglas[k].variableIDCreacionCodigo == arregloDeVariables[x].ID) {
@@ -6774,11 +6784,39 @@ export default class Calculo extends React.Component {
         )();*/
         console.log('arregloDeIndicadores')
         console.log(arregloDeIndicadores)
+        console.log('arregloDeVariables')
+        console.log(arregloDeVariables)
+        console.log('arregloDeExcel')
+        console.log(arregloDeExcel)
         window['calculoIndicadores'] = new Function(
             'return function calculoIndicadores(evaluate, round, calculoDeRiesgos){'+
                     '\n'+codigo+'\n\tcalculoDeRiesgos();\n'+
             '}'
         )();
+        setTimeout(function() {
+            for (var a = 0; a < arregloDeVariables.length; a++) {
+                console.log('window["'+arregloDeVariables[a].nombre+'"]');
+                console.log(window[arregloDeVariables[a].nombre]);
+            };
+        }, 3000);
+
+        setTimeout(function() {
+            console.log('===========');
+            for (var a = 0; a < arregloDeFormas.length; a++) {
+                console.log('window["'+arregloDeFormas[a].nombre+'"]');
+                console.log(window[arregloDeFormas[a].nombre]);
+            };
+        }, 3000);
+
+        setTimeout(function() {
+            console.log('===========');
+            for (var i = 0; i < arregloDeExcel.length; i++) {
+                for (var j = 0; j < arregloDeExcel[i].variables.length; j++) {
+                    console.log('window["'+arregloDeExcel[i].variables[j].nombre+'"]');
+                    console.log(window[arregloDeExcel[i].variables[j].nombre]);
+                };
+            };
+        }, 3000);
         window['calculoIndicadores'](evaluate, round, this.calculoDeRiesgos);
     }
 
@@ -6876,7 +6914,9 @@ export default class Calculo extends React.Component {
     }
 
     guardarVariablesCalculadas () {
-        alert("Calculo realizado con exito.")
+        this.setState({
+            showModal: true
+        });
         for (var i = 0; i < arregloDeExcel.length; i++) {
             for (var j = 0; j < arregloDeExcel[i].variables.length; j++) {
                 if(arregloDeExcel[i].variables[j].realizarCalculo) {
@@ -7116,6 +7156,15 @@ export default class Calculo extends React.Component {
                 }, 600);
             }
         }
+        var tipoVar = '';
+        if (variable.esInstruccionSQL) {
+            tipoVar = 'SQL';
+        } else if(variable.esObjeto) {
+            tipoVar = 'objeto';
+        } else if(variable.esObjeto) {
+            tipoVar = 'objeto';
+        }
+        this.saveBitacora(hoy, "Usuario: "+this.props.userName+" realizo el cálculo para la variable tipo variable: "+variable.nombre, "variable", variable.ID);
     }
 
     guardarVariable (instruccionSQL, variable, tabla, hoy) {
@@ -7350,6 +7399,8 @@ export default class Calculo extends React.Component {
         setTimeout(function () {
             self.guardarIndicador(instruccionSQLFinal, indicador, 'indicador', hoy);
         }, 600);
+
+        this.saveBitacora(hoy, "Usuario: "+this.props.userName+" realizo el cálculo para el indicador: "+indicador.nombre, "indicador", indicador.ID);
     }
 
     guardarIndicador (instruccionSQL, variable, tabla, hoy) {
@@ -7527,6 +7578,8 @@ export default class Calculo extends React.Component {
         setTimeout(function () {
             self.guardarRiesgo(instruccionSQLFinal);
         }, 600);
+
+        this.saveBitacora(hoy, "Usuario: "+this.props.userName+" realizo el cálculo para el riesgo: "+riesgo.nombre, "riesgo", riesgo.ID);
     }
 
     guardarRiesgo (instruccionSQL) {
@@ -7733,6 +7786,8 @@ export default class Calculo extends React.Component {
                 }, 600);
             };
         }
+
+        this.saveBitacora(hoy, "Usuario: "+this.props.userName+" realizo el cálculo para la variable tipo excel: "+variable.nombre, "variable", variable.ID);
     }
 
     guardarExcel (instruccionSQL, variable, tabla, hoy) {
@@ -7863,7 +7918,6 @@ export default class Calculo extends React.Component {
     }
 
     crearResultadoNombreForma (variable, hoy) {
-        console.log('INICAR CREAR RESULTADO');
         let mes = hoy.getMonth()+1;
         if(mes.toString().length == 1)
             mes = '0'+mes;
@@ -7897,11 +7951,11 @@ export default class Calculo extends React.Component {
 
         let hoy = new Date();
         var textoInsertPrincipio = 'INSERT INTO '+variable.nombre+'_'+fechaNombreTabla.getFullYear()+'_'+(fechaNombreTabla.getMonth()+1)+'_'+fechaNombreTabla.getDate()+'_'+fechaNombreTabla.getHours()+'_'+fechaNombreTabla.getMinutes()+'_'+fechaNombreTabla.getSeconds()+' ( ';
-        for (var i = 0; i < variable.variables.length; i++) {
+        /*for (var i = 0; i < variable.variables.length; i++) {
             if(i != 0)
                 textoInsertPrincipio += ', ';
             textoInsertPrincipio += variable.variables[i].nombre;
-        };
+        };*/
         textoInsertPrincipio += ', f3ch4Gu4rd4do ) values ( ';
         var instruccionSQLBorrar = "DELETE FROM "+variable.nombre+"_"+fechaNombreTabla.getFullYear()+"_"+(fechaNombreTabla.getMonth()+1)+"_"+fechaNombreTabla.getDate()+"_"+fechaNombreTabla.getHours()+"_"+fechaNombreTabla.getMinutes()+"_"+fechaNombreTabla.getSeconds()+ " WHERE f3ch4Gu4rd4do = '"+hoy.getFullYear()+"-"+(hoy.getMonth()+1)+"-"+hoy.getDate()+"' ";
         this.borrarForma(instruccionSQLBorrar);
@@ -7921,11 +7975,11 @@ export default class Calculo extends React.Component {
         setTimeout(function () {
             self.guardarForma(instruccionSQLFinal, variable, 'forma', hoy);
         }, 600);
+
+        this.saveBitacora(hoy, "Usuario: "+this.props.userName+" realizo el cálculo para la variable tipo forma: "+variable.nombre, "variable", variable.ID);
     }
 
     guardarForma (instruccionSQL, variable, tabla, hoy) {
-        console.log('instruccionSQLFinal');
-        console.log(instruccionSQL);
         const transaction = new sql.Transaction( this.props.pool );
         transaction.begin(err => {
             var rolledBack = false;
@@ -8032,7 +8086,7 @@ export default class Calculo extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("insert into PeriodicidadCalculo (variableID, tablaVariable, fechaInicio, fechaUltimoCalculo) values ("+variable.ID+", '"+tabla+"', '"+hoy.getFullYear()+"-"+(hoy.getMonth()+1)+"-"+hoy.getDate()+"', '"+hoy.getFullYear()+"-"+hoy.getMonth()+"-"+hoy.getDate()+"') ", (err, result) => {
+            request.query("insert into PeriodicidadCalculo (variableID, tablaVariable, fechaInicio, fechaUltimoCalculo) values ("+variable.ID+", '"+tabla+"', '"+hoy.getFullYear()+"-"+(hoy.getMonth()+1)+"-"+hoy.getDate()+"', '"+hoy.getFullYear()+"-"+(hoy.getMonth()+1)+"-"+hoy.getDate()+"') ", (err, result) => {
                 if (err) {
                     console.log(err);
                     if (!rolledBack) {
@@ -8085,52 +8139,21 @@ export default class Calculo extends React.Component {
                         }
                     };
                     var sheet = workbook.Sheets[workbook.SheetNames[k]];
-                    if(sheet != null) {
+                    if(sheet != null && arregloDeExcel[i].variables[j].realizarCalculo) {
                         try {
                             var arregloPosicionesExcel = this.getArregloPosicionesExcel(arregloDeExcel[i].variables[j].celdas);
                             if(arregloPosicionesExcel.length == 1) {
                                 var variable;
-                                if(arregloDeExcel[i].variables[j].tipo.localeCompare('numero') == 0 && sheet[arregloPosicionesExcel[0]].t.localeCompare('n') == 0) {
+                                console.log('EXCEL');
+                                console.log(sheet[arregloPosicionesExcel[0]]);
+                                if(arregloDeExcel[i].variables[j].tipo.localeCompare('numero') == 0 && sheet[arregloPosicionesExcel[0]].t.localeCompare('n') == 0 && sheet[arregloPosicionesExcel[0]].w.indexOf('/') == -1) {
                                     variable = parseFloat(sheet[arregloPosicionesExcel[0]].v);
-                                } else if(arregloDeExcel[i].variables[j].tipo.localeCompare('bit') == 0 && sheet[arregloPosicionesExcel[0]].t.localeCompare('b') == 0) {
+                                } else if(arregloDeExcel[i].variables[j].tipo.localeCompare('bit') == 0 && sheet[arregloPosicionesExcel[0]].t.localeCompare('b') == 0 && sheet[arregloPosicionesExcel[0]].w.indexOf('/') == -1) {
                                     variable = sheet[arregloPosicionesExcel[0]].v;
-                                } else if(arregloDeExcel[i].variables[j].tipo.localeCompare('varchar') == 0 && sheet[arregloPosicionesExcel[0]].t.localeCompare('s') == 0) {
+                                } else if(arregloDeExcel[i].variables[j].tipo.localeCompare('varchar') == 0 && sheet[arregloPosicionesExcel[0]].t.localeCompare('s') == 0 && sheet[arregloPosicionesExcel[0]].w.indexOf('/') == -1) {
                                     variable = sheet[arregloPosicionesExcel[0]].v;
-                                } else if(arregloDeExcel[i].variables[j].tipo.localeCompare('date') == 0 && (sheet[arregloPosicionesExcel[0]].t.localeCompare('d') == 0 || sheet[arregloPosicionesExcel[0]].t.localeCompare('n') == 0 ||  sheet[arregloPosicionesExcel[0]].t.localeCompare('s') == 0) ) {
+                                } else if(arregloDeExcel[i].variables[j].tipo.localeCompare('date') == 0 && (sheet[arregloPosicionesExcel[0]].t.localeCompare('d') == 0 || sheet[arregloPosicionesExcel[0]].t.localeCompare('n') == 0) && sheet[arregloPosicionesExcel[0]].w.indexOf('/') != -1 ) {
                                     variable = new Date(sheet[arregloPosicionesExcel[0]].w);
-                                    /*if( sheet[arregloPosicionesExcel[0]].t.localeCompare('d') == 0 ) {
-                                        variable = new Date(sheet[arregloPosicionesExcel[0]].w);
-                                    } else {
-                                        var partes;
-                                        if(sheet[arregloPosicionesExcel[0]].w.indexOf("-") > -1) {
-                                            console.log("4.1")
-                                            partes = sheet[arregloPosicionesExcel[0]].w.split("-");
-                                        } else if(sheet[arregloPosicionesExcel[0]].w.indexOf("/") > -1) {
-                                            console.log("4.2")
-                                            partes = sheet[arregloPosicionesExcel[0]].w.split("/");
-                                        }
-                                        var dia, mes, anio, entro = false;
-                                        console.log(partes)
-                                        if(partes.length != undefined && partes.length == 3) {
-                                            console.log("partes[0].length")
-                                            console.log(partes[0].length)
-                                            if(partes[0].length == 4) {
-                                                anio = partes[0];
-                                                mes = partes[1];
-                                                dia = partes[2];
-                                            } else if(partes[2].length == 4) {
-                                                anio = partes[2];
-                                                mes = partes[1];
-                                                dia = partes[0];
-                                            }
-                                        }
-                                        if(entro) {
-                                            variable = new Date(parseInt(anio), parseInt(mes), parseInt(dia));
-                                        } else {
-                                            arregloDeErroresExcel.push({nombre: arregloDeExcel[i].variables[j].nombre, ID: arregloDeExcel[i].variables[j].ID });
-                                            alert("problema para leer fecha: "+arregloDeExcel[i].variables[j].nombre);
-                                        }
-                                    }*/
                                 }
                                 window[arregloDeExcel[i].variables[j].nombre] = variable;
                             } else if(arregloPosicionesExcel.length > 1 && arregloDeExcel[i].variables[j].operacion.localeCompare("ASIG") == 0) {
@@ -8155,7 +8178,7 @@ export default class Calculo extends React.Component {
                                 } else if(arregloDeExcel[i].variables[j].tipo.localeCompare('date') == 0) {
                                     window[arregloDeExcel[i].variables[j].nombre] = [];
                                     for (var k = 0; k < arregloPosicionesExcel.length; k++) {
-                                        var variable = new Date(sheet[arregloPosicionesExcel[k]].v);
+                                        var variable = new Date(sheet[arregloPosicionesExcel[k]].w);
                                         window[arregloDeExcel[i].variables[j].nombre].push(variable);
                                     };
                                 }
@@ -8191,7 +8214,7 @@ export default class Calculo extends React.Component {
                                     if(arregloDeExcel[i].variables[j].tipo.localeCompare("date") == 0) {
                                         var max = new Date(1900, 1, 1);
                                         for (var k = 0; k < arregloPosicionesExcel.length; k++) {
-                                            var variable = new Date(sheet[arregloPosicionesExcel[k]].v);
+                                            var variable = new Date(sheet[arregloPosicionesExcel[k]].w);
                                             if(k == 0)
                                                 max = variable;
                                             if (max.getTime() < variable.getTime()) {
@@ -8216,7 +8239,7 @@ export default class Calculo extends React.Component {
                                     if(arregloDeExcel[i].variables[j].tipo.localeCompare("date") == 0) {
                                         var min = new Date(1900, 1, 1);
                                         for (var k = 0; k < arregloPosicionesExcel.length; k++) {
-                                            var variable = new Date(sheet[arregloPosicionesExcel[k]].v);
+                                            var variable = new Date(sheet[arregloPosicionesExcel[k]].w);
                                             if(k == 0)
                                                 min = variable;
                                             if (min.getTime() > variable.getTime()) {
@@ -8238,38 +8261,10 @@ export default class Calculo extends React.Component {
                                     if(arregloDeExcel[i].variables[j].tipo.localeCompare("date") == 0) {
                                         var count = 0;
                                         for (var k = 0; k < arregloPosicionesExcel.length; k++) {
-                                            //var variable = new Date(sheet[arregloPosicionesExcel[k]].v);
                                             var variable;
-                                            //
                                             if( sheet[arregloPosicionesExcel[k]].t.localeCompare('d') == 0 ) {
-                                                variable = new Date(sheet[arregloPosicionesExcel[k]].v);
-                                            } else {
-                                                var partes;
-                                                if(sheet[arregloPosicionesExcel[k]].w.indexOf("-") > -1) {
-                                                    partes = sheet[arregloPosicionesExcel[k]].w.split("-");
-                                                } else if(sheet[arregloPosicionesExcel[k]].w.indexOf("/") > -1) {
-                                                    partes = sheet[arregloPosicionesExcel[k]].w.split("/");
-                                                }
-                                                var dia, mes, anio, entro = false;
-                                                if(partes.length != undefined && partes.length == 3) {
-                                                    if(partes[0].length == 4) {
-                                                        anio = partes[0];
-                                                        mes = partes[1];
-                                                        dia = partes[2];
-                                                    } else if(partes[2].length == 4) {
-                                                        anio = partes[2];
-                                                        mes = partes[1];
-                                                        dia = partes[0];
-                                                    }
-                                                }
-                                                if(entro) {
-                                                    variable = new Date(parseInt(anio), parseInt(mes), parseInt(dia));
-                                                } else {
-                                                    arregloDeErroresExcel.push({nombre: arregloDeExcel[i].variables[j].nombre, ID: arregloDeExcel[i].variables[j].ID });
-                                                    alert("problema para leer fecha: "+arregloDeExcel[i].variables[j].nombre);
-                                                }
+                                                variable = new Date(sheet[arregloPosicionesExcel[k]].w);
                                             }
-                                            //
                                             if(this.isValidDate(variable))
                                                 count++;
                                         };
@@ -8300,12 +8295,14 @@ export default class Calculo extends React.Component {
                             arregloDeErroresExcel.push({nombre: arregloDeExcel[i].variables[j].nombre, ID: arregloDeExcel[i].variables[j].ID });
                         }
                     } else {
-                        arregloDeErroresExcel.push({nombre: arregloDeExcel[i].variables[j].nombre, ID: arregloDeExcel[i].variables[j].ID });
-                        alert("problema para leer la hoja: "+arregloDeExcel[i].variables[j].nombreHoja);
+                        if(arregloDeExcel[i].variables[j].realizarCalculo) {
+                            arregloDeErroresExcel.push({nombre: arregloDeExcel[i].variables[j].nombre, ID: arregloDeExcel[i].variables[j].ID });
+                            this.props.showMessage("Error", "Problema para leer la hoja: "+arregloDeExcel[i].variables[j].nombreHoja+".", true, false, {});
+                        }
                     }
                 };
             } else {
-                alert("problema para leer archivo: "+arregloDeExcel[i].ubicacionArchivo);
+                this.props.showMessage("Error", "Problema para leer archivo: "+arregloDeExcel[i].ubicacionArchivo+".", true, false, {});
             }
         };
     }
@@ -8755,6 +8752,21 @@ export default class Calculo extends React.Component {
         return false;
     }
 
+    verificarExistenciaErroresVariable(variable) {
+        for (var i = 0; i < arregloDeErroresVariables.length; i++) {
+            if (arregloDeErroresVariables[i].nombre.localeCompare(variable.nombre) == 0 && arregloDeErroresVariables[i].ID == variable.ID) {
+                return true;
+            }
+        };
+        return false;
+    }
+
+    closeModal () {
+        this.setState({
+            showModal: false
+        });
+    }
+
     render() {
         return (
             <div>
@@ -8763,8 +8775,51 @@ export default class Calculo extends React.Component {
                 <br/>
                 <Modal show={this.state.showModalForma}
                     titulo={this.state.tituloVariableForma}
-                    onClose={() => this.closeModalForma}>
+                    onClose={this.closeModalForma}>
                         {this.state.htmlForma}
+                </Modal>
+                <Modal show={this.state.showModal}
+                    titulo={"RESULTADOS"}
+                    onClose={this.closeModal}>
+                        <ul className="list-group mb-3">
+                            {
+                                arregloDeIndicadores.length > 0
+                                ?   <li className="list-group-item d-flex justify-content-between">
+                                        <div style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
+                                            INDICADORES
+                                        </div>
+                                    </li>
+                                :   null
+                            }
+                            {arregloDeIndicadores.map((indicador, i) =>
+                                <li key={"ind"+indicador.ID} className="list-group-item d-flex justify-content-between">
+                                    <div>
+                                        <h6 className="my-0">{indicador.nombre}</h6>
+                                    </div>
+                                    <span className="text-muted">{indicador.total}</span>
+                                </li>
+                            )}
+                        </ul>
+                        <br/>
+                        <ul className="list-group mb-3">
+                            {
+                                arregloDeRiesgos.length > 0
+                                ?   <li className="list-group-item d-flex justify-content-between">
+                                        <div style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
+                                            RIESGOS
+                                        </div>
+                                    </li>
+                                :   null
+                            }
+                            {arregloDeRiesgos.map((riesgo, i) =>
+                                <li key={"rie"+riesgo.ID} className="list-group-item d-flex justify-content-between">
+                                    <div>
+                                        <h6 className="my-0">{riesgo.nombre}</h6>
+                                    </div>
+                                    <span className="text-muted">{riesgo.total}</span>
+                                </li>
+                            )}
+                        </ul>
                 </Modal>
             </div>
         );

@@ -49,6 +49,7 @@ export default class FuenteDatoForma extends React.Component {
         else
             fecha = $("#fecha").datepicker('getDate');
         var responsable = $("#responsable").val();
+        var categoriaVariable = $("#categoriaVariable").val();
         if(nombreVariable.length > 0 && nombreVariable.length < 101) {
             if(!this.tieneEspaciosEnBlanco(nombreVariable)) {
                 if(this.verificarNoExisteNombreVar(nombreVariable)) {
@@ -56,53 +57,58 @@ export default class FuenteDatoForma extends React.Component {
                         if(periodicidad.length > 0 && periodicidad.length < 51) {
                             if(this.isValidDate(fecha)) {
                                 if(responsable.length > 0 && responsable.length < 101) {
-                                    const transaction = new sql.Transaction( this.props.pool );
-                                    transaction.begin(err => {
-                                        var rolledBack = false;
-                                        transaction.on('rollback', aborted => {
-                                            rolledBack = true;
-                                        });
-                                        const request = new sql.Request(transaction);
-                                        request.query("insert into FormasVariables (nombre, tipo, periodicidad, fechaInicioCalculo, responsable, guardar) values ('"+nombreVariable+"', '"+tipo+"', '"+periodicidad+"', '"+fecha.getFullYear()+"-"+(fecha.getMonth()+1)+"-"+fecha.getDate()+"', '"+responsable+"', '"+guardarVariable+"')", (err, result) => {
-                                            if (err) {
-                                                console.log(err);
-                                                if (!rolledBack) {
-                                                    transaction.rollback(err => {
+                                    if(categoriaVariable.length < 101) {
+                                        const transaction = new sql.Transaction( this.props.pool );
+                                        transaction.begin(err => {
+                                            var rolledBack = false;
+                                            transaction.on('rollback', aborted => {
+                                                rolledBack = true;
+                                            });
+                                            const request = new sql.Request(transaction);
+                                            request.query("insert into FormasVariables (nombre, tipo, periodicidad, fechaInicioCalculo, responsable, categoriaVariable, guardar) values ('"+nombreVariable+"', '"+tipo+"', '"+periodicidad+"', '"+fecha.getFullYear()+"-"+(fecha.getMonth()+1)+"-"+fecha.getDate()+"', '"+responsable+"', '"+categoriaVariable+"', '"+guardarVariable+"')", (err, result) => {
+                                                if (err) {
+                                                    console.log(err);
+                                                    if (!rolledBack) {
+                                                        transaction.rollback(err => {
+                                                        });
+                                                    }
+                                                } else {
+                                                    transaction.commit(err => {
+                                                        this.props.showSuccesMessage("Éxito", 'Variable Creada.');
+                                                        $("#nombreVariable").val("");
+                                                        $("#tipo").val("numero");
+                                                        //$("#periodicidad").val("");
+                                                        $("#responsable").val("-1");
+                                                        $("#categoriaVariable").val("");
+                                                        this.getFormas();
+                                                        this.props.getFormas();
                                                     });
                                                 }
-                                            } else {
-                                                transaction.commit(err => {
-                                                    alert("Variable Creada");
-                                                    $("#nombreVariable").val("");
-                                                    $("#tipo").val("numero");
-                                                    //$("#periodicidad").val("");
-                                                    $("#responsable").val("-1");
-                                                    this.getFormas();
-                                                    this.props.getFormas();
-                                                });
-                                            }
-                                        });
-                                    }); // fin transaction
+                                            });
+                                        }); // fin transaction
+                                    } else {
+                                        this.props.showMessage("Error", 'Ingrese un valor para la categoria de variable que debe ser menor a 101 caracteres.', true, false, {});
+                                    }
                                 } else {
-                                    alert('Ingrese un valor para el responsable que debe ser menor a 51 caracteres');
+                                    this.props.showMessage("Error", 'Ingrese un valor para el responsable que debe ser menor a 101 caracteres.', true, false, {});
                                 }
                             } else {
-                                alert('Ingrese un valor para la fecha');
+                                this.props.showMessage("Error", 'Ingrese un valor para la fecha.', true, false, {});
                             }
                         } else {
-                            alert('Ingrese un valor para el valor de periodicidad que debe ser menor a 51 caracteres');
+                            this.props.showMessage("Error", 'Ingrese un valor para el valor de periodicidad que debe ser menor a 51 caracteres.', true, false, {});
                         }
                     } else {
-                        alert('Ingrese un valor para el tipo de la variable que debe ser menor a 31 caracteres');
+                        this.props.showMessage("Error", 'Ingrese un valor para el tipo de la variable que debe ser menor a 31 caracteres.', true, false, {});
                     }
                 } else {
-                    alert('El nombre de la variable debe ser único.');
+                    this.props.showMessage("Error", 'El nombre de la variable debe ser único.', true, false, {});
                 }
             } else {
-                alert('El nombre de la variable no debe contener espacios en blanco');
+                this.props.showMessage("Error", 'El nombre de la variable no debe contener espacios en blanco.', true, false, {});
             }
         } else {
-            alert('Ingrese un valor para el nombre de la variable que debe ser menor a 101 caracteres');
+            this.props.showMessage("Error", 'Ingrese un valor para el nombre de la variable que debe ser menor a 101 caracteres.', true, false, {});
         }
     }
 
@@ -225,13 +231,11 @@ export default class FuenteDatoForma extends React.Component {
     isValidDate (fecha) {
         if (Object.prototype.toString.call(fecha) === "[object Date]") {
             if (isNaN(fecha.getTime())) {
-                alert("Ingrese una fecha valida.");
                 return false;
             } else {
                 return true;
             }
         } else {
-            alert("Ingrese una fecha valida.");
             return false;
         }
     }
@@ -276,6 +280,22 @@ export default class FuenteDatoForma extends React.Component {
                     </div>
                     <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
                         <input id="nombreVariable" type="text" className="form-control form-control-sm"/>
+                    </div>
+                </div>
+                <div className={"row"} style={{width: "100%"}}>
+                    <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
+                        <label htmlFor="idFormula" className="col-form-label">Identificador de la Variable en Fórmula</label>
+                    </div>
+                    <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
+                        <input id="idFormula" defaultValue={idFormula} onKeyUp={this.actualizarIdFormula} type="text" className="form-control form-control-sm"/>
+                    </div>
+                </div>
+                <div className={"row"} style={{width: "100%"}}>
+                    <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3"}>
+                        <label htmlFor="descripcionVariable" className="col-form-label">Descripción de Variable:</label>
+                    </div>
+                    <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9"}>
+                        <textarea defaultValue={descripcionVariable} onKeyUp={this.actualizarDescripcionVariable} className="form-control" id="descripcionVariable" rows="3"></textarea>
                     </div>
                 </div>
                 <div className={"row"} style={{width: "100%"}}>
@@ -330,6 +350,14 @@ export default class FuenteDatoForma extends React.Component {
                         </select>
                     </div>
                 </div>
+                <div className={"row"} style={{width: "100%"}}>
+                        <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
+                            <label htmlFor="categoriaVariable" className="col-form-label">Categoría de Variable</label>
+                        </div>
+                        <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
+                            <input id="categoriaVariable" type="text" className="form-control form-control-sm"/>
+                        </div>
+                    </div>
                 <div className={"row"} style={{width: "100%"}}>
                     <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
                         <label htmlFor="guardarVariable" className="col-form-label">Guardar Valores Obtenidos en Base de Datos</label>

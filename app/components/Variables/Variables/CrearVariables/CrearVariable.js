@@ -37,7 +37,7 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 
 var mostrarFuenteDatoVariableGlobal = false;
 var mostrarFuenteDatoFormaGlobal = false;
-var mostrarFuenteDatoExcelGlobal = true;
+var mostrarFuenteDatoExcelGlobal = false;
 /*COMPONENTE QUE CONTROLA TIPOS DE VARIABLES (EXCEL, FORMA, VARIABLE)*/
 
 var CrearVariable =
@@ -151,6 +151,7 @@ function (_React$Component) {
           width: "100%"
         }
       }, this.state.mostrarFuenteDatoVariable ? _react["default"].createElement(_FuenteDatoVariable["default"], {
+        pool: this.props.pool,
         campos: this.props.columnas,
         goToCreateConditions: this.props.goToCreateConditions,
         goCreateVariableFieldSQL: this.props.goCreateVariableFieldSQL,
@@ -159,7 +160,9 @@ function (_React$Component) {
         eliminarAtributoVariable: this.props.eliminarAtributoVariable,
         modificarNombreVariable: this.props.modificarNombreVariable,
         cambioDeArreglosDeAtributos: this.props.cambioDeArreglosDeAtributos,
+        idFormula: this.props.idFormula,
         nombreVariable: this.props.nombreVariable,
+        actualizarIdFormula: this.props.actualizarIdFormula,
         actualizarNombreVariable: this.props.actualizarNombreVariable,
         actualizarEstadoSiEsObjeto: this.props.actualizarEstadoSiEsObjeto,
         actualizarEstadoSiEsInstruccionSQL: this.props.actualizarEstadoSiEsInstruccionSQL,
@@ -179,10 +182,14 @@ function (_React$Component) {
         categoriaVariable: this.props.categoriaVariable
       }) : null, this.state.mostrarFuenteDatoForma ? _react["default"].createElement(_FuenteDatoForma["default"], {
         pool: this.props.pool,
-        getFormas: this.props.getFormas
+        getFormas: this.props.getFormas,
+        showSuccesMessage: this.props.showSuccesMessage,
+        showMessage: this.props.showMessage
       }) : null, this.state.mostrarFuenteDatoExcel ? _react["default"].createElement(_FuenteDatoExcel["default"], {
         pool: this.props.pool,
-        getExcel: this.props.getExcel
+        getExcel: this.props.getExcel,
+        showSuccesMessage: this.props.showSuccesMessage,
+        showMessage: this.props.showMessage
       }) : null), _react["default"].createElement("div", {
         className: "border-bottom",
         style: {

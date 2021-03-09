@@ -52,7 +52,32 @@ function (_React$Component) {
       fechaFinal: null,
       variables: [],
       indicadores: [],
-      riesgos: []
+      riesgos: [],
+      navbar: _react["default"].createElement("div", {
+        className: "row"
+      }, _react["default"].createElement("div", {
+        className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
+      }, _react["default"].createElement("div", {
+        className: "page-header"
+      }, _react["default"].createElement("h2", {
+        className: "pageheader-title"
+      }, "Seleccionar Fechas de Vigencia de Variables"), _react["default"].createElement("div", {
+        className: "page-breadcrumb"
+      }, _react["default"].createElement("nav", {
+        "aria-label": "breadcrumb"
+      }, _react["default"].createElement("ol", {
+        className: "breadcrumb"
+      }, _react["default"].createElement("li", {
+        className: "breadcrumb-item font-16",
+        "aria-current": "page",
+        onClick: _this.props.goSeleccionReporteria
+      }, _react["default"].createElement("a", {
+        href: "#",
+        className: "breadcrumb-link"
+      }, "Seleccionar Tipo de Reporter\xEDa")), _react["default"].createElement("li", {
+        className: "breadcrumb-item active font-16",
+        "aria-current": "page"
+      }, "Seleccionar Fechas")))))))
     };
     _this.goCreateFilters = _this.goCreateFilters.bind(_assertThisInitialized(_this));
     _this.returnChooseDates = _this.returnChooseDates.bind(_assertThisInitialized(_this));
@@ -68,51 +93,143 @@ function (_React$Component) {
   _createClass(ReporteriaHome, [{
     key: "goCreateFilters",
     value: function goCreateFilters(fechaInicial, fechaFinal) {
+      var navbar = _react["default"].createElement("div", {
+        className: "row"
+      }, _react["default"].createElement("div", {
+        className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
+      }, _react["default"].createElement("div", {
+        className: "page-header"
+      }, _react["default"].createElement("h2", {
+        className: "pageheader-title"
+      }, "Seleccionar Fechas de Vigencia de Variables"), _react["default"].createElement("div", {
+        className: "page-breadcrumb"
+      }, _react["default"].createElement("nav", {
+        "aria-label": "breadcrumb"
+      }, _react["default"].createElement("ol", {
+        className: "breadcrumb"
+      }, _react["default"].createElement("li", {
+        className: "breadcrumb-item font-16",
+        "aria-current": "page",
+        onClick: this.props.goSeleccionReporteria
+      }, _react["default"].createElement("a", {
+        href: "#",
+        className: "breadcrumb-link"
+      }, "Seleccionar Tipo de Reporter\xEDa")), _react["default"].createElement("li", {
+        className: "breadcrumb-item font-16",
+        "aria-current": "page",
+        onClick: this.returnChooseDates
+      }, _react["default"].createElement("a", {
+        href: "#",
+        className: "breadcrumb-link"
+      }, "Seleccionar Fechas")), _react["default"].createElement("li", {
+        className: "breadcrumb-item active font-16",
+        "aria-current": "page"
+      }, "Crear Filtros")))))));
+
       if (fechaInicial == null && fechaFinal == null) {
         this.setState({
-          componenteActual: "crearFiltros"
+          componenteActual: "crearFiltros",
+          navbar: navbar
         });
       } else if (fechaInicial == null && fechaFinal != null) {
         this.setState({
           componenteActual: "crearFiltros",
-          fechaFinal: fechaFinal
+          fechaFinal: fechaFinal,
+          navbar: navbar
         });
       } else if (fechaInicial != null && fechaFinal == null) {
         this.setState({
           componenteActual: "crearFiltros",
-          fechaInicial: fechaInicial
+          fechaInicial: fechaInicial,
+          navbar: navbar
         });
       } else if (fechaInicial != null && fechaFinal != null) {
         this.setState({
           componenteActual: "crearFiltros",
           fechaInicial: fechaInicial,
-          fechaFinal: fechaFinal
+          fechaFinal: fechaFinal,
+          navbar: navbar
         });
       }
     }
   }, {
     key: "returnChooseDates",
     value: function returnChooseDates() {
+      var navbar = _react["default"].createElement("div", {
+        className: "row"
+      }, _react["default"].createElement("div", {
+        className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
+      }, _react["default"].createElement("div", {
+        className: "page-header"
+      }, _react["default"].createElement("h2", {
+        className: "pageheader-title"
+      }, "Seleccionar Fechas de Vigencia de Variables"), _react["default"].createElement("div", {
+        className: "page-breadcrumb"
+      }, _react["default"].createElement("nav", {
+        "aria-label": "breadcrumb"
+      }, _react["default"].createElement("ol", {
+        className: "breadcrumb"
+      }, _react["default"].createElement("li", {
+        className: "breadcrumb-item font-16",
+        "aria-current": "page",
+        onClick: this.props.goSeleccionReporteria
+      }, _react["default"].createElement("a", {
+        href: "#",
+        className: "breadcrumb-link"
+      }, "Seleccionar Tipo de Reporter\xEDa")), _react["default"].createElement("li", {
+        className: "breadcrumb-item active font-16",
+        "aria-current": "page"
+      }, "Seleccionar Fechas")))))));
+
       this.setState({
-        componenteActual: "selFechas"
+        componenteActual: "selFechas",
+        navbar: navbar
       });
     }
   }, {
     key: "returnChooseFilter",
     value: function returnChooseFilter() {
+      var navbar = _react["default"].createElement("div", {
+        className: "row"
+      }, _react["default"].createElement("div", {
+        className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
+      }, _react["default"].createElement("div", {
+        className: "page-header"
+      }, _react["default"].createElement("h2", {
+        className: "pageheader-title"
+      }, "Seleccionar Fechas de Vigencia de Variables"), _react["default"].createElement("div", {
+        className: "page-breadcrumb"
+      }, _react["default"].createElement("nav", {
+        "aria-label": "breadcrumb"
+      }, _react["default"].createElement("ol", {
+        className: "breadcrumb"
+      }, _react["default"].createElement("li", {
+        className: "breadcrumb-item font-16",
+        "aria-current": "page",
+        onClick: this.props.goSeleccionReporteria
+      }, _react["default"].createElement("a", {
+        href: "#",
+        className: "breadcrumb-link"
+      }, "Seleccionar Tipo de Reporter\xEDa")), _react["default"].createElement("li", {
+        className: "breadcrumb-item font-16",
+        "aria-current": "page",
+        onClick: this.returnChooseDates
+      }, _react["default"].createElement("a", {
+        href: "#",
+        className: "breadcrumb-link"
+      }, "Seleccionar Fechas")), _react["default"].createElement("li", {
+        className: "breadcrumb-item active font-16",
+        "aria-current": "page"
+      }, "Seleccionar Fechas")))))));
+
       this.setState({
-        componenteActual: "crearFiltros"
+        componenteActual: "crearFiltros",
+        navbar: navbar
       });
     }
   }, {
     key: "retornoVariables",
     value: function retornoVariables(variables, indicadores, riesgos) {
-      console.log('variables');
-      console.log(variables);
-      console.log('indicadores');
-      console.log(indicadores);
-      console.log('riesgos');
-      console.log(riesgos);
       this.setState({
         variables: variables,
         indicadores: indicadores,
@@ -125,12 +242,13 @@ function (_React$Component) {
     value: function render() {
       if (this.state.componenteActual.localeCompare("selFechas") == 0) {
         return _react["default"].createElement("div", null, _react["default"].createElement(_SeleccionarFechas["default"], {
-          navbar: this.props.navbarFechas,
+          navbar: this.state.navbar,
           goCreateFilters: this.goCreateFilters
         }));
       } else if (this.state.componenteActual.localeCompare("crearFiltros") == 0) {
         return _react["default"].createElement("div", null, _react["default"].createElement(_Filtro["default"], {
           pool: this.props.pool,
+          navbar: this.state.navbar,
           fechaInicial: this.state.fechaInicial,
           fechaFinal: this.state.fechaFinal,
           retornoVariables: this.retornoVariables,
@@ -147,7 +265,8 @@ function (_React$Component) {
           indicadores: this.state.indicadores,
           riesgos: this.state.riesgos,
           returnChooseDates: this.returnChooseDates,
-          returnChooseFilter: this.returnChooseFilter
+          returnChooseFilter: this.returnChooseFilter,
+          goSeleccionReporteria: this.props.goSeleccionReporteria
         }));
       }
     }

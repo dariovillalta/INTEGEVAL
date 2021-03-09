@@ -728,21 +728,7 @@ export default class VerDashboard extends React.Component {
     render() {
         return (
             <div>
-                <div className={"row"}>
-                    <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
-                        <div className={"page-header"}>
-                            <h2 className={"pageheader-title"}>Ver Dashboard</h2>
-                            <div className={"page-breadcrumb"}>
-                                <nav aria-label="breadcrumb">
-                                    <ol className={"breadcrumb"}>
-                                        <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.props.retornarSeleccionDashboards}><a href="#" className={"breadcrumb-link"}>Dashboards</a></li>
-                                        <li className={"breadcrumb-item active font-16"} aria-current="page">Dashboard: {this.props.dashboardSeleccionado.nombre}</li>
-                                    </ol>
-                                </nav>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                {this.props.navbar}
 
                 <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
                     <h2 style={{display: "flex", justifyContent: "center"}}>{this.props.dashboardSeleccionado.nombre}</h2>

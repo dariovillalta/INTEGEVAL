@@ -485,16 +485,18 @@ function (_React$Component) {
           camposDeIndicadores: this.state.camposDeIndicadores,
           riesgos: this.state.riesgos,
           camposDeRiesgos: this.state.camposDeRiesgos,
-          terminoCrearDashboardPasarAEdit: this.terminoCrearDashboardPasarAEdit
+          terminoCrearDashboardPasarAEdit: this.terminoCrearDashboardPasarAEdit,
+          goSeleccionReporteria: this.props.goSeleccionReporteria
         }));
       } else if (this.state.componenteActual.localeCompare("verGrafico") == 0) {
         return _react["default"].createElement("div", null, _react["default"].createElement(_VerGrafico["default"], {
           pool: this.props.pool,
-          retornarSeleccionDashboards: this.retornarSeleccionDashboards,
+          retornarCrearGrafico: this.retornarCrearGrafico,
           variables: this.state.variables,
           indicadores: this.state.indicadores,
           riesgos: this.state.riesgos,
-          seccionesGraficos: this.state.seccionesGraficos
+          seccionesGraficos: this.state.seccionesGraficos,
+          goSeleccionReporteria: this.props.goSeleccionReporteria
         }));
       }
     }

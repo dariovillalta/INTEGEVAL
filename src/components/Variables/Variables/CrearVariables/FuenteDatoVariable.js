@@ -1,4 +1,5 @@
 import React from 'react';
+import sql from 'mssql';
 
 import FuenteDatoVariableAtributos from './FuenteDatoVariableAtributos.js';
 
@@ -55,6 +56,7 @@ export default class FuenteDatoVariable extends React.Component {
             var fecha = $("#fecha").datepicker('getDate');
             self.props.actualizarFechaInicio(fecha);
         });
+        this.getUsuarios();
     }
 
     cambioInstruccionSQL () {
@@ -164,6 +166,14 @@ export default class FuenteDatoVariable extends React.Component {
                     </div>
                     <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
                         <input id="nombreFuenteDato" defaultValue={this.props.nombreVariable} onKeyUp={this.props.actualizarNombreVariable} type="text" className="form-control form-control-sm"/>
+                    </div>
+                </div>
+                <div className={"row"} style={{width: "100%"}}>
+                    <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
+                        <label htmlFor="idFormula" className="col-form-label">Identificador de la Variable en Fórmula</label>
+                    </div>
+                    <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
+                        <input id="idFormula" defaultValue={this.props.idFormula} onKeyUp={this.props.actualizarIdFormula} type="text" className="form-control form-control-sm"/>
                     </div>
                 </div>
                 <div className={"row"} style={{width: "100%"}}>

@@ -89,6 +89,70 @@ function (_React$Component) {
       }, this.props.userName)), _react["default"].createElement("a", {
         className: "dropdown-item",
         href: "#",
+        onClick: this.props.showUsuarios,
+        style: {
+          display: this.props.permision.usuario.indexOf("C") > -1 || this.props.permision.usuario.indexOf("V") > -1 || this.props.permision.usuario.indexOf("E") > -1 ? "" : "none"
+        }
+      }, _react["default"].createElement("img", {
+        src: "../assets/user.png",
+        alt: "",
+        style: {
+          height: "20px",
+          marginRight: "10px"
+        }
+      }), "Usuarios"), _react["default"].createElement("a", {
+        className: "dropdown-item",
+        href: "#",
+        onClick: this.props.showListas,
+        style: {
+          display: this.props.permision.lista.indexOf("C") > -1 || this.props.permision.lista.indexOf("V") > -1 || this.props.permision.lista.indexOf("E") > -1 ? "" : "none"
+        }
+      }, _react["default"].createElement("img", {
+        src: "../assets/list.png",
+        alt: "",
+        style: {
+          height: "20px",
+          marginRight: "10px"
+        }
+      }), "Listas"), _react["default"].createElement("a", {
+        className: "dropdown-item",
+        href: "#",
+        onClick: this.props.logOff,
+        style: {
+          display: this.props.permision.alarma.indexOf("C") > -1 || this.props.permision.alarma.indexOf("V") > -1 || this.props.permision.alarma.indexOf("E") > -1 ? "" : "none"
+        }
+      }, _react["default"].createElement("img", {
+        src: "../assets/alarm.png",
+        alt: "",
+        style: {
+          height: "20px",
+          marginRight: "10px"
+        }
+      }), "Alarmas"), _react["default"].createElement("a", {
+        className: "dropdown-item",
+        href: "#",
+        onClick: this.props.showBitacora
+      }, _react["default"].createElement("img", {
+        src: "../assets/log.png",
+        alt: "",
+        style: {
+          height: "20px",
+          marginRight: "10px"
+        }
+      }), "Bit\xE1cora"), _react["default"].createElement("a", {
+        className: "dropdown-item",
+        href: "#",
+        onClick: this.props.switchProgramMode
+      }, _react["default"].createElement("img", {
+        src: "../assets/arrow.png",
+        alt: "",
+        style: {
+          height: "20px",
+          marginRight: "10px"
+        }
+      }), this.props.showRiskControlHome ? "Monitorear Riesgo Integral" : "Configuración y \n Evaluación de Riesgo Integral"), _react["default"].createElement("a", {
+        className: "dropdown-item",
+        href: "#",
         onClick: this.props.logOff
       }, _react["default"].createElement("i", {
         className: "fas fa-power-off mr-2"

@@ -64,7 +64,7 @@ function (_React$Component) {
       colorSeccionUmbralSeleccionado: '',
       rangosSeccionUmbral: [],
       valorRangoMaximoMinimoNuevo: 0,
-      valorRangoMaximoMaximoNuevo: 1,
+      valorRangoMaximoMaximoNuevo: _this.props.maximoUmbral,
       valorRangoMaximo: 0,
       valoresMinMaxSeccionesUmbral: [],
       rangosCreados: [],
@@ -80,11 +80,10 @@ function (_React$Component) {
     _this.traerTodosRangosSeccionUmbral = _this.traerTodosRangosSeccionUmbral.bind(_assertThisInitialized(_this));
     _this.traerRangosSeccionUmbral = _this.traerRangosSeccionUmbral.bind(_assertThisInitialized(_this));
     _this.agregarRangoSeccionUmbral = _this.agregarRangoSeccionUmbral.bind(_assertThisInitialized(_this));
-    _this.updateValorRangoMinimoNuevo = _this.updateValorRangoMinimoNuevo.bind(_assertThisInitialized(_this));
-    _this.updateValorRangoMaximoNuevo = _this.updateValorRangoMaximoNuevo.bind(_assertThisInitialized(_this));
     _this.updateValorRangoMinimoCreado = _this.updateValorRangoMinimoCreado.bind(_assertThisInitialized(_this));
     _this.updateValorRangoMaximoCreado = _this.updateValorRangoMaximoCreado.bind(_assertThisInitialized(_this));
     _this.modificarRangoSeccionUmbral = _this.modificarRangoSeccionUmbral.bind(_assertThisInitialized(_this));
+    _this.verifyInputValues = _this.verifyInputValues.bind(_assertThisInitialized(_this));
     return _this;
   }
 
@@ -464,7 +463,7 @@ function (_React$Component) {
               for (var i = 0; i < result.recordset.length; i++) {
                 rangosCreados.push({
                   valorRangoMaximoMinimoNuevo: result.recordset[i].valorMinimo,
-                  valorRangoMaximoMaximoNuevo: result.recordset[i].valorMaximo + 100,
+                  valorRangoMaximoMaximoNuevo: _this8.props.maximoUmbral,
                   valorRangoMaximo: result.recordset[i].valorMaximo
                 });
               }
@@ -474,7 +473,7 @@ function (_React$Component) {
               _this8.setState({
                 rangosSeccionUmbral: result.recordset,
                 valorRangoMaximoMinimoNuevo: valorMinimo,
-                valorRangoMaximoMaximoNuevo: valorMaximo,
+                valorRangoMaximoMaximoNuevo: _this8.props.maximoUmbral,
                 rangosCreados: rangosCreados
               });
             });
@@ -540,36 +539,26 @@ function (_React$Component) {
       }
     }
   }, {
-    key: "updateValorRangoMinimoNuevo",
-    value: function updateValorRangoMinimoNuevo() {
-      var valorMinimoNuevo = parseInt($("#nuevoRangoValorMinimo").val());
-      this.setState({
-        valorRangoMaximoMinimoNuevo: valorMinimoNuevo + 1,
-        valorRangoMaximo: valorMinimoNuevo + 1
-      });
-    }
-  }, {
-    key: "updateValorRangoMaximoNuevo",
-    value: function updateValorRangoMaximoNuevo() {
-      var valorMaximoNuevo;
-
-      if (this.state.valorRangoMaximo == 0) {
-        valorMaximoNuevo = 100;
-      } else if (this.state.valorRangoMaximo >= this.state.valorRangoMaximoMaximoNuevo - this.state.valorRangoMaximoMaximoNuevo * 0.1) {
-        valorMaximoNuevo = this.state.valorRangoMaximoMaximoNuevo * 0.5 + this.state.valorRangoMaximoMaximoNuevo;
-        this.setState({
-          valorRangoMaximoMaximoNuevo: valorMaximoNuevo
-        });
-      }
-    }
-  }, {
     key: "updateValorRangoMinimoCreado",
     value: function updateValorRangoMinimoCreado(index) {
-      var valorMinimoNuevo = parseInt($("#nuevoRangoValorMinimo" + index).val());
-      /*this.setState({
-          valorRangoMaximoMinimoNuevo: valorMinimoNuevo+1,
-          valorRangoMaximo: valorMinimoNuevo+1
-      });*/
+      var copy = _toConsumableArray(this.state.rangosCreados);
+
+      var valorMinimoNuevo = parseInt($("#rangoValorMinimo" + index).val());
+
+      if (valorMinimoNuevo < 0 || valorMinimoNuevo > this.props.maximoUmbral - 1) {
+        $("#rangoValorMinimo" + index).val(0);
+        copy[index].valorRangoMaximoMinimoNuevo = 0;
+        copy[index].valorRangoMaximo = 0;
+        this.setState({
+          rangosCreados: copy
+        });
+      } else {
+        copy[index].valorRangoMaximoMinimoNuevo = valorMinimoNuevo;
+        copy[index].valorRangoMaximo = valorMinimoNuevo;
+        this.setState({
+          rangosCreados: copy
+        });
+      }
     }
   }, {
     key: "updateValorRangoMaximoCreado",
@@ -577,17 +566,9 @@ function (_React$Component) {
       var copy = _toConsumableArray(this.state.rangosCreados);
 
       copy[index].valorRangoMaximo = x;
-      var valorMaximoNuevo;
-
-      if (this.state.valorRangoMaximo == 0) {
-        valorMaximoNuevo = 100;
-      } else if (this.state.valorRangoMaximo >= copy[index].valorRangoMaximoMaximoNuevo - copy[index].valorRangoMaximoMaximoNuevo * 0.1) {
-        valorMaximoNuevo = copy[index].valorRangoMaximoMaximoNuevo * 0.5 + copy[index].valorRangoMaximoMaximoNuevo;
-        copy[index].valorRangoMaximoMaximoNuevo = valorMaximoNuevo;
-        this.setState({
-          rangosCreados: copy
-        });
-      }
+      this.setState({
+        rangosCreados: copy
+      });
     }
   }, {
     key: "modificarRangoSeccionUmbral",
@@ -646,6 +627,28 @@ function (_React$Component) {
         }
       } else {
         alert("Los valores ingresados traspasan otros rangos.");
+      }
+    }
+  }, {
+    key: "verifyInputValues",
+    value: function verifyInputValues(id) {
+      if ($("#" + id).val() < 0) {
+        $("#" + id).val(0);
+        this.setState({
+          valorRangoMaximoMinimoNuevo: 0,
+          valorRangoMaximo: 0
+        });
+      } else if ($("#" + id).val() > this.props.maximoUmbral) {
+        $("#" + id).val(0);
+        this.setState({
+          valorRangoMaximoMinimoNuevo: 0,
+          valorRangoMaximo: 0
+        });
+      } else {
+        this.setState({
+          valorRangoMaximoMinimoNuevo: parseInt($("#" + id).val()),
+          valorRangoMaximo: parseInt($("#" + id).val())
+        });
       }
     }
   }, {
@@ -883,9 +886,11 @@ function (_React$Component) {
           name: "nuevoRangoValorMinimo",
           step: "1",
           min: "0",
+          onKeyUp: function onKeyUp() {
+            return _this11.verifyInputValues("nuevoRangoValorMinimo");
+          },
           type: "number",
-          defaultValue: "0",
-          onChange: this.updateValorRangoMinimoNuevo
+          defaultValue: "0"
         })), _react["default"].createElement("div", {
           className: "col-xl-8 col-lg-8 col-md-8 col-sm-8 col-8 form-group"
         }, _react["default"].createElement(_reactInputSlider["default"], {
@@ -898,7 +903,7 @@ function (_React$Component) {
             var x = _ref.x;
             return _this11.setState({
               valorRangoMaximo: x
-            }, _this11.updateValorRangoMaximoNuevo);
+            });
           },
           style: {
             width: "100%",
@@ -943,16 +948,19 @@ function (_React$Component) {
             name: "rangoValorMinimo" + i,
             step: "1",
             min: "0",
+            max: "99",
             type: "number",
             defaultValue: rangoSeccionUmbral.valorMinimo,
-            onChange: _this11.updateValorRangoMinimoNuevo
+            onChange: function onChange() {
+              return _this11.updateValorRangoMinimoCreado(i);
+            }
           })), _react["default"].createElement("div", {
             className: "col-xl-8 col-lg-8 col-md-8 col-sm-8 col-8 form-group"
           }, _react["default"].createElement(_reactInputSlider["default"], {
             axis: "x",
             xstep: 1,
             xmin: _this11.state.rangosCreados[i].valorRangoMaximoMinimoNuevo,
-            xmax: _this11.state.rangosCreados[i].valorRangoMaximoMaximoNuevo,
+            xmax: _this11.props.maximoUmbral,
             x: _this11.state.rangosCreados[i].valorRangoMaximo,
             onChange: function onChange(_ref2) {
               var x = _ref2.x;

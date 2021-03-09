@@ -3,17 +3,30 @@ import sql from 'mssql';
 
 import VerDashboard from './VerDashboard.js';
 import EditarDashboard from './EditarDashboard.js';
-//import CrearDashboardHome from './CrearVariables/CrearVariablesHome.js';
-//import EditarDashboardHome from './EditarVariable/EditarVariablesHome.js';
 
 export default class EditarDashboardHome extends React.Component {
 
     constructor(props) {
         super(props);
         this.state = {
-            componenteActual: "verDashboard"
+            componenteActual: "verDashboard",
+            navbar: <div className={"row"}>
+                        <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
+                            <div className={"page-header"}>
+                                <h2 className={"pageheader-title"}>Ver Dashboard</h2>
+                                <div className={"page-breadcrumb"}>
+                                    <nav aria-label="breadcrumb">
+                                        <ol className={"breadcrumb"}>
+                                            <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.props.goSeleccionReporteria}><a href="#" className={"breadcrumb-link"}>Seleccionar Tipo de Reportería</a></li>
+                                            <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.props.retornarSeleccionDashboards}><a href="#" className={"breadcrumb-link"}>Dashboards</a></li>
+                                            <li className={"breadcrumb-item active font-16"} aria-current="page">Dashboard: {this.props.dashboardSeleccionado.nombre}</li>
+                                        </ol>
+                                    </nav>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
         }
-        this.verDashboard = this.verDashboard.bind(this);
         this.retornoVerDashboard = this.retornoVerDashboard.bind(this);
         this.editarDashboard = this.editarDashboard.bind(this);
     }
@@ -22,21 +35,50 @@ export default class EditarDashboardHome extends React.Component {
         //
     }
 
-    verDashboard () {
-        this.setState({
-            componenteActual: "verDashboard"
-        });
-    }
-
     retornoVerDashboard () {
+        var  navbar =   <div className={"row"}>
+                            <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
+                                <div className={"page-header"}>
+                                    <h2 className={"pageheader-title"}>Ver Dashboard</h2>
+                                    <div className={"page-breadcrumb"}>
+                                        <nav aria-label="breadcrumb">
+                                            <ol className={"breadcrumb"}>
+                                                <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.props.goSeleccionReporteria}><a href="#" className={"breadcrumb-link"}>Seleccionar Tipo de Reportería</a></li>
+                                                <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.props.retornarSeleccionDashboards}><a href="#" className={"breadcrumb-link"}>Dashboards</a></li>
+                                                <li className={"breadcrumb-item active font-16"} aria-current="page">Dashboard: {this.props.dashboardSeleccionado.nombre}</li>
+                                            </ol>
+                                        </nav>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>;
         this.setState({
-            componenteActual: "verDashboard"
+            componenteActual: "verDashboard",
+            navbar: navbar
         });
     }
 
     editarDashboard (idVariable) {
+        var  navbar =   <div className={"row"}>
+                            <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
+                                <div className={"page-header"}>
+                                    <h2 className={"pageheader-title"}>Editar Dashboard</h2>
+                                    <div className={"page-breadcrumb"}>
+                                        <nav aria-label="breadcrumb">
+                                            <ol className={"breadcrumb"}>
+                                                <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.props.goSeleccionReporteria}><a href="#" className={"breadcrumb-link"}>Seleccionar Tipo de Reportería</a></li>
+                                                <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.props.retornarSeleccionDashboards}><a href="#" className={"breadcrumb-link"}>Dashboards</a></li>
+                                                <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.props.retornoVerDashboard}><a href="#" className={"breadcrumb-link"}>Dashboard: {this.props.dashboardSeleccionado.nombre}</a></li>
+                                                <li className={"breadcrumb-item active font-16"} aria-current="page">Editar Dashboard</li>
+                                            </ol>
+                                        </nav>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>;
         this.setState({
-            componenteActual: "editarDashboard"
+            componenteActual: "editarDashboard",
+            navbar: navbar
         });
     }
 
@@ -45,6 +87,7 @@ export default class EditarDashboardHome extends React.Component {
             return (
                 <div>
                     <VerDashboard pool={this.props.pool}
+                                            navbar={this.state.navbar}
                                             variables={this.props.variables}
                                             indicadores={this.props.indicadores}
                                             riesgos={this.props.riesgos}
@@ -58,6 +101,7 @@ export default class EditarDashboardHome extends React.Component {
             return (
                 <div>
                     <EditarDashboard pool={this.props.pool}
+                                            navbar={this.state.navbar}
                                             variables={this.props.variables}
                                             indicadores={this.props.indicadores}
                                             riesgos={this.props.riesgos}

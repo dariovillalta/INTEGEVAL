@@ -242,6 +242,7 @@ export default class Reporteria extends React.Component {
                             <div className={"page-breadcrumb"}>
                                 <nav aria-label="breadcrumb">
                                     <ol className={"breadcrumb"}>
+                                        <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.props.goSeleccionReporteria}><a href="#" className={"breadcrumb-link"}>Seleccionar Tipo de Reportería</a></li>
                                         <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.props.returnChooseDates}><a href="#" className={"breadcrumb-link"}>Seleccionar Fechas</a></li>
                                         <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.props.returnChooseFilter}><a href="#" className={"breadcrumb-link"}>Crear Filtro</a></li>
                                         <li className={"breadcrumb-item active font-16"} aria-current="page">Visualizar Variables</li>

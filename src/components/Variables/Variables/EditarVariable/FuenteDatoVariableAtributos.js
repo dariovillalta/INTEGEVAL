@@ -9,6 +9,7 @@ export default class FuenteDatoVariableAtributos extends React.Component {
     constructor(props) {
         super(props);
         /*this.actualizarSeleccionColumna = this.actualizarSeleccionColumna.bind(this);*/
+        this.goCreateVariableFieldSQL = this.goCreateVariableFieldSQL.bind(this);
         this.actualizarIndiceAtributoSeleccionado = this.actualizarIndiceAtributoSeleccionado.bind(this);
     }
 
@@ -19,8 +20,14 @@ export default class FuenteDatoVariableAtributos extends React.Component {
         this.props.clickEnVariable(columna)
     }*/
 
-    actualizarIndiceAtributoSeleccionado (indice, tipoAtributo) {
-        this.props.goToCreateConditions(indice, tipoAtributo);
+    goCreateVariableFieldSQL () {
+        this.props.changeStateFirstTimeToFalse();
+        this.props.goCreateVariableFieldSQL();
+    }
+
+    actualizarIndiceAtributoSeleccionado (indice) {
+        this.props.changeStateFirstTimeToFalse();
+        this.props.goToCreateConditions(indice);
     }
     
     render() {
@@ -38,7 +45,7 @@ export default class FuenteDatoVariableAtributos extends React.Component {
                             <div className={"row"}>
                                 <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
                                     <br/>
-                                    <a href="#" className="btn btn-success active font-20" style={{width: "100%"}} onClick={() => this.props.goCreateVariableFieldSQL()}>Editar Instrucción SQL </a>
+                                    <a href="#" className="btn btn-success active font-20" style={{width: "100%"}} onClick={() => this.goCreateVariableFieldSQL()}>Editar Instrucción SQL </a>
                                     <br/>
                                 </div>
                             </div>
@@ -72,7 +79,7 @@ export default class FuenteDatoVariableAtributos extends React.Component {
                                     <br/>
                                     <div className={"row"} style={{width: "100%"}}>
                                         <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
-                                            <a href="#" className="btn btn-success active font-20" style={{width: "100%"}} onClick={() => this.props.goCreateVariableFieldSQL()}>Editar Instrucción SQL </a>
+                                            <a href="#" className="btn btn-success active font-20" style={{width: "100%"}} onClick={() => this.goCreateVariableFieldSQL()}>Editar Instrucción SQL </a>
                                         </div>
                                     </div>
                                     <br/>

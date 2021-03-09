@@ -369,7 +369,8 @@ export default class GraficosHome extends React.Component {
                                             camposDeIndicadores={this.state.camposDeIndicadores}
                                             riesgos={this.state.riesgos}
                                             camposDeRiesgos={this.state.camposDeRiesgos}
-                                            terminoCrearDashboardPasarAEdit={this.terminoCrearDashboardPasarAEdit}>
+                                            terminoCrearDashboardPasarAEdit={this.terminoCrearDashboardPasarAEdit}
+                                            goSeleccionReporteria={this.props.goSeleccionReporteria}>
                     </CrearGrafico>
                 </div>
             );
@@ -377,11 +378,12 @@ export default class GraficosHome extends React.Component {
             return (
                 <div>
                     <VerGrafico pool={this.props.pool}
-                                    retornarSeleccionDashboards={this.retornarSeleccionDashboards}
+                                    retornarCrearGrafico={this.retornarCrearGrafico}
                                     variables={this.state.variables}
                                     indicadores={this.state.indicadores}
                                     riesgos={this.state.riesgos}
-                                    seccionesGraficos={this.state.seccionesGraficos}>
+                                    seccionesGraficos={this.state.seccionesGraficos}
+                                    goSeleccionReporteria={this.props.goSeleccionReporteria}>
                     </VerGrafico>
                 </div>
             );

@@ -111,6 +111,7 @@ var posicionAtributoSeleccionado = -1; //posicion del arreglo donde se debe inse
 
 var indiceSeleccionadoFormula = -1; //indice seleccionado formula
 
+var idFormula = '';
 var nombreVariable = '';
 var descripcionVariable = '';
 var fechaInicioVariable = '';
@@ -218,6 +219,7 @@ function (_React$Component) {
     _this.actualizarEstadoSiEsInstruccionSQL = _this.actualizarEstadoSiEsInstruccionSQL.bind(_assertThisInitialized(_this));
     _this.actualizarNivelNuevaRegla = _this.actualizarNivelNuevaRegla.bind(_assertThisInitialized(_this));
     _this.actualizarSeleccionFormula = _this.actualizarSeleccionFormula.bind(_assertThisInitialized(_this));
+    _this.actualizarIdFormula = _this.actualizarIdFormula.bind(_assertThisInitialized(_this));
     _this.actualizarNombreVariable = _this.actualizarNombreVariable.bind(_assertThisInitialized(_this));
     _this.actualizarDescripcionVariable = _this.actualizarDescripcionVariable.bind(_assertThisInitialized(_this));
     _this.actualizarFechaInicio = _this.actualizarFechaInicio.bind(_assertThisInitialized(_this));
@@ -235,6 +237,7 @@ function (_React$Component) {
     _this.eliminarCampoSQL = _this.eliminarCampoSQL.bind(_assertThisInitialized(_this));
     _this.isValidDate = _this.isValidDate.bind(_assertThisInitialized(_this));
     _this.tieneEspaciosEnBlanco = _this.tieneEspaciosEnBlanco.bind(_assertThisInitialized(_this));
+    _this.saveBitacora = _this.saveBitacora.bind(_assertThisInitialized(_this));
     return _this;
   }
 
@@ -505,7 +508,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("insert into Variables (nombre, descripcion, esObjeto, esColeccion, objetoPadreID, esInstruccionSQL, guardar, periodicidad, responsable, categoriaVariable, fechaInicioCalculo) values ('" + variable.nombre + "', '" + variable.descripcion + "', '" + variable.esObjeto + "', '" + variable.esColeccion + "', " + variable.objetoPadreID + ", '" + variable.esInstruccionSQL + "', '" + variable.guardar + "', '" + variable.periodicidad + "', '" + variable.responsable + "', '" + variable.categoriaVariable + "','" + variable.fechaInicioCalculo.getFullYear() + "-" + (variable.fechaInicioCalculo.getMonth() + 1) + "-" + variable.fechaInicioCalculo.getDate() + "')", function (err, result) {
+        request.query("insert into Variables (idFormula, nombre, descripcion, esObjeto, esColeccion, objetoPadreID, esInstruccionSQL, guardar, periodicidad, responsable, categoriaVariable, fechaInicioCalculo) values ('" + variable.idFormula + "', '" + variable.nombre + "', '" + variable.descripcion + "', '" + variable.esObjeto + "', '" + variable.esColeccion + "', " + variable.objetoPadreID + ", '" + variable.esInstruccionSQL + "', '" + variable.guardar + "', '" + variable.periodicidad + "', '" + variable.responsable + "', '" + variable.categoriaVariable + "','" + variable.fechaInicioCalculo.getFullYear() + "-" + (variable.fechaInicioCalculo.getMonth() + 1) + "-" + variable.fechaInicioCalculo.getDate() + "')", function (err, result) {
           if (err) {
             if (!rolledBack) {
               console.log(err);
@@ -517,7 +520,8 @@ function (_React$Component) {
             }
           } else {
             transaction.commit(function (err) {
-              alert("variable creada.");
+              _this2.props.showSuccesMessage("Éxito", 'Variable Creada.');
+
               nombreVariable = '';
               descripcionVariable = '';
               $("#nombreFuenteDato").val("");
@@ -1283,8 +1287,28 @@ function (_React$Component) {
           comandoSQL: "",
           tipoNuevaVariable: ""
         });
-        this.getVariables(); //this.getExcel();
-        //this.getFormas();
+        this.getVariables();
+        var esObjeto;
+        if ($("#esObjetoFuenteDato").is(':checked')) esObjeto = true;else esObjeto = false;
+        var esColeccion;
+        if ($("#esColeccion").is(':checked')) esColeccion = true;else esColeccion = false;
+        var guardarResultadosEnBaseDatos;
+        if ($("#guardarFuenteDato").is(':checked')) guardarResultadosEnBaseDatos = true;else guardarResultadosEnBaseDatos = false;
+        var esInstruccionSQL;
+        if ($("#esInstruccionSQL").is(':checked')) esInstruccionSQL = true;else esInstruccionSQL = false;
+        var nuevosValores = 'nombre: ' + nombreVariable + '\n' + 'descripcion: ' + descripcionVariable + '\n' + 'esObjeto: ' + esObjeto + '\n' + 'esColeccion: ' + esColeccion + '\n' + 'esInstruccionSQL: ' + esInstruccionSQL + '\n' + 'guardar: ' + guardarResultadosEnBaseDatos + '\n' + 'periodicidad: ' + periodicidadVariable + '\n' + 'responsable: ' + responsableVariable + '\n' + 'categoriaVariable: ' + categoriaVariable + '\n' + 'fechaInicioCalculo: ' + fechaInicioVariable + '\n';
+
+        if (esObjeto && atributosVario.length > 0) {
+          nuevosValores += 'ATRIBUTOS\n';
+
+          for (var i = 0; i < atributosVario.length; i++) {
+            nuevosValores += 'nombre: ' + atributosVario[i].nombre + ', tipo: ' + atributosVario[i].tipo + '\n';
+          }
+
+          ;
+        }
+
+        this.saveBitacora(hoy, "Usuario: " + this.props.userName + " modifico la variable: " + nombreVariable + "\nNuevos valores: \n" + nuevosValores, "variable", this.props.idVariable);
       }
     }
   }, {
@@ -1338,6 +1362,7 @@ function (_React$Component) {
   }, {
     key: "guardarVariableSQL",
     value: function guardarVariableSQL() {
+      var idFormula = $("#idFormula").val();
       var nombreVariable = $("#nombreFuenteDato").val();
       var descripcionVariable = $("#descripcionFuenteDato").val();
       var esObjeto;
@@ -1370,27 +1395,153 @@ function (_React$Component) {
       var responsable = $("#responsable").val();
       var categoria = $("#categoriaVariable").val();
 
-      if (nombreVariable.length < 101 && nombreVariable.length > 0) {
-        if (!this.tieneEspaciosEnBlanco(nombreVariable)) {
-          if (this.verificarNoExisteNombreVar(nombreVariable)) {
-            if (descripcionVariable.length < 701) {
-              //if(operacionSeleccionada.valor != undefined) {
-              if (esObjeto != undefined) {
-                if (guardarResultadosEnBaseDatos != undefined) {
-                  if (esInstruccionSQL != undefined) {
-                    if (!isNaN(objetoPadreID)) {
-                      if (periodicidad.length > 0) {
-                        if (this.isValidDate(fechaInicioCalculo)) {
-                          if (responsable.length > 0) {
-                            if (categoria.length < 101) {
-                              if (!isNaN(nuevoNivel)) {
-                                if (variablesSQL.length > 0) {
-                                  if (instruccionSQL.length > 0) {
+      if (idFormula.length < 101 && idFormula.length > 0) {
+        if (nombreVariable.length < 501 && nombreVariable.length > 0) {
+          if (!this.tieneEspaciosEnBlanco(idFormula)) {
+            if (this.verificarNoExisteNombreVar(idFormula)) {
+              if (descripcionVariable.length < 701) {
+                //if(operacionSeleccionada.valor != undefined) {
+                if (esObjeto != undefined) {
+                  if (guardarResultadosEnBaseDatos != undefined) {
+                    if (esInstruccionSQL != undefined) {
+                      if (!isNaN(objetoPadreID)) {
+                        if (periodicidad.length > 0) {
+                          if (this.isValidDate(fechaInicioCalculo)) {
+                            if (responsable.length > 0) {
+                              if (categoria.length < 101) {
+                                if (!isNaN(nuevoNivel)) {
+                                  if (variablesSQL.length > 0) {
+                                    if (instruccionSQL.length > 0) {
+                                      var nuevaVariable = {
+                                        idFormula: idFormula,
+                                        nombre: nombreVariable,
+                                        descripcion: descripcionVariable,
+                                        esObjeto: esObjeto,
+                                        esColeccion: false,
+                                        objetoPadreID: objetoPadreID,
+                                        esInstruccionSQL: esInstruccionSQL,
+                                        guardar: guardarResultadosEnBaseDatos,
+                                        periodicidad: periodicidad,
+                                        fechaInicioCalculo: fechaInicioCalculo,
+                                        responsable: responsable,
+                                        categoriaVariable: categoria
+                                      };
+                                      this.createVariable(nuevaVariable);
+                                      contadorObjetosAGuardar++;
+                                    } else {
+                                      this.props.showMessage("Error", "Cree una instrucción SQL.", true, false, {});
+                                    }
+                                  } else {
+                                    this.props.showMessage("Error", "Cree una variable SQL.", true, false, {});
+                                  }
+                                } else {
+                                  this.props.showMessage("Error", "Seleccione un nivel para el campo.", true, false, {});
+                                }
+                              } else {
+                                this.props.showMessage("Error", "La categoria de variable debe ser menor a 101 caracteres.", true, false, {});
+                              }
+                            } else {
+                              this.props.showMessage("Error", "Ingrese un valor para el responsable.", true, false, {});
+                            }
+                          } else {
+                            this.props.showMessage("Error", "Ingrese una fecha válida para el inicio de cálculo.", true, false, {});
+                          }
+                        } else {
+                          this.props.showMessage("Error", "Ingrese un valor para la periodicidad.", true, false, {});
+                        }
+                      } else {
+                        this.props.showMessage("Error", "Tiene que ingresar un valor para objeto padre.", true, false, {});
+                      }
+                    } else {
+                      this.props.showMessage("Error", "Tiene que ingresar si la variable se calcula con intrucciones SQL.", true, false, {});
+                    }
+                  } else {
+                    this.props.showMessage("Error", "Tiene que ingresar si guardar o no variable.", true, false, {});
+                  }
+                } else {
+                  this.props.showMessage("Error", "Tiene que ingresar si la variable tiene un atributo o muchos.", true, false, {});
+                }
+              } else {
+                this.props.showMessage("Error", "Tiene que ingresar una descripción de la variable menor a 701 caracteres.", true, false, {});
+              }
+            } else {
+              this.props.showMessage("Error", 'El identificador de la variable en fórmula debe ser único.', true, false, {});
+            }
+          } else {
+            this.props.showMessage("Error", 'El identificador de la variable en fórmula no debe contener espacios en blanco.', true, false, {});
+          }
+        } else {
+          this.props.showMessage("Error", "Tiene que ingresar un nombre de la variable.", true, false, {});
+        }
+      } else {
+        this.props.showMessage("Error", "Tiene que ingresar un identificador de la variable en fórmula.", true, false, {});
+      }
+    }
+  }, {
+    key: "guardarVariableUnAtributo",
+    value: function guardarVariableUnAtributo() {
+      var idFormula = $("#idFormula").val();
+      var nombreVariable = $("#nombreFuenteDato").val();
+      var descripcionVariable = $("#descripcionFuenteDato").val();
+      var esObjeto;
+      if ($("#esObjetoFuenteDato").is(':checked')) esObjeto = true;else esObjeto = false;
+      var esColeccion;
+      if ($("#esColeccion").is(':checked')) esColeccion = true;else esColeccion = false;
+      var guardarResultadosEnBaseDatos;
+      if ($("#guardarFuenteDato").is(':checked')) guardarResultadosEnBaseDatos = true;else guardarResultadosEnBaseDatos = false;
+      var objetoPadreID = -1;
+      /*if ($("#esObjetoFuenteDato").is(':checked'))
+          objetoPadreID = $("#objetoPadreID").val();*/
+
+      var nuevoNivel = 0;
+
+      if (banderaEsObjeto) {
+        nuevoNivel = nivelNuevoAtributoVarios;
+      } else {
+        nuevoNivel = nivelNuevoAtributoUnico;
+      }
+
+      var esInstruccionSQL;
+      if ($("#esInstruccionSQL").is(':checked')) esInstruccionSQL = true;else esInstruccionSQL = false;
+      var periodicidad = $("#periodicidad").val();
+      var fechaInicioCalculo;
+
+      if (periodicidad.localeCompare("-1") == 0) {
+        fechaInicioCalculo = new Date(1964, 4, 28);
+      } else {
+        fechaInicioCalculo = $("#fecha").datepicker('getDate');
+      }
+
+      var responsable = $("#responsable").val();
+      var categoria = $("#categoriaVariable").val();
+
+      if (idFormula.length < 501 && idFormula.length > 0) {
+        if (nombreVariable.length < 501 && nombreVariable.length > 0) {
+          if (!this.tieneEspaciosEnBlanco(idFormula)) {
+            if (this.verificarNoExisteNombreVar(idFormula)) {
+              if (descripcionVariable.length < 701) {
+                //if(operacionSeleccionada.valor != undefined) {
+                if (esObjeto != undefined) {
+                  if (esColeccion != undefined) {
+                    if (guardarResultadosEnBaseDatos != undefined) {
+                      if (esInstruccionSQL != undefined) {
+                        if (!isNaN(objetoPadreID)) {
+                          if (periodicidad.length > 0) {
+                            if (this.isValidDate(fechaInicioCalculo)) {
+                              if (responsable.length > 0) {
+                                if (categoria.length < 101) {
+                                  if (!isNaN(nuevoNivel)) {
+                                    var nuevoAtributo = {
+                                      nombre: nombreVariable,
+                                      tipo: tipoDeAsignacionSeleccionado,
+                                      nivel: nuevoNivel
+                                    };
                                     var nuevaVariable = {
+                                      idFormula: idFormula,
                                       nombre: nombreVariable,
                                       descripcion: descripcionVariable,
                                       esObjeto: esObjeto,
-                                      esColeccion: false,
+                                      esColeccion: esColeccion,
                                       objetoPadreID: objetoPadreID,
                                       esInstruccionSQL: esInstruccionSQL,
                                       guardar: guardarResultadosEnBaseDatos,
@@ -1399,188 +1550,58 @@ function (_React$Component) {
                                       responsable: responsable,
                                       categoriaVariable: categoria
                                     };
-                                    this.createVariable(nuevaVariable);
+                                    this.createVariable(nuevaVariable, [nuevoAtributo]);
                                     contadorObjetosAGuardar++;
                                   } else {
-                                    alert("Cree una instrucción SQL.");
+                                    this.props.showMessage("Error", "Seleccione un nivel para el campo.", true, false, {});
                                   }
                                 } else {
-                                  alert("Cree una variable SQL.");
+                                  this.props.showMessage("Error", "La categoria de variable debe ser menor a 101 caracteres.", true, false, {});
                                 }
                               } else {
-                                alert("Seleccione un nivel para el campo.");
+                                this.props.showMessage("Error", "Ingrese un valor para el responsable.", true, false, {});
                               }
                             } else {
-                              alert("La categoria de variable debe ser menor a 101 caracteres.");
+                              this.props.showMessage("Error", "Ingrese una fecha válida para el inicio de cálculo.", true, false, {});
                             }
                           } else {
-                            alert("Ingrese un valor para el responsable.");
+                            this.props.showMessage("Error", "Ingrese un valor para la periodicidad.", true, false, {});
                           }
                         } else {
-                          alert("Ingrese una fecha válida para el inicio de cálculo.");
+                          this.props.showMessage("Error", "Tiene que ingresar un valor para objeto padre.", true, false, {});
                         }
                       } else {
-                        alert("Ingrese un valor para la periodicidad.");
+                        this.props.showMessage("Error", "Tiene que ingresar si la variable se calcula con intrucciones SQL.", true, false, {});
                       }
                     } else {
-                      alert("Tiene que ingresar un valor para objeto padre.");
+                      this.props.showMessage("Error", "Tiene que ingresar si guardar o no variable.", true, false, {});
                     }
                   } else {
-                    alert("Tiene que ingresar si la variable se calcula con intrucciones SQL.");
+                    this.props.showMessage("Error", "Tiene que ingresar si la variable es coleccion o no.", true, false, {});
                   }
                 } else {
-                  alert("Tiene que ingresar si guardar o no variable.");
+                  this.props.showMessage("Error", "Tiene que ingresar si la variable tiene un atributo o muchos.", true, false, {});
                 }
               } else {
-                alert("Tiene que ingresar si la variable tiene un atributo o muchos.");
+                this.props.showMessage("Error", "Tiene que ingresar una descripción de la variable menor a 701 caracteres.", true, false, {});
               }
             } else {
-              alert("Tiene que ingresar una descripción de la variable menor a 701 caracteres.");
+              this.props.showMessage("Error", 'El identificador de la variable en fórmula debe ser único.', true, false, {});
             }
           } else {
-            alert("El nombre de la variable debe ser unico.");
+            this.props.showMessage("Error", 'El identificador de la variable en fórmula no debe contener espacios en blanco.', true, false, {});
           }
         } else {
-          alert('El nombre de la variable no debe contener espacios en blanco');
+          this.props.showMessage("Error", "Tiene que ingresar un nombre de la variable.", true, false, {});
         }
       } else {
-        alert("Tiene que ingresar un nombre de la variable.");
-      }
-    }
-  }, {
-    key: "guardarVariableUnAtributo",
-    value: function guardarVariableUnAtributo() {
-      var nombreVariable = $("#nombreFuenteDato").val();
-      var descripcionVariable = $("#descripcionFuenteDato").val();
-      var esObjeto;
-      if ($("#esObjetoFuenteDato").is(':checked')) esObjeto = true;else esObjeto = false;
-      var esColeccion;
-      if ($("#esColeccion").is(':checked')) esColeccion = true;else esColeccion = false;
-      var guardarResultadosEnBaseDatos;
-      if ($("#guardarFuenteDato").is(':checked')) guardarResultadosEnBaseDatos = true;else guardarResultadosEnBaseDatos = false;
-      var objetoPadreID = -1;
-      /*if ($("#esObjetoFuenteDato").is(':checked'))
-          objetoPadreID = $("#objetoPadreID").val();*/
-
-      var nuevoNivel = 0;
-
-      if (banderaEsObjeto) {
-        nuevoNivel = nivelNuevoAtributoVarios;
-      } else {
-        nuevoNivel = nivelNuevoAtributoUnico;
-      }
-
-      var esInstruccionSQL;
-      if ($("#esInstruccionSQL").is(':checked')) esInstruccionSQL = true;else esInstruccionSQL = false;
-      var periodicidad = $("#periodicidad").val();
-      var fechaInicioCalculo;
-
-      if (periodicidad.localeCompare("-1") == 0) {
-        fechaInicioCalculo = new Date(1964, 4, 28);
-      } else {
-        fechaInicioCalculo = $("#fecha").datepicker('getDate');
-      }
-
-      var responsable = $("#responsable").val();
-      var categoria = $("#categoriaVariable").val();
-
-      if (nombreVariable.length < 101 && nombreVariable.length > 0) {
-        if (!this.tieneEspaciosEnBlanco(nombreVariable)) {
-          if (this.verificarNoExisteNombreVar(nombreVariable)) {
-            if (descripcionVariable.length < 701) {
-              //if(operacionSeleccionada.valor != undefined) {
-              if (esObjeto != undefined) {
-                if (esColeccion != undefined) {
-                  if (guardarResultadosEnBaseDatos != undefined) {
-                    if (esInstruccionSQL != undefined) {
-                      if (!isNaN(objetoPadreID)) {
-                        if (periodicidad.length > 0) {
-                          if (this.isValidDate(fechaInicioCalculo)) {
-                            if (responsable.length > 0) {
-                              if (categoria.length < 101) {
-                                //if(tipoDeAsignacionSeleccionado != undefined && tipoDeAsignacionSeleccionado.length > 0) {
-                                if (!isNaN(nuevoNivel)) {
-                                  var nuevoAtributo = {
-                                    nombre: nombreVariable,
-                                    tipo: tipoDeAsignacionSeleccionado,
-                                    nivel: nuevoNivel
-                                  }; //si la formula ya fue asignada, no agregar tipo
-
-                                  /*if(atributosUnico[0].tipo == undefined) {
-                                      nuevoAtributo = {nombre: nombreVariable, tipo: '', campoEsArreglo: campoEsArreglo,  nivel: nivelNuevoAtributoUnico};
-                                  } else {
-                                      nuevoAtributo = atributosUnico[0];
-                                      nuevoAtributo.nombre = nombreVariable;
-                                      nuevoAtributo.campoEsArreglo = campoEsArreglo;
-                                      nuevoAtributo.nivel = nivelNuevoAtributoUnico;
-                                  }*/
-
-                                  var nuevaVariable = {
-                                    nombre: nombreVariable,
-                                    descripcion: descripcionVariable,
-                                    esObjeto: esObjeto,
-                                    esColeccion: esColeccion,
-                                    objetoPadreID: objetoPadreID,
-                                    esInstruccionSQL: esInstruccionSQL,
-                                    guardar: guardarResultadosEnBaseDatos,
-                                    periodicidad: periodicidad,
-                                    fechaInicioCalculo: fechaInicioCalculo,
-                                    responsable: responsable,
-                                    categoriaVariable: categoria
-                                  }; //nivelNuevoAtributoUnico = 0;
-
-                                  this.createVariable(nuevaVariable, [nuevoAtributo]);
-                                  contadorObjetosAGuardar++;
-                                } else {
-                                  alert("Seleccione un nivel para el campo.");
-                                }
-                                /*} else {
-                                    alert("Seleccione un tipo de asignación.");
-                                }*/
-
-                              } else {
-                                alert("La categoria de variable debe ser menor a 101 caracteres.");
-                              }
-                            } else {
-                              alert("Ingrese un valor para el responsable.");
-                            }
-                          } else {
-                            alert("Ingrese una fecha válida para el inicio de cálculo.");
-                          }
-                        } else {
-                          alert("Ingrese un valor para la periodicidad.");
-                        }
-                      } else {
-                        alert("Tiene que ingresar un valor para objeto padre.");
-                      }
-                    } else {
-                      alert("Tiene que ingresar si la variable se calcula con intrucciones SQL.");
-                    }
-                  } else {
-                    alert("Tiene que ingresar si guardar o no variable.");
-                  }
-                } else {
-                  alert("Tiene que ingresar si la variable es coleccion o no.");
-                }
-              } else {
-                alert("Tiene que ingresar si la variable tiene un atributo o muchos.");
-              }
-            } else {
-              alert("Tiene que ingresar una descripción de la variable menor a 701 caracteres.");
-            }
-          } else {
-            alert("El nombre de la variable debe ser unico.");
-          }
-        } else {
-          alert('El nombre de la variable no debe contener espacios en blanco');
-        }
-      } else {
-        alert("Tiene que ingresar un nombre de la variable.");
+        this.props.showMessage("Error", "Tiene que ingresar un identificador de la variable en fórmula.", true, false, {});
       }
     }
   }, {
     key: "guardarVariableVariosAtributo",
     value: function guardarVariableVariosAtributo() {
+      var idFormula = $("#idFormula").val();
       var nombreVariable = $("#nombreFuenteDato").val();
       var descripcionVariable = $("#descripcionFuenteDato").val();
       var esObjeto;
@@ -1615,89 +1636,82 @@ function (_React$Component) {
       var responsable = $("#responsable").val();
       var categoria = $("#categoriaVariable").val();
 
-      if (nombreVariable.length < 101 && nombreVariable.length > 0) {
-        if (!this.tieneEspaciosEnBlanco(nombreVariable)) {
-          if (this.verificarNoExisteNombreVar(nombreVariable)) {
-            if (descripcionVariable.length < 701) {
-              //if(operacionSeleccionada.valor != undefined) {
-              if (esObjeto != undefined) {
-                if (esColeccion != undefined) {
-                  if (guardarResultadosEnBaseDatos != undefined) {
-                    if (esInstruccionSQL != undefined) {
-                      if (!isNaN(objetoPadreID)) {
-                        if (periodicidad.length > 0) {
-                          if (this.isValidDate(fechaInicioCalculo)) {
-                            if (responsable.length > 0) {
-                              if (categoria.length < 101) {
-                                if (!isNaN(nuevoNivel)) {
-                                  //var nuevoAtributo = {nombre: nombreVariable, tipo: tipoDeAsignacionSeleccionado, nivel: nuevoNivel};
-                                  //si la formula ya fue asignada, no agregar tipo
-
-                                  /*if(atributosUnico[0].tipo == undefined) {
-                                      nuevoAtributo = {nombre: nombreVariable, tipo: '', campoEsArreglo: campoEsArreglo,  nivel: nivelNuevoAtributoUnico};
+      if (idFormula.length < 101 && idFormula.length > 0) {
+        if (nombreVariable.length < 501 && nombreVariable.length > 0) {
+          if (!this.tieneEspaciosEnBlanco(idFormula)) {
+            if (this.verificarNoExisteNombreVar(idFormula)) {
+              if (descripcionVariable.length < 701) {
+                //if(operacionSeleccionada.valor != undefined) {
+                if (esObjeto != undefined) {
+                  if (esColeccion != undefined) {
+                    if (guardarResultadosEnBaseDatos != undefined) {
+                      if (esInstruccionSQL != undefined) {
+                        if (!isNaN(objetoPadreID)) {
+                          if (periodicidad.length > 0) {
+                            if (this.isValidDate(fechaInicioCalculo)) {
+                              if (responsable.length > 0) {
+                                if (categoria.length < 101) {
+                                  if (!isNaN(nuevoNivel)) {
+                                    var nuevaVariable = {
+                                      idFormula: idFormula,
+                                      nombre: nombreVariable,
+                                      descripcion: descripcionVariable,
+                                      esObjeto: esObjeto,
+                                      esColeccion: esColeccion,
+                                      objetoPadreID: objetoPadreID,
+                                      esInstruccionSQL: esInstruccionSQL,
+                                      guardar: guardarResultadosEnBaseDatos,
+                                      periodicidad: periodicidad,
+                                      fechaInicioCalculo: fechaInicioCalculo,
+                                      responsable: responsable,
+                                      categoriaVariable: categoria
+                                    };
+                                    this.createVariable(nuevaVariable, atributosVario);
+                                    contadorObjetosAGuardar++;
                                   } else {
-                                      nuevoAtributo = atributosUnico[0];
-                                      nuevoAtributo.nombre = nombreVariable;
-                                      nuevoAtributo.campoEsArreglo = campoEsArreglo;
-                                      nuevoAtributo.nivel = nivelNuevoAtributoUnico;
-                                  }*/
-                                  var nuevaVariable = {
-                                    nombre: nombreVariable,
-                                    descripcion: descripcionVariable,
-                                    esObjeto: esObjeto,
-                                    esColeccion: esColeccion,
-                                    objetoPadreID: objetoPadreID,
-                                    esInstruccionSQL: esInstruccionSQL,
-                                    guardar: guardarResultadosEnBaseDatos,
-                                    periodicidad: periodicidad,
-                                    fechaInicioCalculo: fechaInicioCalculo,
-                                    responsable: responsable,
-                                    categoriaVariable: categoria
-                                  };
-                                  this.createVariable(nuevaVariable, atributosVario); //nivelNuevoAtributoVarios = 0;
-
-                                  contadorObjetosAGuardar++;
+                                    this.props.showMessage("Error", "Seleccione un nivel para el campo.", true, false, {});
+                                  }
                                 } else {
-                                  alert("Seleccione un nivel para el campo.");
+                                  this.props.showMessage("Error", "La categoria de variable debe ser menor a 101 caracteres.", true, false, {});
                                 }
                               } else {
-                                alert("La categoria de variable debe ser menor a 101 caracteres.");
+                                this.props.showMessage("Error", "Ingrese un valor para el responsable.", true, false, {});
                               }
                             } else {
-                              alert("Ingrese un valor para el responsable.");
+                              this.props.showMessage("Error", "Ingrese una fecha válida para el inicio de cálculo.", true, false, {});
                             }
                           } else {
-                            alert("Ingrese una fecha válida para el inicio de cálculo.");
+                            this.props.showMessage("Error", "Ingrese un valor para la periodicidad.", true, false, {});
                           }
                         } else {
-                          alert("Ingrese un valor para la periodicidad.");
+                          this.props.showMessage("Error", "Tiene que ingresar un valor para objeto padre.", true, false, {});
                         }
                       } else {
-                        alert("Tiene que ingresar un valor para objeto padre.");
+                        this.props.showMessage("Error", "Tiene que ingresar si la variable se calcula con intrucciones SQL.", true, false, {});
                       }
                     } else {
-                      alert("Tiene que ingresar si la variable se calcula con intrucciones SQL.");
+                      this.props.showMessage("Error", "Tiene que ingresar si guardar o no variable.", true, false, {});
                     }
                   } else {
-                    alert("Tiene que ingresar si guardar o no variable.");
+                    this.props.showMessage("Error", "Tiene que ingresar si la variable es coleccion o no.", true, false, {});
                   }
                 } else {
-                  alert("Tiene que ingresar si la variable es coleccion o no.");
+                  this.props.showMessage("Error", "Tiene que ingresar si la variable tiene un atributo o muchos.", true, false, {});
                 }
               } else {
-                alert("Tiene que ingresar si la variable tiene un atributo o muchos.");
+                this.props.showMessage("Error", "Tiene que ingresar una descripción de la variable menor a 701 caracteres.", true, false, {});
               }
             } else {
-              alert("Tiene que ingresar una descripción de la variable menor a 701 caracteres.");
+              this.props.showMessage("Error", 'El identificador de la variable en fórmula debe ser único.', true, false, {});
             }
           } else {
-            alert("El nombre de la variable debe ser unico.");
+            this.props.showMessage("Error", 'El identificador de la variable en fórmula no debe contener espacios en blanco.', true, false, {});
           }
         } else {
-          alert('El nombre de la variable no debe contener espacios en blanco');
+          this.props.showMessage("Error", "Tiene que ingresar un nombre de la variable.", true, false, {});
         }
       } else {
-        alert("Tiene que ingresar un nombre de la variable.");
+        this.props.showMessage("Error", "Tiene que ingresar un identificador de la variable  en fórmula.", true, false, {});
       }
     }
   }, {
@@ -1750,18 +1764,18 @@ function (_React$Component) {
 
               nombreCampoNuevoAtributosVario = '';
               $("#nombreAtributoNuevoCampo").val("");
-              alert("Campo creado.");
+              this.props.showSuccesMessage("Éxito", 'Campo Creado.');
             } else {
-              alert("Seleccione un tipo de asignación.");
+              this.props.showMessage("Error", "Seleccione un tipo de asignación.", true, false, {});
             }
           } else {
-            alert("El nombre del campo debe ser unico.");
+            this.props.showMessage("Error", "El nombre del campo debe ser unico.", true, false, {});
           }
         } else {
-          alert('El nombre del atributo no debe contener espacios en blanco');
+          this.props.showMessage("Error", "El nombre del atributo no debe contener espacios en blanco.", true, false, {});
         }
       } else {
-        alert("Ingrese un valor para el nombre del atributo.");
+        this.props.showMessage("Error", "Ingrese un valor para el nombre del atributo.", true, false, {});
       }
     }
   }, {
@@ -1804,7 +1818,7 @@ function (_React$Component) {
           atributos: copyAtributos
         });
       } else {
-        alert('El nombre del atributo no debe contener espacios en blanco');
+        this.props.showMessage("Error", "El nombre del atributo no debe contener espacios en blanco.", true, false, {});
       }
     }
   }, {
@@ -1828,16 +1842,16 @@ function (_React$Component) {
               $("#nuevoCampo").val("");
               $("#tipo").val("varchar");
             } else {
-              alert("El tipo del campo debe tener una longitud menor a 31 caracteres.");
+              this.props.showMessage("Error", "El tipo del campo debe tener una longitud menor a 31 caracteres.", true, false, {});
             }
           } else {
-            alert("El nombre del campo debe ser unico.");
+            this.props.showMessage("Error", "El nombre del campo debe ser unico.", true, false, {});
           }
         } else {
-          alert('El nombre del campo no debe contener espacios en blanco');
+          this.props.showMessage("Error", "El nombre del campo no debe contener espacios en blanco.", true, false, {});
         }
       } else {
-        alert("Ingrese un valor para el nombre del campo debe tener una longitud menor a 101 caracteres.");
+        this.props.showMessage("Error", "Ingrese un valor para el nombre del campo debe tener una longitud menor a 101 caracteres.", true, false, {});
       }
     }
   }, {
@@ -1850,9 +1864,9 @@ function (_React$Component) {
         this.setState({
           comandoSQL: instruccionSQL
         });
-        alert('Instrucción Guardada');
+        this.props.showSuccesMessage("Éxito", 'Instrucción Guardada.');
       } else {
-        alert("El nombre del campo debe tener una longitud menor a 101 caracteres.");
+        this.props.showMessage("Error", "El nombre del campo debe tener una longitud menor a 101 caracteres.", true, false, {});
       }
     }
   }, {
@@ -2443,7 +2457,7 @@ function (_React$Component) {
 
               } else {
                 if (this.state.tipoNuevaVariable.localeCompare(tipoDeAsignacionSeleccionado) != 0) {
-                  alert("El tipo de asignacion de formula no coincide el tipo de campo.");
+                  this.props.showMessage("Error", "El tipo de asignacion de formula no coincide el tipo de campo.", true, false, {});
                 }
               }
             }
@@ -2452,13 +2466,13 @@ function (_React$Component) {
             if (campoSeleccionado != null && campoSeleccionado.tablaID != undefined) texto2 = 'tabla';
             var texto = 'formula';
             if (!esFormula) texto = 'comparación';
-            alert("La " + texto + " ingresada no pertenece a la misma " + texto2 + ".");
+            this.props.showMessage("Error", "La " + texto + " ingresada no pertenece a la misma " + texto2 + ".", true, false, {});
           }
         } else {
-          alert("Seleccione una posición en la 'Lógica para el cálculo'");
+          this.props.showMessage("Error", "Seleccione una posición en la 'Lógica para el cálculo'", true, false, {});
         }
       } else {
-        if (!reglaEsValida && !esFormula) alert("Ingrese todos los campos necesarios para la condicion.");else if (!reglaEsValida && esFormula) alert("Seleccione una formula.");else alert("La comparación ya tiene una clausula 'SINO'");
+        if (!reglaEsValida && !esFormula) this.props.showMessage("Error", "Ingrese todos los campos necesarios para la condicion.", true, false, {});else if (!reglaEsValida && esFormula) this.props.showMessage("Error", "Seleccione una formula.", true, false, {});else this.props.showMessage("Error", "La comparación ya tiene una clausula 'SINO'", true, false, {});
       }
     }
   }, {
@@ -2953,7 +2967,7 @@ function (_React$Component) {
                   }
                 } else {
                   if (this.state.tipoNuevaVariable.localeCompare(tipoDeAsignacionSeleccionado) != 0) {
-                    alert("El tipo de asignacion de formula no coincide el tipo de campo.");
+                    this.props.showMessage("Error", "El tipo de asignacion de formula no coincide el tipo de campo.", true, false, {});
                   }
                 }
               }
@@ -2962,16 +2976,16 @@ function (_React$Component) {
               if (campoSeleccionado.tablaID != undefined) texto2 = 'tabla';
               var texto = 'formula';
               if (!esFormula) texto = 'comparación';
-              alert("La " + texto + " ingresada no pertenece a la misma " + texto2 + ".");
+              this.props.showMessage("Error", "La " + texto + " ingresada no pertenece a la misma " + texto2 + ".", true, false, {});
             }
           } else {
-            alert("Seleccione una posición en la 'Lógica para el cálculo'");
+            this.props.showMessage("Error", "Seleccione una posición en la 'Lógica para el cálculo'", true, false, {});
           }
         } else {
-          if (!reglaEsValida && !esFormula) alert("Ingrese todos los campos necesarios para la condicion.");else if (!reglaEsValida && esFormula) alert("Seleccione una formula.");else alert("La comparación ya tiene una clausula 'SINO'");
+          if (!reglaEsValida && !esFormula) this.props.showMessage("Error", "Ingrese todos los campos necesarios para la condicion.", true, false, {});else if (!reglaEsValida && esFormula) this.props.showMessage("Error", "Seleccione una formula.", true, false, {});else this.props.showMessage("Error", "La comparación ya tiene una clausula 'SINO'", true, false, {});
         }
       } else {
-        alert("Cree una comparación primero");
+        this.props.showMessage("Error", "Cree una comparación primero", true, false, {});
       }
     }
   }, {
@@ -3026,7 +3040,7 @@ function (_React$Component) {
           segmentoReglasUnAtributo = segmentoRegla;
         }
       } else {
-        alert("Cree una comparación primero");
+        this.props.showMessage("Error", "Cree una comparación primero", true, false, {});
       }
     }
   }, {
@@ -3195,6 +3209,12 @@ function (_React$Component) {
       }
     }
   }, {
+    key: "actualizarIdFormula",
+    value: function actualizarIdFormula() {
+      var idFormulaN = $("#idFormula").val();
+      idFormula = idFormulaN;
+    }
+  }, {
     key: "actualizarNombreVariable",
     value: function actualizarNombreVariable() {
       var nombreVariableN = $("#nombreFuenteDato").val();
@@ -3355,11 +3375,11 @@ function (_React$Component) {
     }
   }, {
     key: "verificarNoExisteNombreVar",
-    value: function verificarNoExisteNombreVar(nombre) {
+    value: function verificarNoExisteNombreVar(idFormula) {
       var noExiste = true;
 
       for (var i = 0; i < this.state.variables.length; i++) {
-        if (this.state.variables[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
+        if (this.state.variables[i].idFormula.toLowerCase().localeCompare(idFormula.toLowerCase()) == 0) {
           noExiste = false;
           break;
         }
@@ -3369,7 +3389,7 @@ function (_React$Component) {
 
       if (noExiste) {
         for (var i = 0; i < this.state.excel.length; i++) {
-          if (this.state.excel[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
+          if (this.state.excel[i].idFormula.toLowerCase().localeCompare(idFormula.toLowerCase()) == 0) {
             noExiste = false;
             break;
           }
@@ -3380,7 +3400,7 @@ function (_React$Component) {
 
       if (noExiste) {
         for (var i = 0; i < this.state.formas.length; i++) {
-          if (this.state.formas[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
+          if (this.state.formas[i].idFormula.toLowerCase().localeCompare(idFormula.toLowerCase()) == 0) {
             noExiste = false;
             break;
           }
@@ -3431,7 +3451,7 @@ function (_React$Component) {
           camposInstruccionSQL: tempCopy
         });
       } else {
-        alert('El nombre del campo no debe contener espacios en blanco');
+        this.props.showMessage("Error", "El nombre del campo no debe contener espacios en blanco.", true, false, {});
       }
     }
   }, {
@@ -3450,13 +3470,11 @@ function (_React$Component) {
     value: function isValidDate(fecha) {
       if (Object.prototype.toString.call(fecha) === "[object Date]") {
         if (isNaN(fecha.getTime())) {
-          alert("Ingrese una fecha valida.");
           return false;
         } else {
           return true;
         }
       } else {
-        alert("Ingrese una fecha valida.");
         return false;
       }
     }
@@ -3466,9 +3484,36 @@ function (_React$Component) {
       return /\s/g.test(s);
     }
   }, {
+    key: "saveBitacora",
+    value: function saveBitacora(fecha, descripcion, tipoVariable, idVariable) {
+      var _this18 = this;
+
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("insert into Bitacora (usuarioID, nombreUsuario, fecha, descripcion, tipoVariable, idVariable) values (" + _this18.props.userID + ", '" + _this18.props.userName + "', '" + fecha.getFullYear() + "-" + (fecha.getMonth() + 1) + "-" + fecha.getDate() + "', '" + descripcion + "', '" + tipoVariable + "', " + idVariable + ")", function (err, result) {
+          if (err) {
+            console.log(err);
+
+            _this18.props.showMessage("Error", 'No se pudo guardar información de bitacora.', true, false, {});
+
+            if (!rolledBack) {
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {});
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
     key: "render",
     value: function render() {
-      var _this18 = this;
+      var _this19 = this;
 
       if (this.state.componenteActual.localeCompare("crearVariable") == 0) {
         return _react["default"].createElement("div", {
@@ -3482,8 +3527,10 @@ function (_React$Component) {
           columnas: this.props.columnas,
           atributos: this.state.atributos,
           cambioDeArreglosDeAtributos: this.cambioDeArreglosDeAtributos,
+          idFormula: idFormula,
           nombreVariable: nombreVariable,
           tipoNuevaVariable: this.state.tipoNuevaVariable,
+          actualizarIdFormula: this.actualizarIdFormula,
           actualizarNombreVariable: this.actualizarNombreVariable,
           descripcionVariable: descripcionVariable,
           actualizarDescripcionVariable: this.actualizarDescripcionVariable,
@@ -3532,7 +3579,7 @@ function (_React$Component) {
           callbackEliminarRegla: this.eliminarRegla,
           retornarIndiceSeleccionado: this.actualizarIndiceSeleccionadoReglas,
           retornarEstadoVistaEsCondicion: function retornarEstadoVistaEsCondicion() {
-            _this18.actualizarCondicion;
+            _this19.actualizarCondicion;
           },
           retornoCampo: this.retornoCampoCondicion,
           retornarValor: this.retornarValor,
@@ -3550,7 +3597,9 @@ function (_React$Component) {
           tablaBorrarFormulas: "FormulasVariablesCampos",
           tablaBorrarElementos: "ElementoFormulasVariablesCampos",
           condicionFormula: this.state.condicionFormula,
-          condicionElemento: this.state.condicionElemento
+          condicionElemento: this.state.condicionElemento,
+          showSuccesMessage: this.props.showSuccesMessage,
+          showMessage: this.props.showMessage
         }));
       } else if (this.state.componenteActual.localeCompare("variableFormula") == 0) {
         return _react["default"].createElement("div", {
@@ -3569,7 +3618,9 @@ function (_React$Component) {
           retornoCampo: this.retornoCampoFormula,
           retornoOperacion: this.retornoOperacion,
           actualizarNivelNuevaRegla: this.actualizarNivelNuevaRegla,
-          navbar: this.state.navbar
+          navbar: this.state.navbar,
+          showSuccesMessage: this.props.showSuccesMessage,
+          showMessage: this.props.showMessage
         }));
       } else if (this.state.componenteActual.localeCompare("variableSQL") == 0) {
         return _react["default"].createElement("div", {
@@ -3587,7 +3638,9 @@ function (_React$Component) {
           agregarInstruccionSQL: this.crearInstruccionSQL,
           actualizarCampo: this.actualizarCampoSQL,
           eliminarCampo: this.eliminarCampoSQL,
-          navbar: this.state.navbar
+          navbar: this.state.navbar,
+          showSuccesMessage: this.props.showSuccesMessage,
+          showMessage: this.props.showMessage
         }));
       }
     }

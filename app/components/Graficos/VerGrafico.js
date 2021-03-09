@@ -701,11 +701,18 @@ function (_React$Component) {
       }, _react["default"].createElement("li", {
         className: "breadcrumb-item font-16",
         "aria-current": "page",
-        onClick: this.props.retornarSeleccionDashboards
+        onClick: this.props.goSeleccionReporteria
       }, _react["default"].createElement("a", {
         href: "#",
         className: "breadcrumb-link"
-      }, "Dashboards")), _react["default"].createElement("li", {
+      }, "Seleccionar Tipo de Reporter\xEDa")), _react["default"].createElement("li", {
+        className: "breadcrumb-item font-16",
+        "aria-current": "page",
+        onClick: this.props.retornarCrearGrafico
+      }, _react["default"].createElement("a", {
+        href: "#",
+        className: "breadcrumb-link"
+      }, "Configurar Gr\xE1fico")), _react["default"].createElement("li", {
         className: "breadcrumb-item active font-16",
         "aria-current": "page"
       }, "Ver Gr\xE1ficas"))))))), this.state.html.length != undefined && this.state.html.length > 0 ? _react["default"].createElement("div", {

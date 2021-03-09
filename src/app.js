@@ -4,6 +4,7 @@ import fs from 'fs';
 
 import Layout from './components/Layout.js';
 import LoginPage from './components/LoginPage.js';
+import MessageModal from './components/MessageModal.js';
 //import odbc from 'odbc';
 
 /*const config = {
@@ -44,41 +45,51 @@ export default class App extends React.Component {
         super();
         this.state = {
             isLoggedIn: false,
+            userID: -1,
             userName: null,
             permision: "",
             config: {},
             pool: null,
-            conexionAbierta: false
+            conexionAbierta: false,
+            mensajeModal: {mostrarMensaje: false, mensajeConfirmado: false, esError: false, esConfirmar: false, titulo: "", mensaje: ""}
         }
         // connection2 is now an open Connection
         this.login = this.login.bind(this);
         this.logOff = this.logOff.bind(this);
         this.readConfigFile = this.readConfigFile.bind(this);
         this.connectToDB = this.connectToDB.bind(this);
+        this.dismissMessageModal = this.dismissMessageModal.bind(this);
+        this.showMessage = this.showMessage.bind(this);
     }
 
     componentDidMount() {
         this.readConfigFile();
     }
 
-    login(userName, permision) {
+    login(id, userName, permision) {
         this.setState({
             isLoggedIn: true,
-            userName: null,
+            userID: id,
+            userName: userName,
             permision: permision
         });
     }
 
     logOff () {
         this.setState({
-            isLoggedIn: false
+            isLoggedIn: false,
+            userID: -1,
+            userName: null,
+            permision: "",
         });
     }
 
     readConfigFile () {
         fs.readFile('./conf.dar', 'utf-8', (err, data) => {
             if(err) {
-                alert("Error al leer el archivo de configuracion de tabla.")
+                this.setState({
+                    mensajeModal: {mostrarMensaje: true, mensajeConfirmado: false, esError: true, esConfirmar: false, titulo: "Error", mensaje: "Error al leer el archivo de configuracion de tabla."}
+                });
             } else {
                 var lineas = data.split("\n");
                 var user, password, server, database;
@@ -130,7 +141,9 @@ export default class App extends React.Component {
             if(err) {
                 console.log(err);
                 console.log("Error en conección con la base de datos");
-                alert("Error en conección con la base de datos");
+                this.setState({
+                    mensajeModal: {mostrarMensaje: true, mensajeConfirmado: false, esError: true, esConfirmar: false, titulo: "Error", mensaje: "Error en conección con la base de datos. Ver Consola."}
+                });
             } else {
                 console.log('pool loaded');
                 this.setState({
@@ -143,13 +156,31 @@ export default class App extends React.Component {
         });
     }
 
+    dismissMessageModal() {
+        this.setState({
+            mensajeModal: {mostrarMensaje: false, mensajeConfirmado: false, esError: false, esConfirmar: false, titulo: "", mensaje: ""}
+        });
+    }
+
+    showMessage(titulo, mensaje, esError, esConfirmar) {
+        this.setState({
+            mensajeModal: {mostrarMensaje: true, esError: esError, esConfirmar: esConfirmar, titulo: titulo, mensaje: mensaje}
+        });
+    }
+
     render() {
         return (
             <div>
                 { this.state.isLoggedIn ? (
-                    <Layout userName={this.state.userName} permision={this.state.permision} logOff={this.logOff} pool={this.state.pool}> </Layout>
+                    <Layout userID={this.state.userID} userName={this.state.userName} permision={this.state.permision} logOff={this.logOff} pool={this.state.pool}> </Layout>
                 ) : (
-                    <LoginPage login={this.login} pool={this.state.pool} readConfigFile={this.readConfigFile} conexionAbierta={this.state.conexionAbierta}> </LoginPage>
+                    <LoginPage login={this.login} pool={this.state.pool} readConfigFile={this.readConfigFile} conexionAbierta={this.state.conexionAbierta} showMessage={this.showMessage}> </LoginPage>
+                )}
+
+                { this.state.mensajeModal.mostrarMensaje ? (
+                    <MessageModal esError={this.state.mensajeModal.esError} esConfirmar={this.state.mensajeModal.esConfirmar} dismissMessage={this.dismissMessageModal}  titulo={this.state.mensajeModal.titulo} mensaje={this.state.mensajeModal.mensaje}> </MessageModal>
+                ) : (
+                    <span></span>
                 )}
             </div>
         );

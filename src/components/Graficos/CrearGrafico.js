@@ -888,14 +888,15 @@ export default class CrearGrafico extends React.Component {
                             <div className={"page-breadcrumb"}>
                                 <nav aria-label="breadcrumb">
                                     <ol className={"breadcrumb"}>
-                                        <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.props.retornarSeleccionDashboards}><a href="#" className={"breadcrumb-link"}>Dashboards</a></li>
-                                        <li className={"breadcrumb-item active font-16"} aria-current="page">Crear Dashboard</li>
+                                        <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.props.goSeleccionReporteria}><a href="#" className={"breadcrumb-link"}>Seleccionar Tipo de Reportería</a></li>
+                                        <li className={"breadcrumb-item active font-16"} aria-current="page">Configurar Gráfico</li>
                                     </ol>
                                 </nav>
                             </div>
                         </div>
                     </div>
                 </div>
+
                 <div className={"row"}>
                     <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
                         <div className={"card influencer-profile-data"}>

@@ -25,7 +25,7 @@ var valorSeleccionado = '', valorSeleccionadoTexto = '';
 var indiceSeleccionadoFormula = -1;
 var indiceFormulaSeleccionadaEdit = -1;
 
-var nombreIndicador = '', codigoIndicador = '', toleranciaIndicador = '', valorIdealIndicador = '', tipoValorIdealIndicador = '', tipoToleranciaIndicador = '', periodicidadIndicador = '', tipoIndicador = '', nombreEncargadoIndicador = '';
+var  idFormula = '', nombreIndicador = '', codigoIndicador = '', toleranciaIndicador = '', valorIdealIndicador = '', tipoValorIdealIndicador = '', tipoToleranciaIndicador = '', periodicidadIndicador = '', tipoIndicador = '', nombreEncargadoIndicador = '';
 
 var banderaEsFormulaIndicador = false, mostrarToleranciaPorcentaje = false, periodicidadIndicador = "-1", fecha = '';
 var contadorObjetosGuardados = 0, contadorObjetosAGuardar = 0;
@@ -81,6 +81,7 @@ export default class CrearIndicador extends React.Component {
         this.modificarFormulaGlobal = this.modificarFormulaGlobal.bind(this);
         this.eliminarFormula = this.eliminarFormula.bind(this);
         
+        this.updateIdFormula = this.updateIdFormula.bind(this);
         this.updateNombreIndicador = this.updateNombreIndicador.bind(this);
         this.updateCodigoIndicador = this.updateCodigoIndicador.bind(this);
         this.updateValorIdealIndicador = this.updateValorIdealIndicador.bind(this);
@@ -108,6 +109,7 @@ export default class CrearIndicador extends React.Component {
     }
 
     crearIndicador () {
+        var idFormula = $("#idFormula").val();
         var nombre = $("#nombreIndicador").val();
         var codigo = $("#codigo").val();
         var formula = formulaG;
@@ -122,102 +124,108 @@ export default class CrearIndicador extends React.Component {
             fecha = new Date(1964, 4, 28);
         var responsable = $("#responsable").val();
         var riesgoPadre = this.props.riesgoPadre;
-        if(nombre.length > 0 && nombre.length < 101) {
-            if(!this.tieneEspaciosEnBlanco(nombre)) {
-                if(codigo.length > 0 && codigo.length < 101) {
-                    if(formula.length > 0 && formula.length < 501) {
-                        if( !isNaN(parseInt(peso)) ) {
-                            if( !isNaN(parseInt(tolerancia)) ) {
-                                if( !isNaN(parseInt(valorIdeal)) ) {
-                                    if(tipoValorIdeal.length > 0 && tipoValorIdeal.length < 21) {
-                                        if(periodicidad.length > 0 && periodicidad.length < 51) {
-                                            if(tipoIndicador.length > 0 && tipoIndicador.length < 21) {
-                                                if(responsable.length > 0) {
-                                                    if( !isNaN(parseInt(riesgoPadre)) ) {
-                                                        if(this.isValidDate(fecha)) {
-                                                            
-                                                            const transaction = new sql.Transaction( this.props.pool );
-                                                            transaction.begin(err => {
-                                                                var rolledBack = false;
-                                                                transaction.on('rollback', aborted => {
-                                                                    rolledBack = true;
-                                                                });
-                                                                const request = new sql.Request(transaction);
-                                                                request.query("insert into Indicadores (nombre, codigo, formula, peso, tolerancia, valorIdeal, tipoValorIdeal, periodicidad, tipoIndicador, responsable, idRiesgoPadre, fechaInicioCalculo) values ('"+nombre+"', '"+codigo+"', '"+formula+"', "+peso+", "+tolerancia+", "+valorIdeal+", '"+tipoValorIdeal+"', '"+periodicidad+"', '"+tipoIndicador+"', '"+responsable+"', "+riesgoPadre+", '"+fecha.getFullYear()+"-"+(fecha.getMonth()+1)+"-"+fecha.getDate()+"')", (err, result) => {
-                                                                    if (err) {
-                                                                        console.log(err);
-                                                                        if (!rolledBack) {
-                                                                            transaction.rollback(err => {
+        if(idFormula.length > 0 && idFormula.length < 101) {
+            if(nombre.length > 0 && nombre.length < 501) {
+                if(!this.tieneEspaciosEnBlanco(nombre)) {
+                    if(codigo.length > 0 && codigo.length < 101) {
+                        if(formula.length > 0 && formula.length < 501) {
+                            if( !isNaN(parseInt(peso)) ) {
+                                if( !isNaN(parseInt(tolerancia)) ) {
+                                    if( !isNaN(parseInt(valorIdeal)) ) {
+                                        if(tipoValorIdeal.length > 0 && tipoValorIdeal.length < 21) {
+                                            if(periodicidad.length > 0 && periodicidad.length < 51) {
+                                                if(tipoIndicador.length > 0 && tipoIndicador.length < 21) {
+                                                    if(responsable.length > 0) {
+                                                        if( !isNaN(parseInt(riesgoPadre)) ) {
+                                                            if(this.isValidDate(fecha)) {
+                                                                
+                                                                const transaction = new sql.Transaction( this.props.pool );
+                                                                transaction.begin(err => {
+                                                                    var rolledBack = false;
+                                                                    transaction.on('rollback', aborted => {
+                                                                        rolledBack = true;
+                                                                    });
+                                                                    const request = new sql.Request(transaction);
+                                                                    request.query("insert into Indicadores (idFormula, nombre, codigo, formula, peso, tolerancia, valorIdeal, tipoValorIdeal, periodicidad, tipoIndicador, responsable, idRiesgoPadre, fechaInicioCalculo) values ('"+idFormula+"', '"+nombre+"', '"+codigo+"', '"+formula+"', "+peso+", "+tolerancia+", "+valorIdeal+", '"+tipoValorIdeal+"', '"+periodicidad+"', '"+tipoIndicador+"', '"+responsable+"', "+riesgoPadre+", '"+fecha.getFullYear()+"-"+(fecha.getMonth()+1)+"-"+fecha.getDate()+"')", (err, result) => {
+                                                                        if (err) {
+                                                                            console.log(err);
+                                                                            if (!rolledBack) {
+                                                                                transaction.rollback(err => {
+                                                                                });
+                                                                            }
+                                                                        } else {
+                                                                            transaction.commit(err => {
+                                                                                alert("Indicador Creado.");
+                                                                                idFormula = '';
+                                                                                nombreIndicador = '';
+                                                                                codigoIndicador = '';
+                                                                                toleranciaIndicador = '';
+                                                                                tipoToleranciaIndicador = '';
+                                                                                valorIdealIndicador = '';
+                                                                                tipoValorIdealIndicador = '';
+                                                                                periodicidadIndicador = '';
+                                                                                tipoIndicador = '';
+                                                                                nombreEncargadoIndicador = '';
+                                                                                $("#nombreIndicador").val("");
+                                                                                $("#idFormula").val("");
+                                                                                $("#codigo").val("");
+                                                                                this.setState({
+                                                                                    x: 0
+                                                                                });
+                                                                                $("#valorIdeal").val("");
+                                                                                $("#tipoValorIdeal").val("numerico");
+                                                                                $("#tolerancia").val("");
+                                                                                $("#tipoTolerancia").val("numerico");
+                                                                                $("#periodicidad").val("-1");
+                                                                                $("#tipoIndicador").val("riesgoInherente");
+                                                                                $("#responsable").val("");
+                                                                                this.getIndicadorID();
                                                                             });
                                                                         }
-                                                                    } else {
-                                                                        transaction.commit(err => {
-                                                                            alert("Indicador Creado.");
-                                                                            nombreIndicador = '';
-                                                                            codigoIndicador = '';
-                                                                            toleranciaIndicador = '';
-                                                                            tipoToleranciaIndicador = '';
-                                                                            valorIdealIndicador = '';
-                                                                            tipoValorIdealIndicador = '';
-                                                                            periodicidadIndicador = '';
-                                                                            tipoIndicador = '';
-                                                                            nombreEncargadoIndicador = '';
-                                                                            $("#nombreIndicador").val("");
-                                                                            $("#codigo").val("");
-                                                                            this.setState({
-                                                                                x: 0
-                                                                            });
-                                                                            $("#valorIdeal").val("");
-                                                                            $("#tipoValorIdeal").val("numerico");
-                                                                            $("#tolerancia").val("");
-                                                                            $("#tipoTolerancia").val("numerico");
-                                                                            $("#periodicidad").val("-1");
-                                                                            $("#tipoIndicador").val("riesgoInherente");
-                                                                            $("#responsable").val("");
-                                                                            this.getIndicadorID();
-                                                                        });
-                                                                    }
-                                                                });
-                                                            }); // fin transaction
+                                                                    });
+                                                                }); // fin transaction
 
+                                                            } else {
+                                                                alert("la fecha inicial debe ser una fecha valida");
+                                                            }
                                                         } else {
-                                                            alert("la fecha inicial debe ser una fecha valida");
+                                                            alert("el riesgo padre del indicador debe ser un numero valido");
                                                         }
                                                     } else {
-                                                        alert("el riesgo padre del indicador debe ser un numero valido");
+                                                        alert("Ingrese un valor para el responsable.");
                                                     }
                                                 } else {
-                                                    alert("Ingrese un valor para el responsable.");
+                                                    alert("el tipo de indicador debe tener una longitud mayor a 0 y menor a 21");
                                                 }
                                             } else {
-                                                alert("el tipo de indicador debe tener una longitud mayor a 0 y menor a 21");
+                                                alert("la periodicidad del indicador debe tener una longitud mayor a 0 y menor a 51");
                                             }
                                         } else {
-                                            alert("la periodicidad del indicador debe tener una longitud mayor a 0 y menor a 51");
+                                            alert("el tipo de valor ideal del indicador debe tener una longitud mayor a 0 y menor a 21");
                                         }
                                     } else {
-                                        alert("el tipo de valor ideal del indicador debe tener una longitud mayor a 0 y menor a 21");
+                                        alert("el valor ideal del indicador debe ser un numero valido");
                                     }
                                 } else {
-                                    alert("el valor ideal del indicador debe ser un numero valido");
+                                    alert("la tolerancia del indicador debe ser un numero valido");
                                 }
                             } else {
-                                alert("la tolerancia del indicador debe ser un numero valido");
+                                alert("el peso del indicador debe ser un numero valido");
                             }
                         } else {
-                            alert("el peso del indicador debe ser un numero valido");
+                            alert("la formula del indicador debe tener una longitud mayor a 0 y menor a 501");
                         }
                     } else {
-                        alert("la formula del indicador debe tener una longitud mayor a 0 y menor a 501");
+                        alert("el codigo del indicador debe tener una longitud mayor a 0 y menor a 101");
                     }
                 } else {
-                    alert("el codigo del indicador debe tener una longitud mayor a 0 y menor a 101");
+                    alert('El nombre del archivo no debe contener espacios en blanco');
                 }
             } else {
-                alert('El nombre del archivo no debe contener espacios en blanco');
+                alert("el nombre del indicador debe tener una longitud mayor a 0 y menor a 501");
             }
         } else {
-            alert("el nombre del indicador debe tener una longitud mayor a 0 y menor a 101");
+            alert("el identificador en fórmula del indicador debe tener una longitud mayor a 0 y menor a 101");
         }
     }
 
@@ -2209,6 +2217,10 @@ export default class CrearIndicador extends React.Component {
         elementosFormulas[posicionSel].splice(posicionFormulaEnCampo, 1);
     }
 
+    updateIdFormula() {
+        idFormula = $("#idFormula").val();
+    }
+
     updateNombreIndicador() {
         nombreIndicador = $("#nombreIndicador").val();
     }
@@ -2344,6 +2356,14 @@ export default class CrearIndicador extends React.Component {
                                             </div>
                                             <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"}>
                                                 <input id="nombreIndicador" defaultValue={nombreIndicador} onKeyUp={this.updateNombreIndicador} type="text" className="form-control form-control-sm"/>
+                                            </div>
+                                        </div>
+                                        <div className={"row"} style={{width: "100%"}}>
+                                            <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
+                                                <label htmlFor="idFormula" className="col-form-label">Identificador en Fórmula</label>
+                                            </div>
+                                            <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"}>
+                                                <input id="idFormula" type="text" defaultValue={idFormula} onKeyUp={this.updateIdFormula} className="form-control form-control-sm"/>
                                             </div>
                                         </div>
                                         <div className={"row"} style={{width: "100%"}}>

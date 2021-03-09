@@ -265,7 +265,7 @@ export default class CrearYSeleccionarLista extends React.Component {
                             </div>
                         </div>
                     </div>
-                    <div className={"row"}>
+                    <div className={"row"} style={{display: this.props.permision.lista.indexOf("E") > -1 ? "" : "none" }}>
                         <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
                             <div className={"card influencer-profile-data"}>
                                 <div className={"card-body"}>
@@ -283,7 +283,7 @@ export default class CrearYSeleccionarLista extends React.Component {
                         </div>
                     </div>
                     <br/>
-                    <div className={"row"}>
+                    <div className={"row"} style={{display: this.props.permision.lista.indexOf("V") > -1 || this.props.permision.lista.indexOf("E") > -1 ? "" : "none" }}>
                         <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
                             <div className={"card influencer-profile-data"}>
                                 <div className={"card-body"}>
@@ -322,7 +322,7 @@ export default class CrearYSeleccionarLista extends React.Component {
                             </div>
                         </div>
                     </div>
-                    <div className={"row"}>
+                    <div className={"row"} style={{display: this.props.permision.lista.indexOf("E") > -1 ? "" : "none" }}>
                         <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
                             <div className={"card influencer-profile-data"}>
                                 <div className={"card-body"}>
@@ -361,7 +361,7 @@ export default class CrearYSeleccionarLista extends React.Component {
                             </div>
                         </div>
                     </div>
-                    <br/>
+                    <br style={{display: this.props.permision.lista.indexOf("E") > -1 ? "" : "none" }}/>
                     <div className={"row"}>
                         <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
                             <div className={"card influencer-profile-data"}>
@@ -375,25 +375,37 @@ export default class CrearYSeleccionarLista extends React.Component {
                                                 </div>
                                                 <div className="form-group col-xl-6 col-6">
                                                     <label className={"col-form-label"}>Nombre de Elemento</label>
-                                                    <InlineEdit id={"nombreElemento"+i} texto={elemento.nombre}> </InlineEdit>
+                                                    {
+                                                        this.props.permision.lista.indexOf("E") > -1
+                                                        ?   <InlineEdit id={"nombreElemento"+i} texto={elemento.nombre}> </InlineEdit>
+                                                        :   <h4 className={"col-form-label"}>{elemento.nombre}</h4>
+                                                    }
                                                 </div>
                                             </div>
                                             <div className={"row"} style={{width: "100%"}}>
                                                 <div className="form-group col-xl-6 col-6">
                                                     <label className={"col-form-label"}>Valor de Elemento</label>
-                                                    <InlineEdit id={"valorElemento"+i} texto={elemento.valor}> </InlineEdit>
+                                                    {
+                                                        this.props.permision.lista.indexOf("E") > -1
+                                                        ?   <InlineEdit id={"valorElemento"+i} texto={elemento.valor}> </InlineEdit>
+                                                        :   <h4 className={"col-form-label"}>{elemento.valor}</h4>
+                                                    }
                                                 </div>
                                                 <div className="form-group col-xl-6 col-6">
                                                     <label className={"col-form-label"}>Tipo de Elemento</label>
-                                                    <select id={"listaTipo"+i} className={"form-control"} defaultValue={elemento.tipo}>
-                                                        <option value="" key="0">Seleccione un tipo de variable...</option>
-                                                        {campos.map((campo, k) =>
-                                                            <option value={campo.nombre} key={k}>{campo.nombre}</option>
-                                                        )}
-                                                    </select>
+                                                    {
+                                                        this.props.permision.lista.indexOf("E") > -1
+                                                        ?   <select id={"listaTipo"+i} className={"form-control"} defaultValue={elemento.tipo}>
+                                                                <option value="" key="0">Seleccione un tipo de variable...</option>
+                                                                {campos.map((campo, k) =>
+                                                                    <option value={campo.nombre} key={k}>{campo.nombre}</option>
+                                                                )}
+                                                            </select>
+                                                        :   <h4 className={"col-form-label"}>{elemento.tipo}</h4>
+                                                    }
                                                 </div>
                                             </div>
-                                            <div className={"row"} style={{width: "100%"}}>
+                                            <div className={"row"} style={{width: "100%", display: this.props.permision.lista.indexOf("E") > -1 ? "" : "none"}}>
                                                 <button onClick={() => this.updateElementList(i, elemento)} className={"btn btn-success btn-block col-xl-5 col-5"} style={{color: "white", fontSize: "1.2em", fontWeight: "bold", margin: "0 auto", display: "block"}}>Guardar</button>
                                                 <button onClick={() => this.deleteElementList(elemento)} className={"btn btn-danger btn-block col-xl-5 col-5"} style={{color: "white", fontSize: "1.2em", fontWeight: "bold", margin: "0 auto", display: "block"}}>Eliminar</button>
                                             </div>

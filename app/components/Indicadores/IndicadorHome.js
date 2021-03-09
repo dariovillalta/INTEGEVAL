@@ -19,8 +19,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "d
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -51,6 +49,7 @@ function (_React$Component) {
     _this.state = {
       componenteAMostrar: "selIndicador",
       idIndicadorSeleccionado: -1,
+      idFormulaIndicadorSeleccionada: "",
       nombreIndicadorSeleccionada: "",
       codigoIndicadorSeleccionada: "",
       formulaIndicadorSeleccionada: "",
@@ -65,8 +64,11 @@ function (_React$Component) {
       idRiesgoPadreSeleccionado: -1,
       formulaRiesgo: "",
       pesoDisponibleRiesgo: 0,
+      indicadoresSeleccionados: [],
+      riesgos: [],
       indicadores: []
     };
+    _this.getIndicators = _this.getIndicators.bind(_assertThisInitialized(_this));
     _this.terminoSeleccionIndicador = _this.terminoSeleccionIndicador.bind(_assertThisInitialized(_this));
     _this.retornoSeleccionIndicador = _this.retornoSeleccionIndicador.bind(_assertThisInitialized(_this));
     _this.goCrearIndicador = _this.goCrearIndicador.bind(_assertThisInitialized(_this));
@@ -76,6 +78,81 @@ function (_React$Component) {
   }
 
   _createClass(IndicadorHome, [{
+    key: "componentDidMount",
+    value: function componentDidMount() {
+      var _this2 = this;
+
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("select * from Riesgos", function (err, result) {
+          if (err) {
+            if (!rolledBack) {
+              console.log(err);
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              _this2.setState({
+                riesgos: result.recordset
+              });
+
+              _this2.getIndicators();
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
+    key: "getIndicators",
+    value: function getIndicators() {
+      var arregloTemp = [];
+
+      for (var i = 0; i < this.state.riesgos.length; i++) {
+        this.insertIndicator(this.state.riesgos[i].ID, i, arregloTemp);
+      }
+
+      ;
+    }
+  }, {
+    key: "insertIndicator",
+    value: function insertIndicator(riesgoID, index, array) {
+      var _this3 = this;
+
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("select * from Indicadores where idRiesgoPadre = " + riesgoID, function (err, result) {
+          if (err) {
+            if (!rolledBack) {
+              console.log(err);
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              if (array[index] == undefined) {
+                array[index] = [];
+              }
+
+              array[index] = $.merge(array[index], result.recordset);
+
+              _this3.setState({
+                indicadores: array
+              });
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
     key: "terminoSeleccionIndicador",
     value: function terminoSeleccionIndicador(id, formula) {
       this.setState({
@@ -105,13 +182,14 @@ function (_React$Component) {
     }
   }, {
     key: "goEditarIndicador",
-    value: function goEditarIndicador(idRiesgo, formula, pesoDisponible, idIndicador, nombreIndicador, codigoIndicador, formulaIndicador, pesoIndicador, toleranciaIndicador, tipoValorIdealIndicador, valorIdealIndicador, periodicidadIndicador, tipoIndicadorIndicador, analistaIndicador, fechaInicioCalculo, indicadores) {
+    value: function goEditarIndicador(idRiesgo, formula, pesoDisponible, idIndicador, idFormula, nombreIndicador, codigoIndicador, formulaIndicador, pesoIndicador, toleranciaIndicador, tipoValorIdealIndicador, valorIdealIndicador, periodicidadIndicador, tipoIndicadorIndicador, analistaIndicador, fechaInicioCalculo, indicadores) {
       this.setState({
         componenteAMostrar: "editIndicador",
         idRiesgoPadreSeleccionado: idRiesgo,
         formulaRiesgo: formula,
         pesoDisponibleRiesgo: pesoDisponible,
         idIndicadorSeleccionado: idIndicador,
+        idFormulaIndicadorSeleccionada: idFormula,
         nombreIndicadorSeleccionada: nombreIndicador,
         codigoIndicadorSeleccionada: codigoIndicador,
         formulaIndicadorSeleccionada: formulaIndicador,
@@ -123,13 +201,13 @@ function (_React$Component) {
         tipoIndicadorIndicadorSeleccionada: tipoIndicadorIndicador,
         analistaIndicadorSeleccionada: analistaIndicador,
         fechaInicioCalculoSeleccionada: fechaInicioCalculo,
-        indicadores: indicadores
+        indicadoresSeleccionados: indicadores
       });
     }
   }, {
     key: "terminoCrearIndicadorPasarAEdit",
     value: function terminoCrearIndicadorPasarAEdit(nombreIndicador) {
-      var _this2 = this;
+      var _this4 = this;
 
       var transaction = new _mssql["default"].Transaction(this.props.pool);
       transaction.begin(function (err) {
@@ -147,7 +225,20 @@ function (_React$Component) {
           } else {
             transaction.commit(function (err) {
               if (result.recordset.length) {
-                _this2.goEditarIndicador(_this2.state.idRiesgoPadreSeleccionado, _this2.state.formulaRiesgo, _this2.state.pesoDisponibleRiesgo, result.recordset[0].ID, result.recordset[0].nombre, result.recordset[0].codigo, result.recordset[0].formula, result.recordset[0].peso, result.recordset[0].tolerancia, result.recordset[0].tipoValorIdeal, result.recordset[0].periodicidad, result.recordset[0].tipoIndicador, result.recordset[0].analista, result.recordset[0].fechaInicioCalculo);
+                var indicadores;
+
+                for (var i = 0; i < _this4.state.riesgos.length; i++) {
+                  if (_this4.state.idRiesgoPadreSeleccionado === _this4.state.riesgos[i].ID) {
+                    indicadores = _this4.state.indicadores[i];
+                    break;
+                  }
+                }
+
+                ;
+
+                _this4.goEditarIndicador(_this4.state.idRiesgoPadreSeleccionado, _this4.state.formulaRiesgo, _this4.state.pesoDisponibleRiesgo, result.recordset[0].ID, result.recordset[0].nombre, result.recordset[0].codigo, result.recordset[0].formula, result.recordset[0].peso, result.recordset[0].tolerancia, result.recordset[0].tipoValorIdeal, result.recordset[0].periodicidad, result.recordset[0].tipoIndicador, result.recordset[0].analista, result.recordset[0].fechaInicioCalculo, indicadores);
+
+                _this4.getIndicators();
               }
             });
           }
@@ -158,15 +249,18 @@ function (_React$Component) {
     key: "render",
     value: function render() {
       if (this.state.componenteAMostrar.localeCompare("selIndicador") == 0) {
-        var _React$createElement;
-
-        return _react["default"].createElement("div", null, _react["default"].createElement(_SeleccionarIndicador["default"], (_React$createElement = {
+        return _react["default"].createElement("div", null, _react["default"].createElement(_SeleccionarIndicador["default"], {
           pool: this.props.pool,
           configuracionHome: this.props.configuracionHome,
           terminoSeleccionIndicador: this.terminoSeleccionIndicador,
           goCrearIndicador: this.goCrearIndicador,
-          showRiesgos: this.props.showRiesgos
-        }, _defineProperty(_React$createElement, "showRiesgos", this.props.showRiesgos), _defineProperty(_React$createElement, "updateBanderaCrearRiesgoTrue", this.props.updateBanderaCrearRiesgoTrue), _defineProperty(_React$createElement, "goEditarIndicador", this.goEditarIndicador), _React$createElement)));
+          showRiesgos: this.props.showRiesgos,
+          riesgos: this.state.riesgos,
+          indicadores: this.state.indicadores,
+          updateBanderaCrearRiesgoTrue: this.props.updateBanderaCrearRiesgoTrue,
+          goEditarIndicador: this.goEditarIndicador,
+          permision: this.props.permision
+        }));
       } else if (this.state.componenteAMostrar.localeCompare("crearIndicador") == 0) {
         return _react["default"].createElement("div", null, _react["default"].createElement(_CrearIndicador["default"], {
           pool: this.props.pool,
@@ -189,6 +283,7 @@ function (_React$Component) {
           formulaRiesgo: this.state.formulaRiesgo,
           pesoDisponibleRiesgo: this.state.pesoDisponibleRiesgo,
           idIndicadorSeleccionado: this.state.idIndicadorSeleccionado,
+          idFormulaIndicadorSeleccionada: this.state.idFormulaIndicadorSeleccionada,
           nombreIndicadorSeleccionada: this.state.nombreIndicadorSeleccionada,
           codigoIndicadorSeleccionada: this.state.codigoIndicadorSeleccionada,
           formulaIndicadorSeleccionada: this.state.formulaIndicadorSeleccionada,
@@ -199,7 +294,11 @@ function (_React$Component) {
           periodicidadIndicadorSeleccionada: this.state.periodicidadIndicadorSeleccionada,
           tipoIndicadorIndicadorSeleccionada: this.state.tipoIndicadorIndicadorSeleccionada,
           analistaIndicadorSeleccionada: this.state.analistaIndicadorSeleccionada,
-          indicadores: this.state.indicadores
+          indicadores: this.state.indicadoresSeleccionados,
+          permision: this.props.permision,
+          getIndicators: this.getIndicators,
+          userID: this.props.userID,
+          userName: this.props.userName
         }, " "));
       }
     }

@@ -47,7 +47,11 @@ export default class ConfigVariablesContenedor extends React.Component {
                 <div>
                     <ConexionesHome pool={this.props.pool}
                                 goOptions={this.goOptions}
-                                configuracionHome={this.props.configuracionHome}>
+                                configuracionHome={this.props.configuracionHome}
+                                showSuccesMessage={this.props.showSuccesMessage}
+                                showMessage={this.props.showMessage}
+                                userID={this.props.userID}
+                                userName={this.props.userName}>
                     </ConexionesHome>
                 </div>
             );
@@ -63,7 +67,12 @@ export default class ConfigVariablesContenedor extends React.Component {
                                 showFormula={this.props.showFormula}
                                 showCondicionVar={this.props.showCondicionVar}
                                 updateFormula={this.props.updateFormula}
-                                showSQL={this.props.showSQL}>
+                                showSQL={this.props.showSQL}
+                                permision={this.props.permision}
+                                userID={this.props.userID}
+                                userName={this.props.userName}
+                                showSuccesMessage={this.props.showSuccesMessage}
+                                showMessage={this.props.showMessage}>
                     </VariableHome>
                 </div>
             );

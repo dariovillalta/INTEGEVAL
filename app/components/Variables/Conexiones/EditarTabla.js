@@ -11,8 +11,6 @@ var _mssql = _interopRequireDefault(require("mssql"));
 
 var _ErrorMessage = _interopRequireDefault(require("../../ErrorMessage.js"));
 
-var _MessageModal = _interopRequireDefault(require("../../MessageModal.js"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -92,34 +90,44 @@ function (_React$Component) {
         indiceY: -1
       }
     };
+    _this.saveBitacora = _this.saveBitacora.bind(_assertThisInitialized(_this));
     _this.updateTable = _this.updateTable.bind(_assertThisInitialized(_this));
     _this.dismissTableNewError = _this.dismissTableNewError.bind(_assertThisInitialized(_this));
-    _this.dismissMessageModal = _this.dismissMessageModal.bind(_assertThisInitialized(_this));
-    _this.confirmMessageModal = _this.confirmMessageModal.bind(_assertThisInitialized(_this));
-    _this.showSuccesMessage = _this.showSuccesMessage.bind(_assertThisInitialized(_this));
+    _this.modifyTableConfirmation = _this.modifyTableConfirmation.bind(_assertThisInitialized(_this));
     return _this;
   }
-  /* mensajeModal <- de state
-      //mostrarMensaje:bandera para mostrar modal mensaje en pantalla
-      //mensajeConfirmado:retorno del modal mensaje si fue conf
-      //esError:bandera para ver que tipo de modal mensaje mostrar
-      //esConfirmar:bandera para ver que tipo de modal mensaje mostrar
-      //titulo:titulo del modal
-      //mensaje:mensaje del modal
-      //banderaMetodoInit:variable para ver a que metodo ir cuando regresa de confirmar el modal
-      //idElementoSelec:id del elemento que mostro el modal mensaje
-      //indiceX:posicion de la tabla en el arreglo que mostro el modal mensaje
-      //indiceY:posicion del campo en el arreglo de tablas que mostro el modal mensaje
-  */
-
 
   _createClass(EditarTabla, [{
-    key: "componentDidMount",
-    value: function componentDidMount() {}
+    key: "saveBitacora",
+    value: function saveBitacora(fecha, descripcion, tipoVariable, idVariable) {
+      var _this2 = this;
+
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("insert into Bitacora (usuarioID, nombreUsuario, fecha, descripcion, tipoVariable, idVariable) values (" + _this2.props.userID + ", '" + _this2.props.userName + "', '" + fecha.getFullYear() + "-" + (fecha.getMonth() + 1) + "-" + fecha.getDate() + "', '" + descripcion + "', '" + tipoVariable + "', " + idVariable + ")", function (err, result) {
+          if (err) {
+            console.log(err);
+
+            _this2.props.showMessage("Error", 'No se pudo guardar información de bitacora.', true, false, {});
+
+            if (!rolledBack) {
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {});
+          }
+        });
+      }); // fin transaction
+    }
   }, {
     key: "updateTable",
     value: function updateTable() {
-      var _this2 = this;
+      var _this3 = this;
 
       var nombreTabla = $("#nombreTablaNuevo").val();
       var usuarioTabla = $("#usuarioTablaNuevo").val();
@@ -128,6 +136,7 @@ function (_React$Component) {
       var basedatosTabla = $("#basedatosTablaNuevo").val();
       var tablaTabla = $("#tablaTablaNuevo").val();
       var funcionTabla = $("#funcionTabla").val();
+      var tipoConexion = $("#tipoConexion").val();
 
       if (nombreTabla.length > 0 && nombreTabla.length < 71) {
         if (usuarioTabla.length > 0 && usuarioTabla.length < 51) {
@@ -135,7 +144,7 @@ function (_React$Component) {
             if (servidorTabla.length > 0 && servidorTabla.length < 51) {
               if (basedatosTabla.length > 0 && basedatosTabla.length < 51) {
                 if (tablaTabla.length > 0 && tablaTabla.length < 71) {
-                  if (tablaTabla.length > 0 && tablaTabla.length < 71) {
+                  if (tipoConexion.length > 0 && tipoConexion.length < 31) {
                     this.setState({
                       errorCreacionTabla: {
                         campo: "",
@@ -150,7 +159,7 @@ function (_React$Component) {
                         rolledBack = true;
                       });
                       var request = new _mssql["default"].Request(transaction);
-                      request.query("update Tablas set Nombre = '" + nombreTabla + "', Usuario = '" + usuarioTabla + "', Contrasena = '" + contrasenaTabla + "', Servidor = '" + servidorTabla + "', BaseDatos = '" + basedatosTabla + "', Tabla = '" + tablaTabla + "' where ID = " + _this2.props.idTablaSeleccionada, function (err, result) {
+                      request.query("update Tablas set Nombre = '" + nombreTabla + "', Usuario = '" + usuarioTabla + "', Contrasena = '" + contrasenaTabla + "', Servidor = '" + servidorTabla + "', BaseDatos = '" + basedatosTabla + "', Tabla = '" + tablaTabla + "', tipoConexion = '" + tipoConexion + "' where ID = " + _this3.props.idTablaSeleccionada, function (err, result) {
                         if (err) {
                           if (!rolledBack) {
                             console.log(err);
@@ -158,15 +167,19 @@ function (_React$Component) {
                           }
                         } else {
                           transaction.commit(function (err) {
-                            _this2.showSuccesMessage("Exito", "Tabla creada con éxito.");
+                            _this3.props.showSuccesMessage("Exito", "Tabla modificada con éxito.");
+
+                            var nuevosValores = 'nombre: ' + nombreTabla + '\n' + 'usuario: ' + usuarioTabla + '\n' + 'servidor: ' + servidorTabla + '\n' + 'base de datos: ' + basedatosTabla + '\n' + 'tabla: ' + tablaTabla + '\n' + 'tipo de conexión: ' + tipoConexion;
+
+                            _this3.saveBitacora(new Date(), "Usuario: " + _this3.props.userName + " modifico la tabla: " + nombreTabla + "\nValores: \n" + nuevosValores, "tabla", _this3.props.idTablaSeleccionada);
                           });
                         }
                       });
                     }); // fin transaction
                   } else {
-                    var campo = "Función de la Tabla";
+                    var campo = "Tipo de Conexión";
                     var descripcion;
-                    if (funcionTabla.length == 0) descripcion = "El campo debe tener una longitud mayor a 0.";else descripcion = "El campo debe tener una longitud menor a 31.";
+                    if (tipoConexion.length == 0) descripcion = "El campo debe tener una longitud mayor a 0.";else descripcion = "El campo debe tener una longitud menor a 31.";
                     this.setState({
                       errorCreacionTabla: {
                         campo: campo,
@@ -279,74 +292,10 @@ function (_React$Component) {
         }
       });
     }
-    /*======_______====== ======_______======   MENSAJES MODAL    ======_______====== ======_______======*/
-
-    /*======_______======                                                             ======_______======*/
-
-    /*======_______======                                                             ======_______======*/
-
-    /*======_______====== ======_______====== ==_____==  ==___==  ======_______====== ======_______======*/
-
   }, {
-    key: "dismissMessageModal",
-    value: function dismissMessageModal() {
-      this.setState({
-        mensajeModal: {
-          mostrarMensaje: false,
-          mensajeConfirmado: false,
-          esError: false,
-          esConfirmar: false,
-          titulo: "",
-          mensaje: "",
-          banderaMetodoInit: "",
-          idElementoSelec: -1,
-          indiceX: -1,
-          indiceY: -1
-        }
-      });
-    }
-  }, {
-    key: "confirmMessageModal",
-    value: function confirmMessageModal() {
-      if (this.state.mensajeModal.banderaMetodoInit.localeCompare("goDelTable") == 0) {
-        var copiaID = this.state.mensajeModal.idElementoSelec;
-        this.deleteTable(copiaID);
-      }
-    }
-  }, {
-    key: "showSuccesMessage",
-    value: function showSuccesMessage(titulo, mensaje) {
-      this.setState({
-        mensajeModal: {
-          mostrarMensaje: true,
-          mensajeConfirmado: false,
-          esError: false,
-          esConfirmar: false,
-          titulo: titulo,
-          mensaje: mensaje,
-          banderaMetodoInit: "",
-          idElementoSelec: this.state.mensajeModal.idElementoSelec,
-          indiceX: this.state.mensajeModal.indiceX,
-          indiceY: this.state.mensajeModal.indiceY
-        }
-      });
-      var self = this;
-      setTimeout(function () {
-        self.setState({
-          mensajeModal: {
-            mostrarMensaje: false,
-            mensajeConfirmado: false,
-            esError: false,
-            esConfirmar: false,
-            titulo: "",
-            mensaje: "",
-            banderaMetodoInit: "",
-            idElementoSelec: self.state.mensajeModal.idElementoSelec,
-            indiceX: self.state.mensajeModal.indiceX,
-            indiceY: self.state.mensajeModal.indiceY
-          }
-        });
-      }, 850);
+    key: "modifyTableConfirmation",
+    value: function modifyTableConfirmation() {
+      this.props.showMessage("Confirmación", "Esta seguro que desea modificar la tabla?", false, true, this.updateTable);
     }
   }, {
     key: "render",
@@ -474,7 +423,7 @@ function (_React$Component) {
         campo: this.state.errorCreacionTabla.campo,
         descripcion: this.state.errorCreacionTabla.descripcion,
         dismissTableError: this.dismissTableNewError
-      }, " ") : _react["default"].createElement("span", null), _react["default"].createElement("div", {
+      }, " ") : _react["default"].createElement("span", null), _react["default"].createElement("br", null), _react["default"].createElement("div", {
         className: "row"
       }, _react["default"].createElement("button", {
         onClick: this.updateTable,
@@ -483,14 +432,7 @@ function (_React$Component) {
           margin: "0 auto",
           display: "block"
         }
-      }, "Guardas Cambios")))))), _react["default"].createElement("br", null), this.state.mensajeModal.mostrarMensaje ? _react["default"].createElement(_MessageModal["default"], {
-        esError: this.state.mensajeModal.esError,
-        esConfirmar: this.state.mensajeModal.esConfirmar,
-        dismissMessage: this.dismissMessageModal,
-        confirmFunction: this.confirmMessageModal,
-        titulo: this.state.mensajeModal.titulo,
-        mensaje: this.state.mensajeModal.mensaje
-      }, " ") : _react["default"].createElement("span", null));
+      }, "Guardas Cambios")))))), _react["default"].createElement("br", null));
     }
   }]);
 

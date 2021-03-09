@@ -11,19 +11,9 @@ var _mssql = _interopRequireDefault(require("mssql"));
 
 var _ErrorMessage = _interopRequireDefault(require("../../ErrorMessage.js"));
 
-var _MessageModal = _interopRequireDefault(require("../../MessageModal.js"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
-
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
-
-function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
-
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -87,27 +77,14 @@ function (_React$Component) {
         descripcion: "",
         mostrar: false
       },
-      mensajeModal: {
-        mostrarMensaje: false,
-        mensajeConfirmado: false,
-        esError: false,
-        esConfirmar: false,
-        titulo: "",
-        mensaje: "",
-        banderaMetodoInit: "",
-        idElementoSelec: -1,
-        indiceX: -1,
-        indiceY: -1
-      }
+      idTablaSel: -1
     };
+    _this.saveBitacora = _this.saveBitacora.bind(_assertThisInitialized(_this));
     _this.loadTables = _this.loadTables.bind(_assertThisInitialized(_this));
     _this.insertTable = _this.insertTable.bind(_assertThisInitialized(_this));
     _this.deleteTableConfirmation = _this.deleteTableConfirmation.bind(_assertThisInitialized(_this));
     _this.deleteTable = _this.deleteTable.bind(_assertThisInitialized(_this));
     _this.dismissTableNewError = _this.dismissTableNewError.bind(_assertThisInitialized(_this));
-    _this.dismissMessageModal = _this.dismissMessageModal.bind(_assertThisInitialized(_this));
-    _this.confirmMessageModal = _this.confirmMessageModal.bind(_assertThisInitialized(_this));
-    _this.showSuccesMessage = _this.showSuccesMessage.bind(_assertThisInitialized(_this));
     return _this;
   }
   /* mensajeModal <- de state
@@ -130,9 +107,36 @@ function (_React$Component) {
       this.loadTables();
     }
   }, {
+    key: "saveBitacora",
+    value: function saveBitacora(fecha, descripcion, tipoVariable, idVariable) {
+      var _this2 = this;
+
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("insert into Bitacora (usuarioID, nombreUsuario, fecha, descripcion, tipoVariable, idVariable) values (" + _this2.props.userID + ", '" + _this2.props.userName + "', '" + fecha.getFullYear() + "-" + (fecha.getMonth() + 1) + "-" + fecha.getDate() + "', '" + descripcion + "', '" + tipoVariable + "', " + idVariable + ")", function (err, result) {
+          if (err) {
+            console.log(err);
+
+            _this2.props.showMessage("Error", 'No se pudo guardar información de bitacora.', true, false, {});
+
+            if (!rolledBack) {
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {});
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
     key: "loadTables",
     value: function loadTables() {
-      var _this2 = this;
+      var _this3 = this;
 
       var transaction = new _mssql["default"].Transaction(this.props.pool);
       transaction.begin(function (err) {
@@ -149,7 +153,7 @@ function (_React$Component) {
             }
           } else {
             transaction.commit(function (err) {
-              _this2.setState({
+              _this3.setState({
                 tablas: result.recordset
               });
             });
@@ -160,7 +164,7 @@ function (_React$Component) {
   }, {
     key: "insertTable",
     value: function insertTable() {
-      var _this3 = this;
+      var _this4 = this;
 
       var nombreTabla = $("#nombreTablaNuevo").val();
       var usuarioTabla = $("#usuarioTablaNuevo").val();
@@ -200,9 +204,34 @@ function (_React$Component) {
                           }
                         } else {
                           transaction.commit(function (err) {
-                            _this3.showSuccesMessage("Exito", "Tabla creada con éxito.");
+                            _this4.props.showSuccesMessage("Exito", "Tabla creada con éxito.");
 
-                            _this3.loadTables();
+                            _this4.loadTables();
+
+                            var transaction1 = new _mssql["default"].Transaction(_this4.props.pool);
+                            transaction1.begin(function (err) {
+                              var rolledBack = false;
+                              transaction1.on('rollback', function (aborted) {
+                                rolledBack = true;
+                              });
+                              var request1 = new _mssql["default"].Request(transaction1);
+                              request1.query("select top 1 * from Tablas order by ID desc", function (err, result) {
+                                if (err) {
+                                  if (!rolledBack) {
+                                    console.log(err);
+                                    transaction1.rollback(function (err) {});
+                                  }
+                                } else {
+                                  transaction1.commit(function (err) {
+                                    if (result.recordset.length > 0) {
+                                      var nuevosValores = 'nombre: ' + nombreTabla + '\n' + 'usuario: ' + usuarioTabla + '\n' + 'servidor: ' + servidorTabla + '\n' + 'base de datos: ' + basedatosTabla + '\n' + 'tabla: ' + tablaTabla + '\n' + 'tipo de conexión: ' + tipoConexion;
+
+                                      _this4.saveBitacora(new Date(), "Usuario: " + _this4.props.userName + " creo la tabla: " + nombreTabla + "\nValores: \n" + nuevosValores, "tabla", result.recordset[0].ID);
+                                    }
+                                  });
+                                }
+                              });
+                            }); // fin transaction1
                           });
                         }
                       });
@@ -306,94 +335,49 @@ function (_React$Component) {
     }
   }, {
     key: "deleteTableConfirmation",
-    value: function deleteTableConfirmation(id, x) {
+    value: function deleteTableConfirmation(id) {
+      this.props.showMessage("Confirmación", "Esta seguro que desea eliminar la tabla?", false, true, this.deleteTable);
       this.setState({
-        mensajeModal: {
-          mostrarMensaje: true,
-          mensajeConfirmado: false,
-          esError: false,
-          esConfirmar: true,
-          titulo: "Confirmación",
-          mensaje: "Esta seguro que desea eliminar la tabla?",
-          banderaMetodoInit: "goDelTable",
-          idElementoSelec: id,
-          indiceX: x,
-          indiceY: -1
-        }
+        idTablaSel: id
       });
     }
   }, {
     key: "deleteTable",
     value: function deleteTable(id) {
-      var _this4 = this;
+      var _this5 = this;
 
-      var transaction = new _mssql["default"].Transaction(this.props.pool);
-      transaction.begin(function (err) {
-        var rolledBack = false;
-        transaction.on('rollback', function (aborted) {
-          rolledBack = true;
-        });
-        var request = new _mssql["default"].Request(transaction);
-        request.query("delete from Tablas where ID = " + id, function (err, result) {
-          if (err) {
-            if (!rolledBack) {
-              console.log(err);
-              transaction.rollback(function (err) {});
-            }
-          } else {
-            transaction.commit(function (err) {
-              // 1. Make a shallow copy of the items
-              var tablas = _toConsumableArray(_this4.state.tablas); // 3. Replace the property you're intested in
+      if (this.state.idTablaSel != -1) {
+        var transaction = new _mssql["default"].Transaction(this.props.pool);
+        transaction.begin(function (err) {
+          var rolledBack = false;
+          transaction.on('rollback', function (aborted) {
+            rolledBack = true;
+          });
+          var request = new _mssql["default"].Request(transaction);
+          request.query("delete from Tablas where ID = " + _this5.state.idTablaSel, function (err, result) {
+            if (err) {
+              if (!rolledBack) {
+                console.log(err);
+                transaction.rollback(function (err) {});
+              }
+            } else {
+              transaction.commit(function (err) {
+                // 1. Make a shallow copy of the items
 
+                /*let tablas = [...this.state.tablas];
+                // 3. Replace the property you're intested in
+                tablas.splice(this.state.mensajeModal.indiceX, 1);*/
+                // 5. Set the state to our new copy
+                _this5.loadTables();
 
-              tablas.splice(_this4.state.mensajeModal.indiceX, 1); // 5. Set the state to our new copy
-              //this.loadTables();
+                _this5.props.showSuccesMessage("Exito", "Tabla eliminada con éxito.");
 
-              _this4.setState({
-                tablas: tablas,
-                mensajeModal: {
-                  mostrarMensaje: false,
-                  mensajeConfirmado: true,
-                  esError: false,
-                  esConfirmar: false,
-                  titulo: "",
-                  mensaje: "",
-                  banderaMetodoInit: "",
-                  idElementoSelec: _this4.state.mensajeModal.idElementoSelec,
-                  indiceX: _this4.state.mensajeModal.indiceX,
-                  indiceY: _this4.state.mensajeModal.indiceY
-                }
+                _this5.saveBitacora(new Date(), "Usuario: " + _this5.props.userName + " elimino la tabla: " + nombreTabla, "tabla", result.recordset[0].ID);
               });
-
-              _this4.showSuccesMessage("Exito", "Tabla eliminada con éxito.");
-              /*this.setState({
-                  tablas: quitando tabla,
-                  mensajeModal: limpiando variables del modal
-              });*/
-
-            });
-          }
-        });
-      }); // fin transaction
-
-      var transaction2 = new _mssql["default"].Transaction(this.props.pool);
-      transaction2.begin(function (err) {
-        var rolledBack = false;
-        transaction.on('rollback', function (aborted) {
-          rolledBack = true;
-        });
-        var request2 = new _mssql["default"].Request(transaction2);
-        request2.query("delete from Campos where tablaID = " + id, function (err, result) {
-          if (err) {
-            if (!rolledBack) {
-              console.log(err);
-              transaction2.rollback(function (err) {});
             }
-          } else {
-            transaction2.commit(function (err) {});
-          }
-        });
-      }); // fin transaction2
+          });
+        }); // fin transaction
+      }
     }
     /*======_______====== ======_______======   MENSAJES ERROR DE CAMPOS    ======_______====== ======_______======*/
 
@@ -414,79 +398,10 @@ function (_React$Component) {
         }
       });
     }
-    /*======_______====== ======_______======   MENSAJES MODAL    ======_______====== ======_______======*/
-
-    /*======_______======                                                             ======_______======*/
-
-    /*======_______======                                                             ======_______======*/
-
-    /*======_______====== ======_______====== ==_____==  ==___==  ======_______====== ======_______======*/
-
-  }, {
-    key: "dismissMessageModal",
-    value: function dismissMessageModal() {
-      this.setState({
-        mensajeModal: {
-          mostrarMensaje: false,
-          mensajeConfirmado: false,
-          esError: false,
-          esConfirmar: false,
-          titulo: "",
-          mensaje: "",
-          banderaMetodoInit: "",
-          idElementoSelec: -1,
-          indiceX: -1,
-          indiceY: -1
-        }
-      });
-    }
-  }, {
-    key: "confirmMessageModal",
-    value: function confirmMessageModal() {
-      if (this.state.mensajeModal.banderaMetodoInit.localeCompare("goDelTable") == 0) {
-        var copiaID = this.state.mensajeModal.idElementoSelec;
-        this.deleteTable(copiaID);
-      }
-    }
-  }, {
-    key: "showSuccesMessage",
-    value: function showSuccesMessage(titulo, mensaje) {
-      this.setState({
-        mensajeModal: {
-          mostrarMensaje: true,
-          mensajeConfirmado: false,
-          esError: false,
-          esConfirmar: false,
-          titulo: titulo,
-          mensaje: mensaje,
-          banderaMetodoInit: "",
-          idElementoSelec: this.state.mensajeModal.idElementoSelec,
-          indiceX: this.state.mensajeModal.indiceX,
-          indiceY: this.state.mensajeModal.indiceY
-        }
-      });
-      var self = this;
-      setTimeout(function () {
-        self.setState({
-          mensajeModal: {
-            mostrarMensaje: false,
-            mensajeConfirmado: false,
-            esError: false,
-            esConfirmar: false,
-            titulo: "",
-            mensaje: "",
-            banderaMetodoInit: "",
-            idElementoSelec: self.state.mensajeModal.idElementoSelec,
-            indiceX: self.state.mensajeModal.indiceX,
-            indiceY: self.state.mensajeModal.indiceY
-          }
-        });
-      }, 850);
-    }
   }, {
     key: "render",
     value: function render() {
-      var _this5 = this;
+      var _this6 = this;
 
       return _react["default"].createElement("div", null, _react["default"].createElement("div", {
         className: "row"
@@ -646,7 +561,7 @@ function (_React$Component) {
           }
         }, _react["default"].createElement("img", {
           onClick: function onClick() {
-            return _this5.deleteTableConfirmation(tabla.ID, i);
+            return _this6.deleteTableConfirmation(tabla.ID, i);
           },
           src: "../assets/trash.png",
           style: {
@@ -662,7 +577,7 @@ function (_React$Component) {
           }
         }, _react["default"].createElement("img", {
           onClick: function onClick() {
-            return _this5.props.terminoSeleccionTabla(tabla.ID, tabla.tabla, tabla.usuario, tabla.contrasena, tabla.servidor, tabla.baseDatos, tabla.tabla, tabla.tipoConexion);
+            return _this6.props.terminoSeleccionTabla(tabla.ID, tabla.tabla, tabla.usuario, tabla.contrasena, tabla.servidor, tabla.baseDatos, tabla.tabla, tabla.tipoConexion);
           },
           src: "../assets/edit.png",
           style: {
@@ -670,14 +585,7 @@ function (_React$Component) {
             width: "20px"
           }
         })))));
-      }), _react["default"].createElement("br", null), this.state.mensajeModal.mostrarMensaje ? _react["default"].createElement(_MessageModal["default"], {
-        esError: this.state.mensajeModal.esError,
-        esConfirmar: this.state.mensajeModal.esConfirmar,
-        dismissMessage: this.dismissMessageModal,
-        confirmFunction: this.confirmMessageModal,
-        titulo: this.state.mensajeModal.titulo,
-        mensaje: this.state.mensajeModal.mensaje
-      }, " ") : _react["default"].createElement("span", null));
+      }), _react["default"].createElement("br", null));
     }
   }]);
 

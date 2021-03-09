@@ -3,10 +3,30 @@ import sql from 'mssql';
 
 import Operacion from '../Regla/Operacion.js';
 import Valor from '../Regla/Valor.js';
+import FilasCelda from '../ContenedorCeldas/FilasCeldas.js';
 
 var textoOperacion = '', operacion = '', valor = '', valorTexto = '';
 
 var tipoDeVariableSeleccionada = '';
+
+const categoriasVariables = [
+    {   
+        nombre: 'Cat1',
+        variables: [
+            {nombre: "test 1", seleccionada: false},
+            {nombre: "test 2", seleccionada: false}
+        ]
+    },
+    {
+        nombre: 'Cat2',
+        variables: [
+            {nombre: "test 3", seleccionada: false},
+            {nombre: "test 4", seleccionada: false},
+            {nombre: "test 5", seleccionada: false},
+            {nombre: "test 6", seleccionada: false}
+        ]
+    }
+];
 
 export default class Filtro extends React.Component {
 
@@ -25,7 +45,7 @@ export default class Filtro extends React.Component {
                 esTexto: false
             },
             filtros: [],
-            /*textoValor: ""*/
+            contenedorVariables: []
         }
         this.getResultsVariables = this.getResultsVariables.bind(this);
         this.getResultsVariablesFieldsInit = this.getResultsVariablesFieldsInit.bind(this);
@@ -65,6 +85,8 @@ export default class Filtro extends React.Component {
         this.minusYears = this.minusYears.bind(this);
 
         this.retornoVariables = this.retornoVariables.bind(this);
+
+        this.seleccionVariable = this.seleccionVariable.bind(this);
 
         textoOperacion = '';
         operacion = '';
@@ -937,124 +959,74 @@ export default class Filtro extends React.Component {
     }
 
     retornoVariables() {
-        console.log('FIN')
-        console.log('this.state.variables')
-        console.log(this.state.variables)
         this.props.retornoVariables(this.state.variables, this.state.indicadores, this.state.riesgos);
+    }
+
+    seleccionVariable (variable, posArregloPadre, posicionVariable) {
+        var copyTemp = [...categoriasVariables];
+        copyTemp[posArregloPadre][posicionVariable].seleccionada = !variable.seleccionada;
+        /*this.setState({
+            categoriasVariables: copyTemp
+        });*/
     }
 
     render() {
         return (
             <div>
-                <div className={"row"}>
-                    <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
-                        <div className={"page-header"}>
-                            <h2 className={"pageheader-title"}>Crear Filtros</h2>
-                            <div className={"page-breadcrumb"}>
-                                <nav aria-label="breadcrumb">
-                                    <ol className={"breadcrumb"}>
-                                        <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.props.returnChooseDates}><a href="#" className={"breadcrumb-link"}>Seleccionar Fechas</a></li>
-                                        <li className={"breadcrumb-item active font-16"} aria-current="page">Crear Filtros</li>
-                                    </ol>
-                                </nav>
-                            </div>
-                        </div>
-                    </div>
+                {this.props.navbar}
+
+                <div className="row">
+                    <h2>Creación de Filtros</h2>
+                    <ul className="list-unstyled arrow">
+                        <li>Esta sección permite la creación de valores a filtrar de los resultados de variables, indicadores y riegsos. Primero se selecciona un valor de la barra izquierda lo que muestra los campos disponibles de la variable en el cuadro de la derecha. Al seleccionar un campo se muestran las diferentes opciones disponibles para filtrar.</li>
+                        <li>Al crear un filtro, se mostrara en la tabla al fondo de la página en donde se podrá eliminar el filtro.</li>
+                        <li>Para avanzar a la siguiente ventana, se debe seleccionar por lo menos una variable de la barra izquierda.</li>
+                    </ul>
                 </div>
+
+                <FilasCelda
+                    categoriasVariables={categoriasVariables}
+                    seleccionVariable={this.seleccionVariable}>
+                </FilasCelda>
 
                 <div className="row" style={{height: "70vh"}}>
                     <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12" style={{height: "100%", width: "100%"}}>
-                        <div className="card" style={{height: "100%", width: "100%"}}>
-                            <div className="row" style={{borderBottom: "3px solid #d2d2e4", height: "90%", width: "100%"}}>
-                                <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3"} style={{borderRight: "3px solid #d2d2e4", height: "100%", overflowY: "scroll"}}>
-                                    <div style={{display: "flex", alignItems: "center", paddingTop: "1%", justifyContent: "center", height: "8%", width: "100%", paddingTop: "5px"}}>
-                                        <h2>Variables</h2>
-                                    </div>
-                                    <div style={{width: "100%", display: "flex", justifyContent: "center", alignItems: "center"}}>
-                                        <div style={{width: "100%", border: "1px solid #999297", borderRadius: "50px"}}>
-                                        </div>
-                                    </div>
-                                    <br/>
-                                    <div style={{paddingLeft: "5px", overflowX: "scroll"}}>
-                                        {this.state.variables.map((variable, i) => (
-                                            <div key={variable.ID}>
-                                                <label className="custom-control custom-radio">
-                                                    <input id={"varRad"+variable.ID} onClick={() => this.selVar(i, "variable")} type="radio" name="sinoRadio" className="custom-control-input"/><span className="custom-control-label">{variable.nombreVariable}</span>
-                                                </label>
-                                                {
-                                                    i != this.state.variables.length-1
-                                                    ?   <div style={{width: "100%", display: "flex", justifyContent: "center", alignItems: "center"}}>
+                        <div style={{height: "100%", width: "100%"}}>
+                            <div className="row" style={{height: "90%", width: "100%"}}>
+                                <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3"} style={{height: "100%", overflowY: "scroll", backgroundColor: "white"}}>
+                                    {this.state.contenedorVariables.map((variables, i) => (
+                                        <div>
+                                            <div style={{position: "sticky", top: "0", backgroundColor: "white", zIndex: "99"}}>
+                                                <div style={{display: "flex", alignItems: "center",  justifyContent: "center", height: "8%", width: "100%", paddingTop: "5px"}}>
+                                                    <h2>Variables</h2>
+                                                </div>
+                                                <div style={{width: "100%", display: "flex", justifyContent: "center", alignItems: "center"}}>
+                                                    <div style={{width: "100%", border: "1px solid #999297", borderRadius: "50px"}}>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <br/>
+                                            <div style={{paddingLeft: "5px", overflowX: "scroll"}}>
+                                                {variables.map((variable, j) => (
+                                                    <div key={variable.ID}>
+                                                        <label className="custom-control custom-checkbox">
+                                                            <input id={"varRad"+variable.ID} onClick={() => this.selVar(i, "variable")} type="checkbox" name="sinoRadio" className="custom-control-input"/><span className="custom-control-label">{variable.nombreVariable}</span>
+                                                        </label>
+                                                        <div style={{width: "100%", display: "flex", justifyContent: "center", alignItems: "center"}}>
                                                             <div style={{width: "80%", border: "1px solid #d2d2e4", borderRadius: "50px"}}>
                                                             </div>
                                                         </div>
-                                                    : null
-                                                }
-                                            </div>
-                                        ))}
-                                    </div>
-
-                                    <div style={{width: "100%", display: "flex", justifyContent: "center", alignItems: "center"}}>
-                                        <div style={{width: "100%", border: "1px solid #999297", borderRadius: "50px"}}>
-                                        </div>
-                                    </div>
-                                    <div style={{display: "flex", alignItems: "center", paddingTop: "1%", justifyContent: "center", height: "8%", width: "100%", paddingTop: "5px"}}>
-                                        <h2>Indicadores</h2>
-                                    </div>
-                                    <div style={{width: "100%", display: "flex", justifyContent: "center", alignItems: "center"}}>
-                                        <div style={{width: "100%", border: "1px solid #999297", borderRadius: "50px"}}>
-                                        </div>
-                                    </div>
-                                    <br/>
-                                    <div style={{paddingLeft: "5px", overflowX: "scroll"}}>
-                                        {this.state.indicadores.map((indicador, i) => (
-                                            <div key={indicador.ID}>
-                                                <label className="custom-control custom-radio">
-                                                    <input id={"varRad"+indicador.ID} onClick={() => this.selVar(i, "indicador")} type="radio" name="sinoRadio" className="custom-control-input"/><span className="custom-control-label">{indicador.nombreIndicador}</span>
+                                                    </div>
+                                                ))}
+                                                <label className="custom-control custom-checkbox">
+                                                    <input id="todosVariables" type="checkbox" name="sinoRadio" className="custom-control-input"/><span className="custom-control-label">Seleccionar / Deseleccionar Todos</span>
                                                 </label>
-                                                {
-                                                    i != this.state.indicadores.length-1
-                                                    ?   <div style={{width: "100%", display: "flex", justifyContent: "center", alignItems: "center"}}>
-                                                            <div style={{width: "80%", border: "1px solid #d2d2e4", borderRadius: "50px"}}>
-                                                            </div>
-                                                        </div>
-                                                    : null
-                                                }
                                             </div>
-                                        ))}
-                                    </div>
-
-                                    <div style={{width: "100%", display: "flex", justifyContent: "center", alignItems: "center"}}>
-                                        <div style={{width: "100%", border: "1px solid #999297", borderRadius: "50px"}}>
                                         </div>
-                                    </div>
-                                    <div style={{display: "flex", alignItems: "center", paddingTop: "1%", justifyContent: "center", height: "8%", width: "100%", paddingTop: "5px"}}>
-                                        <h2>Riesgos</h2>
-                                    </div>
-                                    <div style={{width: "100%", display: "flex", justifyContent: "center", alignItems: "center"}}>
-                                        <div style={{width: "100%", border: "1px solid #999297", borderRadius: "50px"}}>
-                                        </div>
-                                    </div>
-                                    <br/>
-                                    <div style={{paddingLeft: "5px", overflowX: "scroll"}}>
-                                        {this.state.riesgos.map((riesgo, i) => (
-                                            <div key={riesgo.ID}>
-                                                <label className="custom-control custom-radio">
-                                                    <input id={"varRad"+riesgo.ID} onClick={() => this.selVar(i, "riesgo")} type="radio" name="sinoRadio" className="custom-control-input"/><span className="custom-control-label">{riesgo.nombreRiesgo}</span>
-                                                </label>
-                                                {
-                                                    i != this.state.riesgos.length-1
-                                                    ?   <div style={{width: "100%", display: "flex", justifyContent: "center", alignItems: "center"}}>
-                                                            <div style={{width: "80%", border: "1px solid #d2d2e4", borderRadius: "50px"}}>
-                                                            </div>
-                                                        </div>
-                                                    : null
-                                                }
-                                            </div>
-                                        ))}
-                                    </div>
+                                    ))}
                                 </div>
 
-                                <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9"} style={{height: "100%", width: "100%", padding: "0px"}}>
+                                <div className={"col-xl-8 col-lg-8 col-md-8 col-sm-8 col-8 offset-sm-1"} style={{height: "100%", width: "100%", padding: "0px", backgroundColor: "white"}}>
                                     <div className="row" style={{display: (this.state.variableSeleccionada != null ? "" : "none"), borderBottom: "3px solid #d2d2e4", height: "30%", width: "100%"}}>
                                         {
                                             this.state.variableSeleccionada != null
@@ -1062,7 +1034,7 @@ export default class Filtro extends React.Component {
                                                     {this.state.variableSeleccionada.atributos.map((atributo, i) => (
                                                         <div key={this.state.variableSeleccionada.nombre+atributo.nombre+atributo.ID} style={{height: "100%", width: "33%", display: "inline-block", lineHeight: "100%", borderRight: "1px solid #d2d2e4", backgroundColor: (atributo.activa ? "rgba(210, 210, 228, 0.4)" : "") }} onClick={() => this.selCampo(i)} className="addPointer">
                                                             <div style={{height: "100%", width: "100%", display: "flex", alignItems: "center", justifyContent: "center"}}>
-                                                                <p className="lead" style={{overflowWrap: "break-word", wordWrap: "break-word", whiteSpace: "-moz-pre-wrap", whiteSpace: "pre-wrap", wordBreak: "break-all"}}>
+                                                                <p className="lead" style={{overflowWrap: "break-word", wordWrap: "break-word", whiteSpace: "-moz-pre-wrap", whiteSpace: "pre-wrap", wordBreak: "break-all", lineHeight: "1em"}}>
                                                                     {atributo.nombre}
                                                                 </p>
                                                             </div>
@@ -1094,7 +1066,7 @@ export default class Filtro extends React.Component {
                                 </div>
                             </div>
                             <br/>
-                            <div className={"text-center"} style={{width: "100%"}}>
+                            <div className={"text-center"} style={{width: "100%", backgroundColor: "white", padding: "2% 0%"}}>
                                 <a href="#" className="btn btn-primary active" onClick={this.agregarFiltro}>Agregar Filtro</a>
                             </div>
                             <br/>
@@ -1102,6 +1074,22 @@ export default class Filtro extends React.Component {
                     </div>
                 </div>
 
+                <br/><br/><br/>
+                <div className={"row"} style={{display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "white"}}>
+                    <div style={{width: "50%"}}>
+                        <div className={"row"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
+                            Agrupar por:
+                        </div>
+                        <div className={"row"}>
+                            <label className="custom-control custom-radio custom-control-inline">
+                                <input type="radio" name="radio-inline" className="custom-control-input" defaultChecked/><span className="custom-control-label">Variables, Indicadores y Riesgos</span>
+                            </label>
+                            <label className="custom-control custom-radio custom-control-inline">
+                                <input type="radio" name="radio-inline" className="custom-control-input"/><span className="custom-control-label">Usuarios</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
                 <br/>
                 <div className={"row"}>
                     <a className={"btn btn-success btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.crearCodigoFiltros}>Visualizar Variables</a>
@@ -1111,6 +1099,13 @@ export default class Filtro extends React.Component {
                 <div className="row">
                     <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
                         <div className="card">
+                            <table className="table table-striped table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Variables a Visualizar</th>
+                                    </tr>
+                                </thead>
+                            </table>
                             <table className="table table-striped table-bordered">
                                 <thead>
                                     <tr>

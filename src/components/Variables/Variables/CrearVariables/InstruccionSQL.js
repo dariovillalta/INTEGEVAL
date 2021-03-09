@@ -49,10 +49,10 @@ export default class InstruccionSQL extends React.Component {
             if(tipo.length > 0 && tipo.length < 31) {
                 this.props.actualizarCampo(this.state.indexVarSeleccionado, nombre, tipo);
             } else {
-                alert("El tipo de la variable debe ser mayor a 0 caracteres y menor a 31.");
+                this.props.showMessage("Error", 'El tipo de la variable debe ser mayor a 0 caracteres y menor a 31.', true, false, {});
             }
         } else {
-            alert("El nombre de la variable debe ser mayor a 0 caracteres y menor a 101.");
+            this.props.showMessage("Error", 'El nombre de la variable debe ser mayor a 0 caracteres y menor a 101.', true, false, {});
         }
     }
 
@@ -77,7 +77,7 @@ export default class InstruccionSQL extends React.Component {
                     request.query(instruccionSQL, (err, result) => {
                         if (err) {
                             console.log(err);
-                            alert("Error al ejecutar la instruccionSQL.");
+                            this.props.showMessage("Error", 'Error al ejecutar la instruccionSQL.', true, false, {});
                             if (!rolledBack) {
                                 transaction.rollback(err => {
                                 });
@@ -95,22 +95,22 @@ export default class InstruccionSQL extends React.Component {
                                         for (var i = 0; i < camposError.length; i++) {
                                             textoCamposErrores += camposError[i];
                                         };
-                                        alert("Se encontraron errores al recuperar los campos: "+textoCamposErrores+". No se guardo la instruccionSQL.");
+                                        this.props.showMessage("Error", "Se encontraron errores al recuperar los campos: "+textoCamposErrores+". No se guardo la instruccionSQL.", true, false, {});
                                     } else {
                                         this.props.agregarInstruccionSQL();
                                     }
                                 } else {
-                                    alert("La instruccionSQL no retorno ningun valor.");
+                                    this.props.showMessage("Error", "La instruccionSQL no retorno ningun valor.", true, false, {});
                                 }
                             });
                         }
                     });
                 }); // fin transaction
             } else {
-                alert("Ingrese campos para tomar de la InstruccionSQL.")
+                this.props.showMessage("Error", "Ingrese campos para tomar de la InstruccionSQL.", true, false, {});
             }
         } else {
-            alert("Ingrese un valor para la InstruccionSQL.")
+            this.props.showMessage("Error", "Ingrese un valor para la InstruccionSQL.", true, false, {});
         }
     }
     

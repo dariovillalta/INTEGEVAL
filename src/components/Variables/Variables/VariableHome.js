@@ -23,6 +23,7 @@ export default class VariableHome extends React.Component {
         this.retornoSeleccionVariables = this.retornoSeleccionVariables.bind(this);
         this.editarVariables = this.editarVariables.bind(this);
         this.changeStateFirstTimeToFalse = this.changeStateFirstTimeToFalse.bind(this);
+        this.changeStateFirstTimeToTrue = this.changeStateFirstTimeToTrue.bind(this);
         this.terminoCrearVariablesPasarAEdit = this.terminoCrearVariablesPasarAEdit.bind(this);
         this.actualizarIDVariableModificada = this.actualizarIDVariableModificada.bind(this);
     }
@@ -61,6 +62,12 @@ export default class VariableHome extends React.Component {
     changeStateFirstTimeToFalse() {
         this.setState({
             esPrimeraVez: false
+        });
+    }
+
+    changeStateFirstTimeToTrue() {
+        this.setState({
+            esPrimeraVez: true
         });
     }
 
@@ -192,7 +199,10 @@ export default class VariableHome extends React.Component {
                                             nombreTablaSeleccionada={this.props.nombreTablaSeleccionada}
                                             goOptions={this.props.goOptions}
                                             retornoSeleccionVariables={this.retornoSeleccionVariables}
-                                            configuracionHome={this.props.configuracionHome}>
+                                            configuracionHome={this.props.configuracionHome}
+                                            permision={this.props.permision}
+                                            showSuccesMessage={this.props.showSuccesMessage}
+                                            showMessage={this.props.showMessage}>
                     </CrearVariablesHome>
                 </div>
             );
@@ -209,7 +219,13 @@ export default class VariableHome extends React.Component {
                                     configuracionHome={this.props.configuracionHome}
                                     actualizarIDVariableModificada={this.actualizarIDVariableModificada}
                                     changeStateFirstTimeToFalse={this.changeStateFirstTimeToFalse}
-                                    esPrimeraVez={this.state.esPrimeraVez}>
+                                    changeStateFirstTimeToTrue={this.changeStateFirstTimeToTrue}
+                                    esPrimeraVez={this.state.esPrimeraVez}
+                                    permision={this.props.permision}
+                                    userID={this.props.userID}
+                                    userName={this.props.userName}
+                                    showSuccesMessage={this.props.showSuccesMessage}
+                                    showMessage={this.props.showMessage}>
                     </EditarVariablesHome>
                 </div>
             );

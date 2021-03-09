@@ -54,7 +54,32 @@ function (_React$Component) {
       camposDeIndicadores: [],
       riesgos: [],
       camposDeRiesgos: [],
-      dashboardSeleccionado: null
+      dashboardSeleccionado: null,
+      navbar: _react["default"].createElement("div", {
+        className: "row"
+      }, _react["default"].createElement("div", {
+        className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
+      }, _react["default"].createElement("div", {
+        className: "page-header"
+      }, _react["default"].createElement("h2", {
+        className: "pageheader-title"
+      }, "Seleccionar Dashboard"), _react["default"].createElement("div", {
+        className: "page-breadcrumb"
+      }, _react["default"].createElement("nav", {
+        "aria-label": "breadcrumb"
+      }, _react["default"].createElement("ol", {
+        className: "breadcrumb"
+      }, _react["default"].createElement("li", {
+        className: "breadcrumb-item font-16",
+        "aria-current": "page",
+        onClick: _this.props.goSeleccionReporteria
+      }, _react["default"].createElement("a", {
+        href: "#",
+        className: "breadcrumb-link"
+      }, "Seleccionar Tipo de Reporter\xEDa")), _react["default"].createElement("li", {
+        className: "breadcrumb-item active font-16",
+        "aria-current": "page"
+      }, "Dashboards")))))))
     };
     _this.crearDashboard = _this.crearDashboard.bind(_assertThisInitialized(_this));
     _this.retornarSeleccionDashboards = _this.retornarSeleccionDashboards.bind(_assertThisInitialized(_this));
@@ -85,15 +110,76 @@ function (_React$Component) {
   }, {
     key: "crearDashboard",
     value: function crearDashboard() {
+      var navbar = _react["default"].createElement("div", {
+        className: "row"
+      }, _react["default"].createElement("div", {
+        className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
+      }, _react["default"].createElement("div", {
+        className: "page-header"
+      }, _react["default"].createElement("h2", {
+        className: "pageheader-title"
+      }, "Crear Dashboard"), _react["default"].createElement("div", {
+        className: "page-breadcrumb"
+      }, _react["default"].createElement("nav", {
+        "aria-label": "breadcrumb"
+      }, _react["default"].createElement("ol", {
+        className: "breadcrumb"
+      }, _react["default"].createElement("li", {
+        className: "breadcrumb-item font-16",
+        "aria-current": "page",
+        onClick: this.props.goSeleccionReporteria
+      }, _react["default"].createElement("a", {
+        href: "#",
+        className: "breadcrumb-link"
+      }, "Seleccionar Tipo de Reporter\xEDa")), _react["default"].createElement("li", {
+        className: "breadcrumb-item font-16",
+        "aria-current": "page",
+        onClick: this.retornarSeleccionDashboards
+      }, _react["default"].createElement("a", {
+        href: "#",
+        className: "breadcrumb-link"
+      }, "Dashboards")), _react["default"].createElement("li", {
+        className: "breadcrumb-item active font-16",
+        "aria-current": "page"
+      }, "Crear Dashboard")))))));
+
       this.setState({
-        componenteActual: "crearDashboard"
+        componenteActual: "crearDashboard",
+        navbar: navbar
       });
     }
   }, {
     key: "retornarSeleccionDashboards",
     value: function retornarSeleccionDashboards() {
+      var navbar = _react["default"].createElement("div", {
+        className: "row"
+      }, _react["default"].createElement("div", {
+        className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
+      }, _react["default"].createElement("div", {
+        className: "page-header"
+      }, _react["default"].createElement("h2", {
+        className: "pageheader-title"
+      }, "Seleccionar Dashboard"), _react["default"].createElement("div", {
+        className: "page-breadcrumb"
+      }, _react["default"].createElement("nav", {
+        "aria-label": "breadcrumb"
+      }, _react["default"].createElement("ol", {
+        className: "breadcrumb"
+      }, _react["default"].createElement("li", {
+        className: "breadcrumb-item font-16",
+        "aria-current": "page",
+        onClick: this.props.goSeleccionReporteria
+      }, _react["default"].createElement("a", {
+        href: "#",
+        className: "breadcrumb-link"
+      }, "Seleccionar Tipo de Reporter\xEDa")), _react["default"].createElement("li", {
+        className: "breadcrumb-item active font-16",
+        "aria-current": "page"
+      }, "Dashboards")))))));
+
       this.setState({
-        componenteActual: "selDashboard"
+        componenteActual: "selDashboard",
+        navbar: navbar
       });
     }
   }, {
@@ -518,6 +604,7 @@ function (_React$Component) {
       if (this.state.componenteActual.localeCompare("selDashboard") == 0) {
         return _react["default"].createElement("div", null, _react["default"].createElement(_SeleccionarDashboard["default"], {
           pool: this.props.pool,
+          navbar: this.state.navbar,
           configuracionHome: this.props.configuracionHome,
           crearDashboard: this.crearDashboard,
           goOptions: this.props.goOptions,
@@ -526,6 +613,7 @@ function (_React$Component) {
       } else if (this.state.componenteActual.localeCompare("crearDashboard") == 0) {
         return _react["default"].createElement("div", null, _react["default"].createElement(_CrearDashboard["default"], {
           pool: this.props.pool,
+          navbar: this.state.navbar,
           retornarSeleccionDashboards: this.retornarSeleccionDashboards,
           terminoCrearCampo: this.terminoCrearFuenteDatosPasarAEdit,
           variables: this.state.variables,
@@ -543,7 +631,8 @@ function (_React$Component) {
           variables: this.state.variables,
           indicadores: this.state.indicadores,
           riesgos: this.state.riesgos,
-          dashboardSeleccionado: this.state.dashboardSeleccionado
+          dashboardSeleccionado: this.state.dashboardSeleccionado,
+          goSeleccionReporteria: this.props.goSeleccionReporteria
         }));
       }
     }

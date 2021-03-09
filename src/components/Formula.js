@@ -665,10 +665,28 @@ export default class Formula extends React.Component {
                             formula: copyFormula
                         });
                     }
+                    if(copyFormula.length == 0) {
+                        this.setState({
+                            tablas: tablasOriginales,
+                            camposTablas: camposTablasOriginales,
+                            variablesEscalares: variablesEscalaresOriginales,
+                            variables: variablesOriginales,
+                            camposVariables: camposVariablesOriginales,
+                            excel: excelOriginales,
+                            camposDeExcel: camposExcelOriginales,
+                            formas: formasOriginales,
+                            variablesSQL: variablesOriginalesSQL,
+                            camposVariablesSQL: camposVariablesOriginalesSQL
+                        });
+                    }
+                    var self = this;
+                    setTimeout(function () {
+                        console.log(self.state.formula);
+                    }, 300);
                 } else if(arregloVarSeleccionadas.length > 1) {
-                    alert("Solo debe seleccionar una variable a eliminar.");
+                    this.props.showMessage("Error", "Solo debe seleccionar una variable a eliminar.", true, false, {});
                 } else {
-                    alert("Debe seleccionar por lo menos la variable a eliminar.");
+                    this.props.showMessage("Error", "Debe seleccionar por lo menos la variable a eliminar.", true, false, {});
                 }
             } else if(this.state.formula.length > 0 && $("div").hasClass("colorPunteroFormula") && operacionSeleccionada.valor != undefined && operacionSeleccionada.valor.localeCompare("/") != 0) {
                 var formulaTemp = [...this.state.formula];
@@ -891,7 +909,7 @@ export default class Formula extends React.Component {
                 var arregloVarSeleccionadas = [];
                 this.getSelectedVariables (this.state.formula, arregloVarSeleccionadas, '');
                 if($("div").hasClass("colorPunteroFormula") || arregloVarSeleccionadas.length == 0) {
-                    alert("Para agregar una división, seleccione las variables a ser numerador en la fórmula.");
+                    this.props.showMessage("Error", "Para agregar una división, seleccione las variables a ser numerador en la fórmula.", true, false, {});
                 } else {
                     var tipoOriginal = variableSeleccionada.tipo;
                     variableSeleccionada.tipoOriginal = tipoOriginal;
@@ -1102,7 +1120,7 @@ export default class Formula extends React.Component {
                                 alert("La selecciones de divisiones tiene que tener todas las variables de la division seleccionada.")
                             }*/
                         } else {
-                            alert("La seleccion de variables deben ser seguidas en la formula.");
+                            this.props.showMessage("Error", "La seleccion de variables deben ser seguidas en la formula.", true, false, {});
                         }
                     } else if(indicesVarSeleccionadas.length == 1) {
                         //VIENDO SI SE SELECCIONO SOLO UNA VARIABLE
@@ -1186,7 +1204,7 @@ export default class Formula extends React.Component {
                                     formula: copyFormula
                                 });
                             } else {
-                                alert("la variable seleccionada debe ser del numerador");
+                                this.props.showMessage("Error", "La variable seleccionada debe ser del numerador.", true, false, {});
                             }
                         } else if(arregloVarSeleccionadasPorIndicesInicial[0].length > 1) {
                             //SELECCIONO MAS DE UNA VARIABLE
@@ -1242,7 +1260,7 @@ export default class Formula extends React.Component {
                                     formula: copyFormula
                                 });
                             } else {
-                                alert("Selección de división invalida. Falta selección de numerador.")
+                                this.props.showMessage("Error", "Selección de división invalida. Falta selección de numerador.", true, false, {});
                             }
                         }
                     }
@@ -1349,12 +1367,12 @@ export default class Formula extends React.Component {
                     //FIN actualizando campos de variables a mostrar segun el campo que se acaba de agregar
                 }
             } else if( !$("div").hasClass("colorPunteroFormula") ){
-                alert("Seleccione una posición en la fórmula.");
+                this.props.showMessage("Error", "Seleccione una posición en la fórmula.", true, false, {});
             } else if(this.state.formula.length > 0 && $("div").hasClass("colorPunteroFormula") && operacionSeleccionada.valor == undefined) {
-                alert("Seleccione una operación.");
+                this.props.showMessage("Error", "Seleccione una operación.", true, false, {});
             }
         } else {
-            alert("Seleccione un campo");
+            this.props.showMessage("Error", "Seleccione un campo.", true, false, {});
         }
     }
 
@@ -1853,7 +1871,7 @@ export default class Formula extends React.Component {
         } else {
             this.props.modificarFormula(objetoFormula, this.state.formula);
         }
-        alert("Fórmula guardada.");
+        this.props.showSuccesMessage("Error", "Fórmula guardada.");
         //camposTablas={this.state.camposTablas} variables={this.state.variablesEscalares} objetos={this.state.variables} camposDeObjetos={this.state.camposVariables} excel={this.state.excel} camposDeExcel={this.state.camposDeExcel} formas={this.state.formas} variablesSQL={this.state.variablesSQL} camposVariablesSQL={this.state.camposVariablesSQL}
         //this.guardarVariable(formula);
     }

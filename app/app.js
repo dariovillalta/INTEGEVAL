@@ -15,6 +15,8 @@ var _Layout = _interopRequireDefault(require("./components/Layout.js"));
 
 var _LoginPage = _interopRequireDefault(require("./components/LoginPage.js"));
 
+var _MessageModal = _interopRequireDefault(require("./components/MessageModal.js"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -82,17 +84,28 @@ function (_React$Component) {
     _this = _possibleConstructorReturn(this, _getPrototypeOf(App).call(this));
     _this.state = {
       isLoggedIn: false,
+      userID: -1,
       userName: null,
       permision: "",
       config: {},
       pool: null,
-      conexionAbierta: false // connection2 is now an open Connection
+      conexionAbierta: false,
+      mensajeModal: {
+        mostrarMensaje: false,
+        mensajeConfirmado: false,
+        esError: false,
+        esConfirmar: false,
+        titulo: "",
+        mensaje: ""
+      } // connection2 is now an open Connection
 
     };
     _this.login = _this.login.bind(_assertThisInitialized(_this));
     _this.logOff = _this.logOff.bind(_assertThisInitialized(_this));
     _this.readConfigFile = _this.readConfigFile.bind(_assertThisInitialized(_this));
     _this.connectToDB = _this.connectToDB.bind(_assertThisInitialized(_this));
+    _this.dismissMessageModal = _this.dismissMessageModal.bind(_assertThisInitialized(_this));
+    _this.showMessage = _this.showMessage.bind(_assertThisInitialized(_this));
     return _this;
   }
 
@@ -103,10 +116,11 @@ function (_React$Component) {
     }
   }, {
     key: "login",
-    value: function login(userName, permision) {
+    value: function login(id, userName, permision) {
       this.setState({
         isLoggedIn: true,
-        userName: null,
+        userID: id,
+        userName: userName,
         permision: permision
       });
     }
@@ -114,7 +128,10 @@ function (_React$Component) {
     key: "logOff",
     value: function logOff() {
       this.setState({
-        isLoggedIn: false
+        isLoggedIn: false,
+        userID: -1,
+        userName: null,
+        permision: ""
       });
     }
   }, {
@@ -124,7 +141,16 @@ function (_React$Component) {
 
       _fs["default"].readFile('./conf.dar', 'utf-8', function (err, data) {
         if (err) {
-          alert("Error al leer el archivo de configuracion de tabla.");
+          _this2.setState({
+            mensajeModal: {
+              mostrarMensaje: true,
+              mensajeConfirmado: false,
+              esError: true,
+              esConfirmar: false,
+              titulo: "Error",
+              mensaje: "Error al leer el archivo de configuracion de tabla."
+            }
+          });
         } else {
           var lineas = data.split("\n");
           var user, password, server, database;
@@ -184,7 +210,17 @@ function (_React$Component) {
         if (err) {
           console.log(err);
           console.log("Error en conección con la base de datos");
-          alert("Error en conección con la base de datos");
+
+          _this3.setState({
+            mensajeModal: {
+              mostrarMensaje: true,
+              mensajeConfirmado: false,
+              esError: true,
+              esConfirmar: false,
+              titulo: "Error",
+              mensaje: "Error en conección con la base de datos. Ver Consola."
+            }
+          });
         } else {
           console.log('pool loaded');
 
@@ -198,9 +234,37 @@ function (_React$Component) {
       });
     }
   }, {
+    key: "dismissMessageModal",
+    value: function dismissMessageModal() {
+      this.setState({
+        mensajeModal: {
+          mostrarMensaje: false,
+          mensajeConfirmado: false,
+          esError: false,
+          esConfirmar: false,
+          titulo: "",
+          mensaje: ""
+        }
+      });
+    }
+  }, {
+    key: "showMessage",
+    value: function showMessage(titulo, mensaje, esError, esConfirmar) {
+      this.setState({
+        mensajeModal: {
+          mostrarMensaje: true,
+          esError: esError,
+          esConfirmar: esConfirmar,
+          titulo: titulo,
+          mensaje: mensaje
+        }
+      });
+    }
+  }, {
     key: "render",
     value: function render() {
       return _react["default"].createElement("div", null, this.state.isLoggedIn ? _react["default"].createElement(_Layout["default"], {
+        userID: this.state.userID,
         userName: this.state.userName,
         permision: this.state.permision,
         logOff: this.logOff,
@@ -209,8 +273,15 @@ function (_React$Component) {
         login: this.login,
         pool: this.state.pool,
         readConfigFile: this.readConfigFile,
-        conexionAbierta: this.state.conexionAbierta
-      }, " "));
+        conexionAbierta: this.state.conexionAbierta,
+        showMessage: this.showMessage
+      }, " "), this.state.mensajeModal.mostrarMensaje ? _react["default"].createElement(_MessageModal["default"], {
+        esError: this.state.mensajeModal.esError,
+        esConfirmar: this.state.mensajeModal.esConfirmar,
+        dismissMessage: this.dismissMessageModal,
+        titulo: this.state.mensajeModal.titulo,
+        mensaje: this.state.mensajeModal.mensaje
+      }, " ") : _react["default"].createElement("span", null));
     }
   }]);
 

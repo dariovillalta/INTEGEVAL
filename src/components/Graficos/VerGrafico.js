@@ -538,7 +538,8 @@ export default class VerGrafico extends React.Component {
                             <div className={"page-breadcrumb"}>
                                 <nav aria-label="breadcrumb">
                                     <ol className={"breadcrumb"}>
-                                        <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.props.retornarSeleccionDashboards}><a href="#" className={"breadcrumb-link"}>Dashboards</a></li>
+                                        <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.props.goSeleccionReporteria}><a href="#" className={"breadcrumb-link"}>Seleccionar Tipo de Reportería</a></li>
+                                        <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.props.retornarCrearGrafico}><a href="#" className={"breadcrumb-link"}>Configurar Gráfico</a></li>
                                         <li className={"breadcrumb-item active font-16"} aria-current="page">Ver Gráficas</li>
                                     </ol>
                                 </nav>

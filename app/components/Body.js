@@ -21,19 +21,13 @@ var _RiesgoHome = _interopRequireDefault(require("./Riesgos/RiesgoHome.js"));
 
 var _Calculo = _interopRequireDefault(require("./Calculo.js"));
 
-var _Dashboard = _interopRequireDefault(require("./Dashboard.js"));
-
-var _ReporteriaHome = _interopRequireDefault(require("./Reporteria/ReporteriaHome.js"));
-
-var _DashboardHome = _interopRequireDefault(require("./Dashboards/DashboardHome.js"));
-
 var _CrearYSeleccionarLista = _interopRequireDefault(require("./CrearYSeleccionarLista.js"));
-
-var _GraficosHome = _interopRequireDefault(require("./Graficos/GraficosHome.js"));
 
 var _MantenimientoUsuarios = _interopRequireDefault(require("./Usuarios/MantenimientoUsuarios.js"));
 
 var _Bitacora = _interopRequireDefault(require("./Bitacora/Bitacora.js"));
+
+var _SeleccionarOpcionReporteriaContenedor = _interopRequireDefault(require("./SeleccionarOpcionReporteria/SeleccionarOpcionReporteriaContenedor.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
@@ -142,10 +136,13 @@ function (_React$Component) {
           pool: this.props.pool,
           showListas: this.props.showListas,
           showUsuarios: this.props.showUsuarios,
-          showBitacora: this.props.showBitacora
+          showBitacora: this.props.showBitacora,
+          permision: this.props.permision,
+          showSuccesMessage: this.props.showSuccesMessage,
+          showMessage: this.props.showMessage
         }, " "));
       } else if (this.props.router.showRiskMonitorHome) {
-        return _react["default"].createElement("div", null, _react["default"].createElement(_Dashboard["default"], {
+        return _react["default"].createElement("div", null, _react["default"].createElement(_SeleccionarOpcionReporteriaContenedor["default"], {
           pool: this.props.pool
         }, " "));
       } else if (this.props.router.showVariables) {
@@ -156,7 +153,12 @@ function (_React$Component) {
           pool: this.props.pool,
           showFormula: this.props.showFormula,
           showCondicionVar: this.props.showCondicionVar,
-          updateFormula: this.updateFormula
+          updateFormula: this.updateFormula,
+          permision: this.props.permision,
+          userID: this.props.userID,
+          userName: this.props.userName,
+          showSuccesMessage: this.props.showSuccesMessage,
+          showMessage: this.props.showMessage
         }, " "));
       } else if (this.props.router.showFormula) {
         return _react["default"].createElement("div", null, _react["default"].createElement(_Formula["default"], {
@@ -164,7 +166,9 @@ function (_React$Component) {
           pool: this.props.pool,
           showVariables: this.props.showVariables,
           idVarEditar: this.state.idVarEditarFormula,
-          tablaVarEditar: this.state.tablaVarEditarFormula
+          tablaVarEditar: this.state.tablaVarEditarFormula,
+          showSuccesMessage: this.props.showSuccesMessage,
+          showMessage: this.props.showMessage
         }, " "));
       } else if (this.props.router.showCondicionVar) {
         return _react["default"].createElement("div", null, _react["default"].createElement(_CondicionVariable["default"], {
@@ -179,7 +183,12 @@ function (_React$Component) {
           showFormula: this.props.showFormula,
           showCondicionVar: this.props.showCondicionVar,
           showRiesgos: this.props.showRiesgos,
-          updateBanderaCrearRiesgoTrue: this.updateBanderaCrearRiesgoTrue
+          updateBanderaCrearRiesgoTrue: this.updateBanderaCrearRiesgoTrue,
+          userID: this.props.userID,
+          userName: this.props.userName,
+          permision: this.props.permision,
+          showSuccesMessage: this.props.showSuccesMessage,
+          showMessage: this.props.showMessage
         }, " "));
       } else if (this.props.router.showRiesgos) {
         return _react["default"].createElement("div", null, _react["default"].createElement(_RiesgoHome["default"], {
@@ -191,42 +200,57 @@ function (_React$Component) {
           showCondicionVar: this.props.showCondicionVar,
           crearRiesgo: this.state.crearRiesgo,
           updateFormula: this.updateFormula,
-          updateBanderaCrearRiesgoFalse: this.updateBanderaCrearRiesgoFalse
+          updateBanderaCrearRiesgoFalse: this.updateBanderaCrearRiesgoFalse,
+          userID: this.props.userID,
+          userName: this.props.userName,
+          permision: this.props.permision,
+          showSuccesMessage: this.props.showSuccesMessage,
+          showMessage: this.props.showMessage
         }, " "));
       } else if (this.props.router.showCalulo) {
         return _react["default"].createElement("div", null, _react["default"].createElement(_Calculo["default"], {
-          pool: this.props.pool
+          pool: this.props.pool,
+          userID: this.props.userID,
+          userName: this.props.userName,
+          showSuccesMessage: this.props.showSuccesMessage,
+          showMessage: this.props.showMessage
         }, " "));
       } else if (this.props.router.showReporteria) {
         return _react["default"].createElement("div", {
           style: {
             width: "100%"
           }
-        }, _react["default"].createElement(_ReporteriaHome["default"], {
-          pool: this.props.pool
-        }, " "));
-      } else if (this.props.router.showDashboard) {
-        return _react["default"].createElement("div", null, _react["default"].createElement(_DashboardHome["default"], {
-          pool: this.props.pool
+        }, _react["default"].createElement(ReporteriaHome, {
+          pool: this.props.pool,
+          showSuccesMessage: this.props.showSuccesMessage,
+          showMessage: this.props.showMessage
         }, " "));
       } else if (this.props.router.showListas) {
         return _react["default"].createElement("div", null, _react["default"].createElement(_CrearYSeleccionarLista["default"], {
           pool: this.props.pool,
-          configuracionHome: this.props.showRiskControlHome
-        }, " "));
-      } else if (this.props.router.showGraficos) {
-        return _react["default"].createElement("div", null, _react["default"].createElement(_GraficosHome["default"], {
-          pool: this.props.pool
+          configuracionHome: this.props.showRiskControlHome,
+          permision: this.props.permision,
+          showSuccesMessage: this.props.showSuccesMessage,
+          showMessage: this.props.showMessage
         }, " "));
       } else if (this.props.router.showUsuarios) {
         return _react["default"].createElement("div", null, _react["default"].createElement(_MantenimientoUsuarios["default"], {
           pool: this.props.pool,
-          configuracionHome: this.props.showRiskControlHome
+          configuracionHome: this.props.showRiskControlHome,
+          permision: this.props.permision,
+          showSuccesMessage: this.props.showSuccesMessage,
+          showMessage: this.props.showMessage,
+          userID: this.props.userID,
+          userName: this.props.userName
         }, " "));
       } else if (this.props.router.showBitacora) {
         return _react["default"].createElement("div", null, _react["default"].createElement(_Bitacora["default"], {
           pool: this.props.pool,
           configuracionHome: this.props.showRiskControlHome
+        }, " "));
+      } else if (this.props.router.showContenedorReporteria) {
+        return _react["default"].createElement("div", null, _react["default"].createElement(_SeleccionarOpcionReporteriaContenedor["default"], {
+          pool: this.props.pool
         }, " "));
       } else {
         return _react["default"].createElement("div", null);

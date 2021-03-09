@@ -755,7 +755,9 @@ function (_React$Component) {
         tablaBorrarFormulas: this.props.tablaBorrarFormulas,
         tablaBorrarElementos: this.props.tablaBorrarElementos,
         condicionFormula: this.props.condicionFormula,
-        condicionElemento: this.props.condicionElemento
+        condicionElemento: this.props.condicionElemento,
+        showSuccesMessage: this.props.showSuccesMessage,
+        showMessage: this.props.showMessage
       }))), _react["default"].createElement("hr", null), _react["default"].createElement("div", {
         className: "row"
       }, _react["default"].createElement("div", {

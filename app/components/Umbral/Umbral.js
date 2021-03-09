@@ -11,7 +11,7 @@ var _mssql = _interopRequireDefault(require("mssql"));
 
 var _VistaUmbral = _interopRequireDefault(require("./VistaUmbral.js"));
 
-var _EditarUmbral = _interopRequireDefault(require("./EditarUmbral.js"));
+var _CrearUmbral = _interopRequireDefault(require("./CrearUmbral.js"));
 
 var _ListaRestoUmbrales = _interopRequireDefault(require("./ListaRestoUmbrales.js"));
 
@@ -98,6 +98,9 @@ function (_React$Component) {
           if (err) {
             if (!rolledBack) {
               console.log(err);
+
+              _this2.props.showMessage("Error", "No se pudo traer valores de la tabla de umbrales.", true, false, {});
+
               transaction.rollback(function (err) {});
             }
           } else {
@@ -138,6 +141,9 @@ function (_React$Component) {
           if (err) {
             if (!rolledBack) {
               console.log(err);
+
+              _this3.props.showMessage("Error", "No se pudo traer valores de la tabla de secciones del umbral.", true, false, {});
+
               transaction.rollback(function (err) {});
             }
           } else {
@@ -183,6 +189,8 @@ function (_React$Component) {
           if (err) {
             posicionesInsertadasRango++;
             console.log(err);
+
+            _this4.props.showMessage("Error", "No se pudo traer valores de la tabla de rangos de sección del umbral.", true, false, {});
 
             if (!rolledBack) {
               transaction.rollback(function (err) {});
@@ -269,12 +277,15 @@ function (_React$Component) {
         lista: this.props.lista
       }, " "), _react["default"].createElement(_VistaUmbral["default"], {
         umbrales: this.state.secciones
-      }, " "), _react["default"].createElement(_EditarUmbral["default"], {
+      }, " "), _react["default"].createElement(_CrearUmbral["default"], {
         idVariable: this.props.idVariable,
         pool: this.props.pool,
         tablaVariable: this.props.tablaVariable,
         tituloUmbral: this.props.tituloUmbral,
-        traerUmbralesPADRE: this.traerUmbrales
+        traerUmbralesPADRE: this.traerUmbrales,
+        maximoUmbral: this.props.maximoUmbral,
+        showSuccesMessage: this.props.showSuccesMessage,
+        showMessage: this.props.showMessage
       }, " "));
     }
   }]);

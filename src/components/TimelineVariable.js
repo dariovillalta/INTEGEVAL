@@ -69,6 +69,13 @@ export default class TimelineVariable extends React.Component {
     }
 
     getFieldAttributes(resultado, index, array) {
+        let nombreVariable = '';
+        if(this.props.esVariable)
+            nombreVariable = resultado.nombreVariable;
+        else if(this.props.esIndicador)
+            nombreVariable = resultado.nombreIndicador;
+        else
+            nombreVariable = resultado.nombreRiesgo;
         const transaction = new sql.Transaction( this.props.pool );
         transaction.begin(err => {
             var rolledBack = false;
@@ -76,7 +83,7 @@ export default class TimelineVariable extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("select * from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME = '"+resultado.nombreVariable+'_'+resultado.inicioVigencia.getFullYear()+'_'+(resultado.inicioVigencia.getMonth()+1)+'_'+resultado.inicioVigencia.getDate()+'_'+resultado.inicioVigencia.getHours()+'_'+resultado.inicioVigencia.getMinutes()+'_'+resultado.inicioVigencia.getSeconds()+"'", (err, result) => {
+            request.query("select * from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME = '"+nombreVariable+'_'+resultado.inicioVigencia.getFullYear()+'_'+(resultado.inicioVigencia.getMonth()+1)+'_'+resultado.inicioVigencia.getDate()+'_'+resultado.inicioVigencia.getHours()+'_'+resultado.inicioVigencia.getMinutes()+'_'+resultado.inicioVigencia.getSeconds()+"'", (err, result) => {
                 if (err) {
                     console.log(err);
                     if (!rolledBack) {
@@ -101,6 +108,13 @@ export default class TimelineVariable extends React.Component {
     }
 
     getFieldResults(resultado, index, array) {
+        let nombreVariable = '';
+        if(this.props.esVariable)
+            nombreVariable = resultado.nombreVariable;
+        else if(this.props.esIndicador)
+            nombreVariable = resultado.nombreIndicador;
+        else
+            nombreVariable = resultado.nombreRiesgo;
         const transaction = new sql.Transaction( this.props.pool );
         transaction.begin(err => {
             var rolledBack = false;
@@ -108,7 +122,7 @@ export default class TimelineVariable extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("select * from "+resultado.nombreVariable+'_'+resultado.inicioVigencia.getFullYear()+'_'+(resultado.inicioVigencia.getMonth()+1)+'_'+resultado.inicioVigencia.getDate()+'_'+resultado.inicioVigencia.getHours()+'_'+resultado.inicioVigencia.getMinutes()+'_'+resultado.inicioVigencia.getSeconds(), (err, result) => {
+            request.query("select * from "+nombreVariable+'_'+resultado.inicioVigencia.getFullYear()+'_'+(resultado.inicioVigencia.getMonth()+1)+'_'+resultado.inicioVigencia.getDate()+'_'+resultado.inicioVigencia.getHours()+'_'+resultado.inicioVigencia.getMinutes()+'_'+resultado.inicioVigencia.getSeconds(), (err, result) => {
                 if (err) {
                     console.log(err);
                     if (!rolledBack) {
@@ -118,6 +132,8 @@ export default class TimelineVariable extends React.Component {
                 } else {
                     transaction.commit(err => {
                         array[index].resultados = result.recordset;
+                        console.log('result.recordset')
+                        console.log(result.recordset)
                         banderaImportacionInicio++;
                         //this.finImportacion();
                         this.setState({
@@ -233,7 +249,7 @@ export default class TimelineVariable extends React.Component {
                                     </div>
                                     <div className="cd-timeline__content js-cd-content">
                                         {htmlObjectDesc}
-                                        <span className="cd-timeline__date">{this.state.resultados[0].resultados[i].f3ch4Gu4rd4do.getFullYear()+"-"+this.state.resultados[0].resultados[i].f3ch4Gu4rd4do.getMonth()+"-"+this.state.resultados[0].resultados[i].f3ch4Gu4rd4do.getDate()}</span>
+                                        <span className="cd-timeline__date">{this.state.resultados[0].resultados[i].f3ch4Gu4rd4do.getFullYear()+"-"+(this.state.resultados[0].resultados[i].f3ch4Gu4rd4do.getMonth()+1)+"-"+this.state.resultados[0].resultados[i].f3ch4Gu4rd4do.getDate()}</span>
                                     </div>
                                 </div>;
                 htmlContent.push(htmlRow);

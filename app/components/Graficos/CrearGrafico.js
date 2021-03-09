@@ -1111,14 +1111,14 @@ function (_React$Component) {
       }, _react["default"].createElement("li", {
         className: "breadcrumb-item font-16",
         "aria-current": "page",
-        onClick: this.props.retornarSeleccionDashboards
+        onClick: this.props.goSeleccionReporteria
       }, _react["default"].createElement("a", {
         href: "#",
         className: "breadcrumb-link"
-      }, "Dashboards")), _react["default"].createElement("li", {
+      }, "Seleccionar Tipo de Reporter\xEDa")), _react["default"].createElement("li", {
         className: "breadcrumb-item active font-16",
         "aria-current": "page"
-      }, "Crear Dashboard"))))))), _react["default"].createElement("div", {
+      }, "Configurar Gr\xE1fico"))))))), _react["default"].createElement("div", {
         className: "row"
       }, _react["default"].createElement("div", {
         className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"

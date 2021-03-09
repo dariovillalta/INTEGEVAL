@@ -9,9 +9,9 @@ var _react = _interopRequireDefault(require("react"));
 
 var _mssql = _interopRequireDefault(require("mssql"));
 
-var _MessageModal = _interopRequireDefault(require("../MessageModal.js"));
-
 var _Modal = _interopRequireDefault(require("../Modal/Modal.js"));
+
+var _MessageModal = _interopRequireDefault(require("../MessageModal.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
@@ -54,37 +54,36 @@ function (_React$Component) {
     _this = _possibleConstructorReturn(this, _getPrototypeOf(MantenimientoUsuarios).call(this, props));
     _this.state = {
       usuarios: [],
+      mostrarModal: false,
+      tituloModal: "",
+      idUsuarioSeleccionado: -1,
+      posUsuarioSeleccionado: -1,
+      nombreUsuarioSeleccionado: "",
+      usuarioUsuarioSeleccionado: "",
+      contrasenaUsuarioSeleccionado: "",
+      permisosUsuarios: [],
+      permisoSeleccionado: null,
       mensajeModal: {
         mostrarMensaje: false,
         mensajeConfirmado: false,
         esError: false,
         esConfirmar: false,
         titulo: "",
-        mensaje: "",
-        banderaMetodoInit: "",
-        idElementoSelec: -1,
-        indiceX: -1
-      },
-      mostrarModal: false,
-      tituloModal: "",
-      nombreUsuarioSeleccionado: "",
-      usuarioUsuarioSeleccionado: "",
-      contrasenaUsuarioSeleccionado: "",
-      posUsuarioSeleccionado: -1,
-      permisosUsuarios: [],
-      permisoSeleccionado: null
+        mensaje: ""
+      }
     };
     _this.loadUsuarios = _this.loadUsuarios.bind(_assertThisInitialized(_this));
     _this.loadPermisos = _this.loadPermisos.bind(_assertThisInitialized(_this));
     _this.insertarUsuario = _this.insertarUsuario.bind(_assertThisInitialized(_this));
     _this.getUsuarioID = _this.getUsuarioID.bind(_assertThisInitialized(_this));
     _this.insertarPermisos = _this.insertarPermisos.bind(_assertThisInitialized(_this));
-    _this.dismissMessageModal = _this.dismissMessageModal.bind(_assertThisInitialized(_this));
-    _this.showSuccesMessage = _this.showSuccesMessage.bind(_assertThisInitialized(_this));
     _this.openModal = _this.openModal.bind(_assertThisInitialized(_this));
     _this.closeModal = _this.closeModal.bind(_assertThisInitialized(_this));
     _this.editUser = _this.editUser.bind(_assertThisInitialized(_this));
     _this.deleteUser = _this.deleteUser.bind(_assertThisInitialized(_this));
+    _this.saveBitacora = _this.saveBitacora.bind(_assertThisInitialized(_this));
+    _this.deleteUserConfirmation = _this.deleteUserConfirmation.bind(_assertThisInitialized(_this));
+    _this.modifyUserConfirmation = _this.modifyUserConfirmation.bind(_assertThisInitialized(_this));
     return _this;
   }
 
@@ -180,175 +179,218 @@ function (_React$Component) {
                 rolledBack = true;
               });
               var request = new _mssql["default"].Request(transaction);
-              request.query("insert into Usuarios (nombreCompleto, usuario, contrasena) values ('" + nombreCompleto + "','" + usuario + "','" + contrasena + "')", function (err, result) {
+              request.query("select * from Usuarios where usuario = '" + usuario + "'", function (err, result) {
                 if (err) {
                   if (!rolledBack) {
                     console.log(err);
+
+                    _this4.props.showMessage("Error", "Error al buscar nombre de usuario.", true, false, {});
+
                     transaction.rollback(function (err) {});
                   }
                 } else {
                   transaction.commit(function (err) {
-                    var permisosVariable = '',
-                        permisosIndicador = '',
-                        permisosRiesgo = '',
-                        permisosRiesgoIntegral = '',
-                        permisosUsuario = '',
-                        permisosLista = '',
-                        permisosAlarma = '';
+                    if (result.recordset.length == 0) {
+                      var _transaction = new _mssql["default"].Transaction(_this4.props.pool);
 
-                    if ($("#variableCalculo").is(':checked')) {
-                      permisosVariable += 'C';
+                      _transaction.begin(function (err) {
+                        var rolledBack = false;
+
+                        _transaction.on('rollback', function (aborted) {
+                          rolledBack = true;
+                        });
+
+                        var request = new _mssql["default"].Request(_transaction);
+                        request.query("insert into Usuarios (nombreCompleto, usuario, contrasena) values ('" + nombreCompleto + "','" + usuario + "','" + contrasena + "')", function (err, result) {
+                          if (err) {
+                            if (!rolledBack) {
+                              console.log(err);
+
+                              _this4.props.showMessage("Error", "Error al crear usuario.", true, false, {});
+
+                              _transaction.rollback(function (err) {});
+                            }
+                          } else {
+                            _transaction.commit(function (err) {
+                              var permisosVariable = '',
+                                  permisosIndicador = '',
+                                  permisosRiesgo = '',
+                                  permisosRiesgoIntegral = '',
+                                  permisosUsuario = '',
+                                  permisosLista = '',
+                                  permisosAlarma = '';
+
+                              if ($("#variableCalculo").is(':checked')) {
+                                permisosVariable += 'C';
+                              }
+
+                              if ($("#indicadorCalculo").is(':checked')) {
+                                permisosIndicador += 'C';
+                              }
+
+                              if ($("#riesgoCalculo").is(':checked')) {
+                                permisosRiesgo += 'C';
+                              }
+
+                              if ($("#riesgoIntegralCalculo").is(':checked')) {
+                                permisosRiesgoIntegral += 'C';
+                              }
+
+                              if ($("#variableVer").is(':checked')) {
+                                if (permisosVariable.length > 0) permisosVariable += '/';
+                                permisosVariable += 'V';
+                              }
+
+                              if ($("#indicadorVer").is(':checked')) {
+                                if (permisosIndicador.length > 0) permisosIndicador += '/';
+                                permisosIndicador += 'V';
+                              }
+
+                              if ($("#riesgoVer").is(':checked')) {
+                                if (permisosRiesgo.length > 0) permisosRiesgo += '/';
+                                permisosRiesgo += 'V';
+                              }
+
+                              if ($("#riesgoIntegralVer").is(':checked')) {
+                                if (permisosRiesgoIntegral.length > 0) permisosRiesgoIntegral += '/';
+                                permisosRiesgoIntegral += 'V';
+                              }
+
+                              if ($("#usuarioVer").is(':checked')) {
+                                if (permisosUsuario.length > 0) permisosUsuario += '/';
+                                permisosUsuario += 'V';
+                              }
+
+                              if ($("#listaVer").is(':checked')) {
+                                if (permisosLista.length > 0) permisosLista += '/';
+                                permisosLista += 'V';
+                              }
+
+                              if ($("#alarmaVer").is(':checked')) {
+                                if (permisosAlarma.length > 0) permisosAlarma += '/';
+                                permisosAlarma += 'V';
+                              }
+
+                              if ($("#variableEditar").is(':checked')) {
+                                if (permisosVariable.length > 0) permisosVariable += '/';
+                                permisosVariable += 'E';
+                              }
+
+                              if ($("#indicadorEditar").is(':checked')) {
+                                if (permisosIndicador.length > 0) permisosIndicador += '/';
+                                permisosIndicador += 'E';
+                              }
+
+                              if ($("#riesgoEditar").is(':checked')) {
+                                if (permisosRiesgo.length > 0) permisosRiesgo += '/';
+                                permisosRiesgo += 'E';
+                              }
+
+                              if ($("#riesgoIntegralEditar").is(':checked')) {
+                                if (permisosRiesgoIntegral.length > 0) permisosRiesgoIntegral += '/';
+                                permisosRiesgoIntegral += 'E';
+                              }
+
+                              if ($("#usuarioEditar").is(':checked')) {
+                                if (permisosUsuario.length > 0) permisosUsuario += '/';
+                                permisosUsuario += 'E';
+                              }
+
+                              if ($("#listaEditar").is(':checked')) {
+                                if (permisosLista.length > 0) permisosLista += '/';
+                                permisosLista += 'E';
+                              }
+
+                              if ($("#alarmaEditar").is(':checked')) {
+                                if (permisosAlarma.length > 0) permisosAlarma += '/';
+                                permisosAlarma += 'E';
+                              }
+
+                              var permisoUsuarios = {
+                                variable: permisosVariable,
+                                indicador: permisosIndicador,
+                                riesgo: permisosRiesgo,
+                                riesgoIntegral: permisosRiesgoIntegral,
+                                usuario: permisosUsuario,
+                                lista: permisosLista,
+                                alarma: permisosAlarma
+                              };
+
+                              var copyPermisos = _toConsumableArray(_this4.state.permisosUsuarios);
+
+                              copyPermisos.push(permisoUsuarios);
+
+                              _this4.setState({
+                                mensajeModal: {
+                                  mostrarMensaje: false,
+                                  mensajeConfirmado: false,
+                                  esError: false,
+                                  esConfirmar: false,
+                                  titulo: "",
+                                  mensaje: ""
+                                },
+                                permisosUsuarios: copyPermisos
+                              }, _this4.getUsuarioID);
+
+                              _this4.props.showSuccesMessage("Éxito", "Usuario creado con éxito.");
+
+                              _this4.loadUsuarios();
+
+                              var transaction1 = new _mssql["default"].Transaction(_this4.props.pool);
+                              transaction1.begin(function (err) {
+                                var rolledBack = false;
+                                transaction1.on('rollback', function (aborted) {
+                                  rolledBack = true;
+                                });
+                                var request1 = new _mssql["default"].Request(transaction1);
+                                request1.query("select top 1 * from Usuarios order by ID desc", function (err, result) {
+                                  if (err) {
+                                    if (!rolledBack) {
+                                      console.log(err);
+                                      transaction1.rollback(function (err) {});
+                                    }
+                                  } else {
+                                    transaction1.commit(function (err) {
+                                      if (result.recordset.length > 0) {
+                                        var nuevosValores = 'nombre: ' + nombreCompleto + '\n' + 'usuario: ' + usuario + '\n' + 'permisos: {\n' + '\tvariable: ' + permisosVariable + '\n' + '\tindicador: ' + permisosIndicador + '\n' + '\triesgo: ' + permisosRiesgo + '\n' + '\triesgoIntegral: ' + permisosRiesgoIntegral + '\n' + '\tusuario: ' + permisosUsuario + '\n' + '\tlista: ' + permisosLista + '\n' + '\talarma: ' + permisosAlarma + '\n' + '}';
+
+                                        _this4.saveBitacora(new Date(), "Usuario: " + _this4.props.userName + " creo al usuario: " + _this4.state.usuarioUsuarioSeleccionado + "\nValores: \n" + nuevosValores, "usuario", result.recordset[0].ID);
+                                      }
+                                    });
+                                  }
+                                });
+                              }); // fin transaction1
+                            });
+                          }
+                        });
+                      }); // fin transaction
+
+                    } else {
+                      _this4.props.showMessage("Error", "El nombre de usuario ya existe.", true, false, {});
                     }
-
-                    if ($("#indicadorCalculo").is(':checked')) {
-                      permisosIndicador += 'C';
-                    }
-
-                    if ($("#riesgoCalculo").is(':checked')) {
-                      permisosRiesgo += 'C';
-                    }
-
-                    if ($("#riesgoIntegralCalculo").is(':checked')) {
-                      permisosRiesgoIntegral += 'C';
-                    }
-
-                    if ($("#usuarioCalculo").is(':checked')) {
-                      permisosUsuario += 'C';
-                    }
-
-                    if ($("#listaCalculo").is(':checked')) {
-                      permisosLista += 'C';
-                    }
-
-                    if ($("#alarmaCalculo").is(':checked')) {
-                      permisosAlarma += 'C';
-                    }
-
-                    if ($("#variableVer").is(':checked')) {
-                      if (permisosVariable.length > 0) permisosVariable += '/';
-                      permisosVariable += 'V';
-                    }
-
-                    if ($("#indicadorVer").is(':checked')) {
-                      if (permisosIndicador.length > 0) permisosIndicador += '/';
-                      permisosIndicador += 'V';
-                    }
-
-                    if ($("#riesgoVer").is(':checked')) {
-                      if (permisosRiesgo.length > 0) permisosRiesgo += '/';
-                      permisosRiesgo += 'V';
-                    }
-
-                    if ($("#riesgoIntegralVer").is(':checked')) {
-                      if (permisosRiesgoIntegral.length > 0) permisosRiesgoIntegral += '/';
-                      permisosRiesgoIntegral += 'V';
-                    }
-
-                    if ($("#usuarioVer").is(':checked')) {
-                      if (permisosUsuario.length > 0) permisosUsuario += '/';
-                      permisosUsuario += 'V';
-                    }
-
-                    if ($("#listaVer").is(':checked')) {
-                      if (permisosLista.length > 0) permisosLista += '/';
-                      permisosLista += 'V';
-                    }
-
-                    if ($("#alarmaVer").is(':checked')) {
-                      if (permisosAlarma.length > 0) permisosAlarma += '/';
-                      permisosAlarma += 'V';
-                    }
-
-                    if ($("#variableEditar").is(':checked')) {
-                      if (permisosVariable.length > 0) permisosVariable += '/';
-                      permisosVariable += 'E';
-                    }
-
-                    if ($("#indicadorEditar").is(':checked')) {
-                      if (permisosIndicador.length > 0) permisosIndicador += '/';
-                      permisosIndicador += 'E';
-                    }
-
-                    if ($("#riesgoEditar").is(':checked')) {
-                      if (permisosRiesgo.length > 0) permisosRiesgo += '/';
-                      permisosRiesgo += 'E';
-                    }
-
-                    if ($("#riesgoIntegralEditar").is(':checked')) {
-                      if (permisosRiesgoIntegral.length > 0) permisosRiesgoIntegral += '/';
-                      permisosRiesgoIntegral += 'E';
-                    }
-
-                    if ($("#usuarioEditar").is(':checked')) {
-                      if (permisosUsuario.length > 0) permisosUsuario += '/';
-                      permisosUsuario += 'E';
-                    }
-
-                    if ($("#listaEditar").is(':checked')) {
-                      if (permisosLista.length > 0) permisosLista += '/';
-                      permisosLista += 'E';
-                    }
-
-                    if ($("#alarmaEditar").is(':checked')) {
-                      if (permisosAlarma.length > 0) permisosAlarma += '/';
-                      permisosAlarma += 'E';
-                    }
-
-                    var permisoUsuarios = {
-                      variable: permisosVariable,
-                      indicador: permisosIndicador,
-                      riesgo: permisosRiesgo,
-                      riesgoIntegral: permisosRiesgoIntegral,
-                      usuario: permisosUsuario,
-                      lista: permisosLista,
-                      alarma: permisosAlarma
-                    };
-
-                    var copyPermisos = _toConsumableArray(_this4.state.permisosUsuarios);
-
-                    copyPermisos.push(permisoUsuarios);
-
-                    _this4.setState({
-                      mensajeModal: {
-                        mostrarMensaje: false,
-                        mensajeConfirmado: true,
-                        esError: false,
-                        esConfirmar: false,
-                        titulo: "",
-                        mensaje: "",
-                        banderaMetodoInit: "",
-                        idElementoSelec: _this4.state.mensajeModal.idElementoSelec,
-                        indiceX: _this4.state.mensajeModal.indiceX
-                      },
-                      permisosUsuarios: copyPermisos
-                    }, _this4.getUsuarioID);
-
-                    _this4.showSuccesMessage("Exito", "Usuario creado con éxito.");
-
-                    _this4.loadUsuarios();
                   });
                 }
               });
             }); // fin transaction
           } else {
             if (contrasena.length == 0) {
-              alert('Ingrese un valor para el campo de contraseña.');
+              this.props.showMessage("Error", "Ingrese un valor para el campo de contraseña.", true, false, {});
             } else {
-              alert('El valor para el campo de contraseña debe ser menor a 51 caracteres.');
+              this.props.showMessage("Error", "El valor para el campo de contraseña debe ser menor a 51 caracteres.", true, false, {});
             }
           }
         } else {
           if (usuario.length == 0) {
-            alert('Ingrese un valor para el campo de usuario.');
+            this.props.showMessage("Error", "Ingrese un valor para el campo de usuario.", true, false, {});
           } else {
-            alert('El valor para el campo de usuario debe ser menor a 26 caracteres.');
+            this.props.showMessage("Error", "El valor para el campo de usuario debe ser menor a 26 caracteres.", true, false, {});
           }
         }
       } else {
         if (nombreCompleto.length == 0) {
-          alert('Ingrese un valor para el campo de nombre completo.');
+          this.props.showMessage("Error", "Ingrese un valor para el campo de nombre completo.", true, false, {});
         } else {
-          alert('El valor para el campo de nombre completo debe ser menor a 101 caracteres.');
+          this.props.showMessage("Error", "El valor para el campo de nombre completo debe ser menor a 101 caracteres.", true, false, {});
         }
       }
     }
@@ -368,6 +410,9 @@ function (_React$Component) {
           if (err) {
             if (!rolledBack) {
               console.log(err);
+
+              _this5.props.showMessage("Error", "Error al intentar obtener ID de usuario.", true, false, {});
+
               transaction.rollback(function (err) {});
             }
           } else {
@@ -398,6 +443,9 @@ function (_React$Component) {
           if (err) {
             if (!rolledBack) {
               console.log(err);
+
+              _this6.props.showMessage("Error", "Error al ingresar permisos de usuario.", true, false, {});
+
               transaction.rollback(function (err) {});
             }
           } else {
@@ -440,212 +488,234 @@ function (_React$Component) {
       var nombreCompleto = $("#nombreCompletoEdit").val();
       var usuario = $("#usuarioEdit").val();
       var contrasena = $("#contrasenaEdit").val();
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("update Usuarios set nombreCompleto = '" + nombreCompleto + "', usuario = '" + usuario + "', contrasena = '" + contrasena + "' where ID = " + _this7.state.usuarios[_this7.state.posUsuarioSeleccionado].ID, function (err, result) {
+          if (err) {
+            if (!rolledBack) {
+              console.log(err);
 
-      if (nombreCompleto.length > 0 && nombreCompleto.length < 101) {
-        if (usuario.length > 0 && usuario.length < 26) {
-          if (contrasena.length > 0 && contrasena.length < 51) {
-            var transaction = new _mssql["default"].Transaction(this.props.pool);
-            transaction.begin(function (err) {
-              var rolledBack = false;
-              transaction.on('rollback', function (aborted) {
-                rolledBack = true;
-              });
-              var request = new _mssql["default"].Request(transaction);
-              request.query("update Usuarios set nombreCompleto = '" + nombreCompleto + "', usuario = '" + usuario + "', contrasena = '" + contrasena + "' where ID = " + _this7.state.usuarios[_this7.state.posUsuarioSeleccionado].ID, function (err, result) {
-                if (err) {
-                  if (!rolledBack) {
-                    console.log(err);
-                    transaction.rollback(function (err) {});
-                  }
-                } else {
-                  transaction.commit(function (err) {
-                    var permisosVariable = '',
-                        permisosIndicador = '',
-                        permisosRiesgo = '',
-                        permisosRiesgoIntegral = '',
-                        permisosUsuario = '',
-                        permisosLista = '',
-                        permisosAlarma = '';
+              _this7.props.showMessage("Error", "Error al modificar usuario.", true, false, {});
 
-                    if ($("#variableCalculoEdit").is(':checked')) {
-                      permisosVariable += 'C';
-                    }
-
-                    if ($("#indicadorCalculoEdit").is(':checked')) {
-                      permisosIndicador += 'C';
-                    }
-
-                    if ($("#riesgoCalculoEdit").is(':checked')) {
-                      permisosRiesgo += 'C';
-                    }
-
-                    if ($("#riesgoIntegralCalculoEdit").is(':checked')) {
-                      permisosRiesgoIntegral += 'C';
-                    }
-
-                    if ($("#usuarioCalculoEdit").is(':checked')) {
-                      permisosUsuario += 'C';
-                    }
-
-                    if ($("#listaCalculoEdit").is(':checked')) {
-                      permisosLista += 'C';
-                    }
-
-                    if ($("#alarmaCalculoEdit").is(':checked')) {
-                      permisosAlarma += 'C';
-                    }
-
-                    if ($("#variableVerEdit").is(':checked')) {
-                      if (permisosVariable.length > 0) permisosVariable += '/';
-                      permisosVariable += 'V';
-                    }
-
-                    if ($("#indicadorVerEdit").is(':checked')) {
-                      if (permisosIndicador.length > 0) permisosIndicador += '/';
-                      permisosIndicador += 'V';
-                    }
-
-                    if ($("#riesgoVerEdit").is(':checked')) {
-                      if (permisosRiesgo.length > 0) permisosRiesgo += '/';
-                      permisosRiesgo += 'V';
-                    }
-
-                    if ($("#riesgoIntegralVerEdit").is(':checked')) {
-                      if (permisosRiesgoIntegral.length > 0) permisosRiesgoIntegral += '/';
-                      permisosRiesgoIntegral += 'V';
-                    }
-
-                    if ($("#usuarioVerEdit").is(':checked')) {
-                      if (permisosUsuario.length > 0) permisosUsuario += '/';
-                      permisosUsuario += 'V';
-                    }
-
-                    if ($("#listaVerEdit").is(':checked')) {
-                      if (permisosLista.length > 0) permisosLista += '/';
-                      permisosLista += 'V';
-                    }
-
-                    if ($("#alarmaVerEdit").is(':checked')) {
-                      if (permisosAlarma.length > 0) permisosAlarma += '/';
-                      permisosAlarma += 'V';
-                    }
-
-                    if ($("#variableEditarEdit").is(':checked')) {
-                      if (permisosVariable.length > 0) permisosVariable += '/';
-                      permisosVariable += 'E';
-                    }
-
-                    if ($("#indicadorEditarEdit").is(':checked')) {
-                      if (permisosIndicador.length > 0) permisosIndicador += '/';
-                      permisosIndicador += 'E';
-                    }
-
-                    if ($("#riesgoEditarEdit").is(':checked')) {
-                      if (permisosRiesgo.length > 0) permisosRiesgo += '/';
-                      permisosRiesgo += 'E';
-                    }
-
-                    if ($("#riesgoIntegralEditarEdit").is(':checked')) {
-                      if (permisosRiesgoIntegral.length > 0) permisosRiesgoIntegral += '/';
-                      permisosRiesgoIntegral += 'E';
-                    }
-
-                    if ($("#usuarioEditarEdit").is(':checked')) {
-                      if (permisosUsuario.length > 0) permisosUsuario += '/';
-                      permisosUsuario += 'E';
-                    }
-
-                    if ($("#listaEditarEdit").is(':checked')) {
-                      if (permisosLista.length > 0) permisosLista += '/';
-                      permisosLista += 'E';
-                    }
-
-                    if ($("#alarmaEditarEdit").is(':checked')) {
-                      if (permisosAlarma.length > 0) permisosAlarma += '/';
-                      permisosAlarma += 'E';
-                    }
-
-                    var permisoUsuarios = {
-                      variable: permisosVariable,
-                      indicador: permisosIndicador,
-                      riesgo: permisosRiesgo,
-                      riesgoIntegral: permisosRiesgoIntegral,
-                      usuario: permisosUsuario,
-                      lista: permisosLista,
-                      alarma: permisosAlarma
-                    };
-
-                    var copyPermisos = _toConsumableArray(_this7.state.permisosUsuarios);
-
-                    var idPermiso = copyPermisos[_this7.state.posUsuarioSeleccionado].ID;
-                    copyPermisos[_this7.state.posUsuarioSeleccionado] = permisoUsuarios;
-
-                    _this7.setState({
-                      mensajeModal: {
-                        mostrarMensaje: false,
-                        mensajeConfirmado: true,
-                        esError: false,
-                        esConfirmar: false,
-                        titulo: "",
-                        mensaje: "",
-                        banderaMetodoInit: "",
-                        idElementoSelec: _this7.state.mensajeModal.idElementoSelec,
-                        indiceX: _this7.state.mensajeModal.indiceX
-                      },
-                      permisosUsuarios: copyPermisos
-                    });
-
-                    _this7.showSuccesMessage("Exito", "Usuario modificado con éxito.");
-
-                    _this7.loadUsuarios();
-
-                    var transaction = new _mssql["default"].Transaction(_this7.props.pool);
-                    transaction.begin(function (err) {
-                      var rolledBack = false;
-                      transaction.on('rollback', function (aborted) {
-                        rolledBack = true;
-                      });
-                      var request = new _mssql["default"].Request(transaction);
-                      request.query("update PermisosUsuarios set variable = '" + permisosVariable + "', indicador = '" + permisosIndicador + "', riesgo = '" + permisosRiesgo + "', riesgoIntegral = '" + permisosRiesgoIntegral + "', usuario = '" + permisosUsuario + "', lista = '" + permisosLista + "', alarma = '" + permisosAlarma + "' where ID = " + idPermiso, function (err, result) {
-                        if (err) {
-                          if (!rolledBack) {
-                            console.log(err);
-                            transaction.rollback(function (err) {});
-                          }
-                        } else {
-                          transaction.commit(function (err) {});
-                        }
-                      });
-                    }); // fin transaction
-                  });
-                }
-              });
-            }); // fin transaction
-          } else {
-            if (contrasena.length == 0) {
-              alert('Ingrese un valor para el campo de contraseña.');
-            } else {
-              alert('El valor para el campo de contraseña debe ser menor a 51 caracteres.');
+              transaction.rollback(function (err) {});
             }
-          }
-        } else {
-          if (usuario.length == 0) {
-            alert('Ingrese un valor para el campo de usuario.');
           } else {
-            alert('El valor para el campo de usuario debe ser menor a 26 caracteres.');
+            transaction.commit(function (err) {
+              var permisosVariable = '',
+                  permisosIndicador = '',
+                  permisosRiesgo = '',
+                  permisosRiesgoIntegral = '',
+                  permisosUsuario = '',
+                  permisosLista = '',
+                  permisosAlarma = '';
+
+              if ($("#variableCalculoEdit").is(':checked')) {
+                permisosVariable += 'C';
+              }
+
+              if ($("#indicadorCalculoEdit").is(':checked')) {
+                permisosIndicador += 'C';
+              }
+
+              if ($("#riesgoCalculoEdit").is(':checked')) {
+                permisosRiesgo += 'C';
+              }
+
+              if ($("#riesgoIntegralCalculoEdit").is(':checked')) {
+                permisosRiesgoIntegral += 'C';
+              }
+
+              if ($("#variableVerEdit").is(':checked')) {
+                if (permisosVariable.length > 0) permisosVariable += '/';
+                permisosVariable += 'V';
+              }
+
+              if ($("#indicadorVerEdit").is(':checked')) {
+                if (permisosIndicador.length > 0) permisosIndicador += '/';
+                permisosIndicador += 'V';
+              }
+
+              if ($("#riesgoVerEdit").is(':checked')) {
+                if (permisosRiesgo.length > 0) permisosRiesgo += '/';
+                permisosRiesgo += 'V';
+              }
+
+              if ($("#riesgoIntegralVerEdit").is(':checked')) {
+                if (permisosRiesgoIntegral.length > 0) permisosRiesgoIntegral += '/';
+                permisosRiesgoIntegral += 'V';
+              }
+
+              if ($("#usuarioVerEdit").is(':checked')) {
+                if (permisosUsuario.length > 0) permisosUsuario += '/';
+                permisosUsuario += 'V';
+              }
+
+              if ($("#listaVerEdit").is(':checked')) {
+                if (permisosLista.length > 0) permisosLista += '/';
+                permisosLista += 'V';
+              }
+
+              if ($("#alarmaVerEdit").is(':checked')) {
+                if (permisosAlarma.length > 0) permisosAlarma += '/';
+                permisosAlarma += 'V';
+              }
+
+              if ($("#variableEditarEdit").is(':checked')) {
+                if (permisosVariable.length > 0) permisosVariable += '/';
+                permisosVariable += 'E';
+              }
+
+              if ($("#indicadorEditarEdit").is(':checked')) {
+                if (permisosIndicador.length > 0) permisosIndicador += '/';
+                permisosIndicador += 'E';
+              }
+
+              if ($("#riesgoEditarEdit").is(':checked')) {
+                if (permisosRiesgo.length > 0) permisosRiesgo += '/';
+                permisosRiesgo += 'E';
+              }
+
+              if ($("#riesgoIntegralEditarEdit").is(':checked')) {
+                if (permisosRiesgoIntegral.length > 0) permisosRiesgoIntegral += '/';
+                permisosRiesgoIntegral += 'E';
+              }
+
+              if ($("#usuarioEditarEdit").is(':checked')) {
+                if (permisosUsuario.length > 0) permisosUsuario += '/';
+                permisosUsuario += 'E';
+              }
+
+              if ($("#listaEditarEdit").is(':checked')) {
+                if (permisosLista.length > 0) permisosLista += '/';
+                permisosLista += 'E';
+              }
+
+              if ($("#alarmaEditarEdit").is(':checked')) {
+                if (permisosAlarma.length > 0) permisosAlarma += '/';
+                permisosAlarma += 'E';
+              }
+
+              var permisoUsuarios = {
+                variable: permisosVariable,
+                indicador: permisosIndicador,
+                riesgo: permisosRiesgo,
+                riesgoIntegral: permisosRiesgoIntegral,
+                usuario: permisosUsuario,
+                lista: permisosLista,
+                alarma: permisosAlarma
+              };
+
+              var copyPermisos = _toConsumableArray(_this7.state.permisosUsuarios);
+
+              var idPermiso;
+              if (copyPermisos[_this7.state.posUsuarioSeleccionado] != undefined) idPermiso = copyPermisos[_this7.state.posUsuarioSeleccionado].ID;
+              var idUsuario = _this7.state.usuarios[_this7.state.posUsuarioSeleccionado].ID;
+              copyPermisos[_this7.state.posUsuarioSeleccionado] = permisoUsuarios;
+
+              _this7.setState({
+                mensajeModal: {
+                  mostrarMensaje: false,
+                  mensajeConfirmado: false,
+                  esError: false,
+                  esConfirmar: false,
+                  titulo: "",
+                  mensaje: ""
+                },
+                permisosUsuarios: copyPermisos
+              });
+
+              _this7.props.showSuccesMessage("Éxito", "Usuario modificado con éxito.");
+
+              _this7.loadUsuarios();
+
+              var transaction1 = new _mssql["default"].Transaction(_this7.props.pool);
+              transaction1.begin(function (err) {
+                var rolledBack = false;
+                transaction1.on('rollback', function (aborted) {
+                  rolledBack = true;
+                });
+                var request1 = new _mssql["default"].Request(transaction1);
+                request1.query("select * from PermisosUsuarios where usuarioID = " + idUsuario, function (err, result) {
+                  if (err) {
+                    if (!rolledBack) {
+                      console.log(err);
+
+                      _this7.props.showMessage("Error", "Error al buscar permisos de usuario.", true, false, {});
+
+                      transaction1.rollback(function (err) {});
+                    }
+                  } else {
+                    transaction1.commit(function (err) {
+                      if (result.recordset.length > 0) {
+                        var transaction2 = new _mssql["default"].Transaction(_this7.props.pool);
+                        transaction2.begin(function (err) {
+                          var rolledBack = false;
+                          transaction2.on('rollback', function (aborted) {
+                            rolledBack = true;
+                          });
+                          var request2 = new _mssql["default"].Request(transaction2);
+                          request2.query("update PermisosUsuarios set variable = '" + permisosVariable + "', indicador = '" + permisosIndicador + "', riesgo = '" + permisosRiesgo + "', riesgoIntegral = '" + permisosRiesgoIntegral + "', usuario = '" + permisosUsuario + "', lista = '" + permisosLista + "', alarma = '" + permisosAlarma + "' where ID = " + idPermiso, function (err, result) {
+                            if (err) {
+                              if (!rolledBack) {
+                                console.log(err);
+
+                                _this7.props.showMessage("Error", "Error al modificar permisos de usuario.", true, false, {});
+
+                                transaction2.rollback(function (err) {});
+                              }
+                            } else {
+                              transaction2.commit(function (err) {});
+                            }
+                          });
+                        }); // fin transaction1
+                      } else {
+                        var _transaction2 = new _mssql["default"].Transaction(_this7.props.pool);
+
+                        _transaction2.begin(function (err) {
+                          var rolledBack = false;
+
+                          _transaction2.on('rollback', function (aborted) {
+                            rolledBack = true;
+                          });
+
+                          var request2 = new _mssql["default"].Request(_transaction2);
+                          request2.query("insert into PermisosUsuarios (usuarioID, variable, indicador, riesgo, riesgoIntegral, usuario, lista, alarma) values (" + idUsuario + ", '" + permisosVariable + "',  '" + permisosIndicador + "',  '" + permisosRiesgo + "',  '" + permisosRiesgoIntegral + "', '" + permisosUsuario + "',  '" + permisosLista + "',  '" + permisosAlarma + "')", function (err, result) {
+                            if (err) {
+                              if (!rolledBack) {
+                                console.log(err);
+
+                                _this7.props.showMessage("Error", "Error al modificar permisos de usuario.", true, false, {});
+
+                                _transaction2.rollback(function (err) {});
+                              }
+                            } else {
+                              _transaction2.commit(function (err) {});
+                            }
+                          });
+                        }); // fin transaction2
+
+                      }
+
+                      var nuevosValores = 'nombre: ' + nombreCompleto + '\n' + 'usuario: ' + usuario + '\n' + 'permisos: {\n' + '\tvariable: ' + permisosVariable + '\n' + '\tindicador: ' + permisosIndicador + '\n' + '\triesgo: ' + permisosRiesgo + '\n' + '\triesgoIntegral: ' + permisosRiesgoIntegral + '\n' + '\tusuario: ' + permisosUsuario + '\n' + '\tlista: ' + permisosLista + '\n' + '\talarma: ' + permisosAlarma + '\n' + '}';
+
+                      _this7.saveBitacora(new Date(), "Usuario: " + _this7.props.userName + " modifico el usuario: " + _this7.state.usuarioUsuarioSeleccionado + "\nNuevos valores: \n" + nuevosValores, "usuario", idUsuario);
+                    });
+                  }
+                });
+              }); // fin transaction
+            });
           }
-        }
-      } else {
-        if (nombreCompleto.length == 0) {
-          alert('Ingrese un valor para el campo de nombre completo.');
-        } else {
-          alert('El valor para el campo de nombre completo debe ser menor a 101 caracteres.');
-        }
-      }
+        });
+      }); // fin transaction
     }
   }, {
     key: "deleteUser",
-    value: function deleteUser(idUsuario, posicionUsuario) {
+    value: function deleteUser() {
       var _this8 = this;
 
       var transaction = new _mssql["default"].Transaction(this.props.pool);
@@ -655,10 +725,13 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("delete from Usuarios where ID = " + idUsuario, function (err, result) {
+        request.query("delete from Usuarios where ID = " + _this8.state.idUsuarioSeleccionado, function (err, result) {
           if (err) {
             if (!rolledBack) {
               console.log(err);
+
+              _this8.props.showMessage("Error", "El al borrar usuario.", true, false, {});
+
               transaction.rollback(function (err) {});
             }
           } else {
@@ -666,20 +739,17 @@ function (_React$Component) {
               _this8.setState({
                 mensajeModal: {
                   mostrarMensaje: false,
-                  mensajeConfirmado: true,
+                  mensajeConfirmado: false,
                   esError: false,
                   esConfirmar: false,
                   titulo: "",
-                  mensaje: "",
-                  banderaMetodoInit: "",
-                  idElementoSelec: _this8.state.mensajeModal.idElementoSelec,
-                  indiceX: _this8.state.mensajeModal.indiceX
+                  mensaje: ""
                 }
               });
 
-              _this8.showSuccesMessage("Exito", "Usuario eliminado con éxito.");
+              _this8.props.showSuccesMessage("Éxito", "Usuario eliminado con éxito.");
 
-              _this8.loadUsuarios();
+              _this8.saveBitacora(new Date(), "Usuario: " + _this8.props.userName + " elimino el usuario: " + _this8.state.usuarioUsuarioSeleccionado, "usuario", _this8.state.idUsuarioSeleccionado);
 
               var transaction = new _mssql["default"].Transaction(_this8.props.pool);
               transaction.begin(function (err) {
@@ -688,14 +758,19 @@ function (_React$Component) {
                   rolledBack = true;
                 });
                 var request = new _mssql["default"].Request(transaction);
-                request.query("delete from PermisosUsuarios where ID = " + _this8.state.permisosUsuarios[posicionUsuario].ID, function (err, result) {
+                request.query("delete from PermisosUsuarios where ID = " + _this8.state.permisosUsuarios[_this8.state.posUsuarioSeleccionado].ID, function (err, result) {
                   if (err) {
                     if (!rolledBack) {
                       console.log(err);
+
+                      _this8.props.showMessage("Error", "El al borrar permisos de usuario.", true, false, {});
+
                       transaction.rollback(function (err) {});
                     }
                   } else {
-                    transaction.commit(function (err) {});
+                    transaction.commit(function (err) {
+                      _this8.loadUsuarios();
+                    });
                   }
                 });
               }); // fin transaction
@@ -704,68 +779,89 @@ function (_React$Component) {
         });
       }); // fin transaction
     }
-    /*======_______====== ======_______======   MENSAJES MODAL    ======_______====== ======_______======*/
-
-    /*======_______======                                                             ======_______======*/
-
-    /*======_______======                                                             ======_______======*/
-
-    /*======_______====== ======_______====== ==_____==  ==___==  ======_______====== ======_______======*/
-
   }, {
-    key: "dismissMessageModal",
-    value: function dismissMessageModal() {
-      this.setState({
-        mensajeModal: {
-          mostrarMensaje: false,
-          mensajeConfirmado: false,
-          esError: false,
-          esConfirmar: false,
-          titulo: "",
-          mensaje: "",
-          banderaMetodoInit: "",
-          idElementoSelec: -1,
-          indiceX: -1
-        }
-      });
-    }
-  }, {
-    key: "showSuccesMessage",
-    value: function showSuccesMessage(titulo, mensaje) {
-      this.setState({
-        mensajeModal: {
-          mostrarMensaje: true,
-          mensajeConfirmado: false,
-          esError: false,
-          esConfirmar: false,
-          titulo: titulo,
-          mensaje: mensaje,
-          banderaMetodoInit: "",
-          idElementoSelec: this.state.mensajeModal.idElementoSelec,
-          indiceX: this.state.mensajeModal.indiceX
-        }
-      });
-      var self = this;
-      setTimeout(function () {
-        self.setState({
-          mensajeModal: {
-            mostrarMensaje: false,
-            mensajeConfirmado: false,
-            esError: false,
-            esConfirmar: false,
-            titulo: "",
-            mensaje: "",
-            banderaMetodoInit: "",
-            idElementoSelec: self.state.mensajeModal.idElementoSelec,
-            indiceX: self.state.mensajeModal.indiceX
+    key: "saveBitacora",
+    value: function saveBitacora(fecha, descripcion, tipoVariable, idVariable) {
+      var _this9 = this;
+
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("insert into Bitacora (usuarioID, nombreUsuario, fecha, descripcion, tipoVariable, idVariable) values (" + _this9.props.userID + ", '" + _this9.props.userName + "', '" + fecha.getFullYear() + "-" + (fecha.getMonth() + 1) + "-" + fecha.getDate() + "', '" + descripcion + "', '" + tipoVariable + "', " + idVariable + ")", function (err, result) {
+          if (err) {
+            console.log(err);
+
+            _this9.props.showMessage("Error", 'No se pudo guardar información de bitacora.', true, false, {});
+
+            if (!rolledBack) {
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {});
           }
         });
-      }, 850);
+      }); // fin transaction
+    }
+  }, {
+    key: "deleteUserConfirmation",
+    value: function deleteUserConfirmation(id, pos) {
+      this.setState({
+        idUsuarioSeleccionado: id,
+        posUsuarioSeleccionado: pos
+      });
+      this.props.showMessage("Confirmación", "Esta seguro que desea eliminar el usuario?", false, true, this.deleteUser);
+    }
+  }, {
+    key: "modifyUserConfirmation",
+    value: function modifyUserConfirmation() {
+      var nombreCompleto = $("#nombreCompletoEdit").val();
+      var usuario = $("#usuarioEdit").val();
+      var contrasena = $("#contrasenaEdit").val();
+
+      if (nombreCompleto.length > 0 && nombreCompleto.length < 101) {
+        if (usuario.length > 0 && usuario.length < 26) {
+          if (contrasena.length > 0 && contrasena.length < 51) {
+            var validoModificar = true;
+
+            for (var i = 0; i < this.state.usuarios.length; i++) {
+              if (this.state.usuarios[i].usuario.localeCompare(usuario) == 0 && this.state.posUsuarioSeleccionado != i) {
+                validoModificar = false;
+                break;
+              }
+            }
+
+            ;
+            if (validoModificar) this.props.showMessage("Confirmación", "Esta seguro que desea modificar el usuario?", false, true, this.editUser);else this.props.showMessage("Error", "El nombre de usuario ya existe.", true, false, {});
+          } else {
+            if (contrasena.length == 0) {
+              this.props.showMessage("Error", "Ingrese un valor para el campo de contraseña.", true, false, {});
+            } else {
+              this.props.showMessage("Error", "El valor para el campo de contraseña debe ser menor a 51 caracteres.", true, false, {});
+            }
+          }
+        } else {
+          if (usuario.length == 0) {
+            this.props.showMessage("Error", "Ingrese un valor para el campo de usuario.", true, false, {});
+          } else {
+            this.props.showMessage("Error", "El valor para el campo de usuario debe ser menor a 26 caracteres.", true, false, {});
+          }
+        }
+      } else {
+        if (nombreCompleto.length == 0) {
+          this.props.showMessage("Error", "Ingrese un valor para el campo de nombre completo.", true, false, {});
+        } else {
+          this.props.showMessage("Error", "El valor para el campo de nombre completo debe ser menor a 101 caracteres.", true, false, {});
+        }
+      }
     }
   }, {
     key: "render",
     value: function render() {
-      var _this9 = this;
+      var _this10 = this;
 
       return _react["default"].createElement("div", null, _react["default"].createElement("div", {
         className: "row"
@@ -792,7 +888,10 @@ function (_React$Component) {
         className: "breadcrumb-item font-16 active",
         "aria-current": "page"
       }, "Mantenimiento de Usuarios"))))))), _react["default"].createElement("div", {
-        className: "row"
+        className: "row",
+        style: {
+          display: this.props.permision.lista.indexOf("E") > -1 ? "" : "none"
+        }
       }, _react["default"].createElement("div", {
         className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
       }, _react["default"].createElement("div", {
@@ -829,7 +928,7 @@ function (_React$Component) {
         id: "contrasena",
         type: "password",
         className: "form-control"
-      }))), _react["default"].createElement("div", {
+      }))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
         className: "row"
       }, _react["default"].createElement("table", {
         className: "table table-striped"
@@ -902,38 +1001,11 @@ function (_React$Component) {
         className: "custom-control-label"
       }))), _react["default"].createElement("td", {
         scope: "row"
-      }, _react["default"].createElement("label", {
-        className: "custom-control custom-checkbox"
-      }, _react["default"].createElement("input", {
-        id: "usuarioCalculo",
-        type: "checkbox",
-        defaultChecked: true,
-        className: "custom-control-input"
-      }), _react["default"].createElement("span", {
-        className: "custom-control-label"
-      }))), _react["default"].createElement("td", {
+      }), _react["default"].createElement("td", {
         scope: "row"
-      }, _react["default"].createElement("label", {
-        className: "custom-control custom-checkbox"
-      }, _react["default"].createElement("input", {
-        id: "listaCalculo",
-        type: "checkbox",
-        defaultChecked: true,
-        className: "custom-control-input"
-      }), _react["default"].createElement("span", {
-        className: "custom-control-label"
-      }))), _react["default"].createElement("td", {
+      }), _react["default"].createElement("td", {
         scope: "row"
-      }, _react["default"].createElement("label", {
-        className: "custom-control custom-checkbox"
-      }, _react["default"].createElement("input", {
-        id: "alarmaCalculo",
-        type: "checkbox",
-        defaultChecked: true,
-        className: "custom-control-input"
-      }), _react["default"].createElement("span", {
-        className: "custom-control-label"
-      })))), _react["default"].createElement("tr", null, _react["default"].createElement("th", {
+      })), _react["default"].createElement("tr", null, _react["default"].createElement("th", {
         scope: "row"
       }, "Ver"), _react["default"].createElement("td", {
         scope: "row"
@@ -1014,7 +1086,7 @@ function (_React$Component) {
         className: "custom-control-label"
       })))), _react["default"].createElement("tr", null, _react["default"].createElement("th", {
         scope: "row"
-      }, "Ver"), _react["default"].createElement("td", {
+      }, "Editar"), _react["default"].createElement("td", {
         scope: "row"
       }, _react["default"].createElement("label", {
         className: "custom-control custom-checkbox"
@@ -1091,7 +1163,7 @@ function (_React$Component) {
         className: "custom-control-input"
       }), _react["default"].createElement("span", {
         className: "custom-control-label"
-      }))))))), _react["default"].createElement("div", {
+      }))))))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
         className: "row"
       }, _react["default"].createElement("button", {
         onClick: this.insertarUsuario,
@@ -1101,7 +1173,10 @@ function (_React$Component) {
           display: "block"
         }
       }, "Crear")))))), _react["default"].createElement("div", {
-        className: "row"
+        className: "row",
+        style: {
+          display: this.props.permision.lista.indexOf("V") > -1 || this.props.permision.lista.indexOf("E") > -1 ? "" : "none"
+        }
       }, _react["default"].createElement("div", {
         className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
       }, _react["default"].createElement("div", {
@@ -1117,17 +1192,27 @@ function (_React$Component) {
       }, "Nombre Completo"), _react["default"].createElement("th", {
         scope: "col"
       }, "Usuario"), _react["default"].createElement("th", {
-        scope: "col"
+        scope: "col",
+        style: {
+          display: this.props.permision.lista.indexOf("E") > -1 ? "" : "none"
+        }
       }, "Editar"), _react["default"].createElement("th", {
-        scope: "col"
+        scope: "col",
+        style: {
+          display: this.props.permision.lista.indexOf("E") > -1 ? "" : "none"
+        }
       }, "Eliminar"))), _react["default"].createElement("tbody", null, this.state.usuarios.map(function (usuario, i) {
         return _react["default"].createElement("tr", {
           key: usuario.ID
         }, _react["default"].createElement("th", {
           scope: "row"
-        }, i + 1), _react["default"].createElement("td", null, usuario.nombreCompleto), _react["default"].createElement("td", null, usuario.usuario), _react["default"].createElement("td", null, _react["default"].createElement("img", {
+        }, i + 1), _react["default"].createElement("td", null, usuario.nombreCompleto), _react["default"].createElement("td", null, usuario.usuario), _react["default"].createElement("td", {
+          style: {
+            display: _this10.props.permision.lista.indexOf("E") > -1 ? "" : "none"
+          }
+        }, _react["default"].createElement("img", {
           onClick: function onClick() {
-            return _this9.openModal(i);
+            return _this10.openModal(i);
           },
           src: "../assets/edit.png",
           style: {
@@ -1135,9 +1220,13 @@ function (_React$Component) {
             width: "20px",
             cursor: 'pointer'
           }
-        })), _react["default"].createElement("td", null, _react["default"].createElement("img", {
+        })), _react["default"].createElement("td", {
+          style: {
+            display: _this10.props.permision.lista.indexOf("E") > -1 ? "" : "none"
+          }
+        }, _react["default"].createElement("img", {
           onClick: function onClick() {
-            return _this9.deleteUser(usuario.ID, i);
+            return _this10.deleteUserConfirmation(usuario.ID, i);
           },
           src: "../assets/trash.png",
           style: {
@@ -1146,14 +1235,7 @@ function (_React$Component) {
             cursor: 'pointer'
           }
         })));
-      }))))))), this.state.mensajeModal.mostrarMensaje ? _react["default"].createElement(_MessageModal["default"], {
-        esError: this.state.mensajeModal.esError,
-        esConfirmar: this.state.mensajeModal.esConfirmar,
-        dismissMessage: this.dismissMessageModal,
-        confirmFunction: this.confirmMessageModal,
-        titulo: this.state.mensajeModal.titulo,
-        mensaje: this.state.mensajeModal.mensaje
-      }, " ") : _react["default"].createElement("span", null), _react["default"].createElement(_Modal["default"], {
+      }))))))), _react["default"].createElement(_Modal["default"], {
         show: this.state.mostrarModal,
         titulo: this.state.tituloModal,
         onClose: this.closeModal
@@ -1190,7 +1272,7 @@ function (_React$Component) {
         type: "password",
         defaultValue: this.state.contrasenaUsuarioSeleccionado,
         className: "form-control"
-      }))), _react["default"].createElement("div", {
+      }))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
         className: "row"
       }, _react["default"].createElement("table", {
         className: "table table-striped"
@@ -1258,38 +1340,11 @@ function (_React$Component) {
         className: "custom-control-label"
       }))), _react["default"].createElement("td", {
         scope: "row"
-      }, _react["default"].createElement("label", {
-        className: "custom-control custom-checkbox"
-      }, _react["default"].createElement("input", {
-        id: "usuarioCalculoEdit",
-        type: "checkbox",
-        defaultChecked: this.state.permisoSeleccionado != null ? this.state.permisoSeleccionado.usuario.indexOf("C") >= 0 ? true : false : false,
-        className: "custom-control-input"
-      }), _react["default"].createElement("span", {
-        className: "custom-control-label"
-      }))), _react["default"].createElement("td", {
+      }), _react["default"].createElement("td", {
         scope: "row"
-      }, _react["default"].createElement("label", {
-        className: "custom-control custom-checkbox"
-      }, _react["default"].createElement("input", {
-        id: "listaCalculoEdit",
-        type: "checkbox",
-        defaultChecked: this.state.permisoSeleccionado != null ? this.state.permisoSeleccionado.lista.indexOf("C") >= 0 ? true : false : false,
-        className: "custom-control-input"
-      }), _react["default"].createElement("span", {
-        className: "custom-control-label"
-      }))), _react["default"].createElement("td", {
+      }), _react["default"].createElement("td", {
         scope: "row"
-      }, _react["default"].createElement("label", {
-        className: "custom-control custom-checkbox"
-      }, _react["default"].createElement("input", {
-        id: "alarmaCalculoEdit",
-        type: "checkbox",
-        defaultChecked: this.state.permisoSeleccionado != null ? this.state.permisoSeleccionado.alarma.indexOf("C") >= 0 ? true : false : false,
-        className: "custom-control-input"
-      }), _react["default"].createElement("span", {
-        className: "custom-control-label"
-      })))), _react["default"].createElement("tr", null, _react["default"].createElement("th", {
+      })), _react["default"].createElement("tr", null, _react["default"].createElement("th", {
         scope: "row"
       }, "Ver"), _react["default"].createElement("td", {
         scope: "row"
@@ -1370,7 +1425,7 @@ function (_React$Component) {
         className: "custom-control-label"
       })))), _react["default"].createElement("tr", null, _react["default"].createElement("th", {
         scope: "row"
-      }, "Ver"), _react["default"].createElement("td", {
+      }, "Editar"), _react["default"].createElement("td", {
         scope: "row"
       }, _react["default"].createElement("label", {
         className: "custom-control custom-checkbox"
@@ -1447,16 +1502,22 @@ function (_React$Component) {
         className: "custom-control-input"
       }), _react["default"].createElement("span", {
         className: "custom-control-label"
-      }))))))), _react["default"].createElement("div", {
+      }))))))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
         className: "row"
       }, _react["default"].createElement("button", {
-        onClick: this.editUser,
+        onClick: this.modifyUserConfirmation,
         className: "btn btn-success btn-block col-xl-10 col-10",
         style: {
           margin: "0 auto",
           display: "block"
         }
-      }, "Modificar"))));
+      }, "Modificar")), this.state.mensajeModal.mostrarMensaje ? _react["default"].createElement(_MessageModal["default"], {
+        esError: this.state.mensajeModal.esError,
+        esConfirmar: this.state.mensajeModal.esConfirmar,
+        dismissMessage: this.dismissMessageModal,
+        titulo: this.state.mensajeModal.titulo,
+        mensaje: this.state.mensajeModal.mensaje
+      }, " ") : null));
     }
   }]);
 

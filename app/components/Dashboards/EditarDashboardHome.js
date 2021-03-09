@@ -33,8 +33,6 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
-//import CrearDashboardHome from './CrearVariables/CrearVariablesHome.js';
-//import EditarDashboardHome from './EditarVariable/EditarVariablesHome.js';
 var EditarDashboardHome =
 /*#__PURE__*/
 function (_React$Component) {
@@ -47,9 +45,40 @@ function (_React$Component) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(EditarDashboardHome).call(this, props));
     _this.state = {
-      componenteActual: "verDashboard"
+      componenteActual: "verDashboard",
+      navbar: _react["default"].createElement("div", {
+        className: "row"
+      }, _react["default"].createElement("div", {
+        className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
+      }, _react["default"].createElement("div", {
+        className: "page-header"
+      }, _react["default"].createElement("h2", {
+        className: "pageheader-title"
+      }, "Ver Dashboard"), _react["default"].createElement("div", {
+        className: "page-breadcrumb"
+      }, _react["default"].createElement("nav", {
+        "aria-label": "breadcrumb"
+      }, _react["default"].createElement("ol", {
+        className: "breadcrumb"
+      }, _react["default"].createElement("li", {
+        className: "breadcrumb-item font-16",
+        "aria-current": "page",
+        onClick: _this.props.goSeleccionReporteria
+      }, _react["default"].createElement("a", {
+        href: "#",
+        className: "breadcrumb-link"
+      }, "Seleccionar Tipo de Reporter\xEDa")), _react["default"].createElement("li", {
+        className: "breadcrumb-item font-16",
+        "aria-current": "page",
+        onClick: _this.props.retornarSeleccionDashboards
+      }, _react["default"].createElement("a", {
+        href: "#",
+        className: "breadcrumb-link"
+      }, "Dashboards")), _react["default"].createElement("li", {
+        className: "breadcrumb-item active font-16",
+        "aria-current": "page"
+      }, "Dashboard: ", _this.props.dashboardSeleccionado.nombre)))))))
     };
-    _this.verDashboard = _this.verDashboard.bind(_assertThisInitialized(_this));
     _this.retornoVerDashboard = _this.retornoVerDashboard.bind(_assertThisInitialized(_this));
     _this.editarDashboard = _this.editarDashboard.bind(_assertThisInitialized(_this));
     return _this;
@@ -60,24 +89,92 @@ function (_React$Component) {
     value: function componentDidMount() {//
     }
   }, {
-    key: "verDashboard",
-    value: function verDashboard() {
-      this.setState({
-        componenteActual: "verDashboard"
-      });
-    }
-  }, {
     key: "retornoVerDashboard",
     value: function retornoVerDashboard() {
+      var navbar = _react["default"].createElement("div", {
+        className: "row"
+      }, _react["default"].createElement("div", {
+        className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
+      }, _react["default"].createElement("div", {
+        className: "page-header"
+      }, _react["default"].createElement("h2", {
+        className: "pageheader-title"
+      }, "Ver Dashboard"), _react["default"].createElement("div", {
+        className: "page-breadcrumb"
+      }, _react["default"].createElement("nav", {
+        "aria-label": "breadcrumb"
+      }, _react["default"].createElement("ol", {
+        className: "breadcrumb"
+      }, _react["default"].createElement("li", {
+        className: "breadcrumb-item font-16",
+        "aria-current": "page",
+        onClick: this.props.goSeleccionReporteria
+      }, _react["default"].createElement("a", {
+        href: "#",
+        className: "breadcrumb-link"
+      }, "Seleccionar Tipo de Reporter\xEDa")), _react["default"].createElement("li", {
+        className: "breadcrumb-item font-16",
+        "aria-current": "page",
+        onClick: this.props.retornarSeleccionDashboards
+      }, _react["default"].createElement("a", {
+        href: "#",
+        className: "breadcrumb-link"
+      }, "Dashboards")), _react["default"].createElement("li", {
+        className: "breadcrumb-item active font-16",
+        "aria-current": "page"
+      }, "Dashboard: ", this.props.dashboardSeleccionado.nombre)))))));
+
       this.setState({
-        componenteActual: "verDashboard"
+        componenteActual: "verDashboard",
+        navbar: navbar
       });
     }
   }, {
     key: "editarDashboard",
     value: function editarDashboard(idVariable) {
+      var navbar = _react["default"].createElement("div", {
+        className: "row"
+      }, _react["default"].createElement("div", {
+        className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
+      }, _react["default"].createElement("div", {
+        className: "page-header"
+      }, _react["default"].createElement("h2", {
+        className: "pageheader-title"
+      }, "Editar Dashboard"), _react["default"].createElement("div", {
+        className: "page-breadcrumb"
+      }, _react["default"].createElement("nav", {
+        "aria-label": "breadcrumb"
+      }, _react["default"].createElement("ol", {
+        className: "breadcrumb"
+      }, _react["default"].createElement("li", {
+        className: "breadcrumb-item font-16",
+        "aria-current": "page",
+        onClick: this.props.goSeleccionReporteria
+      }, _react["default"].createElement("a", {
+        href: "#",
+        className: "breadcrumb-link"
+      }, "Seleccionar Tipo de Reporter\xEDa")), _react["default"].createElement("li", {
+        className: "breadcrumb-item font-16",
+        "aria-current": "page",
+        onClick: this.props.retornarSeleccionDashboards
+      }, _react["default"].createElement("a", {
+        href: "#",
+        className: "breadcrumb-link"
+      }, "Dashboards")), _react["default"].createElement("li", {
+        className: "breadcrumb-item font-16",
+        "aria-current": "page",
+        onClick: this.props.retornoVerDashboard
+      }, _react["default"].createElement("a", {
+        href: "#",
+        className: "breadcrumb-link"
+      }, "Dashboard: ", this.props.dashboardSeleccionado.nombre)), _react["default"].createElement("li", {
+        className: "breadcrumb-item active font-16",
+        "aria-current": "page"
+      }, "Editar Dashboard")))))));
+
       this.setState({
-        componenteActual: "editarDashboard"
+        componenteActual: "editarDashboard",
+        navbar: navbar
       });
     }
   }, {
@@ -86,6 +183,7 @@ function (_React$Component) {
       if (this.state.componenteActual.localeCompare("verDashboard") == 0) {
         return _react["default"].createElement("div", null, _react["default"].createElement(_VerDashboard["default"], {
           pool: this.props.pool,
+          navbar: this.state.navbar,
           variables: this.props.variables,
           indicadores: this.props.indicadores,
           riesgos: this.props.riesgos,
@@ -96,6 +194,7 @@ function (_React$Component) {
       } else if (this.state.componenteActual.localeCompare("editarDashboard") == 0) {
         return _react["default"].createElement("div", null, _react["default"].createElement(_EditarDashboard["default"], {
           pool: this.props.pool,
+          navbar: this.state.navbar,
           variables: this.props.variables,
           indicadores: this.props.indicadores,
           riesgos: this.props.riesgos,

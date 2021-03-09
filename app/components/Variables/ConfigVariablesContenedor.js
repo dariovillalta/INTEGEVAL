@@ -89,7 +89,11 @@ function (_React$Component) {
         return _react["default"].createElement("div", null, _react["default"].createElement(_ConexionesHome["default"], {
           pool: this.props.pool,
           goOptions: this.goOptions,
-          configuracionHome: this.props.configuracionHome
+          configuracionHome: this.props.configuracionHome,
+          showSuccesMessage: this.props.showSuccesMessage,
+          showMessage: this.props.showMessage,
+          userID: this.props.userID,
+          userName: this.props.userName
         }));
       } else if (this.state.showVariables) {
         return _react["default"].createElement("div", null, _react["default"].createElement(_VariableHome["default"], {
@@ -102,7 +106,12 @@ function (_React$Component) {
           showFormula: this.props.showFormula,
           showCondicionVar: this.props.showCondicionVar,
           updateFormula: this.props.updateFormula,
-          showSQL: this.props.showSQL
+          showSQL: this.props.showSQL,
+          permision: this.props.permision,
+          userID: this.props.userID,
+          userName: this.props.userName,
+          showSuccesMessage: this.props.showSuccesMessage,
+          showMessage: this.props.showMessage
         }));
       } else {
         return _react["default"].createElement("div", null, _react["default"].createElement(_OpcionesVariableHome["default"], {

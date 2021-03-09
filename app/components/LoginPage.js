@@ -88,6 +88,8 @@ function (_React$Component) {
     _this.crearListas = _this.crearListas.bind(_assertThisInitialized(_this));
     _this.crearVariablesdeLista = _this.crearVariablesdeLista.bind(_assertThisInitialized(_this));
     _this.crearUsuarios = _this.crearUsuarios.bind(_assertThisInitialized(_this));
+    _this.crearPermisosUsuarios = _this.crearPermisosUsuarios.bind(_assertThisInitialized(_this));
+    _this.crearUsuarioAdmin = _this.crearUsuarioAdmin.bind(_assertThisInitialized(_this));
     _this.showModal = _this.showModal.bind(_assertThisInitialized(_this));
     _this.closeModal = _this.closeModal.bind(_assertThisInitialized(_this));
     _this.saveFile = _this.saveFile.bind(_assertThisInitialized(_this));
@@ -100,142 +102,178 @@ function (_React$Component) {
       if (prevProps.pool == null && this.props.pool != null) {
         var self = this;
         setTimeout(function () {
-          self.probarExistenciaTablas();
+          self.probarExistenciaTablas(false);
         }, 500);
       }
     }
   }, {
     key: "login",
     value: function login() {
+      var _this2 = this;
+
       if (this.props.conexionAbierta) {
-        /*var username = $('#username').val();
+        var username = $('#username').val();
         var password = $('#password').val();
-        if(username.localeCompare("admin") == 0) {
+        /*if(username.localeCompare("admin") == 0) {
             if(password.localeCompare("password111!") == 0) {
                 this.props.login("Admin", "admin");
             }
-        }
-        if(username.length > 0){
-            if(password.length > 0){
-                const transaction = new sql.Transaction( this.props.pool );
-                transaction.begin(err => {
-                    var rolledBack = false;
-                    transaction.on('rollback', aborted => {
-                        // emited with aborted === true
-                        rolledBack = true;
-                    });
-                    const request = new sql.Request(transaction);
-                    request.query("select * from Usuarios where usuario = '"+ username +"' and contrasena = '"+ password +"'", (err, result) => {
-                        if (err) {
-                            console.log(err);
-                            if (!rolledBack) {
-                                transaction.rollback(err => {
-                                    alert("Error en conección con la tabla de Usuarios.");
-                                });
-                            }
-                        }  else {
-                            transaction.commit(err => {
-                                // ... error checks
-                                if(result.recordset.length > 0) {
-                                    var usuario = result.recordset[0];*/
-        //Cookie Username
-        //this.props.login(usuario.nombreCompleto, usuario.tipoUsuario);
-        this.props.login("Dario Villalta", "admin");
-        /*} else {
-            alert("Usuario ó contraseña incorrecta.");
-        }
-        });
-        }
-        });
-        }); // fin transaction
-        } else {
-        alert("Ingrese un valor para la contraseña.");
-        }
-        } else {
-        alert("Ingrese un valor para el usuario.");
         }*/
+
+        if (username.length > 0) {
+          if (password.length > 0) {
+            var transaction = new _mssql["default"].Transaction(this.props.pool);
+            transaction.begin(function (err) {
+              var rolledBack = false;
+              transaction.on('rollback', function (aborted) {
+                // emited with aborted === true
+                rolledBack = true;
+              });
+              var request = new _mssql["default"].Request(transaction);
+              request.query("select * from Usuarios where usuario = '" + username + "' and contrasena = '" + password + "'", function (err, result) {
+                if (err) {
+                  console.log(err);
+
+                  _this2.props.showMessage("Error", "Error en conección con la tabla de Usuarios.", true, false);
+
+                  if (!rolledBack) {
+                    transaction.rollback(function (err) {});
+                  }
+                } else {
+                  transaction.commit(function (err) {
+                    // ... error checks
+                    if (result.recordset.length > 0) {
+                      var usuario = result.recordset[0];
+
+                      var _transaction = new _mssql["default"].Transaction(_this2.props.pool);
+
+                      _transaction.begin(function (err) {
+                        var rolledBack = false;
+
+                        _transaction.on('rollback', function (aborted) {
+                          rolledBack = true;
+                        });
+
+                        var request = new _mssql["default"].Request(_transaction);
+                        request.query("select * from PermisosUsuarios where usuarioID = " + usuario.ID, function (err, result) {
+                          if (err) {
+                            if (!rolledBack) {
+                              console.log(err);
+
+                              _this2.props.showMessage("Error", "Ingrese al traer permisos de usuario.", true, false);
+
+                              _transaction.rollback(function (err) {});
+                            }
+                          } else {
+                            _transaction.commit(function (err) {
+                              if (result.recordset.length > 0) _this2.props.login(usuario.ID, usuario.nombreCompleto, result.recordset[0]);else _this2.props.login(usuario.ID, usuario.nombreCompleto, {
+                                variable: '',
+                                indicador: '',
+                                riesgo: '',
+                                riesgoIntegral: '',
+                                usuario: '',
+                                lista: '',
+                                alarma: ''
+                              });
+                            });
+                          }
+                        });
+                      }); // fin transaction
+
+                    } else {
+                      _this2.props.showMessage("Error", "Usuario ó contraseña incorrecta.", true, false);
+                    }
+                  });
+                }
+              });
+            }); // fin transaction
+          } else {
+            this.props.showMessage("Error", "Ingrese un valor para la contraseña.", true, false);
+          }
+        } else {
+          this.props.showMessage("Error", "Ingrese un valor para el usuario.", true, false);
+        }
       } else {
-        alert("La conexion con la base de datos no ha sido realizada");
+        this.props.showMessage("Error", "La conexion con la base de datos no ha sido realizada.", true, false);
       }
     }
   }, {
     key: "probarExistenciaTablas",
-    value: function probarExistenciaTablas() {
+    value: function probarExistenciaTablas(mostrarExito) {
       if (this.props.pool != null) {
         //Riesgos
-        this.existeTabla("Riesgos"); //Indicadores
+        this.existeTabla("Riesgos", mostrarExito); //Indicadores
 
-        this.existeTabla("Indicadores"); //ElementoIndicador
+        this.existeTabla("Indicadores", mostrarExito); //ElementoIndicador
 
-        this.existeTabla("ElementoIndicador"); //IndicadoresCampos
+        this.existeTabla("ElementoIndicador", mostrarExito); //IndicadoresCampos
 
-        this.existeTabla("IndicadoresCampos"); //FormulasIndicadoresCampos
+        this.existeTabla("IndicadoresCampos", mostrarExito); //FormulasIndicadoresCampos
 
-        this.existeTabla("FormulasIndicadoresCampos"); //ElementoFormulasIndicadoresCampos
+        this.existeTabla("FormulasIndicadoresCampos", mostrarExito); //ElementoFormulasIndicadoresCampos
 
-        this.existeTabla("ElementoFormulasIndicadoresCampos"); //SegmentoReglasIndicadores
+        this.existeTabla("ElementoFormulasIndicadoresCampos", mostrarExito); //SegmentoReglasIndicadores
 
-        this.existeTabla("SegmentoReglasIndicadores"); //ReglasIndicadores
+        this.existeTabla("SegmentoReglasIndicadores", mostrarExito); //ReglasIndicadores
 
-        this.existeTabla("ReglasIndicadores"); //Variables
+        this.existeTabla("ReglasIndicadores", mostrarExito); //Variables
 
-        this.existeTabla("Variables"); //VariablesCampos
+        this.existeTabla("Variables", mostrarExito); //VariablesCampos
 
-        this.existeTabla("VariablesCampos"); //FormulasVariablesCampos
+        this.existeTabla("VariablesCampos", mostrarExito); //FormulasVariablesCampos
 
-        this.existeTabla("FormulasVariablesCampos"); //ElementoFormulasVariablesCampos
+        this.existeTabla("FormulasVariablesCampos", mostrarExito); //ElementoFormulasVariablesCampos
 
-        this.existeTabla("ElementoFormulasVariablesCampos"); //InstruccionSQLCampos
+        this.existeTabla("ElementoFormulasVariablesCampos", mostrarExito); //InstruccionSQLCampos
 
-        this.existeTabla("InstruccionSQLCampos"); //InstruccionSQL
+        this.existeTabla("InstruccionSQLCampos", mostrarExito); //InstruccionSQL
 
-        this.existeTabla("InstruccionSQL"); //ResultadosNombreVariables
+        this.existeTabla("InstruccionSQL", mostrarExito); //ResultadosNombreVariables
 
-        this.existeTabla("ResultadosNombreVariables"); //ResultadosNombreIndicadores
+        this.existeTabla("ResultadosNombreVariables", mostrarExito); //ResultadosNombreIndicadores
 
-        this.existeTabla("ResultadosNombreIndicadores"); //ResultadosNombreRiesgos
+        this.existeTabla("ResultadosNombreIndicadores", mostrarExito); //ResultadosNombreRiesgos
 
-        this.existeTabla("ResultadosNombreRiesgos"); //PeriodicidadCalculo
+        this.existeTabla("ResultadosNombreRiesgos", mostrarExito); //PeriodicidadCalculo
 
-        this.existeTabla("PeriodicidadCalculo"); //Tablas
+        this.existeTabla("PeriodicidadCalculo", mostrarExito); //Tablas
 
-        this.existeTabla("Tablas"); //SegmentoReglasVariables
+        this.existeTabla("Tablas", mostrarExito); //SegmentoReglasVariables
 
-        this.existeTabla("SegmentoReglasVariables"); //ReglasVariables
+        this.existeTabla("SegmentoReglasVariables", mostrarExito); //ReglasVariables
 
-        this.existeTabla("ReglasVariables"); //ExcelArchivos
+        this.existeTabla("ReglasVariables", mostrarExito); //ExcelArchivos
 
-        this.existeTabla("ExcelArchivos"); //ExcelVariables
+        this.existeTabla("ExcelArchivos", mostrarExito); //ExcelVariables
 
-        this.existeTabla("ExcelVariables"); //FormasVariables
+        this.existeTabla("ExcelVariables", mostrarExito); //FormasVariables
 
-        this.existeTabla("FormasVariables"); //Umbral
+        this.existeTabla("FormasVariables", mostrarExito); //Umbral
 
-        this.existeTabla("Umbral"); //SeccionUmbral
+        this.existeTabla("Umbral", mostrarExito); //SeccionUmbral
 
-        this.existeTabla("SeccionUmbral"); //RangoSeccionUmbral
+        this.existeTabla("SeccionUmbral", mostrarExito); //RangoSeccionUmbral
 
-        this.existeTabla("RangoSeccionUmbral"); //Bitacora
+        this.existeTabla("RangoSeccionUmbral", mostrarExito); //Bitacora
 
-        this.existeTabla("Bitacora"); //Dashboard
+        this.existeTabla("Bitacora", mostrarExito); //Dashboard
 
-        this.existeTabla("Dashboard"); //SeccionDashboard
+        this.existeTabla("Dashboard", mostrarExito); //SeccionDashboard
 
-        this.existeTabla("SeccionDashboard"); //Listas
+        this.existeTabla("SeccionDashboard", mostrarExito); //Listas
 
-        this.existeTabla("Listas"); //VariablesdeLista
+        this.existeTabla("Listas", mostrarExito); //VariablesdeLista
 
-        this.existeTabla("VariablesdeLista"); //Usuarios
+        this.existeTabla("VariablesdeLista", mostrarExito); //Usuarios
 
-        this.existeTabla("Usuarios"); //PermisosUsuarios
-
-        this.existeTabla("PermisosUsuarios");
+        this.existeTabla("Usuarios", mostrarExito); //PermisosUsuarios
+        //this.existeTabla("PermisosUsuarios");
       }
     }
   }, {
     key: "existeTabla",
-    value: function existeTabla(nombreTabla) {
-      var _this2 = this;
+    value: function existeTabla(nombreTabla, mostrarExito) {
+      var _this3 = this;
 
       var transaction = new _mssql["default"].Transaction(this.props.pool);
       transaction.begin(function (err) {
@@ -248,6 +286,13 @@ function (_React$Component) {
           if (err) {
             if (!rolledBack) {
               console.log(err);
+
+              _this3.props.showMessage("Error", "Error al traer tablas de la base de datos.", true, false);
+
+              if (nombreTabla.localeCompare("Riesgos") == 0 && mostrarExito) {
+                _this3.props.showSuccesMessage("Éxito", "Conexión realizada con éxito.");
+              }
+
               transaction.rollback(function (err) {});
             }
           } else {
@@ -255,74 +300,78 @@ function (_React$Component) {
               if (result.recordset.length == 0) {
                 //no existe tabla
                 if (nombreTabla.localeCompare("Riesgos") == 0) {
-                  _this2.crearTablaRiesgos();
+                  _this3.crearTablaRiesgos();
                 } else if (nombreTabla.localeCompare("Indicadores") == 0) {
-                  _this2.crearTablaIndicadores();
+                  _this3.crearTablaIndicadores();
                 } else if (nombreTabla.localeCompare("ElementoIndicador") == 0) {
-                  _this2.crearTablaElementoIndicador();
+                  _this3.crearTablaElementoIndicador();
                 } else if (nombreTabla.localeCompare("IndicadoresCampos") == 0) {
-                  _this2.crearTablaIndicadoresCampos();
+                  _this3.crearTablaIndicadoresCampos();
                 } else if (nombreTabla.localeCompare("FormulasIndicadoresCampos") == 0) {
-                  _this2.crearTablaFormulasIndicadoresCampos();
+                  _this3.crearTablaFormulasIndicadoresCampos();
                 } else if (nombreTabla.localeCompare("ElementoFormulasIndicadoresCampos") == 0) {
-                  _this2.crearTablaElementoFormulasIndicadoresCampos();
+                  _this3.crearTablaElementoFormulasIndicadoresCampos();
                 } else if (nombreTabla.localeCompare("SegmentoReglasIndicadores") == 0) {
-                  _this2.crearTablaSegmentoReglasIndicadores();
+                  _this3.crearTablaSegmentoReglasIndicadores();
                 } else if (nombreTabla.localeCompare("ReglasIndicadores") == 0) {
-                  _this2.crearTablaReglasIndicadores();
+                  _this3.crearTablaReglasIndicadores();
                 } else if (nombreTabla.localeCompare("Variables") == 0) {
-                  _this2.crearTablaVariables();
+                  _this3.crearTablaVariables();
                 } else if (nombreTabla.localeCompare("VariablesCampos") == 0) {
-                  _this2.crearTablaVariablesCampos();
+                  _this3.crearTablaVariablesCampos();
                 } else if (nombreTabla.localeCompare("FormulasVariablesCampos") == 0) {
-                  _this2.crearTablaFormulasVariablesCampos();
+                  _this3.crearTablaFormulasVariablesCampos();
                 } else if (nombreTabla.localeCompare("ElementoFormulasVariablesCampos") == 0) {
-                  _this2.crearTablaElementoFormulasVariablesCampos();
+                  _this3.crearTablaElementoFormulasVariablesCampos();
                 } else if (nombreTabla.localeCompare("InstruccionSQLCampos") == 0) {
-                  _this2.crearTablaInstruccionSQLCampos();
+                  _this3.crearTablaInstruccionSQLCampos();
                 } else if (nombreTabla.localeCompare("InstruccionSQL") == 0) {
-                  _this2.crearTablaInstruccionSQL();
+                  _this3.crearTablaInstruccionSQL();
                 } else if (nombreTabla.localeCompare("ResultadosNombreVariables") == 0) {
-                  _this2.crearTablaResultadosNombreVariables();
+                  _this3.crearTablaResultadosNombreVariables();
                 } else if (nombreTabla.localeCompare("ResultadosNombreIndicadores") == 0) {
-                  _this2.crearTablaResultadosNombreIndicadores();
+                  _this3.crearTablaResultadosNombreIndicadores();
                 } else if (nombreTabla.localeCompare("ResultadosNombreRiesgos") == 0) {
-                  _this2.crearTablaResultadosNombreRiesgos();
+                  _this3.crearTablaResultadosNombreRiesgos();
                 } else if (nombreTabla.localeCompare("PeriodicidadCalculo") == 0) {
-                  _this2.crearTablaPeriodicidadCalculo();
+                  _this3.crearTablaPeriodicidadCalculo();
                 } else if (nombreTabla.localeCompare("Tablas") == 0) {
-                  _this2.crearTablaTablas();
+                  _this3.crearTablaTablas();
                 } else if (nombreTabla.localeCompare("SegmentoReglasVariables") == 0) {
-                  _this2.crearTablaSegmentoReglasVariables();
+                  _this3.crearTablaSegmentoReglasVariables();
                 } else if (nombreTabla.localeCompare("ReglasVariables") == 0) {
-                  _this2.crearTablaReglasVariables();
+                  _this3.crearTablaReglasVariables();
                 } else if (nombreTabla.localeCompare("ExcelArchivos") == 0) {
-                  _this2.crearExcelArchivos();
+                  _this3.crearExcelArchivos();
                 } else if (nombreTabla.localeCompare("ExcelVariables") == 0) {
-                  _this2.crearExcelVariables();
+                  _this3.crearExcelVariables();
                 } else if (nombreTabla.localeCompare("FormasVariables") == 0) {
-                  _this2.crearFormasVariables();
+                  _this3.crearFormasVariables();
                 } else if (nombreTabla.localeCompare("Umbral") == 0) {
-                  _this2.crearUmbral();
+                  _this3.crearUmbral();
                 } else if (nombreTabla.localeCompare("SeccionUmbral") == 0) {
-                  _this2.crearSeccionUmbral();
+                  _this3.crearSeccionUmbral();
                 } else if (nombreTabla.localeCompare("RangoSeccionUmbral") == 0) {
-                  _this2.crearRangoSeccionUmbral();
+                  _this3.crearRangoSeccionUmbral();
                 } else if (nombreTabla.localeCompare("Bitacora") == 0) {
-                  _this2.crearBitacora();
+                  _this3.crearBitacora();
                 } else if (nombreTabla.localeCompare("Dashboard") == 0) {
-                  _this2.crearDashboard();
+                  _this3.crearDashboard();
                 } else if (nombreTabla.localeCompare("SeccionDashboard") == 0) {
-                  _this2.crearSeccionDashboard();
+                  _this3.crearSeccionDashboard();
                 } else if (nombreTabla.localeCompare("Listas") == 0) {
-                  _this2.crearListas();
+                  _this3.crearListas();
                 } else if (nombreTabla.localeCompare("VariablesdeLista") == 0) {
-                  _this2.crearVariablesdeLista();
+                  _this3.crearVariablesdeLista();
                 } else if (nombreTabla.localeCompare("Usuarios") == 0) {
-                  _this2.crearUsuarios();
-                } else if (nombreTabla.localeCompare("PermisosUsuarios") == 0) {
-                  _this2.crearPermisosUsuarios();
+                  _this3.crearUsuarios();
                 }
+                /* else if(nombreTabla.localeCompare("PermisosUsuarios") == 0) {
+                   this.crearPermisosUsuarios();
+                }*/
+
+              } else if (nombreTabla.localeCompare("Usuarios") == 0) {
+                _this3.crearUsuarioAdmin();
               }
             });
           }
@@ -339,7 +388,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("CREATE TABLE Riesgos ( ID int IDENTITY(1,1) PRIMARY KEY, nombre varchar(100), formula varchar(500), responsable int, peso decimal(8,4) )", function (err, result) {
+        request.query("CREATE TABLE Riesgos ( ID int IDENTITY(1,1) PRIMARY KEY, idFormula varchar(100), nombre varchar(500), formula varchar(500), responsable int, peso decimal(8,4) )", function (err, result) {
           if (err) {
             if (!rolledBack) {
               console.log(err);
@@ -363,7 +412,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("CREATE TABLE Indicadores ( ID int IDENTITY(1,1) PRIMARY KEY, nombre varchar(100), codigo varchar(100), formula varchar(500), peso decimal(22,4), tolerancia decimal(22,4), valorIdeal decimal(8,4), tipoValorIdeal varchar(20), periodicidad varchar(50), tipoIndicador varchar(20), responsable int, idRiesgoPadre int, fechaInicioCalculo date )", function (err, result) {
+        request.query("CREATE TABLE Indicadores ( ID int IDENTITY(1,1) PRIMARY KEY, idFormula varchar(100), nombre varchar(500), codigo varchar(100), formula varchar(500), peso decimal(22,4), tolerancia decimal(22,4), valorIdeal decimal(8,4), tipoValorIdeal varchar(20), periodicidad varchar(50), tipoIndicador varchar(20), responsable int, idRiesgoPadre int, fechaInicioCalculo date )", function (err, result) {
           if (err) {
             if (!rolledBack) {
               console.log(err);
@@ -531,7 +580,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("CREATE TABLE Variables ( ID int IDENTITY(1,1) PRIMARY KEY, nombre varchar(100), descripcion varchar(700), esObjeto bit, esColeccion bit, objetoPadreID int, esInstruccionSQL bit, guardar bit, periodicidad varchar(50), responsable int, categoriaVariable varchar(100), fechaInicioCalculo date )", function (err, result) {
+        request.query("CREATE TABLE Variables ( ID int IDENTITY(1,1) PRIMARY KEY, idFormula varchar(100), nombre varchar(500), descripcion varchar(700), esObjeto bit, esColeccion bit, objetoPadreID int, esInstruccionSQL bit, guardar bit, periodicidad varchar(50), responsable int, categoriaVariable varchar(100), fechaInicioCalculo date )", function (err, result) {
           if (err) {
             if (!rolledBack) {
               console.log(err);
@@ -868,7 +917,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("CREATE TABLE ExcelVariables ( ID int IDENTITY(1,1) PRIMARY KEY, excelArchivoID int, nombreHoja varchar(200), nombre varchar(100), operacion varchar(30), celdas varchar(100), tipo varchar(30), periodicidad varchar(50), fechaInicioCalculo date, responsable int, guardar bit )", function (err, result) {
+        request.query("CREATE TABLE ExcelVariables ( ID int IDENTITY(1,1) PRIMARY KEY, excelArchivoID int, nombreHoja varchar(200), idFormula varchar(100), nombre varchar(500), descripcion varchar(700), operacion varchar(30), celdas varchar(100), tipo varchar(30), periodicidad varchar(50), fechaInicioCalculo date, responsable int, categoriaVariable varchar(100), guardar bit )", function (err, result) {
           if (err) {
             if (!rolledBack) {
               console.log(err);
@@ -892,7 +941,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("CREATE TABLE FormasVariables ( ID int IDENTITY(1,1) PRIMARY KEY, nombre varchar(100), tipo varchar(30), periodicidad varchar(50), fechaInicioCalculo date, responsable int, guardar bit )", function (err, result) {
+        request.query("CREATE TABLE FormasVariables ( ID int IDENTITY(1,1) PRIMARY KEY, idFormula varchar(100), nombre varchar(500), descripcion varchar(700), tipo varchar(30), periodicidad varchar(50), fechaInicioCalculo date, responsable int, categoriaVariable varchar(100), guardar bit )", function (err, result) {
           if (err) {
             if (!rolledBack) {
               console.log(err);
@@ -988,7 +1037,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("CREATE TABLE Bitacora ( ID int IDENTITY(1,1) PRIMARY KEY, usuarioID int, nombreUsuario varchar(100), fecha date, descripcion varchar(1000) )", function (err, result) {
+        request.query("CREATE TABLE Bitacora ( ID int IDENTITY(1,1) PRIMARY KEY, usuarioID int, nombreUsuario varchar(100), fecha date, descripcion varchar(1000), tipoVariable varchar(30), idVariable int )", function (err, result) {
           if (err) {
             if (!rolledBack) {
               console.log(err);
@@ -1101,6 +1150,8 @@ function (_React$Component) {
   }, {
     key: "crearUsuarios",
     value: function crearUsuarios() {
+      var _this4 = this;
+
       var transaction = new _mssql["default"].Transaction(this.props.pool);
       transaction.begin(function (err) {
         var rolledBack = false;
@@ -1117,6 +1168,104 @@ function (_React$Component) {
           } else {
             transaction.commit(function (err) {
               console.log("Tabla Usuarios creada.");
+
+              _this4.crearPermisosUsuarios();
+            });
+          }
+        });
+      }); // fin transaction
+    }
+  }, {
+    key: "crearUsuarioAdmin",
+    value: function crearUsuarioAdmin() {
+      var _this5 = this;
+
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("select * from Usuarios where nombreCompleto = 'Administrador' and usuario = 'ADMIN'", function (err, result) {
+          if (err) {
+            if (!rolledBack) {
+              console.log(err);
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {
+              if (result.recordset != undefined && result.recordset.length == 0) {
+                var _transaction2 = new _mssql["default"].Transaction(_this5.props.pool);
+
+                _transaction2.begin(function (err) {
+                  var rolledBack = false;
+
+                  _transaction2.on('rollback', function (aborted) {
+                    rolledBack = true;
+                  });
+
+                  var request = new _mssql["default"].Request(_transaction2);
+                  request.query("insert into Usuarios ( nombreCompleto, usuario, contrasena ) values ('Administrador', 'ADMIN', '12345') ", function (err, result) {
+                    if (err) {
+                      if (!rolledBack) {
+                        console.log(err);
+
+                        _transaction2.rollback(function (err) {});
+                      }
+                    } else {
+                      _transaction2.commit(function (err) {
+                        console.log("Usuario admin creado.");
+                        var transaction = new _mssql["default"].Transaction(_this5.props.pool);
+                        transaction.begin(function (err) {
+                          var rolledBack = false;
+                          transaction.on('rollback', function (aborted) {
+                            rolledBack = true;
+                          });
+                          var request = new _mssql["default"].Request(transaction);
+                          request.query("select top 1 * from Usuarios order by ID desc", function (err, result) {
+                            if (err) {
+                              if (!rolledBack) {
+                                console.log(err);
+                                transaction.rollback(function (err) {});
+                              }
+                            } else {
+                              transaction.commit(function (err) {
+                                if (result.recordset.length > 0) {
+                                  var _transaction3 = new _mssql["default"].Transaction(_this5.props.pool);
+
+                                  _transaction3.begin(function (err) {
+                                    var rolledBack = false;
+
+                                    _transaction3.on('rollback', function (aborted) {
+                                      rolledBack = true;
+                                    });
+
+                                    var request = new _mssql["default"].Request(_transaction3);
+                                    request.query("insert into PermisosUsuarios ( usuarioID, variable, indicador, riesgo, riesgoIntegral, usuario, lista, alarma ) values (" + result.recordset[0].ID + ", 'C/V/E', 'C/V/E', 'C/V/E', 'C/V/E', 'C/V/E', 'C/V/E', 'C/V/E') ", function (err, result) {
+                                      if (err) {
+                                        if (!rolledBack) {
+                                          console.log(err);
+
+                                          _transaction3.rollback(function (err) {});
+                                        }
+                                      } else {
+                                        _transaction3.commit(function (err) {});
+                                      }
+                                    });
+                                  }); // fin transaction
+
+                                }
+                              });
+                            }
+                          });
+                        }); // fin transaction
+                      });
+                    }
+                  });
+                }); // fin transaction
+
+              }
             });
           }
         });
@@ -1125,6 +1274,8 @@ function (_React$Component) {
   }, {
     key: "crearPermisosUsuarios",
     value: function crearPermisosUsuarios() {
+      var _this6 = this;
+
       var transaction = new _mssql["default"].Transaction(this.props.pool);
       transaction.begin(function (err) {
         var rolledBack = false;
@@ -1141,6 +1292,8 @@ function (_React$Component) {
           } else {
             transaction.commit(function (err) {
               console.log("Tabla PermisosUsuarios creada.");
+
+              _this6.crearUsuarioAdmin();
             });
           }
         });
@@ -1185,21 +1338,23 @@ function (_React$Component) {
                 self.props.readConfigFile();
               }, 600);
             } else {
-              alert("Ingrese un valor para el nombre de la base de datos.");
+              this.props.showMessage("Error", "Ingrese un valor para el nombre de la base de datos.", true, false);
             }
           } else {
-            alert("Ingrese un valor para el servidor de la base de datos.");
+            this.props.showMessage("Error", "Ingrese un valor para el servidor de la base de datos.", true, false);
           }
         } else {
-          alert("Ingrese un valor para la contraseña de la base de datos.");
+          this.props.showMessage("Error", "Ingrese un valor para la contraseña de la base de datos.", true, false);
         }
       } else {
-        alert("Ingrese un valor para el usuario de la base de datos.");
+        this.props.showMessage("Error", "Ingrese un valor para el usuario de la base de datos.", true, false);
       }
     }
   }, {
     key: "render",
     value: function render() {
+      var _this7 = this;
+
       return _react["default"].createElement("div", null, _react["default"].createElement("div", {
         className: "splash-container"
       }, _react["default"].createElement("div", {
@@ -1246,7 +1401,18 @@ function (_React$Component) {
         href: "#",
         className: "btn btn-success active",
         onClick: this.showModal
-      }, "Actualizar Configuraci\xF3n de Conexi\xF3n a las Bases de Datos")), _react["default"].createElement("br", null), _react["default"].createElement(_Modal["default"], {
+      }, "Actualizar Configuraci\xF3n de Conexi\xF3n a las Bases de Datos")), _react["default"].createElement("br", null), _react["default"].createElement("div", {
+        className: "text-center",
+        style: {
+          width: "100%"
+        }
+      }, _react["default"].createElement("a", {
+        href: "#",
+        className: "btn btn-brand active",
+        onClick: function onClick() {
+          return _this7.probarExistenciaTablas(true);
+        }
+      }, "Volver a Intentar Conexi\xF3n a las Bases de Datos")), _react["default"].createElement("br", null), _react["default"].createElement(_Modal["default"], {
         show: this.state.showModal,
         titulo: "Actualizar Configuración de Conexión a las Bases de Datos",
         onClose: this.closeModal

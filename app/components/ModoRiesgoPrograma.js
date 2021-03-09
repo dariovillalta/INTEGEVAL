@@ -19,9 +19,9 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
 
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
@@ -32,13 +32,53 @@ var ModoRiesgoPrograma =
 function (_React$Component) {
   _inherits(ModoRiesgoPrograma, _React$Component);
 
-  function ModoRiesgoPrograma() {
+  function ModoRiesgoPrograma(props) {
+    var _this;
+
     _classCallCheck(this, ModoRiesgoPrograma);
 
-    return _possibleConstructorReturn(this, _getPrototypeOf(ModoRiesgoPrograma).apply(this, arguments));
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(ModoRiesgoPrograma).call(this, props));
+    _this.state = {
+      showEffect: false
+    };
+    _this.showRiskControlHome = _this.showRiskControlHome.bind(_assertThisInitialized(_this));
+    _this.showRiskMonitorHome = _this.showRiskMonitorHome.bind(_assertThisInitialized(_this));
+    _this.timeoutRiskControlHome = _this.timeoutRiskControlHome.bind(_assertThisInitialized(_this));
+    _this.timeoutRiskMonitorHome = _this.timeoutRiskMonitorHome.bind(_assertThisInitialized(_this));
+    return _this;
   }
 
   _createClass(ModoRiesgoPrograma, [{
+    key: "showRiskControlHome",
+    value: function showRiskControlHome() {
+      this.setState({
+        showEffect: true
+      }, this.timeoutRiskControlHome);
+    }
+  }, {
+    key: "showRiskMonitorHome",
+    value: function showRiskMonitorHome() {
+      this.setState({
+        showEffect: true
+      }, this.timeoutRiskMonitorHome);
+    }
+  }, {
+    key: "timeoutRiskControlHome",
+    value: function timeoutRiskControlHome() {
+      var self = this;
+      setTimeout(function () {
+        self.props.showRiskControlHome();
+      }, 1750);
+    }
+  }, {
+    key: "timeoutRiskMonitorHome",
+    value: function timeoutRiskMonitorHome() {
+      var self = this;
+      setTimeout(function () {
+        self.props.showRiskMonitorHome();
+      }, 1750);
+    }
+  }, {
     key: "render",
     value: function render() {
       return _react["default"].createElement("div", null, _react["default"].createElement("div", {
@@ -51,19 +91,16 @@ function (_React$Component) {
           height: "100%"
         }
       }, _react["default"].createElement("div", {
-        className: "col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12 text-center",
+        className: "col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12 text-center optionRiskModeHover " + (this.state.showEffect ? "fadeLeft" : ""),
+        onClick: this.showRiskControlHome,
         style: {
           height: "100%",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          borderRight: "2px solid black"
+          backgroundColor: "#3949ab"
         }
-      }, _react["default"].createElement("a", {
-        href: "#",
-        className: "btn btn-primary btn-lg",
-        onClick: this.props.showRiskControlHome
-      }, _react["default"].createElement("span", {
+      }, _react["default"].createElement("div", null, _react["default"].createElement("span", {
         className: "row"
       }, _react["default"].createElement("img", {
         src: "./assets/MONITOR_BLANCO.png",
@@ -76,20 +113,21 @@ function (_React$Component) {
           width: "auto"
         }
       })), _react["default"].createElement("span", {
-        className: "font-bold font-24"
+        className: "font-bold font-24",
+        style: {
+          color: "white"
+        }
       }, "Configuraci\xF3n y ", _react["default"].createElement("br", null), " Evaluaci\xF3n de Riesgo Integral"))), _react["default"].createElement("div", {
-        className: "col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12 text-center",
+        className: "col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12 text-center optionRiskModeHover " + (this.state.showEffect ? "fadeRight" : ""),
+        onClick: this.showRiskMonitorHome,
         style: {
           height: "100%",
           display: "flex",
           alignItems: "center",
-          justifyContent: "center"
+          justifyContent: "center",
+          backgroundColor: "#1e88e5"
         }
-      }, _react["default"].createElement("a", {
-        href: "#",
-        className: "btn btn-primary btn-lg",
-        onClick: this.props.showRiskMonitorHome
-      }, _react["default"].createElement("span", {
+      }, _react["default"].createElement("div", null, _react["default"].createElement("span", {
         className: "row"
       }, _react["default"].createElement("img", {
         src: "./assets/IDENTIFICAR BLANCO.png",
@@ -102,7 +140,10 @@ function (_React$Component) {
           width: "auto"
         }
       })), _react["default"].createElement("span", {
-        className: "font-bold font-24"
+        className: "font-bold font-24",
+        style: {
+          color: "white"
+        }
       }, "Monitorear Riesgo Integral"))))));
     }
   }]);

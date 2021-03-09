@@ -2,7 +2,6 @@ import React from 'react';
 import sql from 'mssql';
 
 import ErrorMessage from '../../ErrorMessage.js';
-import MessageModal from '../../MessageModal.js';
 
 const campos = [ {nombre: "varchar"}, {nombre: "bit"}, {nombre: "date"}, {nombre: "int"} ];
 let funciones = [ {funcion: "idCliente", texto: "ID de Cliente"}, {funcion: "fecha", texto: "fecha"}, {nombre: "date"}, {nombre: "int"} ];
@@ -16,26 +15,34 @@ export default class EditarTabla extends React.Component {
             errorCreacionTabla: {campo: "", descripcion: "", mostrar: false},
             mensajeModal: {mostrarMensaje: false, mensajeConfirmado: false, esError: false, esConfirmar: false, titulo: "", mensaje: "", banderaMetodoInit: "", idElementoSelec: -1, indiceX: -1, indiceY: -1}
         }
+        this.saveBitacora = this.saveBitacora.bind(this);
         this.updateTable = this.updateTable.bind(this);
         this.dismissTableNewError = this.dismissTableNewError.bind(this);
-        this.dismissMessageModal = this.dismissMessageModal.bind(this);
-        this.confirmMessageModal = this.confirmMessageModal.bind(this);
-        this.showSuccesMessage = this.showSuccesMessage.bind(this);
+        this.modifyTableConfirmation = this.modifyTableConfirmation.bind(this);
     }
-    /* mensajeModal <- de state
-        //mostrarMensaje:bandera para mostrar modal mensaje en pantalla
-        //mensajeConfirmado:retorno del modal mensaje si fue conf
-        //esError:bandera para ver que tipo de modal mensaje mostrar
-        //esConfirmar:bandera para ver que tipo de modal mensaje mostrar
-        //titulo:titulo del modal
-        //mensaje:mensaje del modal
-        //banderaMetodoInit:variable para ver a que metodo ir cuando regresa de confirmar el modal
-        //idElementoSelec:id del elemento que mostro el modal mensaje
-        //indiceX:posicion de la tabla en el arreglo que mostro el modal mensaje
-        //indiceY:posicion del campo en el arreglo de tablas que mostro el modal mensaje
-    */
 
-    componentDidMount() {
+    saveBitacora (fecha, descripcion, tipoVariable, idVariable) {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("insert into Bitacora (usuarioID, nombreUsuario, fecha, descripcion, tipoVariable, idVariable) values ("+this.props.userID+", '"+this.props.userName+"', '"+fecha.getFullYear()+"-"+(fecha.getMonth()+1)+"-"+fecha.getDate()+"', '"+descripcion+"', '"+tipoVariable+"', "+idVariable+")", (err, result) => {
+                if (err) {
+                    console.log(err);
+                    this.props.showMessage("Error", 'No se pudo guardar información de bitacora.', true, false, {});
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                    });
+                }
+            });
+        }); // fin transaction
     }
 
     updateTable() {
@@ -46,13 +53,14 @@ export default class EditarTabla extends React.Component {
         let basedatosTabla = $("#basedatosTablaNuevo").val();
         let tablaTabla = $("#tablaTablaNuevo").val();
         let funcionTabla = $("#funcionTabla").val();
+        let tipoConexion = $("#tipoConexion").val();
         if(nombreTabla.length > 0 && nombreTabla.length < 71) {
             if(usuarioTabla.length > 0 && usuarioTabla.length < 51) {
                 if(contrasenaTabla.length > 0 && contrasenaTabla.length < 201) {
                     if(servidorTabla.length > 0 && servidorTabla.length < 51) {
                         if(basedatosTabla.length > 0 && basedatosTabla.length < 51) {
                             if(tablaTabla.length > 0 && tablaTabla.length < 71) {
-                                if(tablaTabla.length > 0 && tablaTabla.length < 71) {
+                                if(tipoConexion.length > 0 && tipoConexion.length < 31) {
                                     this.setState({
                                         errorCreacionTabla: {campo: "", descripcion: "", mostrar: false}
                                     });
@@ -63,7 +71,7 @@ export default class EditarTabla extends React.Component {
                                             rolledBack = true;
                                         });
                                         const request = new sql.Request(transaction);
-                                        request.query("update Tablas set Nombre = '"+nombreTabla+"', Usuario = '"+usuarioTabla+"', Contrasena = '"+contrasenaTabla+"', Servidor = '"+servidorTabla+"', BaseDatos = '"+basedatosTabla+"', Tabla = '"+tablaTabla+"' where ID = "+this.props.idTablaSeleccionada, (err, result) => {
+                                        request.query("update Tablas set Nombre = '"+nombreTabla+"', Usuario = '"+usuarioTabla+"', Contrasena = '"+contrasenaTabla+"', Servidor = '"+servidorTabla+"', BaseDatos = '"+basedatosTabla+"', Tabla = '"+tablaTabla+"', tipoConexion = '"+tipoConexion+"' where ID = "+this.props.idTablaSeleccionada, (err, result) => {
                                             if (err) {
                                                 if (!rolledBack) {
                                                     console.log(err);
@@ -72,15 +80,22 @@ export default class EditarTabla extends React.Component {
                                                 }
                                             } else {
                                                 transaction.commit(err => {
-                                                    this.showSuccesMessage("Exito", "Tabla creada con éxito.");
+                                                    this.props.showSuccesMessage("Exito", "Tabla modificada con éxito.");
+                                                    var nuevosValores = 'nombre: '+nombreTabla+'\n'+
+                                                                        'usuario: '+usuarioTabla+'\n'+
+                                                                        'servidor: '+servidorTabla+'\n'+
+                                                                        'base de datos: '+basedatosTabla+'\n'+
+                                                                        'tabla: '+tablaTabla+'\n'+
+                                                                        'tipo de conexión: '+tipoConexion;
+                                                    this.saveBitacora(new Date(), "Usuario: "+this.props.userName+" modifico la tabla: "+nombreTabla+"\nValores: \n"+nuevosValores, "tabla", this.props.idTablaSeleccionada);
                                                 });
                                             }
                                         });
                                     }); // fin transaction
                                 } else {
-                                    let campo = "Función de la Tabla";
+                                    let campo = "Tipo de Conexión";
                                     let descripcion;
-                                    if(funcionTabla.length == 0)
+                                    if(tipoConexion.length == 0)
                                         descripcion = "El campo debe tener una longitud mayor a 0.";
                                     else
                                         descripcion = "El campo debe tener una longitud menor a 31.";
@@ -168,34 +183,8 @@ export default class EditarTabla extends React.Component {
         });
     }
 
-    /*======_______====== ======_______======   MENSAJES MODAL    ======_______====== ======_______======*/
-    /*======_______======                                                             ======_______======*/
-    /*======_______======                                                             ======_______======*/
-    /*======_______====== ======_______====== ==_____==  ==___==  ======_______====== ======_______======*/
-
-    dismissMessageModal() {
-        this.setState({
-            mensajeModal: {mostrarMensaje: false, mensajeConfirmado: false, esError: false, esConfirmar: false, titulo: "", mensaje: "", banderaMetodoInit: "", idElementoSelec: -1, indiceX: -1, indiceY: -1}
-        });
-    }
-
-    confirmMessageModal() {
-        if(this.state.mensajeModal.banderaMetodoInit.localeCompare("goDelTable") == 0) {
-            let copiaID = this.state.mensajeModal.idElementoSelec;
-            this.deleteTable(copiaID);
-        }
-    }
-
-    showSuccesMessage(titulo, mensaje) {
-        this.setState({
-            mensajeModal: {mostrarMensaje: true, mensajeConfirmado: false, esError: false, esConfirmar: false, titulo: titulo, mensaje: mensaje, banderaMetodoInit: "", idElementoSelec: this.state.mensajeModal.idElementoSelec, indiceX: this.state.mensajeModal.indiceX, indiceY: this.state.mensajeModal.indiceY}
-        });
-        let self = this;
-        setTimeout(function(){
-            self.setState({
-                mensajeModal: {mostrarMensaje: false, mensajeConfirmado: false, esError: false, esConfirmar: false, titulo: "", mensaje: "", banderaMetodoInit: "", idElementoSelec: self.state.mensajeModal.idElementoSelec, indiceX: self.state.mensajeModal.indiceX, indiceY: self.state.mensajeModal.indiceY}
-            });
-        }, 850);
+    modifyTableConfirmation() {
+        this.props.showMessage("Confirmación", "Esta seguro que desea modificar la tabla?", false, true, this.updateTable );
     }
 
     render() {
@@ -264,6 +253,7 @@ export default class EditarTabla extends React.Component {
                                 ) : (
                                     <span></span>
                                 )}
+                                <br/>
                                 <div className={"row"}>
                                     <button onClick={this.updateTable} className={"btn btn-success btn-block col-xl-10 col-10 font-bold font-20"} style={{margin: "0 auto", display: "block"}}>Guardas Cambios</button>
                                 </div>
@@ -272,12 +262,6 @@ export default class EditarTabla extends React.Component {
                     </div>
                 </div>
                 <br/>
-
-                { this.state.mensajeModal.mostrarMensaje ? (
-                    <MessageModal esError={this.state.mensajeModal.esError} esConfirmar={this.state.mensajeModal.esConfirmar} dismissMessage={this.dismissMessageModal} confirmFunction={this.confirmMessageModal} titulo={this.state.mensajeModal.titulo} mensaje={this.state.mensajeModal.mensaje}> </MessageModal>
-                ) : (
-                    <span></span>
-                )}
             </div>
         );
     }

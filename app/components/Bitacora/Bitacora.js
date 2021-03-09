@@ -44,6 +44,7 @@ function (_React$Component) {
       filtros: []
     };
     _this.getBitacora = _this.getBitacora.bind(_assertThisInitialized(_this));
+    _this.styleDate = _this.styleDate.bind(_assertThisInitialized(_this));
     return _this;
   }
 
@@ -82,8 +83,15 @@ function (_React$Component) {
       }); // fin transaction
     }
   }, {
+    key: "styleDate",
+    value: function styleDate(date) {
+      return date.getDate() + '-' + (date.getMonth() + 1) + '-' + date.getFullYear();
+    }
+  }, {
     key: "render",
     value: function render() {
+      var _this3 = this;
+
       return _react["default"].createElement("div", null, _react["default"].createElement("div", {
         className: "row"
       }, _react["default"].createElement("div", {
@@ -139,7 +147,7 @@ function (_React$Component) {
           scope: "row"
         }, filtro.nombreUsuario), _react["default"].createElement("th", {
           scope: "row"
-        }, filtro.fecha), _react["default"].createElement("th", {
+        }, _this3.styleDate(filtro.fecha)), _react["default"].createElement("th", {
           scope: "row"
         }, filtro.descripcion));
       }))))))));

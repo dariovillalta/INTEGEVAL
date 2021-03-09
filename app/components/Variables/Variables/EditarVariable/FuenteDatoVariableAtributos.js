@@ -52,6 +52,7 @@ function (_React$Component) {
     _this = _possibleConstructorReturn(this, _getPrototypeOf(FuenteDatoVariableAtributos).call(this, props));
     /*this.actualizarSeleccionColumna = this.actualizarSeleccionColumna.bind(this);*/
 
+    _this.goCreateVariableFieldSQL = _this.goCreateVariableFieldSQL.bind(_assertThisInitialized(_this));
     _this.actualizarIndiceAtributoSeleccionado = _this.actualizarIndiceAtributoSeleccionado.bind(_assertThisInitialized(_this));
     return _this;
   }
@@ -64,9 +65,16 @@ function (_React$Component) {
     }*/
 
   }, {
+    key: "goCreateVariableFieldSQL",
+    value: function goCreateVariableFieldSQL() {
+      this.props.changeStateFirstTimeToFalse();
+      this.props.goCreateVariableFieldSQL();
+    }
+  }, {
     key: "actualizarIndiceAtributoSeleccionado",
-    value: function actualizarIndiceAtributoSeleccionado(indice, tipoAtributo) {
-      this.props.goToCreateConditions(indice, tipoAtributo);
+    value: function actualizarIndiceAtributoSeleccionado(indice) {
+      this.props.changeStateFirstTimeToFalse();
+      this.props.goToCreateConditions(indice);
     }
   }, {
     key: "render",
@@ -106,7 +114,7 @@ function (_React$Component) {
           width: "100%"
         },
         onClick: function onClick() {
-          return _this2.props.goCreateVariableFieldSQL();
+          return _this2.goCreateVariableFieldSQL();
         }
       }, "Editar Instrucci\xF3n SQL "), _react["default"].createElement("br", null))) : _react["default"].createElement("div", {
         className: "row"
@@ -168,7 +176,7 @@ function (_React$Component) {
           width: "100%"
         },
         onClick: function onClick() {
-          return _this2.props.goCreateVariableFieldSQL();
+          return _this2.goCreateVariableFieldSQL();
         }
       }, "Editar Instrucci\xF3n SQL "))), _react["default"].createElement("br", null))) : _react["default"].createElement("div", {
         className: "row"

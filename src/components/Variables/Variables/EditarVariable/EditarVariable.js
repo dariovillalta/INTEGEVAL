@@ -16,34 +16,24 @@ var mostrarFuenteDatoExcelGlobal = false;
 export default class EditarVariable extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {
-            mostrarFuenteDatoVariable: mostrarFuenteDatoVariableGlobal,
-            mostrarFuenteDatoForma: mostrarFuenteDatoFormaGlobal,
-            mostrarFuenteDatoExcel: mostrarFuenteDatoExcelGlobal
-        }
         this.mostrarFuenteDatoVariable = this.mostrarFuenteDatoVariable.bind(this);
         this.mostrarFuenteDatoForma = this.mostrarFuenteDatoForma.bind(this);
         this.mostrarFuenteDatoExcel = this.mostrarFuenteDatoExcel.bind(this);
     }
 
+    componentWillUnmount() {
+        /*mostrarFuenteDatoVariableGlobal = false;
+        mostrarFuenteDatoFormaGlobal = false;
+        mostrarFuenteDatoExcelGlobal = false;*/
+    }
+
     componentDidMount() {
         if (this.props.tipoVariableOriginal.localeCompare("excel") == 0 && this.props.esPrimeraVez) {
-            mostrarFuenteDatoVariableGlobal = false;
-            mostrarFuenteDatoFormaGlobal = false;
-            mostrarFuenteDatoExcelGlobal = true;
-            this.props.changeStateFirstTimeToFalse();
-            //esPrimeraVez = false;
+            this.props.cambiarEstadoVistaVariable(false, false, true);
         } else if (this.props.tipoVariableOriginal.localeCompare("forma") == 0 && this.props.esPrimeraVez) {
-            mostrarFuenteDatoVariableGlobal = false;
-            mostrarFuenteDatoFormaGlobal = true;
-            mostrarFuenteDatoExcelGlobal = false;
-            this.props.changeStateFirstTimeToFalse();
-            //esPrimeraVez = false;
+            this.props.cambiarEstadoVistaVariable(false, true, false);
         } else if (this.props.tipoVariableOriginal.localeCompare("variable") == 0 && this.props.esPrimeraVez) {
-            mostrarFuenteDatoVariableGlobal = true;
-            mostrarFuenteDatoFormaGlobal = false;
-            mostrarFuenteDatoExcelGlobal = false;
-            //esPrimeraVez = false;
+            this.props.cambiarEstadoVistaVariable(true, false, false);
         }
         this.setState({
             mostrarFuenteDatoVariable: mostrarFuenteDatoVariableGlobal,
@@ -53,36 +43,15 @@ export default class EditarVariable extends React.Component {
     }
 
     mostrarFuenteDatoVariable () {
-        mostrarFuenteDatoVariableGlobal = true;
-        mostrarFuenteDatoFormaGlobal = false;
-        mostrarFuenteDatoExcelGlobal = false;
-        this.setState({
-            mostrarFuenteDatoVariable: true,
-            mostrarFuenteDatoForma: false,
-            mostrarFuenteDatoExcel: false
-        });
+        this.props.cambiarEstadoVistaVariable(true, false, false);
     }
 
     mostrarFuenteDatoForma () {
-        mostrarFuenteDatoVariableGlobal = false;
-        mostrarFuenteDatoFormaGlobal = true;
-        mostrarFuenteDatoExcelGlobal = false;
-        this.setState({
-            mostrarFuenteDatoVariable: false,
-            mostrarFuenteDatoForma: true,
-            mostrarFuenteDatoExcel: false
-        });
+        this.props.cambiarEstadoVistaVariable(false, true, false);
     }
 
     mostrarFuenteDatoExcel () {
-        mostrarFuenteDatoVariableGlobal = false;
-        mostrarFuenteDatoFormaGlobal = false;
-        mostrarFuenteDatoExcelGlobal = true;
-        this.setState({
-            mostrarFuenteDatoVariable: false,
-            mostrarFuenteDatoForma: false,
-            mostrarFuenteDatoExcel: true
-        });
+        this.props.cambiarEstadoVistaVariable(false, false, true);
     }
 
     render() {
@@ -110,7 +79,7 @@ export default class EditarVariable extends React.Component {
                         <div className={"card"}>
                                 <div className={"border-top"} style={{width: "100%"}}>
                                     {
-                                        this.state.mostrarFuenteDatoVariable
+                                        this.props.estadoVistaVariable.mostrarFuenteDatoVariable
                                         ?
                                             <FuenteDatoVariable pool={this.props.pool} campos={this.props.columnas}
                                                                 esObjetoVariable={this.props.esObjetoVariable}
@@ -123,7 +92,9 @@ export default class EditarVariable extends React.Component {
                                                                 eliminarAtributoVariable={this.props.eliminarAtributoVariable}
                                                                 modificarNombreVariable={this.props.modificarNombreVariable}
                                                                 cambioDeArreglosDeAtributos={this.props.cambioDeArreglosDeAtributos}
+                                                                idFormula={this.props.idFormula}
                                                                 nombreVariable={this.props.nombreVariable}
+                                                                actualizarIdFormula={this.props.actualizarIdFormula}
                                                                 actualizarNombreVariable={this.props.actualizarNombreVariable}
                                                                 actualizarEstadoSiEsObjeto={this.props.actualizarEstadoSiEsObjeto}
                                                                 actualizarEstadoSiEsInstruccionSQL={this.props.actualizarEstadoSiEsInstruccionSQL}
@@ -145,12 +116,16 @@ export default class EditarVariable extends React.Component {
                                                                 responsableVariable={this.props.responsableVariable}
                                                                 categoriaVariable={this.props.categoriaVariable}
                                                                 esPrimeraVez={this.props.esPrimeraVez}
-                                                                changeStateFirstTimeToFalse={this.props.changeStateFirstTimeToFalse}>
+                                                                changeStateFirstTimeToFalse={this.props.changeStateFirstTimeToFalse}
+                                                                changeStateFirstTimeToTrue={this.props.changeStateFirstTimeToTrue}
+                                                                permision={this.props.permision}
+                                                                userID={this.props.userID}
+                                                                userName={this.props.userName}>
                                             </FuenteDatoVariable>
                                         : null
                                     }
                                     {
-                                        this.state.mostrarFuenteDatoForma
+                                        this.props.estadoVistaVariable.mostrarFuenteDatoForma
                                         ?
                                             <FuenteDatoForma pool={this.props.pool}
                                                                 esObjetoVariable={this.props.esObjetoVariable}
@@ -161,12 +136,15 @@ export default class EditarVariable extends React.Component {
                                                                 goToTimeline={this.props.goToTimeline}
                                                                 eliminarVarForma={this.props.eliminarVarForma}
                                                                 getFormas={this.props.getFormas}
-                                                                limpiarArreglos={this.props.limpiarArreglos}>
+                                                                limpiarArreglos={this.props.limpiarArreglos}
+                                                                permision={this.props.permision}
+                                                                userID={this.props.userID}
+                                                                userName={this.props.userName}>
                                             </FuenteDatoForma>
                                         : null
                                     }
                                     {
-                                        this.state.mostrarFuenteDatoExcel
+                                        this.props.estadoVistaVariable.mostrarFuenteDatoExcel
                                         ?
                                             <FuenteDatoExcel pool={this.props.pool}
                                                                 esObjetoVariable={this.props.esObjetoVariable}
@@ -177,19 +155,23 @@ export default class EditarVariable extends React.Component {
                                                                 goToTimeline={this.props.goToTimeline}
                                                                 eliminarVarExcel={this.props.eliminarVarExcel}
                                                                 getExcel={this.props.getExcel}
-                                                                limpiarArreglos={this.props.limpiarArreglos}>
+                                                                limpiarArreglos={this.props.limpiarArreglos}
+                                                                permision={this.props.permision}
+                                                                userID={this.props.userID}
+                                                                userName={this.props.userName}
+                                                                changeStateFirstTimeToTrue={this.props.changeStateFirstTimeToTrue}>
                                             </FuenteDatoExcel>
                                         : null
                                     }
                                 </div>
                                 <div className={"border-bottom"} style={{width: "100%", height: "30px", overflowX: "scroll"}}>
-                                    <div onClick={this.mostrarFuenteDatoExcel} className={"border-right addPointer"} style={{width: "33%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", float: "left", backgroundColor: !this.state.mostrarFuenteDatoExcel ? "#f5f5f5" : "" }}>
+                                    <div onClick={this.mostrarFuenteDatoExcel} className={"border-right addPointer"} style={{width: "33%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", float: "left", backgroundColor: !this.props.estadoVistaVariable.mostrarFuenteDatoExcel ? "#f5f5f5" : "" }}>
                                         Excel
                                     </div>
-                                    <div onClick={this.mostrarFuenteDatoForma} className={"border-right addPointer"} style={{width: "33%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", float: "left", backgroundColor: !this.state.mostrarFuenteDatoForma ? "#f5f5f5" : "" }}>
+                                    <div onClick={this.mostrarFuenteDatoForma} className={"border-right addPointer"} style={{width: "33%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", float: "left", backgroundColor: !this.props.estadoVistaVariable.mostrarFuenteDatoForma ? "#f5f5f5" : "" }}>
                                         Forma
                                     </div>
-                                    <div onClick={this.mostrarFuenteDatoVariable} className={"addPointer"} style={{width: "34%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", float: "left", backgroundColor: !this.state.mostrarFuenteDatoVariable ? "#f5f5f5" : "" }}>
+                                    <div onClick={this.mostrarFuenteDatoVariable} className={"addPointer"} style={{width: "34%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", float: "left", backgroundColor: !this.props.estadoVistaVariable.mostrarFuenteDatoVariable ? "#f5f5f5" : "" }}>
                                         Variable
                                     </div>
                                 </div>

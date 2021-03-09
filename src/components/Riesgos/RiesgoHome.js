@@ -18,6 +18,7 @@ export default class RiesgoHome extends React.Component {
             pesoDisponible: 0,
             idRiesgoSeleccionado: -1,
             componenteActual: componente,
+            idFormula: "",
             nombreRiesgo: "",
             pesoRiesgo: 0,
             formulaRiesgo: "",
@@ -90,7 +91,7 @@ export default class RiesgoHome extends React.Component {
         }, this.acutalizarPesoMaximoDisponible );
     }
 
-    editarRiesgo (id, nombreRiesgo, pesoRiesgo, formulaRiesgo, responsableRiesgo) {
+    editarRiesgo (id, idFormula, nombreRiesgo, pesoRiesgo, formulaRiesgo, responsableRiesgo) {
         if(this.state.pesoDisponible == 0) {
             this.setState({
                 pesoDisponible: pesoRiesgo
@@ -109,6 +110,7 @@ export default class RiesgoHome extends React.Component {
         this.setState({
             idRiesgoSeleccionado: id,
             componenteActual: "editarRiesgo",
+            idFormula: idFormula,
             nombreRiesgo: nombreRiesgo,
             pesoRiesgo: pesoRiesgo,
             formulaRiesgo: formulaRiesgo,
@@ -206,6 +208,7 @@ export default class RiesgoHome extends React.Component {
                                     configuracionHome={this.props.configuracionHome}
                                     showUmbralHome={this.props.showUmbralHome}
                                     riesgos={this.state.riesgos}
+                                    idFormula={this.state.idFormula}
                                     nombreRiesgo={this.state.nombreRiesgo}
                                     pesoRiesgo={this.state.pesoRiesgo}
                                     formulaRiesgo={this.state.formulaRiesgo}
@@ -213,7 +216,10 @@ export default class RiesgoHome extends React.Component {
                                     idRiesgoSeleccionado={this.state.idRiesgoSeleccionado}
                                     pesoMaximo={this.state.pesoDisponible}
                                     responsableRiesgo={this.state.responsableRiesgo}
-                                    editarRiesgo={this.editarRiesgo}> </EditarRiesgo>
+                                    editarRiesgo={this.editarRiesgo}
+                                    permision={this.props.permision}
+                                    userID={this.props.userID}
+                                    userName={this.props.userName}> </EditarRiesgo>
                 </div>
             );
         }

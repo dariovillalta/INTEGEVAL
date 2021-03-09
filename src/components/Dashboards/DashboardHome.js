@@ -17,7 +17,22 @@ export default class DashboardHome extends React.Component {
             camposDeIndicadores: [],
             riesgos: [],
             camposDeRiesgos: [],
-            dashboardSeleccionado: null
+            dashboardSeleccionado: null,
+            navbar: <div className={"row"}>
+                        <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
+                            <div className={"page-header"}>
+                                <h2 className={"pageheader-title"}>Seleccionar Dashboard</h2>
+                                <div className={"page-breadcrumb"}>
+                                    <nav aria-label="breadcrumb">
+                                        <ol className={"breadcrumb"}>
+                                            <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.props.goSeleccionReporteria}><a href="#" className={"breadcrumb-link"}>Seleccionar Tipo de Reportería</a></li>
+                                            <li className={"breadcrumb-item active font-16"} aria-current="page">Dashboards</li>
+                                        </ol>
+                                    </nav>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
         }
         this.crearDashboard = this.crearDashboard.bind(this);
         this.retornarSeleccionDashboards = this.retornarSeleccionDashboards.bind(this);
@@ -47,14 +62,47 @@ export default class DashboardHome extends React.Component {
     }
 
     crearDashboard () {
+        var  navbar =   <div className={"row"}>
+                            <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
+                                <div className={"page-header"}>
+                                    <h2 className={"pageheader-title"}>Crear Dashboard</h2>
+                                    <div className={"page-breadcrumb"}>
+                                        <nav aria-label="breadcrumb">
+                                            <ol className={"breadcrumb"}>
+                                                <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.props.goSeleccionReporteria}><a href="#" className={"breadcrumb-link"}>Seleccionar Tipo de Reportería</a></li>
+                                                <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.retornarSeleccionDashboards}><a href="#" className={"breadcrumb-link"}>Dashboards</a></li>
+                                                <li className={"breadcrumb-item active font-16"} aria-current="page">Crear Dashboard</li>
+                                            </ol>
+                                        </nav>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>;
         this.setState({
-            componenteActual: "crearDashboard"
+            componenteActual: "crearDashboard",
+            navbar: navbar
         });
     }
 
     retornarSeleccionDashboards () {
+        var  navbar = <div className={"row"}>
+                            <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
+                                <div className={"page-header"}>
+                                    <h2 className={"pageheader-title"}>Seleccionar Dashboard</h2>
+                                    <div className={"page-breadcrumb"}>
+                                        <nav aria-label="breadcrumb">
+                                            <ol className={"breadcrumb"}>
+                                                <li className={"breadcrumb-item font-16"} aria-current="page" onClick={this.props.goSeleccionReporteria}><a href="#" className={"breadcrumb-link"}>Seleccionar Tipo de Reportería</a></li>
+                                                <li className={"breadcrumb-item active font-16"} aria-current="page">Dashboards</li>
+                                            </ol>
+                                        </nav>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>;
         this.setState({
-            componenteActual: "selDashboard"
+            componenteActual: "selDashboard",
+            navbar: navbar
         });
     }
 
@@ -397,6 +445,7 @@ export default class DashboardHome extends React.Component {
             return (
                 <div>
                     <SeleccionarDashboard pool={this.props.pool}
+                                            navbar={this.state.navbar}
                                             configuracionHome={this.props.configuracionHome}
                                             crearDashboard={this.crearDashboard}
                                             goOptions={this.props.goOptions}
@@ -408,6 +457,7 @@ export default class DashboardHome extends React.Component {
             return (
                 <div>
                     <CrearDashboard pool={this.props.pool}
+                                            navbar={this.state.navbar}
                                             retornarSeleccionDashboards={this.retornarSeleccionDashboards}
                                             terminoCrearCampo={this.terminoCrearFuenteDatosPasarAEdit}
                                             variables={this.state.variables}
@@ -428,7 +478,8 @@ export default class DashboardHome extends React.Component {
                                     variables={this.state.variables}
                                     indicadores={this.state.indicadores}
                                     riesgos={this.state.riesgos}
-                                    dashboardSeleccionado={this.state.dashboardSeleccionado}>
+                                    dashboardSeleccionado={this.state.dashboardSeleccionado}
+                                    goSeleccionReporteria={this.props.goSeleccionReporteria}>
                     </EditarDashboardHome>
                 </div>
             );

@@ -318,46 +318,32 @@ function (_React$Component) {
         }, _react["default"].createElement("a", {
           className: "btn btn-success btn-block btnWhiteColorHover font-bold font-20",
           style: {
-            color: "#fafafa"
+            color: "#fafafa",
+            display: this.props.permision.variable.indexOf("C") > -1 || this.props.permision.variable.indexOf("V") > -1 || this.props.permision.variable.indexOf("E") > -1 ? "" : "none"
           },
           onClick: this.props.showVariables
         }, "Variables"), _react["default"].createElement("a", {
           className: "btn btn-primary btn-block btnWhiteColorHover font-bold font-20",
           style: {
-            color: "#fafafa"
+            color: "#fafafa",
+            display: this.props.permision.indicador.indexOf("C") > -1 || this.props.permision.indicador.indexOf("V") > -1 || this.props.permision.indicador.indexOf("E") > -1 ? "" : "none"
           },
           onClick: this.props.showIndicador
         }, "Indicadores"), _react["default"].createElement("a", {
           className: "btn btn-brand btn-block btnWhiteColorHover font-bold font-20",
           style: {
-            color: "#fafafa"
+            color: "#fafafa",
+            display: this.props.permision.riesgo.indexOf("C") > -1 || this.props.permision.riesgo.indexOf("V") > -1 || this.props.permision.riesgo.indexOf("E") > -1 ? "" : "none"
           },
           onClick: this.props.showRiesgos
         }, "Tipos de Riesgos"), _react["default"].createElement("a", {
           className: "btn btn-info btn-block btnWhiteColorHover font-bold font-20",
           style: {
-            color: "#fafafa"
+            color: "#fafafa",
+            display: this.props.permision.riesgoIntegral.indexOf("E") > -1 ? "" : "none"
           },
           onClick: this.showUmbralIntegral
-        }, "Umbral del Riesgo Integral"), _react["default"].createElement("a", {
-          className: "btn btn-dark btn-block btnWhiteColorHover font-bold font-20",
-          style: {
-            color: "#fafafa"
-          },
-          onClick: this.props.showListas
-        }, "Administrar Listas"), _react["default"].createElement("a", {
-          className: "btn btn-danger btn-block btnWhiteColorHover font-bold font-20",
-          style: {
-            color: "#fafafa"
-          },
-          onClick: this.props.showUsuarios
-        }, "Administrar Usuarios"), _react["default"].createElement("a", {
-          className: "btn btn-success btn-block btnWhiteColorHover font-bold font-20",
-          style: {
-            color: "#fafafa"
-          },
-          onClick: this.props.showBitacora
-        }, "Ver Bitacora")))))));
+        }, "Umbral del Riesgo Integral")))))));
       } else if (this.state.componenteActual.localeCompare("RiesgoIntegral") == 0) {
         return _react["default"].createElement("div", null, _react["default"].createElement(_Umbral["default"], {
           navbar: this.state.navbar,
@@ -365,7 +351,10 @@ function (_React$Component) {
           idVariable: -99,
           pool: this.props.pool,
           tablaVariable: "Institucional",
-          tituloUmbral: "Institucional"
+          tituloUmbral: "Institucional",
+          maximoUmbral: 100,
+          showSuccesMessage: this.props.showSuccesMessage,
+          showMessage: this.props.showMessage
         }));
       }
     }

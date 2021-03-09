@@ -11,7 +11,7 @@ class Modal extends React.Component {
 
 	    return (
 	      	<div className="backdrop" style={{height: "100vh", width: "100vw", position: "fixed", top: "0", left: "0", zIndex: "99", backgroundColor: 'rgba(0,0,0,0.3)', padding: "130px 50px 50px 50px"}} onClick={this.props.onClose}>
-	        	<div style={{backgroundColor: '#fff', borderRadius: "5px", maxWidth: "800px", minHeight: "300px", margin: '0 auto', padding: "5px 30px 30px 30px", zIndex: "100"}} onClick={(e) => {e.stopPropagation()}}>
+	        	<div style={{backgroundColor: '#fff', borderRadius: "5px", maxWidth: "800px", minHeight: "300px", maxHeight: "80vh", margin: '0 auto', padding: "5px 30px 30px 30px", zIndex: "100", overflowY: "auto"}} onClick={(e) => {e.stopPropagation()}}>
 	        		<div style={{width: "100%", height: "10px"}}>
 	        			<span className="addPointer" style={{float: "right"}} onClick={this.props.onClose}>X</span>
 	        		</div>

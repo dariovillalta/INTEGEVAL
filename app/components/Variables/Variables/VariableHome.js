@@ -60,6 +60,7 @@ function (_React$Component) {
     _this.retornoSeleccionVariables = _this.retornoSeleccionVariables.bind(_assertThisInitialized(_this));
     _this.editarVariables = _this.editarVariables.bind(_assertThisInitialized(_this));
     _this.changeStateFirstTimeToFalse = _this.changeStateFirstTimeToFalse.bind(_assertThisInitialized(_this));
+    _this.changeStateFirstTimeToTrue = _this.changeStateFirstTimeToTrue.bind(_assertThisInitialized(_this));
     _this.terminoCrearVariablesPasarAEdit = _this.terminoCrearVariablesPasarAEdit.bind(_assertThisInitialized(_this));
     _this.actualizarIDVariableModificada = _this.actualizarIDVariableModificada.bind(_assertThisInitialized(_this));
     return _this;
@@ -104,6 +105,13 @@ function (_React$Component) {
     value: function changeStateFirstTimeToFalse() {
       this.setState({
         esPrimeraVez: false
+      });
+    }
+  }, {
+    key: "changeStateFirstTimeToTrue",
+    value: function changeStateFirstTimeToTrue() {
+      this.setState({
+        esPrimeraVez: true
       });
     }
   }, {
@@ -247,7 +255,10 @@ function (_React$Component) {
           nombreTablaSeleccionada: this.props.nombreTablaSeleccionada,
           goOptions: this.props.goOptions,
           retornoSeleccionVariables: this.retornoSeleccionVariables,
-          configuracionHome: this.props.configuracionHome
+          configuracionHome: this.props.configuracionHome,
+          permision: this.props.permision,
+          showSuccesMessage: this.props.showSuccesMessage,
+          showMessage: this.props.showMessage
         }));
       } else if (this.state.componenteActual.localeCompare("editarVariables") == 0) {
         return _react["default"].createElement("div", null, _react["default"].createElement(_EditarVariablesHome["default"], {
@@ -261,7 +272,13 @@ function (_React$Component) {
           configuracionHome: this.props.configuracionHome,
           actualizarIDVariableModificada: this.actualizarIDVariableModificada,
           changeStateFirstTimeToFalse: this.changeStateFirstTimeToFalse,
-          esPrimeraVez: this.state.esPrimeraVez
+          changeStateFirstTimeToTrue: this.changeStateFirstTimeToTrue,
+          esPrimeraVez: this.state.esPrimeraVez,
+          permision: this.props.permision,
+          userID: this.props.userID,
+          userName: this.props.userName,
+          showSuccesMessage: this.props.showSuccesMessage,
+          showMessage: this.props.showMessage
         }));
       }
     }

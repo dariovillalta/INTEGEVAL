@@ -8,6 +8,7 @@ export default class Bitacora extends React.Component {
             filtros: []
         }
         this.getBitacora = this.getBitacora.bind(this);
+        this.styleDate = this.styleDate.bind(this);
     }
 
     componentDidMount() {
@@ -38,6 +39,10 @@ export default class Bitacora extends React.Component {
                 }
             });
         }); // fin transaction
+    }
+
+    styleDate (date) {
+        return date.getDate()+'-'+(date.getMonth()+1)+'-'+date.getFullYear();
     }
 
     render() {
@@ -80,7 +85,7 @@ export default class Bitacora extends React.Component {
                                                 <th scope="row">{i+1}</th>
                                                 <th scope="row">{filtro.usuarioID}</th>
                                                 <th scope="row">{filtro.nombreUsuario}</th>
-                                                <th scope="row">{filtro.fecha}</th>
+                                                <th scope="row">{this.styleDate(filtro.fecha)}</th>
                                                 <th scope="row">{filtro.descripcion}</th>
                                             </tr>
                                         ))}

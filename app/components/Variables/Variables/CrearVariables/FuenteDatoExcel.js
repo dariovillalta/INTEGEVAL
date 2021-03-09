@@ -57,6 +57,18 @@ var periodicidad = [{
 }, {
   nombre: "anual"
 }];
+var nombreArchivo = '',
+    ubicacionArchivo = '';
+var nombreVariable = '',
+    idFormula = '',
+    descripcionVariable = '',
+    operacion = '',
+    hojaExcel = '',
+    tipoVariable = '',
+    celdasVariable = '',
+    periodicidadVariable = '',
+    responsableVariable = '',
+    categoriaVariable = '';
 
 var FuenteDatoExcel =
 /*#__PURE__*/
@@ -70,7 +82,7 @@ function (_React$Component) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(FuenteDatoExcel).call(this, props));
     _this.state = {
-      ubicacionArchivo: '',
+      ubicacionArchivo: ubicacionArchivo,
       variables: [],
       valorPeriodicidad: '-1',
       valoresPeriodicidad: [],
@@ -96,6 +108,17 @@ function (_React$Component) {
     _this.isValidDate = _this.isValidDate.bind(_assertThisInitialized(_this));
     _this.tieneEspaciosEnBlanco = _this.tieneEspaciosEnBlanco.bind(_assertThisInitialized(_this));
     _this.getUsuarios = _this.getUsuarios.bind(_assertThisInitialized(_this));
+    _this.actualizarNombreArchivo = _this.actualizarNombreArchivo.bind(_assertThisInitialized(_this));
+    _this.actualizarNombreVariable = _this.actualizarNombreVariable.bind(_assertThisInitialized(_this));
+    _this.actualizarIdFormula = _this.actualizarIdFormula.bind(_assertThisInitialized(_this));
+    _this.actualizarDescripcionVariable = _this.actualizarDescripcionVariable.bind(_assertThisInitialized(_this));
+    _this.updateOperacion = _this.updateOperacion.bind(_assertThisInitialized(_this));
+    _this.updateHojaExcel = _this.updateHojaExcel.bind(_assertThisInitialized(_this));
+    _this.updateTipoVariable = _this.updateTipoVariable.bind(_assertThisInitialized(_this));
+    _this.actualizarCeldasVariable = _this.actualizarCeldasVariable.bind(_assertThisInitialized(_this));
+    _this.actualizarPeriodicidad = _this.actualizarPeriodicidad.bind(_assertThisInitialized(_this));
+    _this.actualizarNombreEncargado = _this.actualizarNombreEncargado.bind(_assertThisInitialized(_this));
+    _this.actualizarCategoriaVariable = _this.actualizarCategoriaVariable.bind(_assertThisInitialized(_this));
     return _this;
   }
 
@@ -106,6 +129,33 @@ function (_React$Component) {
       this.getExcel();
       this.getFormas();
       this.getUsuarios();
+    }
+  }, {
+    key: "saveBitacora",
+    value: function saveBitacora(fecha, descripcion) {
+      var _this2 = this;
+
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
+      transaction.begin(function (err) {
+        var rolledBack = false;
+        transaction.on('rollback', function (aborted) {
+          rolledBack = true;
+        });
+        var request = new _mssql["default"].Request(transaction);
+        request.query("insert into Bitacora (usuarioID, nombreUsuario, fecha, descripcion, tipoVariable, idVariable) values (" + _this2.props.userID + ", '" + _this2.props.userName + "', '" + fecha.getFullYear() + "-" + (fecha.getMonth() + 1) + "-" + fecha.getDate() + "', '" + descripcion + "', '" + tipoVariable + "', " + idVariable + ")", function (err, result) {
+          if (err) {
+            console.log(err);
+
+            _this2.props.showMessage("Error", 'No se pudo guardar información de bitacora.', true, false, {});
+
+            if (!rolledBack) {
+              transaction.rollback(function (err) {});
+            }
+          } else {
+            transaction.commit(function (err) {});
+          }
+        });
+      }); // fin transaction
     }
   }, {
     key: "seleccionarArchivo",
@@ -132,53 +182,25 @@ function (_React$Component) {
           }
 
           ;
+          ubicacionArchivo = fileExcel[0];
           this.setState({
             ubicacionArchivo: fileExcel[0],
             hojas: hojas
           });
         } else {
-          alert("no se pudo abrir el archivo.");
+          this.props.showMessage("Error", "No se pudo abrir el archivo.", true, false, {});
         }
       }
     }
   }, {
     key: "guardarUbicacionArchivo",
     value: function guardarUbicacionArchivo() {
-      var _this2 = this;
+      var _this3 = this;
 
       var nombre = $("#nombreArchivo").val();
 
       if (nombre.length > 0 && nombre.length < 101) {
         if (this.state.ubicacionArchivo.length > 0 && this.state.ubicacionArchivo.length < 1001) {
-          /*var guardar = true;
-          for (var i = 0; i < this.state.variables.length; i++) {
-              if(this.state.variables[i].nombre.length > 0 && this.state.variables[i].nombre.length < 101) {
-                  if(this.state.variables[i].operacion.length > 0 && this.state.variables[i].operacion.length < 31) {
-                      if(this.state.variables[i].celdas.length > 0 && this.state.variables[i].celdas.length < 101) {
-                          if(this.state.variables[i].nombreHoja.length > 0 && this.state.variables[i].nombreHoja.length < 201) {
-                              if(this.state.variables[i].tipo.length > 0 && this.state.variables[i].tipo.length < 31) {
-                              } else {
-                                  guardar = false;
-                                  alert('Ingrese un valor para el valor de tipo de variable que debe ser menor a 31 caracteres');
-                              }
-                          } else {
-                              guardar = false;
-                              alert('Ingrese un valor para el valor de hoja de excel que debe ser menor a 201 caracteres');
-                          }
-                      } else {
-                          guardar = false;
-                          alert('Ingrese un valor para el valor de celdas que debe ser menor a 101 caracteres');
-                      }
-                  } else {
-                      guardar = false;
-                      alert('Ingrese un valor para el valor de operación que debe ser menor a 31 caracteres');
-                  }
-              } else {
-                  guardar = false;
-                  alert('Ingrese un valor para la ubicación del archivo que debe ser menor a 1001 caracteres');
-              }
-          };
-          if(guardar) {*/
           var transaction = new _mssql["default"].Transaction(this.props.pool);
           transaction.begin(function (err) {
             var rolledBack = false;
@@ -186,39 +208,43 @@ function (_React$Component) {
               rolledBack = true;
             });
             var request = new _mssql["default"].Request(transaction);
-            request.query("insert into ExcelArchivos (ubicacionArchivo, nombre) values ('" + _this2.state.ubicacionArchivo + "', '" + nombre + "')", function (err, result) {
+            request.query("insert into ExcelArchivos (ubicacionArchivo, nombre) values ('" + _this3.state.ubicacionArchivo + "', '" + nombre + "')", function (err, result) {
               if (err) {
                 console.log(err);
+
+                _this3.props.showMessage("Error", 'Error al guardar archivo de excel.', true, false, {});
 
                 if (!rolledBack) {
                   transaction.rollback(function (err) {});
                 }
               } else {
                 transaction.commit(function (err) {
-                  alert('Variable Creada');
-                  $("#nombreArchivo").val("");
+                  _this3.props.showSuccesMessage("Éxito", 'Variable Creada.');
 
-                  _this2.setState({
+                  $("#nombreArchivo").val("");
+                  nombreArchivo = '';
+                  ubicacionArchivo = '';
+
+                  _this3.setState({
                     ubicacionArchivo: ""
                   });
 
-                  _this2.traerArchivoID();
+                  _this3.traerArchivoID();
                 });
               }
             });
           }); // fin transaction
-          //}
         } else {
-          alert('Ingrese un valor para la ubicación del archivo que debe ser menor a 1001 caracteres');
+          this.props.showMessage("Error", 'Ingrese un valor para la ubicación del archivo que debe ser menor a 1001 caracteres.', true, false, {});
         }
       } else {
-        alert('Ingrese un nombre el archivo que debe ser menor a 101 caracteres');
+        this.props.showMessage("Error", 'Ingrese un nombre el archivo que debe ser menor a 101 caracteres.', true, false, {});
       }
     }
   }, {
     key: "traerArchivoID",
     value: function traerArchivoID() {
-      var _this3 = this;
+      var _this4 = this;
 
       var transaction = new _mssql["default"].Transaction(this.props.pool);
       transaction.begin(function (err) {
@@ -231,12 +257,14 @@ function (_React$Component) {
           if (err) {
             console.log(err);
 
+            _this4.props.showMessage("Error", 'Error al seleccionar ID de variable.', true, false, {});
+
             if (!rolledBack) {
               transaction.rollback(function (err) {});
             }
           } else {
             transaction.commit(function (err) {
-              _this3.guardarVariables(result.recordset[0].ID);
+              _this4.guardarVariables(result.recordset[0].ID);
             });
           }
         });
@@ -245,42 +273,47 @@ function (_React$Component) {
   }, {
     key: "guardarVariables",
     value: function guardarVariables(archivoExcelID) {
-      var _this4 = this;
+      var _this5 = this;
 
       var _loop = function _loop(i) {
-        var nombreHoja = _this4.state.variables[i].nombreHoja;
-        var nombre = _this4.state.variables[i].nombre;
-        var operacion = _this4.state.variables[i].operacion;
-        var celdas = _this4.state.variables[i].celdas;
-        var tipo = _this4.state.variables[i].tipo;
-        var periodicidad = _this4.state.variables[i].periodicidad;
-        var fechaInicioCalculo = _this4.state.variables[i].fechaInicioCalculo;
-        var responsable = _this4.state.variables[i].responsable;
-        var guardarVariable = _this4.state.variables[i].guardar;
-        var transaction = new _mssql["default"].Transaction(_this4.props.pool);
+        var nombreHoja = _this5.state.variables[i].nombreHoja;
+        var nombre = _this5.state.variables[i].nombre;
+        var idFormula = _this5.state.variables[i].idFormula;
+        var descripcion = _this5.state.variables[i].descripcion;
+        var operacion = _this5.state.variables[i].operacion;
+        var celdas = _this5.state.variables[i].celdas;
+        var tipo = _this5.state.variables[i].tipo;
+        var periodicidad = _this5.state.variables[i].periodicidad;
+        var fechaInicioCalculo = _this5.state.variables[i].fechaInicioCalculo;
+        var responsable = _this5.state.variables[i].responsable;
+        var categoriaVariable = _this5.state.variables[i].categoriaVariable;
+        var guardarVariable = _this5.state.variables[i].guardar;
+        var transaction = new _mssql["default"].Transaction(_this5.props.pool);
         transaction.begin(function (err) {
           var rolledBack = false;
           transaction.on('rollback', function (aborted) {
             rolledBack = true;
           });
           var request = new _mssql["default"].Request(transaction);
-          request.query("insert into ExcelVariables (excelArchivoID, nombreHoja, nombre, operacion, celdas, tipo, periodicidad, fechaInicioCalculo, responsable, guardar) values (" + archivoExcelID + ", '" + nombreHoja + "', '" + nombre + "', '" + operacion + "', '" + celdas + "', '" + tipo + "', '" + periodicidad + "', '" + fechaInicioCalculo.getFullYear() + "-" + (fechaInicioCalculo.getMonth() + 1) + "-" + fechaInicioCalculo.getDate() + "', '" + responsable + "', '" + guardarVariable + "')", function (err, result) {
+          request.query("insert into ExcelVariables (excelArchivoID, nombreHoja, nombre, idFormula, descripcion, operacion, celdas, tipo, periodicidad, fechaInicioCalculo, responsable, categoriaVariable, guardar) values (" + archivoExcelID + ", '" + nombreHoja + "', '" + nombre + "', '" + idFormula + "', '" + descripcion + "', '" + operacion + "', '" + celdas + "', '" + tipo + "', '" + periodicidad + "', '" + fechaInicioCalculo.getFullYear() + "-" + (fechaInicioCalculo.getMonth() + 1) + "-" + fechaInicioCalculo.getDate() + "', '" + responsable + "', '" + categoriaVariable + "', '" + guardarVariable + "')", function (err, result) {
             if (err) {
               console.log(err);
+
+              _this5.props.showMessage("Error", 'Error al crear variable.', true, false, {});
 
               if (!rolledBack) {
                 transaction.rollback(function (err) {});
               }
             } else {
               transaction.commit(function (err) {
-                if (i == _this4.state.variables.length - 1) {
-                  _this4.setState({
+                if (i == _this5.state.variables.length - 1) {
+                  _this5.setState({
                     variables: []
                   });
 
-                  _this4.getExcel();
+                  _this5.getExcel();
 
-                  _this4.props.getExcel();
+                  _this5.props.getExcel();
                 }
               });
             }
@@ -298,6 +331,8 @@ function (_React$Component) {
     key: "crearVariable",
     value: function crearVariable() {
       var nombre = $("#nombreVariable").val();
+      var idFormula = $("#idFormula").val();
+      var descripcion = $("#descripcionVariable").val();
       var operacion = $("#operacion").val();
       var celdas = $("#celdasVariable").val();
       var hoja = $("#hojaExcelVariable").val();
@@ -308,143 +343,188 @@ function (_React$Component) {
       var fecha;
       if (periodicidad.localeCompare("-1") == 0) fecha = new Date(1964, 4, 28);else fecha = $("#fecha").datepicker('getDate');
       var responsable = $("#responsable").val();
+      var categoriaVariable = $("#categoriaVariable").val();
 
       if (nombre.length > 0 && nombre.length < 101) {
-        if (this.verificarNoExisteNombreVar(nombre)) {
-          if (!this.tieneEspaciosEnBlanco(nombre)) {
-            if (operacion.length > 0 && operacion.length < 31) {
-              if (celdas.length > 0 && celdas.length < 101) {
-                if (hoja.length > 0 && hoja.length < 201) {
-                  if (tipo.length > 0 && tipo.length < 31) {
-                    if (periodicidad.length > 0 && periodicidad.length < 51) {
-                      if (this.isValidDate(fecha)) {
-                        if (responsable.length > 0 && responsable.length < 101) {
-                          var copyTemp = _toConsumableArray(this.state.variables);
+        if (idFormula.length > 0 && idFormula.length < 101) {
+          if (descripcion.length < 701) {
+            if (this.verificarNoExisteNombreVar(idFormula)) {
+              if (!this.tieneEspaciosEnBlanco(idFormula)) {
+                if (operacion.length > 0 && operacion.length < 31) {
+                  if (celdas.length > 0 && celdas.length < 101) {
+                    if (hoja.length > 0 && hoja.length < 201) {
+                      if (tipo.length > 0 && tipo.length < 31) {
+                        if (periodicidad.length > 0 && periodicidad.length < 51) {
+                          if (this.isValidDate(fecha)) {
+                            if (responsable.length > 0 && responsable.length < 101) {
+                              if (categoriaVariable.length < 101) {
+                                var copyTemp = _toConsumableArray(this.state.variables);
 
-                          var nuevaVar = {
-                            nombreHoja: hoja,
-                            nombre: nombre,
-                            operacion: operacion,
-                            celdas: celdas,
-                            tipo: tipo,
-                            periodicidad: periodicidad,
-                            fechaInicioCalculo: fecha,
-                            responsable: responsable,
-                            guardar: guardarVariable
-                          };
+                                var nuevaVar = {
+                                  nombreHoja: hoja,
+                                  nombre: nombre,
+                                  idFormula: idFormula,
+                                  descripcion: descripcion,
+                                  operacion: operacion,
+                                  celdas: celdas,
+                                  tipo: tipo,
+                                  periodicidad: periodicidad,
+                                  fechaInicioCalculo: fecha,
+                                  responsable: responsable,
+                                  categoriaVariable: categoriaVariable,
+                                  guardar: guardarVariable
+                                };
 
-                          var copyTempPeriodicidad = _toConsumableArray(this.state.valoresPeriodicidad);
+                                var copyTempPeriodicidad = _toConsumableArray(this.state.valoresPeriodicidad);
 
-                          copyTemp.push(nuevaVar);
-                          copyTempPeriodicidad.push(periodicidad);
-                          this.setState({
-                            variables: copyTemp,
-                            valoresPeriodicidad: copyTempPeriodicidad
-                          });
-                          $("#nombreVariable").val("");
-                          $("#operacion").val("ASIG");
-                          $("#hojaExcelVariable").val(this.state.hojas[0]);
-                          $("#tipoVariable").val("numero");
-                          $("#celdasVariable").val(""); //$("#periodicidad").val("");
+                                copyTemp.push(nuevaVar);
+                                copyTempPeriodicidad.push(periodicidad);
+                                this.setState({
+                                  variables: copyTemp,
+                                  valoresPeriodicidad: copyTempPeriodicidad
+                                });
+                                nombreVariable = '';
+                                idFormula = '';
+                                descripcionVariable = '';
+                                operacion = '';
+                                hojaExcel = '';
+                                tipoVariable = '';
+                                celdasVariable = '';
+                                periodicidadVariable = '';
+                                responsableVariable = '';
+                                categoriaVariable = '';
+                                $("#nombreVariable").val("");
+                                $("#idFormula").val("");
+                                $("#descripcionVariable").val("");
+                                $("#operacion").val("ASIG");
+                                $("#hojaExcelVariable").val(this.state.hojas[0]);
+                                $("#tipoVariable").val("numero");
+                                $("#celdasVariable").val("");
+                                $("#categoriaVariable").val(""); //$("#periodicidad").val("");
 
-                          $("#responsable").val("-1");
+                                $("#responsable").val("-1");
+                              } else {
+                                this.props.showMessage("Error", 'Ingrese un valor para el valor de categoria de variable que debe ser menor a 101 caracteres.', true, false, {});
+                              }
+                            } else {
+                              this.props.showMessage("Error", 'Ingrese un valor para el valor de responsable que debe ser menor a 101 caracteres.', true, false, {});
+                            }
+                          } else {
+                            this.props.showMessage("Error", 'Ingrese un valor para el valor de inicio de cálculo.', true, false, {});
+                          }
                         } else {
-                          alert('Ingrese un valor para el valor de responsable que debe ser menor a 101 caracteres');
+                          this.props.showMessage("Error", 'Ingrese un valor para el valor de periodicidad que debe ser menor a 51 caracteres.', true, false, {});
                         }
                       } else {
-                        alert('Ingrese un valor para el valor de inicio de cálculo.');
+                        this.props.showMessage("Error", 'Ingrese un valor para el valor de tipo de variable que debe ser menor a 31 caracteres.', true, false, {});
                       }
                     } else {
-                      alert('Ingrese un valor para el valor de periodicidad que debe ser menor a 51 caracteres');
+                      this.props.showMessage("Error", 'Ingrese un valor para el valor de hoja de excel que debe ser menor a 201 caracteres.', true, false, {});
                     }
                   } else {
-                    alert('Ingrese un valor para el valor de tipo de variable que debe ser menor a 31 caracteres');
+                    this.props.showMessage("Error", 'Ingrese un valor para el valor de celdas que debe ser menor a 101 caracteres.', true, false, {});
                   }
                 } else {
-                  alert('Ingrese un valor para el valor de hoja de excel que debe ser menor a 201 caracteres');
+                  this.props.showMessage("Error", 'Ingrese un valor para el valor de operación que debe ser menor a 31 caracteres.', true, false, {});
                 }
               } else {
-                alert('Ingrese un valor para el valor de celdas que debe ser menor a 101 caracteres');
+                this.props.showMessage("Error", 'El identificador de la variable en fórmula no debe contener espacios en blanco.', true, false, {});
               }
             } else {
-              alert('Ingrese un valor para el valor de operación que debe ser menor a 31 caracteres');
+              this.props.showMessage("Error", 'El identificador de la variable en fórmula debe ser único.', true, false, {});
             }
           } else {
-            alert('El nombre del archivo no debe contener espacios en blanco');
+            this.props.showMessage("Error", 'La descripción de la variable debe ser menor a 701 caracteres.', true, false, {});
           }
         } else {
-          alert('El nombre de la variable debe ser único.');
+          this.props.showMessage("Error", 'Ingrese un valor para el identificador de la variable en fórmula que debe ser menor a 101 caracteres.', true, false, {});
         }
       } else {
-        alert('Ingrese un valor para la ubicación del archivo que debe ser menor a 1001 caracteres');
+        this.props.showMessage("Error", 'Ingrese un valor para el nombre de la variable que debe ser menor a 501 caracteres.', true, false, {});
       }
     }
   }, {
     key: "updateVariable",
     value: function updateVariable(index) {
-      if ($("#nombreVariable" + index).length > 0 && $("#nombreVariable" + index).length < 101) {
-        if ($("#operacion" + index).val().length > 0 && $("#operacion" + index).val().length < 31) {
-          if ($("#celdasVariable" + index).length > 0 && $("#celdasVariable" + index).length < 101) {
-            if ($("#hojaExcelVariable" + index).length > 0 && $("#hojaExcelVariable" + index).length < 201) {
-              if ($("#tipoVariable" + index).val().length > 0 && $("#tipoVariable" + index).val().length < 31) {
-                if ($("#periodicidad" + index).val().length > 0 && $("#periodicidad" + index).val().length < 51) {
-                  var fecha;
-                  if ($("#periodicidad" + index).val().localeCompare("-1") == 0) fecha = new Date(1964, 4, 28);else fecha = $("#fecha" + index).datepicker('getDate');
+      if ($("#nombreVariable" + index).length > 0 && $("#nombreVariable" + index).length < 501) {
+        if ($("#idFormula" + index).length > 0 && $("#idFormula" + index).length < 101) {
+          if ($("#descripcionVariable" + index).length < 701) {
+            if ($("#operacion" + index).val().length > 0 && $("#operacion" + index).val().length < 31) {
+              if ($("#celdasVariable" + index).length > 0 && $("#celdasVariable" + index).length < 101) {
+                if ($("#hojaExcelVariable" + index).length > 0 && $("#hojaExcelVariable" + index).length < 201) {
+                  if ($("#tipoVariable" + index).val().length > 0 && $("#tipoVariable" + index).val().length < 31) {
+                    if ($("#periodicidad" + index).val().length > 0 && $("#periodicidad" + index).val().length < 51) {
+                      var fecha;
+                      if ($("#periodicidad" + index).val().localeCompare("-1") == 0) fecha = new Date(1964, 4, 28);else fecha = $("#fecha" + index).datepicker('getDate');
 
-                  if (this.isValidDate(fecha)) {
-                    if ($("#responsable" + index).val().length > 0 && $("#responsable" + index).val().length < 101) {
-                      if (this.verificarNoExisteNombreVarUpdate($("#nombreVariable" + index).val(), index)) {
-                        if (!this.tieneEspaciosEnBlanco($("#nombreVariable" + index).val())) {
-                          var copyTemp = _toConsumableArray(this.state.variables);
+                      if (this.isValidDate(fecha)) {
+                        if ($("#responsable" + index).val().length > 0 && $("#responsable" + index).val().length < 101) {
+                          if ($("#categoriaVariable" + index).val().length < 101) {
+                            if (this.verificarNoExisteNombreVarUpdate($("#idFormula" + index).val(), index)) {
+                              if (!this.tieneEspaciosEnBlanco($("#idFormula" + index).val())) {
+                                var copyTemp = _toConsumableArray(this.state.variables);
 
-                          copyTemp[index].nombre = $("#nombreVariable" + index).val();
-                          copyTemp[index].operacion = $("#operacion" + index).val();
-                          copyTemp[index].celdas = $("#celdasVariable" + index).val();
-                          copyTemp[index].nombreHoja = $("#hojaExcelVariable" + index).val();
-                          copyTemp[index].tipo = $("#tipoVariable" + index).val();
-                          copyTemp[index].periodicidad = $("#periodicidad" + index).val();
-                          copyTemp[index].fechaInicioCalculo = fecha;
-                          copyTemp[index].responsable = $("#responsable" + index).val();
-                          var guardarVariable;
-                          if ($("#guardarVariable" + index).is(':checked')) guardarVariable = true;else guardarVariable = false;
-                          copyTemp[index].guardar = guardarVariable;
+                                copyTemp[index].nombre = $("#nombreVariable" + index).val();
+                                copyTemp[index].idFormula = $("#idFormula" + index).val();
+                                copyTemp[index].descripcion = $("#descripcionVariable" + index).val();
+                                copyTemp[index].operacion = $("#operacion" + index).val();
+                                copyTemp[index].celdas = $("#celdasVariable" + index).val();
+                                copyTemp[index].nombreHoja = $("#hojaExcelVariable" + index).val();
+                                copyTemp[index].tipo = $("#tipoVariable" + index).val();
+                                copyTemp[index].periodicidad = $("#periodicidad" + index).val();
+                                copyTemp[index].fechaInicioCalculo = fecha;
+                                copyTemp[index].responsable = $("#responsable" + index).val();
+                                copyTemp[index].categoriaVariable = $("#categoriaVariable" + index).val();
+                                var guardarVariable;
+                                if ($("#guardarVariable" + index).is(':checked')) guardarVariable = true;else guardarVariable = false;
+                                copyTemp[index].guardar = guardarVariable;
 
-                          var copyTempPeriodicidad = _toConsumableArray(this.state.valoresPeriodicidad);
+                                var copyTempPeriodicidad = _toConsumableArray(this.state.valoresPeriodicidad);
 
-                          copyTempPeriodicidad[index] = $("#periodicidad" + index).val();
-                          this.setState({
-                            variables: copyTemp,
-                            valoresPeriodicidad: copyTempPeriodicidad
-                          });
+                                copyTempPeriodicidad[index] = $("#periodicidad" + index).val();
+                                this.setState({
+                                  variables: copyTemp,
+                                  valoresPeriodicidad: copyTempPeriodicidad
+                                });
+                                this.props.showSuccesMessage("Éxito", 'Variable Modificada.');
+                              } else {
+                                this.props.showMessage("Error", 'El identificador de la variable en fórmula no debe contener espacios en blanco.', true, false, {});
+                              }
+                            } else {
+                              this.props.showMessage("Error", 'El identificador de la variable en fórmula debe ser único.', true, false, {});
+                            }
+                          } else {
+                            this.props.showMessage("Error", 'Ingrese un valor para el valor de categoria de variable que debe ser menor a 101 caracteres.', true, false, {});
+                          }
                         } else {
-                          alert('El nombre del archivo no debe contener espacios en blanco');
+                          this.props.showMessage("Error", 'Ingrese un valor para el valor de responsable que debe ser menor a 101 caracteres.', true, false, {});
                         }
                       } else {
-                        alert('El nombre de la variable debe ser único.');
+                        this.props.showMessage("Error", 'Ingrese un valor para el valor de inicio de cálculo.', true, false, {});
                       }
                     } else {
-                      alert('Ingrese un valor para el valor de responsable que debe ser menor a 101 caracteres');
+                      this.props.showMessage("Error", 'Ingrese un valor para el valor de periodicidad que debe ser menor a 51 caracteres.', true, false, {});
                     }
                   } else {
-                    alert('Ingrese un valor para el valor de inicio de cálculo.');
+                    this.props.showMessage("Error", 'Ingrese un valor para el valor de tipo de variable que debe ser menor a 31 caracteres.', true, false, {});
                   }
                 } else {
-                  alert('Ingrese un valor para el valor de periodicidad que debe ser menor a 51 caracteres');
+                  this.props.showMessage("Error", 'Ingrese un valor para el valor de hoja de excel que debe ser menor a 201 caracteres.', true, false, {});
                 }
               } else {
-                alert('Ingrese un valor para el valor de tipo de variable que debe ser menor a 31 caracteres');
+                this.props.showMessage("Error", 'Ingrese un valor para el valor de celdas que debe ser menor a 101 caracteres.', true, false, {});
               }
             } else {
-              alert('Ingrese un valor para el valor de hoja de excel que debe ser menor a 201 caracteres');
+              this.props.showMessage("Error", 'Ingrese un valor para el valor de operación que debe ser menor a 31 caracteres.', true, false, {});
             }
           } else {
-            alert('Ingrese un valor para el valor de celdas que debe ser menor a 101 caracteres');
+            this.props.showMessage("Error", 'La descripción de la variable debe ser menor a 701 caracteres.', true, false, {});
           }
         } else {
-          alert('Ingrese un valor para el valor de operación que debe ser menor a 31 caracteres');
+          this.props.showMessage("Error", 'Ingrese un valor para el identificador de la variable en fórmula que debe ser menor a 101 caracteres.', true, false, {});
         }
       } else {
-        alert('Ingrese un valor para la ubicación del archivo que debe ser menor a 1001 caracteres');
+        this.props.showMessage("Error", 'Ingrese un valor para el nombre de la variable que debe ser menor a 501 caracteres.', true, false, {});
       }
     }
   }, {
@@ -456,6 +536,7 @@ function (_React$Component) {
       this.setState({
         variables: copyTemp
       });
+      this.props.showSuccesMessage("Éxito", 'Variable Eliminada.');
     }
   }, {
     key: "getVariables",
@@ -534,11 +615,11 @@ function (_React$Component) {
     }
   }, {
     key: "verificarNoExisteNombreVar",
-    value: function verificarNoExisteNombreVar(nombre) {
+    value: function verificarNoExisteNombreVar(idFormula) {
       var noExiste = true;
 
       for (var i = 0; i < variables.length; i++) {
-        if (variables[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
+        if (variables[i].idFormula.toLowerCase().localeCompare(idFormula.toLowerCase()) == 0) {
           noExiste = false;
           break;
         }
@@ -548,7 +629,7 @@ function (_React$Component) {
 
       if (noExiste) {
         for (var i = 0; i < excel.length; i++) {
-          if (excel[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
+          if (excel[i].idFormula.toLowerCase().localeCompare(idFormula.toLowerCase()) == 0) {
             noExiste = false;
             break;
           }
@@ -559,7 +640,7 @@ function (_React$Component) {
 
       if (noExiste) {
         for (var i = 0; i < this.state.variables.length; i++) {
-          if (this.state.variables[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
+          if (this.state.variables[i].idFormula.toLowerCase().localeCompare(idFormula.toLowerCase()) == 0) {
             noExiste = false;
             break;
           }
@@ -570,7 +651,7 @@ function (_React$Component) {
 
       if (noExiste) {
         for (var i = 0; i < formas.length; i++) {
-          if (formas[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
+          if (formas[i].idFormula.toLowerCase().localeCompare(idFormula.toLowerCase()) == 0) {
             noExiste = false;
             break;
           }
@@ -583,11 +664,11 @@ function (_React$Component) {
     }
   }, {
     key: "verificarNoExisteNombreVarUpdate",
-    value: function verificarNoExisteNombreVarUpdate(nombre, index) {
+    value: function verificarNoExisteNombreVarUpdate(idFormula, index) {
       var noExiste = true;
 
       for (var i = 0; i < variables.length; i++) {
-        if (variables[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
+        if (variables[i].idFormula.toLowerCase().localeCompare(idFormula.toLowerCase()) == 0) {
           noExiste = false;
           break;
         }
@@ -597,7 +678,7 @@ function (_React$Component) {
 
       if (noExiste) {
         for (var i = 0; i < excel.length; i++) {
-          if (excel[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
+          if (excel[i].idFormula.toLowerCase().localeCompare(idFormula.toLowerCase()) == 0) {
             noExiste = false;
             break;
           }
@@ -608,7 +689,7 @@ function (_React$Component) {
 
       if (noExiste) {
         for (var i = 0; i < this.state.variables.length; i++) {
-          if (this.state.variables[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0 && index != i) {
+          if (this.state.variables[i].idFormula.toLowerCase().localeCompare(idFormula.toLowerCase()) == 0 && index != i) {
             noExiste = false;
             break;
           }
@@ -619,7 +700,7 @@ function (_React$Component) {
 
       if (noExiste) {
         for (var i = 0; i < formas.length; i++) {
-          if (formas[i].nombre.toLowerCase().localeCompare(nombre.toLowerCase()) == 0) {
+          if (formas[i].idFormula.toLowerCase().localeCompare(idFormula.toLowerCase()) == 0) {
             noExiste = false;
             break;
           }
@@ -706,7 +787,7 @@ function (_React$Component) {
   }, {
     key: "getUsuarios",
     value: function getUsuarios() {
-      var _this5 = this;
+      var _this6 = this;
 
       var transaction = new _mssql["default"].Transaction(this.props.pool);
       transaction.begin(function (err) {
@@ -724,7 +805,7 @@ function (_React$Component) {
             }
           } else {
             transaction.commit(function (err) {
-              _this5.setState({
+              _this6.setState({
                 usuarios: result.recordset
               });
             });
@@ -733,9 +814,75 @@ function (_React$Component) {
       }); // fin transaction
     }
   }, {
+    key: "actualizarNombreArchivo",
+    value: function actualizarNombreArchivo() {
+      var nombreArchivoN = $("#nombreArchivo").val();
+      nombreArchivo = nombreArchivoN;
+    }
+  }, {
+    key: "actualizarNombreVariable",
+    value: function actualizarNombreVariable() {
+      var nombreVariableN = $("#nombreVariable").val();
+      nombreVariable = nombreVariableN;
+    }
+  }, {
+    key: "actualizarIdFormula",
+    value: function actualizarIdFormula() {
+      var idFormulaN = $("#idFormula").val();
+      idFormula = idFormulaN;
+    }
+  }, {
+    key: "actualizarDescripcionVariable",
+    value: function actualizarDescripcionVariable() {
+      var descripcionVariableN = $("#descripcionVariable").val();
+      descripcionVariable = descripcionVariableN;
+    }
+  }, {
+    key: "updateOperacion",
+    value: function updateOperacion() {
+      var operacionN = $("#operacion").val();
+      operacion = operacionN;
+    }
+  }, {
+    key: "updateHojaExcel",
+    value: function updateHojaExcel() {
+      var hojaExcelVariableN = $("#hojaExcelVariable").val();
+      hojaExcelVariable = hojaExcelVariableN;
+    }
+  }, {
+    key: "updateTipoVariable",
+    value: function updateTipoVariable() {
+      var tipoVariableN = $("#tipoVariable").val();
+      tipoVariable = tipoVariableN;
+    }
+  }, {
+    key: "actualizarCeldasVariable",
+    value: function actualizarCeldasVariable() {
+      var celdasVariableN = $("#celdasVariable").val();
+      celdasVariable = celdasVariableN;
+    }
+  }, {
+    key: "actualizarPeriodicidad",
+    value: function actualizarPeriodicidad() {
+      var periodicidadVariableN = $("#periodicidadVariable").val();
+      periodicidadVariable = periodicidadVariableN;
+    }
+  }, {
+    key: "actualizarNombreEncargado",
+    value: function actualizarNombreEncargado() {
+      var responsableVariableN = $("#responsableVariable").val();
+      responsableVariable = responsableVariableN;
+    }
+  }, {
+    key: "actualizarCategoriaVariable",
+    value: function actualizarCategoriaVariable() {
+      var categoriaVariableN = $("#categoriaVariable").val();
+      categoriaVariable = categoriaVariableN;
+    }
+  }, {
     key: "render",
     value: function render() {
-      var _this6 = this;
+      var _this7 = this;
 
       return _react["default"].createElement("div", null, _react["default"].createElement("br", null), _react["default"].createElement("div", {
         className: "row",
@@ -756,6 +903,8 @@ function (_React$Component) {
         }
       }, _react["default"].createElement("input", {
         id: "nombreArchivo",
+        defaultValue: nombreArchivo,
+        onKeyUp: this.actualizarNombreArchivo,
         type: "text",
         className: "form-control form-control-sm"
       }))), _react["default"].createElement("div", {
@@ -810,8 +959,51 @@ function (_React$Component) {
         }
       }, _react["default"].createElement("input", {
         id: "nombreVariable",
+        defaultValue: nombreVariable,
+        onKeyUp: this.actualizarNombreVariable,
         type: "text",
         className: "form-control form-control-sm"
+      }))), _react["default"].createElement("div", {
+        className: "row",
+        style: {
+          width: "100%"
+        }
+      }, _react["default"].createElement("div", {
+        className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
+      }, _react["default"].createElement("label", {
+        htmlFor: "idFormula",
+        className: "col-form-label"
+      }, "Identificador de la Variable en F\xF3rmula")), _react["default"].createElement("div", {
+        className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group",
+        style: {
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center"
+        }
+      }, _react["default"].createElement("input", {
+        id: "idFormula",
+        defaultValue: idFormula,
+        onKeyUp: this.actualizarIdFormula,
+        type: "text",
+        className: "form-control form-control-sm"
+      }))), _react["default"].createElement("div", {
+        className: "row",
+        style: {
+          width: "100%"
+        }
+      }, _react["default"].createElement("div", {
+        className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3"
+      }, _react["default"].createElement("label", {
+        htmlFor: "descripcionVariable",
+        className: "col-form-label"
+      }, "Descripci\xF3n de Variable:")), _react["default"].createElement("div", {
+        className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9"
+      }, _react["default"].createElement("textarea", {
+        defaultValue: descripcionVariable,
+        onKeyUp: this.actualizarDescripcionVariable,
+        className: "form-control",
+        id: "descripcionVariable",
+        rows: "3"
       }))), _react["default"].createElement("div", {
         className: "row",
         style: {
@@ -831,7 +1023,9 @@ function (_React$Component) {
         }
       }, _react["default"].createElement("select", {
         id: "operacion",
-        className: "form-control"
+        className: "form-control",
+        defaultValue: operacion,
+        onChange: this.updateOperacion
       }, _react["default"].createElement("option", {
         value: "ASIG"
       }, "Asignar"), _react["default"].createElement("option", {
@@ -863,7 +1057,9 @@ function (_React$Component) {
         }
       }, _react["default"].createElement("select", {
         id: "hojaExcelVariable",
-        className: "form-control"
+        className: "form-control",
+        defaultValue: hojaExcel,
+        onChange: this.updateHojaExcel
       }, this.state.hojas.map(function (hoja, i) {
         return _react["default"].createElement("option", {
           value: hoja,
@@ -888,7 +1084,9 @@ function (_React$Component) {
         }
       }, _react["default"].createElement("select", {
         id: "tipoVariable",
-        className: "form-control"
+        className: "form-control",
+        defaultValue: tipoVariable,
+        onChange: this.updateTipoVariable
       }, _react["default"].createElement("option", {
         value: "numero"
       }, "N\xFAmero"), _react["default"].createElement("option", {
@@ -916,6 +1114,8 @@ function (_React$Component) {
         }
       }, _react["default"].createElement("input", {
         id: "celdasVariable",
+        defaultValue: celdasVariable,
+        onKeyUp: this.actualizarCeldasVariable,
         type: "text",
         className: "form-control form-control-sm"
       }))), _react["default"].createElement("div", {
@@ -932,9 +1132,9 @@ function (_React$Component) {
         className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
       }, _react["default"].createElement("select", {
         id: "periodicidad",
-        defaultValue: this.props.periodicidadVariable,
-        onChange: this.actualizarPeriodicidad,
-        className: "form-control"
+        className: "form-control",
+        defaultValue: periodicidadVariable,
+        onChange: this.actualizarPeriodicidad
       }, _react["default"].createElement("option", {
         value: "-1"
       }, "Ninguno"), periodicidad.map(function (periodicidad, i) {
@@ -972,9 +1172,9 @@ function (_React$Component) {
         className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
       }, _react["default"].createElement("select", {
         id: "responsable",
-        defaultValue: this.props.responsableVariable,
-        onChange: this.props.actualizarNombreEncargado,
-        className: "form-control"
+        className: "form-control",
+        defaultValue: responsableVariable,
+        onChange: this.actualizarNombreEncargado
       }, _react["default"].createElement("option", {
         value: "-1"
       }, "Ninguno"), this.state.usuarios.map(function (usuario, i) {
@@ -983,6 +1183,29 @@ function (_React$Component) {
           key: usuario.ID
         }, usuario.usuario);
       })))), _react["default"].createElement("div", {
+        className: "row",
+        style: {
+          width: "100%"
+        }
+      }, _react["default"].createElement("div", {
+        className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
+      }, _react["default"].createElement("label", {
+        htmlFor: "categoriaVariable",
+        className: "col-form-label"
+      }, "Categor\xEDa de Variable")), _react["default"].createElement("div", {
+        className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group",
+        style: {
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center"
+        }
+      }, _react["default"].createElement("input", {
+        id: "categoriaVariable",
+        defaultValue: categoriaVariable,
+        onChange: this.actualizarCategoriaVariable,
+        type: "text",
+        className: "form-control form-control-sm"
+      }))), _react["default"].createElement("div", {
         className: "row",
         style: {
           width: "100%"
@@ -1052,6 +1275,45 @@ function (_React$Component) {
         }, _react["default"].createElement("div", {
           className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
         }, _react["default"].createElement("label", {
+          htmlFor: "idFormula" + i,
+          className: "col-form-label"
+        }, "Identificador de la Variable en F\xF3rmula")), _react["default"].createElement("div", {
+          className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group",
+          style: {
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center"
+          }
+        }, _react["default"].createElement("input", {
+          id: "idFormula" + i,
+          defaultValue: variable.idFormula,
+          type: "text",
+          className: "form-control form-control-sm"
+        }))), _react["default"].createElement("div", {
+          className: "row",
+          style: {
+            width: "100%"
+          }
+        }, _react["default"].createElement("div", {
+          className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3"
+        }, _react["default"].createElement("label", {
+          htmlFor: "descripcionVariable" + i,
+          className: "col-form-label"
+        }, "Descripci\xF3n de Variable:")), _react["default"].createElement("div", {
+          className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9"
+        }, _react["default"].createElement("textarea", {
+          defaultValue: variable.descripcion,
+          className: "form-control",
+          id: "descripcionVariable" + i,
+          rows: "3"
+        }))), _react["default"].createElement("div", {
+          className: "row",
+          style: {
+            width: "100%"
+          }
+        }, _react["default"].createElement("div", {
+          className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
+        }, _react["default"].createElement("label", {
           htmlFor: "operacion" + i,
           className: "col-form-label"
         }, "Operaci\xF3n:")), _react["default"].createElement("div", {
@@ -1098,7 +1360,7 @@ function (_React$Component) {
           id: "hojaExcelVariable" + i,
           defaultValue: variable.nombreHoja,
           className: "form-control"
-        }, _this6.state.hojas.map(function (hoja, i) {
+        }, _this7.state.hojas.map(function (hoja, i) {
           return _react["default"].createElement("option", {
             value: hoja,
             key: hoja
@@ -1170,7 +1432,7 @@ function (_React$Component) {
           id: "periodicidad" + i,
           defaultValue: variable.periodicidad,
           onChange: function onChange() {
-            return _this6.actualizarPeriodicidadUpdate(i);
+            return _this7.actualizarPeriodicidadUpdate(i);
           },
           className: "form-control"
         }, _react["default"].createElement("option", {
@@ -1180,7 +1442,7 @@ function (_React$Component) {
             value: periodicidad.nombre,
             key: periodicidad.nombre
           }, periodicidad.nombre);
-        })))), _this6.state.valoresPeriodicidad[i].localeCompare("-1") != 0 && _this6.inicializarFecha(i, variable.fechaInicioCalculo) ? _react["default"].createElement("div", {
+        })))), _this7.state.valoresPeriodicidad[i].localeCompare("-1") != 0 && _this7.inicializarFecha(i, variable.fechaInicioCalculo) ? _react["default"].createElement("div", {
           className: "row",
           style: {
             width: "100%"
@@ -1214,12 +1476,34 @@ function (_React$Component) {
           className: "form-control"
         }, _react["default"].createElement("option", {
           value: "-1"
-        }, "Ninguno"), _this6.state.usuarios.map(function (usuario, i) {
+        }, "Ninguno"), _this7.state.usuarios.map(function (usuario, i) {
           return _react["default"].createElement("option", {
             value: usuario.ID,
             key: usuario.ID
           }, usuario.usuario);
         })))), _react["default"].createElement("div", {
+          className: "row",
+          style: {
+            width: "100%"
+          }
+        }, _react["default"].createElement("div", {
+          className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
+        }, _react["default"].createElement("label", {
+          htmlFor: "categoriaVariable" + i,
+          className: "col-form-label"
+        }, "Categor\xEDa de Variable")), _react["default"].createElement("div", {
+          className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group",
+          style: {
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center"
+          }
+        }, _react["default"].createElement("input", {
+          id: "categoriaVariable" + i,
+          defaultValue: variable.categoriaVariable,
+          type: "text",
+          className: "form-control form-control-sm"
+        }))), _react["default"].createElement("div", {
           className: "row",
           style: {
             width: "100%"
@@ -1239,7 +1523,7 @@ function (_React$Component) {
           }
         }, _react["default"].createElement("input", {
           type: "checkbox",
-          defaultChecked: variable.guardar,
+          defaultChecked: true,
           name: "guardarVariable" + i,
           id: "guardarVariable" + i
         }), _react["default"].createElement("span", null, _react["default"].createElement("label", {
@@ -1253,13 +1537,13 @@ function (_React$Component) {
           href: "#",
           className: "btn btn-success active",
           onClick: function onClick() {
-            return _this6.updateVariable(i);
+            return _this7.updateVariable(i);
           }
         }, "Modificar Variable"), _react["default"].createElement("a", {
           href: "#",
           className: "btn btn-danger active",
           onClick: function onClick() {
-            return _this6.deleteVariable(i);
+            return _this7.deleteVariable(i);
           },
           style: {
             marginLeft: "10px"

@@ -346,7 +346,10 @@ function (_React$Component) {
           className: "breadcrumb-item active font-16",
           "aria-current": "page"
         }, "Seleccionar Lista"))))))), _react["default"].createElement("div", {
-          className: "row"
+          className: "row",
+          style: {
+            display: this.props.permision.lista.indexOf("E") > -1 ? "" : "none"
+          }
         }, _react["default"].createElement("div", {
           className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
         }, _react["default"].createElement("div", {
@@ -376,7 +379,10 @@ function (_React$Component) {
             display: "block"
           }
         }, "Crear")))))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
-          className: "row"
+          className: "row",
+          style: {
+            display: this.props.permision.lista.indexOf("V") > -1 || this.props.permision.lista.indexOf("E") > -1 ? "" : "none"
+          }
         }, _react["default"].createElement("div", {
           className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
         }, _react["default"].createElement("div", {
@@ -429,7 +435,10 @@ function (_React$Component) {
           className: "breadcrumb-item active font-16",
           "aria-current": "page"
         }, "Seleccionar Lista"))))))), _react["default"].createElement("div", {
-          className: "row"
+          className: "row",
+          style: {
+            display: this.props.permision.lista.indexOf("E") > -1 ? "" : "none"
+          }
         }, _react["default"].createElement("div", {
           className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
         }, _react["default"].createElement("div", {
@@ -503,7 +512,11 @@ function (_React$Component) {
             margin: "0 auto",
             display: "block"
           }
-        }, "Crear")))))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
+        }, "Crear")))))), _react["default"].createElement("br", {
+          style: {
+            display: this.props.permision.lista.indexOf("E") > -1 ? "" : "none"
+          }
+        }), _react["default"].createElement("div", {
           className: "row"
         }, _react["default"].createElement("div", {
           className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
@@ -539,10 +552,12 @@ function (_React$Component) {
             className: "form-group col-xl-6 col-6"
           }, _react["default"].createElement("label", {
             className: "col-form-label"
-          }, "Nombre de Elemento"), _react["default"].createElement(_InlineEdit["default"], {
+          }, "Nombre de Elemento"), _this8.props.permision.lista.indexOf("E") > -1 ? _react["default"].createElement(_InlineEdit["default"], {
             id: "nombreElemento" + i,
             texto: elemento.nombre
-          }, " "))), _react["default"].createElement("div", {
+          }, " ") : _react["default"].createElement("h4", {
+            className: "col-form-label"
+          }, elemento.nombre))), _react["default"].createElement("div", {
             className: "row",
             style: {
               width: "100%"
@@ -551,14 +566,16 @@ function (_React$Component) {
             className: "form-group col-xl-6 col-6"
           }, _react["default"].createElement("label", {
             className: "col-form-label"
-          }, "Valor de Elemento"), _react["default"].createElement(_InlineEdit["default"], {
+          }, "Valor de Elemento"), _this8.props.permision.lista.indexOf("E") > -1 ? _react["default"].createElement(_InlineEdit["default"], {
             id: "valorElemento" + i,
             texto: elemento.valor
-          }, " ")), _react["default"].createElement("div", {
+          }, " ") : _react["default"].createElement("h4", {
+            className: "col-form-label"
+          }, elemento.valor)), _react["default"].createElement("div", {
             className: "form-group col-xl-6 col-6"
           }, _react["default"].createElement("label", {
             className: "col-form-label"
-          }, "Tipo de Elemento"), _react["default"].createElement("select", {
+          }, "Tipo de Elemento"), _this8.props.permision.lista.indexOf("E") > -1 ? _react["default"].createElement("select", {
             id: "listaTipo" + i,
             className: "form-control",
             defaultValue: elemento.tipo
@@ -570,10 +587,13 @@ function (_React$Component) {
               value: campo.nombre,
               key: k
             }, campo.nombre);
-          })))), _react["default"].createElement("div", {
+          })) : _react["default"].createElement("h4", {
+            className: "col-form-label"
+          }, elemento.tipo))), _react["default"].createElement("div", {
             className: "row",
             style: {
-              width: "100%"
+              width: "100%",
+              display: _this8.props.permision.lista.indexOf("E") > -1 ? "" : "none"
             }
           }, _react["default"].createElement("button", {
             onClick: function onClick() {

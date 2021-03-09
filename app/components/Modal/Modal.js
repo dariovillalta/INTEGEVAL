@@ -67,9 +67,11 @@ function (_React$Component) {
           borderRadius: "5px",
           maxWidth: "800px",
           minHeight: "300px",
+          maxHeight: "80vh",
           margin: '0 auto',
           padding: "5px 30px 30px 30px",
-          zIndex: "100"
+          zIndex: "100",
+          overflowY: "auto"
         },
         onClick: function onClick(e) {
           e.stopPropagation();

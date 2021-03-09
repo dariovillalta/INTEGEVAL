@@ -354,6 +354,13 @@ function (_React$Component) {
       }, _react["default"].createElement("li", {
         className: "breadcrumb-item font-16",
         "aria-current": "page",
+        onClick: this.props.goSeleccionReporteria
+      }, _react["default"].createElement("a", {
+        href: "#",
+        className: "breadcrumb-link"
+      }, "Seleccionar Tipo de Reporter\xEDa")), _react["default"].createElement("li", {
+        className: "breadcrumb-item font-16",
+        "aria-current": "page",
         onClick: this.props.returnChooseDates
       }, _react["default"].createElement("a", {
         href: "#",

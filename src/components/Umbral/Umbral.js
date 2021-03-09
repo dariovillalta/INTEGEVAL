@@ -2,7 +2,7 @@ import React from 'react';
 import sql from 'mssql';
 
 import VistaUmbral from './VistaUmbral.js';
-import CrearUmbral from './EditarUmbral.js';
+import CrearUmbral from './CrearUmbral.js';
 import ListaRestoUmbrales from './ListaRestoUmbrales.js';
 
 const secciones = [{nombre: "MONO 1", color: "#00c853", width: "25"}, {nombre: "MONO 2", color: "#ffab40", width: "50"}, {nombre: "MONO 1", color: "#00c853", width: "25"}];
@@ -41,6 +41,7 @@ export default class Umbral extends React.Component {
                 if (err) {
                     if (!rolledBack) {
                         console.log(err);
+                        this.props.showMessage("Error", "No se pudo traer valores de la tabla de umbrales.", true, false, {});
                         transaction.rollback(err => {
                         });
                     }
@@ -75,6 +76,7 @@ export default class Umbral extends React.Component {
                 if (err) {
                     if (!rolledBack) {
                         console.log(err);
+                        this.props.showMessage("Error", "No se pudo traer valores de la tabla de secciones del umbral.", true, false, {});
                         transaction.rollback(err => {
                         });
                     }
@@ -114,6 +116,7 @@ export default class Umbral extends React.Component {
                 if (err) {
                     posicionesInsertadasRango++;
                     console.log(err);
+                    this.props.showMessage("Error", "No se pudo traer valores de la tabla de rangos de sección del umbral.", true, false, {});
                     if (!rolledBack) {
                         transaction.rollback(err => {
                         });
@@ -187,7 +190,10 @@ export default class Umbral extends React.Component {
                 <CrearUmbral idVariable={this.props.idVariable} pool={this.props.pool}
                                                         tablaVariable={this.props.tablaVariable}
                                                         tituloUmbral={this.props.tituloUmbral}
-                                                        traerUmbralesPADRE={this.traerUmbrales}> </CrearUmbral>
+                                                        traerUmbralesPADRE={this.traerUmbrales}
+                                                        maximoUmbral={this.props.maximoUmbral}
+                                                        showSuccesMessage={this.props.showSuccesMessage}
+                                                        showMessage={this.props.showMessage}> </CrearUmbral>
             </div>
         );
     }

@@ -2,7 +2,6 @@ import React from 'react';
 import sql from 'mssql';
 
 import ErrorMessage from '../../ErrorMessage.js';
-import MessageModal from '../../MessageModal.js';
 
 const campos = [ {nombre: "varchar"}, {nombre: "bit"}, {nombre: "date"}, {nombre: "int"} ];
 let funciones = [ {funcion: "idCliente", texto: "ID de Cliente"}, {funcion: "fecha", texto: "fecha"}, {nombre: "date"}, {nombre: "int"} ];
@@ -14,16 +13,14 @@ export default class ConfiguracionTablas extends React.Component {
         this.state = {
             tablas: [],
             errorCreacionTabla: {campo: "", descripcion: "", mostrar: false},
-            mensajeModal: {mostrarMensaje: false, mensajeConfirmado: false, esError: false, esConfirmar: false, titulo: "", mensaje: "", banderaMetodoInit: "", idElementoSelec: -1, indiceX: -1, indiceY: -1}
+            idTablaSel: -1
         }
+        this.saveBitacora = this.saveBitacora.bind(this);
         this.loadTables = this.loadTables.bind(this);
         this.insertTable = this.insertTable.bind(this);
         this.deleteTableConfirmation = this.deleteTableConfirmation.bind(this);
         this.deleteTable = this.deleteTable.bind(this);
         this.dismissTableNewError = this.dismissTableNewError.bind(this);
-        this.dismissMessageModal = this.dismissMessageModal.bind(this);
-        this.confirmMessageModal = this.confirmMessageModal.bind(this);
-        this.showSuccesMessage = this.showSuccesMessage.bind(this);
     }
     /* mensajeModal <- de state
         //mostrarMensaje:bandera para mostrar modal mensaje en pantalla
@@ -40,6 +37,30 @@ export default class ConfiguracionTablas extends React.Component {
 
     componentDidMount() {
         this.loadTables();
+    }
+
+    saveBitacora (fecha, descripcion, tipoVariable, idVariable) {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("insert into Bitacora (usuarioID, nombreUsuario, fecha, descripcion, tipoVariable, idVariable) values ("+this.props.userID+", '"+this.props.userName+"', '"+fecha.getFullYear()+"-"+(fecha.getMonth()+1)+"-"+fecha.getDate()+"', '"+descripcion+"', '"+tipoVariable+"', "+idVariable+")", (err, result) => {
+                if (err) {
+                    console.log(err);
+                    this.props.showMessage("Error", 'No se pudo guardar información de bitacora.', true, false, {});
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                    });
+                }
+            });
+        }); // fin transaction
     }
 
     loadTables() {
@@ -103,8 +124,38 @@ export default class ConfiguracionTablas extends React.Component {
                                                 }
                                             } else {
                                                 transaction.commit(err => {
-                                                    this.showSuccesMessage("Exito", "Tabla creada con éxito.");
+                                                    this.props.showSuccesMessage("Exito", "Tabla creada con éxito.");
                                                     this.loadTables();
+                                                    
+                                                    const transaction1 = new sql.Transaction( this.props.pool );
+                                                    transaction1.begin(err => {
+                                                        var rolledBack = false;
+                                                        transaction1.on('rollback', aborted => {
+                                                            rolledBack = true;
+                                                        });
+                                                        const request1 = new sql.Request(transaction1);
+                                                        request1.query("select top 1 * from Tablas order by ID desc", (err, result) => {
+                                                            if (err) {
+                                                                if (!rolledBack) {
+                                                                    console.log(err);
+                                                                    transaction1.rollback(err => {
+                                                                    });
+                                                                }
+                                                            } else {
+                                                                transaction1.commit(err => {
+                                                                    if(result.recordset.length > 0) {
+                                                                        var nuevosValores = 'nombre: '+nombreTabla+'\n'+
+                                                                                            'usuario: '+usuarioTabla+'\n'+
+                                                                                            'servidor: '+servidorTabla+'\n'+
+                                                                                            'base de datos: '+basedatosTabla+'\n'+
+                                                                                            'tabla: '+tablaTabla+'\n'+
+                                                                                            'tipo de conexión: '+tipoConexion;
+                                                                        this.saveBitacora(new Date(), "Usuario: "+this.props.userName+" creo la tabla: "+nombreTabla+"\nValores: \n"+nuevosValores, "tabla", result.recordset[0].ID);
+                                                                    }
+                                                                });
+                                                            }
+                                                        });
+                                                    }); // fin transaction1
                                                 });
                                             }
                                         });
@@ -188,69 +239,44 @@ export default class ConfiguracionTablas extends React.Component {
         }
     }
 
-    deleteTableConfirmation(id, x) {
+    deleteTableConfirmation(id) {
+        this.props.showMessage("Confirmación", "Esta seguro que desea eliminar la tabla?", false, true, this.deleteTable );
         this.setState({
-            mensajeModal: {mostrarMensaje: true, mensajeConfirmado: false, esError: false, esConfirmar: true, titulo: "Confirmación", mensaje: "Esta seguro que desea eliminar la tabla?", banderaMetodoInit: "goDelTable", idElementoSelec: id, indiceX: x, indiceY: -1}
+            idTablaSel: id
         });
     }
 
     deleteTable(id) {
-        const transaction = new sql.Transaction( this.props.pool );
-        transaction.begin(err => {
-            var rolledBack = false;
-            transaction.on('rollback', aborted => {
-                rolledBack = true;
-            });
-            const request = new sql.Request(transaction);
-            request.query("delete from Tablas where ID = "+id, (err, result) => {
-                if (err) {
-                    if (!rolledBack) {
-                        console.log(err);
-                        transaction.rollback(err => {
+        if(this.state.idTablaSel != -1) {
+            const transaction = new sql.Transaction( this.props.pool );
+            transaction.begin(err => {
+                var rolledBack = false;
+                transaction.on('rollback', aborted => {
+                    rolledBack = true;
+                });
+                const request = new sql.Request(transaction);
+                request.query("delete from Tablas where ID = "+this.state.idTablaSel, (err, result) => {
+                    if (err) {
+                        if (!rolledBack) {
+                            console.log(err);
+                            transaction.rollback(err => {
+                            });
+                        }
+                    } else {
+                        transaction.commit(err => {
+                            // 1. Make a shallow copy of the items
+                            /*let tablas = [...this.state.tablas];
+                            // 3. Replace the property you're intested in
+                            tablas.splice(this.state.mensajeModal.indiceX, 1);*/
+                            // 5. Set the state to our new copy
+                            this.loadTables();
+                            this.props.showSuccesMessage("Exito", "Tabla eliminada con éxito.");
+                            this.saveBitacora(new Date(), "Usuario: "+this.props.userName+" elimino la tabla: "+nombreTabla, "tabla", result.recordset[0].ID);
                         });
                     }
-                } else {
-                    transaction.commit(err => {
-                        // 1. Make a shallow copy of the items
-                        let tablas = [...this.state.tablas];
-                        // 3. Replace the property you're intested in
-                        tablas.splice(this.state.mensajeModal.indiceX, 1);
-                        // 5. Set the state to our new copy
-                        //this.loadTables();
-                        this.setState({
-                            tablas: tablas,
-                            mensajeModal: {mostrarMensaje: false, mensajeConfirmado: true, esError: false, esConfirmar: false, titulo: "", mensaje: "", banderaMetodoInit: "", idElementoSelec: this.state.mensajeModal.idElementoSelec, indiceX: this.state.mensajeModal.indiceX, indiceY: this.state.mensajeModal.indiceY}
-                        });
-                        this.showSuccesMessage("Exito", "Tabla eliminada con éxito.");
-                        /*this.setState({
-                            tablas: quitando tabla,
-                            mensajeModal: limpiando variables del modal
-                        });*/
-                    });
-                }
-            });
-        }); // fin transaction
-
-        const transaction2 = new sql.Transaction( this.props.pool );
-        transaction2.begin(err => {
-            var rolledBack = false;
-            transaction.on('rollback', aborted => {
-                rolledBack = true;
-            });
-            const request2 = new sql.Request(transaction2);
-            request2.query("delete from Campos where tablaID = "+id, (err, result) => {
-                if (err) {
-                    if (!rolledBack) {
-                        console.log(err);
-                        transaction2.rollback(err => {
-                        });
-                    }
-                } else {
-                    transaction2.commit(err => {
-                    });
-                }
-            });
-        }); // fin transaction2
+                });
+            }); // fin transaction
+        }
     }
 
 
@@ -263,36 +289,6 @@ export default class ConfiguracionTablas extends React.Component {
         this.setState({
             errorCreacionTabla: {campo: "", descripcion: "", mostrar: false}
         });
-    }
-
-    /*======_______====== ======_______======   MENSAJES MODAL    ======_______====== ======_______======*/
-    /*======_______======                                                             ======_______======*/
-    /*======_______======                                                             ======_______======*/
-    /*======_______====== ======_______====== ==_____==  ==___==  ======_______====== ======_______======*/
-
-    dismissMessageModal() {
-        this.setState({
-            mensajeModal: {mostrarMensaje: false, mensajeConfirmado: false, esError: false, esConfirmar: false, titulo: "", mensaje: "", banderaMetodoInit: "", idElementoSelec: -1, indiceX: -1, indiceY: -1}
-        });
-    }
-
-    confirmMessageModal() {
-        if(this.state.mensajeModal.banderaMetodoInit.localeCompare("goDelTable") == 0) {
-            let copiaID = this.state.mensajeModal.idElementoSelec;
-            this.deleteTable(copiaID);
-        }
-    }
-
-    showSuccesMessage(titulo, mensaje) {
-        this.setState({
-            mensajeModal: {mostrarMensaje: true, mensajeConfirmado: false, esError: false, esConfirmar: false, titulo: titulo, mensaje: mensaje, banderaMetodoInit: "", idElementoSelec: this.state.mensajeModal.idElementoSelec, indiceX: this.state.mensajeModal.indiceX, indiceY: this.state.mensajeModal.indiceY}
-        });
-        let self = this;
-        setTimeout(function(){
-            self.setState({
-                mensajeModal: {mostrarMensaje: false, mensajeConfirmado: false, esError: false, esConfirmar: false, titulo: "", mensaje: "", banderaMetodoInit: "", idElementoSelec: self.state.mensajeModal.idElementoSelec, indiceX: self.state.mensajeModal.indiceX, indiceY: self.state.mensajeModal.indiceY}
-            });
-        }, 850);
     }
 
     render() {
@@ -399,12 +395,6 @@ export default class ConfiguracionTablas extends React.Component {
                     </div>
                 ))}
                 <br/>
-
-                { this.state.mensajeModal.mostrarMensaje ? (
-                    <MessageModal esError={this.state.mensajeModal.esError} esConfirmar={this.state.mensajeModal.esConfirmar} dismissMessage={this.dismissMessageModal} confirmFunction={this.confirmMessageModal} titulo={this.state.mensajeModal.titulo} mensaje={this.state.mensajeModal.mensaje}> </MessageModal>
-                ) : (
-                    <span></span>
-                )}
             </div>
         );
     }

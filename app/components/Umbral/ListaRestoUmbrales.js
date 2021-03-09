@@ -14,13 +14,13 @@ function ListaRestoUmbrales(props) {
     className: "row"
   }, _react["default"].createElement("div", {
     className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
+  }, _react["default"].createElement("div", {
+    className: "card"
+  }, _react["default"].createElement("div", {
+    className: "card-body"
   }, props.lista.map(function (variable, i) {
     return _react["default"].createElement("div", {
       key: variable.ID
-    }, _react["default"].createElement("div", {
-      className: "card"
-    }, _react["default"].createElement("div", {
-      className: "card-body"
     }, _react["default"].createElement("div", {
       className: "row border-top border-bottom addPaddingToConfig"
     }, _react["default"].createElement("div", {
@@ -71,7 +71,7 @@ function ListaRestoUmbrales(props) {
         height: "20px",
         width: "100%"
       }
-    }, " ")))), _react["default"].createElement("br", null));
-  })));
+    }, " ")), _react["default"].createElement("br", null));
+  })))));
 }
 //# sourceMappingURL=ListaRestoUmbrales.js.map

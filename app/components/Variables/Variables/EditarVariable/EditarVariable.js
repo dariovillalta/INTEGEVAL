@@ -52,11 +52,6 @@ function (_React$Component) {
     _classCallCheck(this, EditarVariable);
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(EditarVariable).call(this, props));
-    _this.state = {
-      mostrarFuenteDatoVariable: mostrarFuenteDatoVariableGlobal,
-      mostrarFuenteDatoForma: mostrarFuenteDatoFormaGlobal,
-      mostrarFuenteDatoExcel: mostrarFuenteDatoExcelGlobal
-    };
     _this.mostrarFuenteDatoVariable = _this.mostrarFuenteDatoVariable.bind(_assertThisInitialized(_this));
     _this.mostrarFuenteDatoForma = _this.mostrarFuenteDatoForma.bind(_assertThisInitialized(_this));
     _this.mostrarFuenteDatoExcel = _this.mostrarFuenteDatoExcel.bind(_assertThisInitialized(_this));
@@ -64,22 +59,21 @@ function (_React$Component) {
   }
 
   _createClass(EditarVariable, [{
+    key: "componentWillUnmount",
+    value: function componentWillUnmount() {
+      /*mostrarFuenteDatoVariableGlobal = false;
+      mostrarFuenteDatoFormaGlobal = false;
+      mostrarFuenteDatoExcelGlobal = false;*/
+    }
+  }, {
     key: "componentDidMount",
     value: function componentDidMount() {
       if (this.props.tipoVariableOriginal.localeCompare("excel") == 0 && this.props.esPrimeraVez) {
-        mostrarFuenteDatoVariableGlobal = false;
-        mostrarFuenteDatoFormaGlobal = false;
-        mostrarFuenteDatoExcelGlobal = true;
-        this.props.changeStateFirstTimeToFalse(); //esPrimeraVez = false;
+        this.props.cambiarEstadoVistaVariable(false, false, true);
       } else if (this.props.tipoVariableOriginal.localeCompare("forma") == 0 && this.props.esPrimeraVez) {
-        mostrarFuenteDatoVariableGlobal = false;
-        mostrarFuenteDatoFormaGlobal = true;
-        mostrarFuenteDatoExcelGlobal = false;
-        this.props.changeStateFirstTimeToFalse(); //esPrimeraVez = false;
+        this.props.cambiarEstadoVistaVariable(false, true, false);
       } else if (this.props.tipoVariableOriginal.localeCompare("variable") == 0 && this.props.esPrimeraVez) {
-        mostrarFuenteDatoVariableGlobal = true;
-        mostrarFuenteDatoFormaGlobal = false;
-        mostrarFuenteDatoExcelGlobal = false; //esPrimeraVez = false;
+        this.props.cambiarEstadoVistaVariable(true, false, false);
       }
 
       this.setState({
@@ -91,38 +85,17 @@ function (_React$Component) {
   }, {
     key: "mostrarFuenteDatoVariable",
     value: function mostrarFuenteDatoVariable() {
-      mostrarFuenteDatoVariableGlobal = true;
-      mostrarFuenteDatoFormaGlobal = false;
-      mostrarFuenteDatoExcelGlobal = false;
-      this.setState({
-        mostrarFuenteDatoVariable: true,
-        mostrarFuenteDatoForma: false,
-        mostrarFuenteDatoExcel: false
-      });
+      this.props.cambiarEstadoVistaVariable(true, false, false);
     }
   }, {
     key: "mostrarFuenteDatoForma",
     value: function mostrarFuenteDatoForma() {
-      mostrarFuenteDatoVariableGlobal = false;
-      mostrarFuenteDatoFormaGlobal = true;
-      mostrarFuenteDatoExcelGlobal = false;
-      this.setState({
-        mostrarFuenteDatoVariable: false,
-        mostrarFuenteDatoForma: true,
-        mostrarFuenteDatoExcel: false
-      });
+      this.props.cambiarEstadoVistaVariable(false, true, false);
     }
   }, {
     key: "mostrarFuenteDatoExcel",
     value: function mostrarFuenteDatoExcel() {
-      mostrarFuenteDatoVariableGlobal = false;
-      mostrarFuenteDatoFormaGlobal = false;
-      mostrarFuenteDatoExcelGlobal = true;
-      this.setState({
-        mostrarFuenteDatoVariable: false,
-        mostrarFuenteDatoForma: false,
-        mostrarFuenteDatoExcel: true
-      });
+      this.props.cambiarEstadoVistaVariable(false, false, true);
     }
   }, {
     key: "render",
@@ -176,7 +149,7 @@ function (_React$Component) {
         style: {
           width: "100%"
         }
-      }, this.state.mostrarFuenteDatoVariable ? _react["default"].createElement(_FuenteDatoVariable["default"], {
+      }, this.props.estadoVistaVariable.mostrarFuenteDatoVariable ? _react["default"].createElement(_FuenteDatoVariable["default"], {
         pool: this.props.pool,
         campos: this.props.columnas,
         esObjetoVariable: this.props.esObjetoVariable,
@@ -189,7 +162,9 @@ function (_React$Component) {
         eliminarAtributoVariable: this.props.eliminarAtributoVariable,
         modificarNombreVariable: this.props.modificarNombreVariable,
         cambioDeArreglosDeAtributos: this.props.cambioDeArreglosDeAtributos,
+        idFormula: this.props.idFormula,
         nombreVariable: this.props.nombreVariable,
+        actualizarIdFormula: this.props.actualizarIdFormula,
         actualizarNombreVariable: this.props.actualizarNombreVariable,
         actualizarEstadoSiEsObjeto: this.props.actualizarEstadoSiEsObjeto,
         actualizarEstadoSiEsInstruccionSQL: this.props.actualizarEstadoSiEsInstruccionSQL,
@@ -211,8 +186,12 @@ function (_React$Component) {
         responsableVariable: this.props.responsableVariable,
         categoriaVariable: this.props.categoriaVariable,
         esPrimeraVez: this.props.esPrimeraVez,
-        changeStateFirstTimeToFalse: this.props.changeStateFirstTimeToFalse
-      }) : null, this.state.mostrarFuenteDatoForma ? _react["default"].createElement(_FuenteDatoForma["default"], {
+        changeStateFirstTimeToFalse: this.props.changeStateFirstTimeToFalse,
+        changeStateFirstTimeToTrue: this.props.changeStateFirstTimeToTrue,
+        permision: this.props.permision,
+        userID: this.props.userID,
+        userName: this.props.userName
+      }) : null, this.props.estadoVistaVariable.mostrarFuenteDatoForma ? _react["default"].createElement(_FuenteDatoForma["default"], {
         pool: this.props.pool,
         esObjetoVariable: this.props.esObjetoVariable,
         esInstruccionSQLVariable: this.props.esInstruccionSQLVariable,
@@ -222,8 +201,11 @@ function (_React$Component) {
         goToTimeline: this.props.goToTimeline,
         eliminarVarForma: this.props.eliminarVarForma,
         getFormas: this.props.getFormas,
-        limpiarArreglos: this.props.limpiarArreglos
-      }) : null, this.state.mostrarFuenteDatoExcel ? _react["default"].createElement(_FuenteDatoExcel["default"], {
+        limpiarArreglos: this.props.limpiarArreglos,
+        permision: this.props.permision,
+        userID: this.props.userID,
+        userName: this.props.userName
+      }) : null, this.props.estadoVistaVariable.mostrarFuenteDatoExcel ? _react["default"].createElement(_FuenteDatoExcel["default"], {
         pool: this.props.pool,
         esObjetoVariable: this.props.esObjetoVariable,
         esInstruccionSQLVariable: this.props.esInstruccionSQLVariable,
@@ -233,7 +215,11 @@ function (_React$Component) {
         goToTimeline: this.props.goToTimeline,
         eliminarVarExcel: this.props.eliminarVarExcel,
         getExcel: this.props.getExcel,
-        limpiarArreglos: this.props.limpiarArreglos
+        limpiarArreglos: this.props.limpiarArreglos,
+        permision: this.props.permision,
+        userID: this.props.userID,
+        userName: this.props.userName,
+        changeStateFirstTimeToTrue: this.props.changeStateFirstTimeToTrue
       }) : null), _react["default"].createElement("div", {
         className: "border-bottom",
         style: {
@@ -251,7 +237,7 @@ function (_React$Component) {
           alignItems: "center",
           justifyContent: "center",
           "float": "left",
-          backgroundColor: !this.state.mostrarFuenteDatoExcel ? "#f5f5f5" : ""
+          backgroundColor: !this.props.estadoVistaVariable.mostrarFuenteDatoExcel ? "#f5f5f5" : ""
         }
       }, "Excel"), _react["default"].createElement("div", {
         onClick: this.mostrarFuenteDatoForma,
@@ -263,7 +249,7 @@ function (_React$Component) {
           alignItems: "center",
           justifyContent: "center",
           "float": "left",
-          backgroundColor: !this.state.mostrarFuenteDatoForma ? "#f5f5f5" : ""
+          backgroundColor: !this.props.estadoVistaVariable.mostrarFuenteDatoForma ? "#f5f5f5" : ""
         }
       }, "Forma"), _react["default"].createElement("div", {
         onClick: this.mostrarFuenteDatoVariable,
@@ -275,7 +261,7 @@ function (_React$Component) {
           alignItems: "center",
           justifyContent: "center",
           "float": "left",
-          backgroundColor: !this.state.mostrarFuenteDatoVariable ? "#f5f5f5" : ""
+          backgroundColor: !this.props.estadoVistaVariable.mostrarFuenteDatoVariable ? "#f5f5f5" : ""
         }
       }, "Variable"))))));
     }

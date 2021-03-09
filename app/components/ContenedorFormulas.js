@@ -103,7 +103,7 @@ function (_React$Component) {
       if (formulaSeleccionada != undefined && formulaSeleccionada != null) {
         this.props.callbackCrearRegla(true, formulaSeleccionada, posicionFormula);
       } else {
-        alert("Seleccione por lo menos una formula");
+        this.props.showMessage("Error", "Seleccione por lo menos una formula", true, false, {});
       }
     }
   }, {
@@ -277,7 +277,7 @@ function (_React$Component) {
         if (formulaSeleccionada != undefined && formulaSeleccionada != null) {
           this.props.callbackModificarRegla(true, formulaSeleccionada, posicionFormula);
         } else {
-          alert("Seleccione por lo menos una formula");
+          this.props.showMessage("Error", "Seleccione por lo menos una formula", true, false, {});
         }
       } else {
         this.props.callbackEliminarRegla(true);

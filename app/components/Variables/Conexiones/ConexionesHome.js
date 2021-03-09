@@ -87,7 +87,11 @@ function (_React$Component) {
           pool: this.props.pool,
           configuracionHome: this.props.configuracionHome,
           goOptions: this.props.goOptions,
-          terminoSeleccionTabla: this.terminoSeleccionTabla
+          terminoSeleccionTabla: this.terminoSeleccionTabla,
+          showSuccesMessage: this.props.showSuccesMessage,
+          showMessage: this.props.showMessage,
+          userID: this.props.userID,
+          userName: this.props.userName
         }));
       } else {
         return _react["default"].createElement("div", null, _react["default"].createElement(_EditarTabla["default"], {
@@ -102,7 +106,11 @@ function (_React$Component) {
           servidorTablaSeleccionada: this.state.servidorTablaSeleccionada,
           baseDatosTablaSeleccionada: this.state.baseDatosTablaSeleccionada,
           tablaTablaSeleccionada: this.state.tablaTablaSeleccionada,
-          tipoConexion: this.state.tipoConexionTablaSeleccionada
+          tipoConexion: this.state.tipoConexionTablaSeleccionada,
+          showSuccesMessage: this.props.showSuccesMessage,
+          showMessage: this.props.showMessage,
+          userID: this.props.userID,
+          userName: this.props.userName
         }));
       }
     }

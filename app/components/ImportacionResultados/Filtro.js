@@ -13,6 +13,8 @@ var _Operacion = _interopRequireDefault(require("../Regla/Operacion.js"));
 
 var _Valor = _interopRequireDefault(require("../Regla/Valor.js"));
 
+var _FilasCeldas = _interopRequireDefault(require("../ContenedorCeldas/FilasCeldas.js"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -48,6 +50,31 @@ var textoOperacion = '',
     valor = '',
     valorTexto = '';
 var tipoDeVariableSeleccionada = '';
+var categoriasVariables = [{
+  nombre: 'Cat1',
+  variables: [{
+    nombre: "test 1",
+    seleccionada: false
+  }, {
+    nombre: "test 2",
+    seleccionada: false
+  }]
+}, {
+  nombre: 'Cat2',
+  variables: [{
+    nombre: "test 3",
+    seleccionada: false
+  }, {
+    nombre: "test 4",
+    seleccionada: false
+  }, {
+    nombre: "test 5",
+    seleccionada: false
+  }, {
+    nombre: "test 6",
+    seleccionada: false
+  }]
+}];
 
 var Filtro =
 /*#__PURE__*/
@@ -72,9 +99,8 @@ function (_React$Component) {
         esFecha: false,
         esTexto: false
       },
-      filtros: []
-      /*textoValor: ""*/
-
+      filtros: [],
+      contenedorVariables: []
     };
     _this.getResultsVariables = _this.getResultsVariables.bind(_assertThisInitialized(_this));
     _this.getResultsVariablesFieldsInit = _this.getResultsVariablesFieldsInit.bind(_assertThisInitialized(_this));
@@ -107,6 +133,7 @@ function (_React$Component) {
     _this.minusMonths = _this.minusMonths.bind(_assertThisInitialized(_this));
     _this.minusYears = _this.minusYears.bind(_assertThisInitialized(_this));
     _this.retornoVariables = _this.retornoVariables.bind(_assertThisInitialized(_this));
+    _this.seleccionVariable = _this.seleccionVariable.bind(_assertThisInitialized(_this));
     textoOperacion = '';
     operacion = '';
     valor = '';
@@ -1146,41 +1173,30 @@ function (_React$Component) {
   }, {
     key: "retornoVariables",
     value: function retornoVariables() {
-      console.log('FIN');
-      console.log('this.state.variables');
-      console.log(this.state.variables);
       this.props.retornoVariables(this.state.variables, this.state.indicadores, this.state.riesgos);
+    }
+  }, {
+    key: "seleccionVariable",
+    value: function seleccionVariable(variable, posArregloPadre, posicionVariable) {
+      var copyTemp = [].concat(categoriasVariables);
+      copyTemp[posArregloPadre][posicionVariable].seleccionada = !variable.seleccionada;
+      /*this.setState({
+          categoriasVariables: copyTemp
+      });*/
     }
   }, {
     key: "render",
     value: function render() {
       var _this11 = this;
 
-      return _react["default"].createElement("div", null, _react["default"].createElement("div", {
+      return _react["default"].createElement("div", null, this.props.navbar, _react["default"].createElement("div", {
         className: "row"
-      }, _react["default"].createElement("div", {
-        className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
-      }, _react["default"].createElement("div", {
-        className: "page-header"
-      }, _react["default"].createElement("h2", {
-        className: "pageheader-title"
-      }, "Crear Filtros"), _react["default"].createElement("div", {
-        className: "page-breadcrumb"
-      }, _react["default"].createElement("nav", {
-        "aria-label": "breadcrumb"
-      }, _react["default"].createElement("ol", {
-        className: "breadcrumb"
-      }, _react["default"].createElement("li", {
-        className: "breadcrumb-item font-16",
-        "aria-current": "page",
-        onClick: this.props.returnChooseDates
-      }, _react["default"].createElement("a", {
-        href: "#",
-        className: "breadcrumb-link"
-      }, "Seleccionar Fechas")), _react["default"].createElement("li", {
-        className: "breadcrumb-item active font-16",
-        "aria-current": "page"
-      }, "Crear Filtros"))))))), _react["default"].createElement("div", {
+      }, _react["default"].createElement("h2", null, "Creaci\xF3n de Filtros"), _react["default"].createElement("ul", {
+        className: "list-unstyled arrow"
+      }, _react["default"].createElement("li", null, "Esta secci\xF3n permite la creaci\xF3n de valores a filtrar de los resultados de variables, indicadores y riegsos. Primero se selecciona un valor de la barra izquierda lo que muestra los campos disponibles de la variable en el cuadro de la derecha. Al seleccionar un campo se muestran las diferentes opciones disponibles para filtrar."), _react["default"].createElement("li", null, "Al crear un filtro, se mostrara en la tabla al fondo de la p\xE1gina en donde se podr\xE1 eliminar el filtro."), _react["default"].createElement("li", null, "Para avanzar a la siguiente ventana, se debe seleccionar por lo menos una variable de la barra izquierda."))), _react["default"].createElement(_FilasCeldas["default"], {
+        categoriasVariables: categoriasVariables,
+        seleccionVariable: this.seleccionVariable
+      }), _react["default"].createElement("div", {
         className: "row",
         style: {
           height: "70vh"
@@ -1192,7 +1208,6 @@ function (_React$Component) {
           width: "100%"
         }
       }, _react["default"].createElement("div", {
-        className: "card",
         style: {
           height: "100%",
           width: "100%"
@@ -1200,60 +1215,34 @@ function (_React$Component) {
       }, _react["default"].createElement("div", {
         className: "row",
         style: {
-          borderBottom: "3px solid #d2d2e4",
           height: "90%",
           width: "100%"
         }
       }, _react["default"].createElement("div", {
         className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3",
         style: {
-          borderRight: "3px solid #d2d2e4",
           height: "100%",
-          overflowY: "scroll"
+          overflowY: "scroll",
+          backgroundColor: "white"
         }
-      }, _react["default"].createElement("div", {
-        style: _defineProperty({
-          display: "flex",
-          alignItems: "center",
-          paddingTop: "1%",
-          justifyContent: "center",
-          height: "8%",
-          width: "100%"
-        }, "paddingTop", "5px")
-      }, _react["default"].createElement("h2", null, "Variables")), _react["default"].createElement("div", {
-        style: {
-          width: "100%",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center"
-        }
-      }, _react["default"].createElement("div", {
-        style: {
-          width: "100%",
-          border: "1px solid #999297",
-          borderRadius: "50px"
-        }
-      })), _react["default"].createElement("br", null), _react["default"].createElement("div", {
-        style: {
-          paddingLeft: "5px",
-          overflowX: "scroll"
-        }
-      }, this.state.variables.map(function (variable, i) {
-        return _react["default"].createElement("div", {
-          key: variable.ID
-        }, _react["default"].createElement("label", {
-          className: "custom-control custom-radio"
-        }, _react["default"].createElement("input", {
-          id: "varRad" + variable.ID,
-          onClick: function onClick() {
-            return _this11.selVar(i, "variable");
-          },
-          type: "radio",
-          name: "sinoRadio",
-          className: "custom-control-input"
-        }), _react["default"].createElement("span", {
-          className: "custom-control-label"
-        }, variable.nombreVariable)), i != _this11.state.variables.length - 1 ? _react["default"].createElement("div", {
+      }, this.state.contenedorVariables.map(function (variables, i) {
+        return _react["default"].createElement("div", null, _react["default"].createElement("div", {
+          style: {
+            position: "sticky",
+            top: "0",
+            backgroundColor: "white",
+            zIndex: "99"
+          }
+        }, _react["default"].createElement("div", {
+          style: {
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            height: "8%",
+            width: "100%",
+            paddingTop: "5px"
+          }
+        }, _react["default"].createElement("h2", null, "Variables")), _react["default"].createElement("div", {
           style: {
             width: "100%",
             display: "flex",
@@ -1262,155 +1251,61 @@ function (_React$Component) {
           }
         }, _react["default"].createElement("div", {
           style: {
-            width: "80%",
-            border: "1px solid #d2d2e4",
+            width: "100%",
+            border: "1px solid #999297",
             borderRadius: "50px"
           }
-        })) : null);
-      })), _react["default"].createElement("div", {
-        style: {
-          width: "100%",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center"
-        }
-      }, _react["default"].createElement("div", {
-        style: {
-          width: "100%",
-          border: "1px solid #999297",
-          borderRadius: "50px"
-        }
-      })), _react["default"].createElement("div", {
-        style: _defineProperty({
-          display: "flex",
-          alignItems: "center",
-          paddingTop: "1%",
-          justifyContent: "center",
-          height: "8%",
-          width: "100%"
-        }, "paddingTop", "5px")
-      }, _react["default"].createElement("h2", null, "Indicadores")), _react["default"].createElement("div", {
-        style: {
-          width: "100%",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center"
-        }
-      }, _react["default"].createElement("div", {
-        style: {
-          width: "100%",
-          border: "1px solid #999297",
-          borderRadius: "50px"
-        }
-      })), _react["default"].createElement("br", null), _react["default"].createElement("div", {
-        style: {
-          paddingLeft: "5px",
-          overflowX: "scroll"
-        }
-      }, this.state.indicadores.map(function (indicador, i) {
-        return _react["default"].createElement("div", {
-          key: indicador.ID
-        }, _react["default"].createElement("label", {
-          className: "custom-control custom-radio"
+        }))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
+          style: {
+            paddingLeft: "5px",
+            overflowX: "scroll"
+          }
+        }, variables.map(function (variable, j) {
+          return _react["default"].createElement("div", {
+            key: variable.ID
+          }, _react["default"].createElement("label", {
+            className: "custom-control custom-checkbox"
+          }, _react["default"].createElement("input", {
+            id: "varRad" + variable.ID,
+            onClick: function onClick() {
+              return _this11.selVar(i, "variable");
+            },
+            type: "checkbox",
+            name: "sinoRadio",
+            className: "custom-control-input"
+          }), _react["default"].createElement("span", {
+            className: "custom-control-label"
+          }, variable.nombreVariable)), _react["default"].createElement("div", {
+            style: {
+              width: "100%",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center"
+            }
+          }, _react["default"].createElement("div", {
+            style: {
+              width: "80%",
+              border: "1px solid #d2d2e4",
+              borderRadius: "50px"
+            }
+          })));
+        }), _react["default"].createElement("label", {
+          className: "custom-control custom-checkbox"
         }, _react["default"].createElement("input", {
-          id: "varRad" + indicador.ID,
-          onClick: function onClick() {
-            return _this11.selVar(i, "indicador");
-          },
-          type: "radio",
+          id: "todosVariables",
+          type: "checkbox",
           name: "sinoRadio",
           className: "custom-control-input"
         }), _react["default"].createElement("span", {
           className: "custom-control-label"
-        }, indicador.nombreIndicador)), i != _this11.state.indicadores.length - 1 ? _react["default"].createElement("div", {
-          style: {
-            width: "100%",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center"
-          }
-        }, _react["default"].createElement("div", {
-          style: {
-            width: "80%",
-            border: "1px solid #d2d2e4",
-            borderRadius: "50px"
-          }
-        })) : null);
+        }, "Seleccionar / Deseleccionar Todos"))));
       })), _react["default"].createElement("div", {
-        style: {
-          width: "100%",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center"
-        }
-      }, _react["default"].createElement("div", {
-        style: {
-          width: "100%",
-          border: "1px solid #999297",
-          borderRadius: "50px"
-        }
-      })), _react["default"].createElement("div", {
-        style: _defineProperty({
-          display: "flex",
-          alignItems: "center",
-          paddingTop: "1%",
-          justifyContent: "center",
-          height: "8%",
-          width: "100%"
-        }, "paddingTop", "5px")
-      }, _react["default"].createElement("h2", null, "Riesgos")), _react["default"].createElement("div", {
-        style: {
-          width: "100%",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center"
-        }
-      }, _react["default"].createElement("div", {
-        style: {
-          width: "100%",
-          border: "1px solid #999297",
-          borderRadius: "50px"
-        }
-      })), _react["default"].createElement("br", null), _react["default"].createElement("div", {
-        style: {
-          paddingLeft: "5px",
-          overflowX: "scroll"
-        }
-      }, this.state.riesgos.map(function (riesgo, i) {
-        return _react["default"].createElement("div", {
-          key: riesgo.ID
-        }, _react["default"].createElement("label", {
-          className: "custom-control custom-radio"
-        }, _react["default"].createElement("input", {
-          id: "varRad" + riesgo.ID,
-          onClick: function onClick() {
-            return _this11.selVar(i, "riesgo");
-          },
-          type: "radio",
-          name: "sinoRadio",
-          className: "custom-control-input"
-        }), _react["default"].createElement("span", {
-          className: "custom-control-label"
-        }, riesgo.nombreRiesgo)), i != _this11.state.riesgos.length - 1 ? _react["default"].createElement("div", {
-          style: {
-            width: "100%",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center"
-          }
-        }, _react["default"].createElement("div", {
-          style: {
-            width: "80%",
-            border: "1px solid #d2d2e4",
-            borderRadius: "50px"
-          }
-        })) : null);
-      }))), _react["default"].createElement("div", {
-        className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9",
+        className: "col-xl-8 col-lg-8 col-md-8 col-sm-8 col-8 offset-sm-1",
         style: {
           height: "100%",
           width: "100%",
-          padding: "0px"
+          padding: "0px",
+          backgroundColor: "white"
         }
       }, _react["default"].createElement("div", {
         className: "row",
@@ -1429,7 +1324,7 @@ function (_React$Component) {
           whiteSpace: "nowrap"
         }
       }, this.state.variableSeleccionada.atributos.map(function (atributo, i) {
-        var _ref4;
+        var _ref;
 
         return _react["default"].createElement("div", {
           key: _this11.state.variableSeleccionada.nombre + atributo.nombre + atributo.ID,
@@ -1455,11 +1350,11 @@ function (_React$Component) {
           }
         }, _react["default"].createElement("p", {
           className: "lead",
-          style: (_ref4 = {
+          style: (_ref = {
             overflowWrap: "break-word",
             wordWrap: "break-word",
             whiteSpace: "-moz-pre-wrap"
-          }, _defineProperty(_ref4, "whiteSpace", "pre-wrap"), _defineProperty(_ref4, "wordBreak", "break-all"), _ref4)
+          }, _defineProperty(_ref, "whiteSpace", "pre-wrap"), _defineProperty(_ref, "wordBreak", "break-all"), _defineProperty(_ref, "lineHeight", "1em"), _ref)
         }, atributo.nombre)));
       })) : null), _react["default"].createElement("div", {
         className: "row",
@@ -1493,13 +1388,53 @@ function (_React$Component) {
       })))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
         className: "text-center",
         style: {
-          width: "100%"
+          width: "100%",
+          backgroundColor: "white",
+          padding: "2% 0%"
         }
       }, _react["default"].createElement("a", {
         href: "#",
         className: "btn btn-primary active",
         onClick: this.agregarFiltro
-      }, "Agregar Filtro")), _react["default"].createElement("br", null)))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
+      }, "Agregar Filtro")), _react["default"].createElement("br", null)))), _react["default"].createElement("br", null), _react["default"].createElement("br", null), _react["default"].createElement("br", null), _react["default"].createElement("div", {
+        className: "row",
+        style: {
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "white"
+        }
+      }, _react["default"].createElement("div", {
+        style: {
+          width: "50%"
+        }
+      }, _react["default"].createElement("div", {
+        className: "row",
+        style: {
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center"
+        }
+      }, "Agrupar por:"), _react["default"].createElement("div", {
+        className: "row"
+      }, _react["default"].createElement("label", {
+        className: "custom-control custom-radio custom-control-inline"
+      }, _react["default"].createElement("input", {
+        type: "radio",
+        name: "radio-inline",
+        className: "custom-control-input",
+        defaultChecked: true
+      }), _react["default"].createElement("span", {
+        className: "custom-control-label"
+      }, "Variables, Indicadores y Riesgos")), _react["default"].createElement("label", {
+        className: "custom-control custom-radio custom-control-inline"
+      }, _react["default"].createElement("input", {
+        type: "radio",
+        name: "radio-inline",
+        className: "custom-control-input"
+      }), _react["default"].createElement("span", {
+        className: "custom-control-label"
+      }, "Usuarios"))))), _react["default"].createElement("br", null), _react["default"].createElement("div", {
         className: "row"
       }, _react["default"].createElement("a", {
         className: "btn btn-success btn-block btnWhiteColorHover font-bold font-20",
@@ -1514,6 +1449,10 @@ function (_React$Component) {
       }, _react["default"].createElement("div", {
         className: "card"
       }, _react["default"].createElement("table", {
+        className: "table table-striped table-bordered"
+      }, _react["default"].createElement("thead", null, _react["default"].createElement("tr", null, _react["default"].createElement("th", {
+        scope: "col"
+      }, "Variables a Visualizar")))), _react["default"].createElement("table", {
         className: "table table-striped table-bordered"
       }, _react["default"].createElement("thead", null, _react["default"].createElement("tr", null, _react["default"].createElement("th", {
         scope: "col"

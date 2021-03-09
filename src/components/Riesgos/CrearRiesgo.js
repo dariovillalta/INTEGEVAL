@@ -3,7 +3,7 @@ import sql from 'mssql';
 import Slider from 'react-input-slider';
 
 const tipoCampos = [ {nombre: "texto"}, {nombre: "booleano"}, {nombre: "fecha"}, {nombre: "número"}, {nombre: "arreglo"}];
-var peso = 0, nombre = '', formula = '', nombreEncargadoRiesgo = '';
+var peso = 0, idFormula = '', nombre = '', formula = '', nombreEncargadoRiesgo = '';
 
 export default class CrearRiesgo extends React.Component {
     constructor(props) {
@@ -15,6 +15,7 @@ export default class CrearRiesgo extends React.Component {
         this.getUsuarios = this.getUsuarios.bind(this);
         this.crearRiesgo = this.crearRiesgo.bind(this);
         this.tieneEspaciosEnBlanco = this.tieneEspaciosEnBlanco.bind(this);
+        this.updateIdFormula = this.updateIdFormula.bind(this);
         this.updateNombreRiesgo = this.updateNombreRiesgo.bind(this);
         this.updateFormulaRiesgo = this.updateFormulaRiesgo.bind(this);
         this.updateNombreEncargadoRiesgo = this.updateNombreEncargadoRiesgo.bind(this);
@@ -58,61 +59,70 @@ export default class CrearRiesgo extends React.Component {
     }
 
     crearRiesgo () {
+        var idFormula = $("#idFormula").val();
         var nombre = $("#nombreRiesgo").val();
         var formula = $("#formula").val();
         var responsable = $("#responsable").val();
         var peso = this.state.x;
-        if(nombre.length > 0 && nombre.length < 101) {
-            if(!this.tieneEspaciosEnBlanco(nombre)) {
-                if(formula.length > 0 && formula.length < 501) {
-                    if(nombre.length > 0 && nombre.length < 101) {
-                        if(responsable.length > 0) {
-                            if( !isNaN(parseInt(peso)) ) {
-                                const transaction = new sql.Transaction( this.props.pool );
-                                transaction.begin(err => {
-                                    var rolledBack = false;
-                                    transaction.on('rollback', aborted => {
-                                        rolledBack = true;
-                                    });
-                                    const request = new sql.Request(transaction);
-                                    request.query("insert into Riesgos (nombre, formula, responsable, peso) values ('"+nombre+"', '"+formula+"', '"+responsable+"', "+peso+")", (err, result) => {
-                                        if (err) {
-                                            if (!rolledBack) {
-                                                console.log(err);
-                                                transaction.rollback(err => {
+        if(idFormula.length > 0 && idFormula.length < 101) {
+            if(nombre.length > 0 && nombre.length < 501) {
+                if(!this.tieneEspaciosEnBlanco(nombre)) {
+                    if(formula.length > 0 && formula.length < 501) {
+                        if(nombre.length > 0 && nombre.length < 101) {
+                            if(responsable.length > 0) {
+                                if( !isNaN(parseInt(peso)) ) {
+                                    const transaction = new sql.Transaction( this.props.pool );
+                                    transaction.begin(err => {
+                                        var rolledBack = false;
+                                        transaction.on('rollback', aborted => {
+                                            rolledBack = true;
+                                        });
+                                        const request = new sql.Request(transaction);
+                                        request.query("insert into Riesgos (idFormula, nombre, formula, responsable, peso) values ('"+idFormula+"', '"+nombre+"', '"+formula+"', '"+responsable+"', "+peso+")", (err, result) => {
+                                            if (err) {
+                                                if (!rolledBack) {
+                                                    console.log(err);
+                                                    transaction.rollback(err => {
+                                                    });
+                                                }
+                                            } else {
+                                                transaction.commit(err => {
+                                                    this.props.terminoCrearRiesgo();
+                                                    this.props.actualizarRiesgos();
                                                 });
                                             }
-                                        } else {
-                                            transaction.commit(err => {
-                                                this.props.terminoCrearRiesgo();
-                                                this.props.actualizarRiesgos();
-                                            });
-                                        }
-                                    });
-                                }); // fin transaction
+                                        });
+                                    }); // fin transaction
+                                } else {
+                                    alert("el peso del riesgo debe ser un numero valido");
+                                }
                             } else {
-                                alert("el peso del riesgo debe ser un numero valido");
+                                alert("Ingrese un valor para el responsable.");
                             }
                         } else {
-                            alert("Ingrese un valor para el responsable.");
+                            alert("el peso del riesgo debe ser un numero valido");
                         }
                     } else {
-                        alert("el peso del riesgo debe ser un numero valido");
+                        alert("la formula del riesgo debe tener una longitud mayor a 0 y menor a 501");
                     }
                 } else {
-                    alert("la formula del riesgo debe tener una longitud mayor a 0 y menor a 501");
+                    alert('El nombre del riesgo no debe contener espacios en blanco');
                 }
             } else {
-                alert('El nombre del riesgo no debe contener espacios en blanco');
+                alert("el nombre del riesgo debe tener una longitud mayor a 0 y menor a 501");
             }
         } else {
-            alert("el nombre del riesgo debe tener una longitud mayor a 0 y menor a 101");
+            alert("el idenficador en fórmula del riesgo debe tener una longitud mayor a 0 y menor a 101");
         }
 
     }
 
     tieneEspaciosEnBlanco (s) {
         return /\s/g.test(s);
+    }
+
+    updateIdFormula () {
+        idFormula = $("#idFormula").val();
     }
 
     updateNombreRiesgo() {
@@ -157,6 +167,14 @@ export default class CrearRiesgo extends React.Component {
                                         </div>
                                         <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"}>
                                             <input id="nombreRiesgo" type="text" defaultValue={nombre} onKeyUp={this.updateNombreRiesgo} className="form-control form-control-sm"/>
+                                        </div>
+                                    </div>
+                                    <div className={"row"} style={{width: "100%"}}>
+                                        <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
+                                            <label htmlFor="idFormula" className="col-form-label">Identificador en Fórmula</label>
+                                        </div>
+                                        <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"}>
+                                            <input id="idFormula" type="text" defaultValue={idFormula} onKeyUp={this.updateIdFormula} className="form-control form-control-sm"/>
                                         </div>
                                     </div>
                                     <div className={"row"} style={{width: "100%"}}>

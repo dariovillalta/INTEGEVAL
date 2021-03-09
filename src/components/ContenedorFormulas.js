@@ -63,7 +63,7 @@ export default class ContenedorFormulas extends React.Component {
         if(formulaSeleccionada != undefined && formulaSeleccionada != null) {
             this.props.callbackCrearRegla(true, formulaSeleccionada, posicionFormula);
         } else {
-            alert("Seleccione por lo menos una formula")
+            this.props.showMessage("Error", "Seleccione por lo menos una formula", true, false, {});
         }
     }
 
@@ -221,7 +221,7 @@ export default class ContenedorFormulas extends React.Component {
             if(formulaSeleccionada != undefined && formulaSeleccionada != null) {
                 this.props.callbackModificarRegla(true, formulaSeleccionada, posicionFormula);
             } else {
-                alert("Seleccione por lo menos una formula")
+                this.props.showMessage("Error", "Seleccione por lo menos una formula", true, false, {});
             }
         } else {
             this.props.callbackEliminarRegla(true);

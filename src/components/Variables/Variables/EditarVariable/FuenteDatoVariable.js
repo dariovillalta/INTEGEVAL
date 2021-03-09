@@ -1,5 +1,7 @@
 import React from 'react';
 import sql from 'mssql';
+import XLSX from 'xlsx-style';
+import { evaluate, round} from 'mathjs';
 
 import FuenteDatoVariableAtributos from './FuenteDatoVariableAtributos.js';
 import Modal from '../../../Modal/Modal.js';
@@ -43,22 +45,6 @@ window.arregloDeVariables = [];                                //Arreglo con las
 window.arregloDeErroresVariables = [];
         //objeto: {nombre, descripcion, esObjeto, objetoPadreID, guardar, nivel, [arreglo de atributos]}
             //objeto arreglo de atributos: {nombre, tipo, formula}
-var nivelMaximoIndicadores = 0;
-window.arregloDeIndicadores = [];                                //Arreglo con las indicadores
-        //objeto: {nombre, descripcion, esObjeto, objetoPadreID, guardar, nivel, [arreglo de atributos]}
-            //objeto arreglo de atributos: {nombre, tipo, formula}
-window.arregloDeRiesgos = [];                                //Arreglo con los riesgos
-
-var banderaImportacionCamposIndicadoresINICIO = 0;                    //Bandera para saber si termino de importar los campos de los indicadores
-var banderaImportacionCamposIndicadoresFIN = 0;                       //Bandera para saber si termino de importar los campos de los indicadores
-var banderaImportacionSegmentosCamposIndicadoresINICIO = 0;           //Bandera para saber si termino de importar los segmentos de reglas de los campos de los indicadores
-var banderaImportacionSegmentosCamposIndicadoresFIN = 0;              //Bandera para saber si termino de importar los segmentos de reglas de los campos de los indicadores
-var banderaImportacionReglasSegmentosCamposIndicadoresINICIO = 0;     //Bandera para saber si termino de importar las reglas de los segmentos de los campos de los indicadores
-var banderaImportacionReglasSegmentosCamposIndicadoresFIN = 0;        //Bandera para saber si termino de importar las reglas de los segmentos de los campos de los indicadores
-var banderaImportacionFormulasCamposIndicadoresINICIO = 0;            //Bandera para saber si termino de importar las formulas de los campos de los indicadores
-var banderaImportacionFormulasCamposIndicadoresFIN = 0;               //Bandera para saber si termino de importar las formulas de los campos de los indicadores
-var banderaImportacionElementosFormulasCamposIndicadoresINICIO = 0;   //Bandera para saber si termino de importar los elementos de las formulas de los campos de los indicadores
-var banderaImportacionElementosFormulasCamposIndicadoresFIN = 0;      //Bandera para saber si termino de importar los elementos de las formulas de los campos de los indicadores
 
 
 window.arregloConexionesATablas = [];          //Arreglo con los valores para poder conectarse a las tablas
@@ -115,6 +101,8 @@ export default class FuenteDatoVariable extends React.Component {
             tipoVariable: tipoVariable,
             usuarios: []
         }
+        this.saveBitacora = this.saveBitacora.bind(this);
+
         this.cambioInstruccionSQL = this.cambioInstruccionSQL.bind(this);
         this.cambioAColeccion = this.cambioAColeccion.bind(this);
         this.cambioAObjeto = this.cambioAObjeto.bind(this);
@@ -128,25 +116,6 @@ export default class FuenteDatoVariable extends React.Component {
         this.traerVariablesExcel = this.traerVariablesExcel.bind(this);
         this.revisarFinImportacionVariablesExcel = this.revisarFinImportacionVariablesExcel.bind(this);
         this.traerFormas = this.traerFormas.bind(this);
-        this.traerRiesgos = this.traerRiesgos.bind(this);
-
-        this.getNivelMaximoIndicadores = this.getNivelMaximoIndicadores.bind(this);
-        this.traerIndicadores = this.traerIndicadores.bind(this);
-        this.traerElementosIndicador = this.traerElementosIndicador.bind(this);
-        this.traerAtributosIndicadores = this.traerAtributosIndicadores.bind(this);
-        this.revisarFinImportacionCamposIndicadores = this.revisarFinImportacionCamposIndicadores.bind(this);
-        this.inicioTraerSegmentosDeCamposIndicadores = this.inicioTraerSegmentosDeCamposIndicadores.bind(this);
-        this.traerSegmentosDeCamposIndicadores = this.traerSegmentosDeCamposIndicadores.bind(this);
-        this.revisarFinImportacionSegmentosCamposIndicadores = this.revisarFinImportacionSegmentosCamposIndicadores.bind(this);
-        this.inicioTraerReglasDeSegmentosIndicadores = this.inicioTraerReglasDeSegmentosIndicadores.bind(this);
-        this.traerReglasDeSegmentosIndicadores = this.traerReglasDeSegmentosIndicadores.bind(this);
-        this.revisarFinImportacionReglasSegmentosIndicadores = this.revisarFinImportacionReglasSegmentosIndicadores.bind(this);
-        this.inicioTraerFormulasDeCamposIndicadores = this.inicioTraerFormulasDeCamposIndicadores.bind(this);
-        this.traerFormulasDeCamposIndicadores = this.traerFormulasDeCamposIndicadores.bind(this);
-        this.revisarFinImportacionFormulasCamposIndicadores = this.revisarFinImportacionFormulasCamposIndicadores.bind(this);
-        this.inicioTraerElementosFormulasDeCamposIndicadores = this.inicioTraerElementosFormulasDeCamposIndicadores.bind(this);
-        this.traerElementosFormulasDeCamposIndicadores = this.traerElementosFormulasDeCamposIndicadores.bind(this);
-        this.revisarFinImportacionElementosFormulasCamposIndicadores = this.revisarFinImportacionElementosFormulasCamposIndicadores.bind(this);
 
         this.getNivelMaximoVariables = this.getNivelMaximoVariables.bind(this);
         this.traerVariables = this.traerVariables.bind(this);
@@ -198,7 +167,9 @@ export default class FuenteDatoVariable extends React.Component {
         this.crearCodigoFuenteDato = this.crearCodigoFuenteDato.bind(this);
         this.crearCodigoFuenteDatoSQL = this.crearCodigoFuenteDatoSQL.bind(this);
         this.crearCodigoSegmentoReglas = this.crearCodigoSegmentoReglas.bind(this);
+        this.crearCodigoSegmentoReglasFormaOExcel = this.crearCodigoSegmentoReglasFormaOExcel.bind(this);
         this.arregloCodigoRegla = this.arregloCodigoRegla.bind(this);
+        this.arregloCodigoReglaFormaOExcel = this.arregloCodigoReglaFormaOExcel.bind(this);
         this.agregarCodigoGuardarVariable = this.agregarCodigoGuardarVariable.bind(this);
         this.crearNivel = this.crearNivel.bind(this);
         this.isValidDate = this.isValidDate.bind(this);
@@ -223,7 +194,6 @@ export default class FuenteDatoVariable extends React.Component {
         this.iniciarHilo = this.iniciarHilo.bind(this);
 
         this.iniciarCalculoIndicadores = this.iniciarCalculoIndicadores.bind(this);
-        this.calculoDeRiesgos = this.calculoDeRiesgos.bind(this);
 
         this.guardarVariablesCalculadas = this.guardarVariablesCalculadas.bind(this);
         this.verificarSiExisteVariableEnResultadosHistoricos = this.verificarSiExisteVariableEnResultadosHistoricos.bind(this);
@@ -231,13 +201,19 @@ export default class FuenteDatoVariable extends React.Component {
         this.crearResultadoNombreVariable = this.crearResultadoNombreVariable.bind(this);
         this.guardarResultadosNombreVariable = this.guardarResultadosNombreVariable.bind(this);
         this.guardarVariable = this.guardarVariable.bind(this);
+        this.borrarRiesgo = this.borrarRiesgo.bind(this);
 
         this.verificarPeriodicidadGuardar = this.verificarPeriodicidadGuardar.bind(this);
         this.updatePeriodicidad = this.updatePeriodicidad.bind(this);
         this.guardarPeriodicidad = this.guardarPeriodicidad.bind(this);
         //valorPeriodicidadGlobal = this.props.periodicidadVariable;
 
+        this.verificarExistenciaErroresExcel = this.verificarExistenciaErroresExcel.bind(this);
+        this.verificarExistenciaErroresForma = this.verificarExistenciaErroresForma.bind(this);
+        this.verificarExistenciaErroresVariable = this.verificarExistenciaErroresVariable.bind(this);
+
         this.getUsuarios = this.getUsuarios.bind(this);
+        this.goToTimeline = this.goToTimeline.bind(this);
     }
 
     componentDidMount () {
@@ -294,7 +270,7 @@ export default class FuenteDatoVariable extends React.Component {
                                     mostrarEsColeccion: result.recordset[0].esColeccion,
                                     valorPeriodicidad: result.recordset[0].periodicidad
                                 });
-                                this.props.changeStateFirstTimeToFalse();
+                                //this.props.changeStateFirstTimeToFalse();
                             }
                         });
                     }
@@ -337,9 +313,35 @@ export default class FuenteDatoVariable extends React.Component {
                 });
             }); // fin transaction
         }
+        this.getUsuarios();
     }
+
     componentWillUnmount() {
         tipoVariable = '';
+    }
+
+    saveBitacora (fecha, descripcion) {
+        const transaction = new sql.Transaction( this.props.pool );
+        transaction.begin(err => {
+            var rolledBack = false;
+            transaction.on('rollback', aborted => {
+                rolledBack = true;
+            });
+            const request = new sql.Request(transaction);
+            request.query("insert into Bitacora (usuarioID, nombreUsuario, fecha, descripcion) values ("+this.props.userID+", '"+this.props.userName+"', '"+fecha.getFullYear()+"-"+(fecha.getMonth()+1)+"-"+fecha.getDate()+"', '"+descripcion+"')", (err, result) => {
+                if (err) {
+                    console.log(err);
+                    this.props.showMessage("Error", 'No se pudo guardar información de bitacora.', true, false, {});
+                    if (!rolledBack) {
+                        transaction.rollback(err => {
+                        });
+                    }
+                } else {
+                    transaction.commit(err => {
+                    });
+                }
+            });
+        }); // fin transaction
     }
 
     cambioInstruccionSQL () {
@@ -413,6 +415,37 @@ export default class FuenteDatoVariable extends React.Component {
             self.props.actualizarFechaInicio(fecha);
         });
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -576,356 +609,11 @@ export default class FuenteDatoVariable extends React.Component {
                 } else {
                     transaction.commit(err => {
                         arregloDeFormas = result.recordset;
-                        this.traerRiesgos();
+                        this.getNivelMaximoVariables();
                     });
                 }
             });
         }); // fin transaction
-    }
-
-    traerRiesgos () {
-        const transaction = new sql.Transaction( this.props.pool );
-        transaction.begin(err => {
-            var rolledBack = false;
-            transaction.on('rollback', aborted => {
-                rolledBack = true;
-            });
-            const request = new sql.Request(transaction);
-            request.query("select * from Riesgos", (err, result) => {
-                if (err) {
-                    console.log(err);
-                    this.getNivelMaximoIndicadores();
-                    if (!rolledBack) {
-                        transaction.rollback(err => {
-                        });
-                    }
-                } else {
-                    transaction.commit(err => {
-                        arregloDeRiesgos = result.recordset;
-                        this.getNivelMaximoIndicadores();
-                    });
-                }
-            });
-        }); // fin transaction
-    }
-
-    getNivelMaximoIndicadores() {
-        nivelMaximoIndicadores = 0;
-        const transaction = new sql.Transaction( this.props.pool );
-        transaction.begin(err => {
-            var rolledBack = false;
-            transaction.on('rollback', aborted => {
-                rolledBack = true;
-            });
-            const request = new sql.Request(transaction);
-            request.query("select MAX(nivel) AS nivel from IndicadoresCampos", (err, result) => {
-                if (err) {
-                    console.log(err);
-                    this.traerIndicadores();
-                    if (!rolledBack) {
-                        transaction.rollback(err => {
-                        });
-                    }
-                } else {
-                    transaction.commit(err => {
-                        if(result.recordset.length > 0) {
-                            nivelMaximoIndicadores = result.recordset[0].nivel;
-                        }
-                        arregloDeIndicadores = [];
-                        this.traerIndicadores();
-                    });
-                }
-            });
-        }); // fin transaction
-    }
-
-    traerIndicadores() {
-        const transaction = new sql.Transaction( this.props.pool );
-        transaction.begin(err => {
-            var rolledBack = false;
-            transaction.on('rollback', aborted => {
-                rolledBack = true;
-            });
-            const request = new sql.Request(transaction);
-            request.query("select * from Indicadores", (err, result) => {
-                if (err) {
-                    console.log(err);
-                    this.getNivelMaximoVariables();
-                    if (!rolledBack) {
-                        transaction.rollback(err => {
-                        });
-                    }
-                } else {
-                    transaction.commit(err => {
-                        arregloDeIndicadores = result.recordset;
-                        banderaImportacionCamposIndicadoresINICIO = 0;
-                        banderaImportacionCamposIndicadoresFIN = arregloDeIndicadores.length;
-                        for (var i = 0; i < arregloDeIndicadores.length; i++) {
-                            this.traerElementosIndicador(arregloDeIndicadores[i].ID, i);
-                            this.traerAtributosIndicadores(arregloDeIndicadores[i].ID, i);
-                        };
-                        if(arregloDeIndicadores.length == 0) {
-                            alert("No existen indicadores");
-                            this.getNivelMaximoVariables();
-                        }
-                    });
-                }
-            });
-        }); // fin transaction
-    }
-
-    traerElementosIndicador (indicadorID, index) {
-        const transaction = new sql.Transaction( this.props.pool );
-        transaction.begin(err => {
-            var rolledBack = false;
-            transaction.on('rollback', aborted => {
-                rolledBack = true;
-            });
-            const request = new sql.Request(transaction);
-            request.query("select * from ElementoIndicador where indicadorID = "+indicadorID, (err, result) => {
-                if (err) {
-                    console.log(err);
-                    this.revisarFinImportacionCamposIndicadores();
-                    if (!rolledBack) {
-                        transaction.rollback(err => {
-                        });
-                    }
-                } else {
-                    transaction.commit(err => {
-                        arregloDeIndicadores[index].elementoFormula = result.recordset;
-                    });
-                }
-            });
-        }); // fin transaction
-    }
-
-    traerAtributosIndicadores (indicadorID, index) {
-        const transaction = new sql.Transaction( this.props.pool );
-        transaction.begin(err => {
-            var rolledBack = false;
-            transaction.on('rollback', aborted => {
-                rolledBack = true;
-            });
-            const request = new sql.Request(transaction);
-            request.query("select * from IndicadoresCampos where indicadorID = "+indicadorID, (err, result) => {
-                if (err) {
-                    console.log(err);
-                    banderaImportacionCamposIndicadoresINICIO++;
-                    this.revisarFinImportacionCamposIndicadores();
-                    if (!rolledBack) {
-                        transaction.rollback(err => {
-                        });
-                    }
-                } else {
-                    transaction.commit(err => {
-                        banderaImportacionCamposIndicadoresINICIO++;
-                        arregloDeIndicadores[index].atributos = result.recordset;
-                        this.revisarFinImportacionCamposIndicadores();
-                    });
-                }
-            });
-        }); // fin transaction
-    }
-
-    revisarFinImportacionCamposIndicadores () {
-        if(banderaImportacionCamposIndicadoresINICIO == banderaImportacionCamposIndicadoresFIN) {
-            this.inicioTraerSegmentosDeCamposIndicadores();
-        }
-    }
-
-    inicioTraerSegmentosDeCamposIndicadores () {
-        console.log('inicioTraerSegmentosDeCamposIndicadores');
-        banderaImportacionSegmentosCamposIndicadoresINICIO = 0;
-        banderaImportacionSegmentosCamposIndicadoresFIN = 0;
-        for (var i = 0; i < arregloDeIndicadores.length; i++) {
-            for (var j = 0; j < arregloDeIndicadores[i].atributos.length; j++) {
-                banderaImportacionSegmentosCamposIndicadoresFIN++;
-                this.traerSegmentosDeCamposIndicadores(arregloDeIndicadores[i].ID, arregloDeIndicadores[i].atributos[j].ID, i, j);
-            };
-        };
-        if(banderaImportacionSegmentosCamposIndicadoresFIN == 0) {
-            this.getNivelMaximoVariables();
-        }
-    }
-
-    traerSegmentosDeCamposIndicadores (indicadorID, indicadorCampoID, i, j) {
-        const transaction = new sql.Transaction( this.props.pool );
-        transaction.begin(err => {
-            var rolledBack = false;
-            transaction.on('rollback', aborted => {
-                rolledBack = true;
-            });
-            const request = new sql.Request(transaction);
-            request.query("select * from SegmentoReglasIndicadores where indicadorID = "+indicadorID+" and indicadorCampoID = "+indicadorCampoID, (err, result) => {
-                if (err) {
-                    console.log(err);
-                    banderaImportacionSegmentosCamposIndicadoresINICIO++;
-                    this.revisarFinImportacionSegmentosCamposIndicadores();
-                    if (!rolledBack) {
-                        transaction.rollback(err => {
-                        });
-                    }
-                } else {
-                    transaction.commit(err => {
-                        banderaImportacionSegmentosCamposIndicadoresINICIO++;
-                        arregloDeIndicadores[i].atributos[j].segmentoReglas = result.recordset;
-                        this.revisarFinImportacionSegmentosCamposIndicadores();
-                    });
-                }
-            });
-        }); // fin transaction
-    }
-
-    revisarFinImportacionSegmentosCamposIndicadores () {
-        if(banderaImportacionSegmentosCamposIndicadoresINICIO == banderaImportacionSegmentosCamposIndicadoresFIN) {
-            this.inicioTraerReglasDeSegmentosIndicadores();
-        }
-    }
-
-    inicioTraerReglasDeSegmentosIndicadores () {
-        console.log('inicioTraerReglasDeSegmentosIndicadores');
-        banderaImportacionReglasSegmentosCamposIndicadoresINICIO = 0;
-        banderaImportacionReglasSegmentosCamposIndicadoresFIN = 0;
-        for (var i = 0; i < arregloDeIndicadores.length; i++) {
-            for (var j = 0; j < arregloDeIndicadores[i].atributos.length; j++) {
-                for (var k = 0; k < arregloDeIndicadores[i].atributos[j].segmentoReglas.length; k++) {
-                    banderaImportacionReglasSegmentosCamposIndicadoresFIN++;
-                    this.traerReglasDeSegmentosIndicadores(arregloDeIndicadores[i].ID, arregloDeIndicadores[i].atributos[j].ID, arregloDeIndicadores[i].atributos[j].segmentoReglas[k].ID,  i, j, k);
-                };
-            };
-        };
-    }
-
-    traerReglasDeSegmentosIndicadores (indicadorID, indicadorCampoID, segmentoCampoID, i, j, k) {
-        const transaction = new sql.Transaction( this.props.pool );
-        transaction.begin(err => {
-            var rolledBack = false;
-            transaction.on('rollback', aborted => {
-                rolledBack = true;
-            });
-            const request = new sql.Request(transaction);
-            request.query("select * from ReglasIndicadores where indicadorID = "+indicadorID+" and indicadorCampoID = "+indicadorCampoID+" and segmentoReglaID = "+segmentoCampoID, (err, result) => {
-                if (err) {
-                    console.log(err);
-                    banderaImportacionReglasSegmentosCamposIndicadoresINICIO++;
-                    this.revisarFinImportacionReglasSegmentosIndicadores();
-                    if (!rolledBack) {
-                        transaction.rollback(err => {
-                        });
-                    }
-                } else {
-                    transaction.commit(err => {
-                        banderaImportacionReglasSegmentosCamposIndicadoresINICIO++;
-                        arregloDeIndicadores[i].atributos[j].segmentoReglas[k].reglas = result.recordset;
-                        this.revisarFinImportacionReglasSegmentosIndicadores();
-                    });
-                }
-            });
-        }); // fin transaction
-    }
-
-    revisarFinImportacionReglasSegmentosIndicadores () {
-        console.log('banderaImportacionReglasSegmentosCamposIndicadoresINICIO');
-        console.log(banderaImportacionReglasSegmentosCamposIndicadoresINICIO);
-        console.log('banderaImportacionReglasSegmentosCamposIndicadoresFIN');
-        console.log(banderaImportacionReglasSegmentosCamposIndicadoresFIN);
-        if(banderaImportacionReglasSegmentosCamposIndicadoresINICIO == banderaImportacionReglasSegmentosCamposIndicadoresFIN) {
-            this.inicioTraerFormulasDeCamposIndicadores();
-        }
-    }
-
-    inicioTraerFormulasDeCamposIndicadores () {
-        console.log('inicioTraerFormulasDeCamposIndicadores');
-        banderaImportacionFormulasCamposIndicadoresINICIO = 0;
-        banderaImportacionFormulasCamposIndicadoresFIN = 0;
-        for (var i = 0; i < arregloDeIndicadores.length; i++) {
-            for (var j = 0; j < arregloDeIndicadores[i].atributos.length; j++) {
-                banderaImportacionFormulasCamposIndicadoresFIN++;
-                this.traerFormulasDeCamposIndicadores(arregloDeIndicadores[i].atributos[j].ID, i, j);
-            };
-        };
-    }
-
-    traerFormulasDeCamposIndicadores (indicadorCampoID, i, j) {
-        const transaction = new sql.Transaction( this.props.pool );
-        transaction.begin(err => {
-            var rolledBack = false;
-            transaction.on('rollback', aborted => {
-                rolledBack = true;
-            });
-            const request = new sql.Request(transaction);
-            request.query("select * from FormulasIndicadoresCampos where indicadorID = "+indicadorCampoID, (err, result) => {
-                if (err) {
-                    console.log(err);
-                    banderaImportacionFormulasCamposIndicadoresINICIO++;
-                    this.revisarFinImportacionFormulasCamposIndicadores();
-                    if (!rolledBack) {
-                        transaction.rollback(err => {
-                        });
-                    }
-                } else {
-                    transaction.commit(err => {
-                        banderaImportacionFormulasCamposIndicadoresINICIO++;
-                        arregloDeIndicadores[i].atributos[j].formulas = result.recordset;
-                        this.revisarFinImportacionFormulasCamposIndicadores();
-                    });
-                }
-            });
-        }); // fin transaction
-    }
-
-    revisarFinImportacionFormulasCamposIndicadores () {
-        if(banderaImportacionFormulasCamposVariablesINICIO == banderaImportacionFormulasCamposVariablesFIN) {
-            this.inicioTraerElementosFormulasDeCamposIndicadores();
-        }
-    }
-
-    inicioTraerElementosFormulasDeCamposIndicadores () {
-        console.log('inicioTraerElementosFormulasDeCamposIndicadores');
-        banderaImportacionElementosFormulasCamposIndicadoresINICIO = 0;
-        banderaImportacionElementosFormulasCamposIndicadoresFIN = 0;
-        for (var i = 0; i < arregloDeIndicadores.length; i++) {
-            for (var j = 0; j < arregloDeIndicadores[i].atributos.length; j++) {
-                for (var k = 0; k < arregloDeIndicadores[i].atributos[j].formulas.length; k++) {
-                    banderaImportacionElementosFormulasCamposIndicadoresFIN++;
-                    this.traerElementosFormulasDeCamposIndicadores(arregloDeIndicadores[i].atributos[j].formulas[k].ID, i, j, k);
-                };
-            };
-        };
-    }
-
-    traerElementosFormulasDeCamposIndicadores (idFormula, i, j, k) {
-        const transaction = new sql.Transaction( this.props.pool );
-        transaction.begin(err => {
-            var rolledBack = false;
-            transaction.on('rollback', aborted => {
-                rolledBack = true;
-            });
-            const request = new sql.Request(transaction);
-            request.query("select * from ElementoFormulasIndicadoresCampos where formulaID = "+idFormula, (err, result) => {
-                if (err) {
-                    console.log(err);
-                    banderaImportacionElementosFormulasCamposIndicadoresINICIO++;
-                    this.revisarFinImportacionElementosFormulasCamposIndicadores();
-                    if (!rolledBack) {
-                        transaction.rollback(err => {
-                        });
-                    }
-                } else {
-                    transaction.commit(err => {
-                        banderaImportacionElementosFormulasCamposIndicadoresINICIO++;
-                        arregloDeIndicadores[i].atributos[j].formulas[k].fuenteDeDatos = result.recordset;
-                        this.revisarFinImportacionElementosFormulasCamposIndicadores();
-                    });
-                }
-            });
-        }); // fin transaction
-    }
-
-    revisarFinImportacionElementosFormulasCamposIndicadores () {
-        if(banderaImportacionElementosFormulasCamposIndicadoresINICIO == banderaImportacionElementosFormulasCamposIndicadoresFIN) {
-            this.getNivelMaximoVariables();
-        }
     }
 
     getNivelMaximoVariables() {
@@ -1177,10 +865,6 @@ export default class FuenteDatoVariable extends React.Component {
     }
 
     revisarFinImportacionReglasSegmentosVariables () {
-        console.log('banderaImportacionReglasSegmentosCamposVariablesINICIO');
-        console.log(banderaImportacionReglasSegmentosCamposVariablesINICIO);
-        console.log('banderaImportacionReglasSegmentosCamposVariablesFIN');
-        console.log(banderaImportacionReglasSegmentosCamposVariablesFIN);
         if(banderaImportacionReglasSegmentosCamposVariablesINICIO == banderaImportacionReglasSegmentosCamposVariablesFIN) {
             this.inicioTraerFormulasDeCamposVariables();
         }
@@ -1299,7 +983,8 @@ export default class FuenteDatoVariable extends React.Component {
             };
         };
         if(banderaImportacionConecionesATablasFIN == 0) {
-            this.iniciarCalculoExcel();
+            //this.iniciarCalculoExcel();
+            this.verificarPeriodicidad();
         }
     }
 
@@ -1437,6 +1122,36 @@ export default class FuenteDatoVariable extends React.Component {
         return date;
     }
 
+    minusDays (fecha, days) {
+        var date = new Date(fecha);
+        if(date.getDate() >= days) {
+            date.setDate(date.getDate() - days);
+        } else {
+            date.setDate(days - date.getDate());
+        }
+        return date;
+    }
+
+    minusMonths (fecha, months) {
+        var date = new Date(fecha);
+        if(date.getMonth() >= months) {
+            date.setMonth(date.getMonth() - months);
+        } else {
+            date.setMonth(months - date.getMonth());
+        }
+        return date;
+    }
+
+    minusYears (fecha, years) {
+        var date = new Date(fecha);
+        if(date.getFullYear() >= years) {
+            date.setYear(date.getFullYear() - years);
+        } else {
+            date.setYear(years - date.getFullYear());
+        }
+        return date;
+    }
+
     traerPeriodicidadVariable (variable, tabla, arreglo, indexI, indexJ) {
         const transaction = new sql.Transaction( this.props.pool );
         transaction.begin(err => {
@@ -1457,15 +1172,6 @@ export default class FuenteDatoVariable extends React.Component {
                 } else {
                     transaction.commit(err => {
                         if(result.recordset.length > 0) {
-                            console.log("ENCONTRO PeriodicidadCalculo");
-                            console.log("result.recordset[0]");
-                            console.log(result.recordset[0]);
-                            console.log("result.recordset[0].fechaUltimoCalculo.getFullYear()");
-                            console.log(result.recordset[0].fechaUltimoCalculo.getFullYear());
-                            console.log("result.recordset[0].fechaUltimoCalculo.getMonth()");
-                            console.log(result.recordset[0].fechaUltimoCalculo.getMonth());
-                            console.log("result.recordset[0].fechaUltimoCalculo.getDate()");
-                            console.log(result.recordset[0].fechaUltimoCalculo.getDate());
                             var fechaInicioCalculo = variable.fechaInicioCalculo;
                             var fechaUltimoCalculo = result.recordset[0].fechaUltimoCalculo;
                             var tieneUltimoCalculo = false;
@@ -1473,8 +1179,6 @@ export default class FuenteDatoVariable extends React.Component {
                             if(fechaUltimoCalculo.getFullYear() != 1964 && fechaUltimoCalculo.getMonth() != 4 && fechaUltimoCalculo.getDate() != 28) {
                                 tieneUltimoCalculo = true;
                             }
-                            console.log("tieneUltimoCalculo");
-                            console.log(tieneUltimoCalculo);
                             if(!tieneUltimoCalculo) {
                                 if(indexJ != null)
                                     arreglo[indexI].variables[indexJ].realizarCalculo = true;
@@ -1484,35 +1188,21 @@ export default class FuenteDatoVariable extends React.Component {
                                 var ultimoCalculoVigente = false;
                                 var periodicidad = variable.periodicidad;
                                 var fechaSiguienteCalculo = new Date(fechaInicioCalculo);
-                                while(fechaSiguienteCalculo.getFullYear() < fechaUltimoCalculo.getFullYear() && fechaSiguienteCalculo.getMonth() < fechaUltimoCalculo.getMonth() && fechaSiguienteCalculo.getDate() < fechaUltimoCalculo.getDate()) {
-                                    console.log("ANTES");
-                                    console.log(fechaSiguienteCalculo);
+                                while(fechaSiguienteCalculo.getFullYear() <= fechaUltimoCalculo.getFullYear() && fechaSiguienteCalculo.getMonth() <= fechaUltimoCalculo.getMonth() && fechaSiguienteCalculo.getDate() <= fechaUltimoCalculo.getDate()) {
                                     if(periodicidad.localeCompare("diario") == 0) {
-                                        console.log("1");
                                         fechaSiguienteCalculo = this.addDays(fechaSiguienteCalculo, 1);
                                     } else if(periodicidad.localeCompare("semanal") == 0) {
-                                        console.log("2");
                                         fechaSiguienteCalculo = this.addDays(fechaSiguienteCalculo, 7);
                                     } else if(periodicidad.localeCompare("mensual") == 0) {
-                                        console.log("3");
                                         fechaSiguienteCalculo = this.addMonths(fechaSiguienteCalculo, 1);
                                     } else if(periodicidad.localeCompare("trimestral") == 0) {
-                                        console.log("4");
                                         fechaSiguienteCalculo = this.addMonths(fechaSiguienteCalculo, 3);
                                     } else if(periodicidad.localeCompare("bi-anual") == 0) {
-                                        console.log("5");
                                         fechaSiguienteCalculo = this.addMonths(fechaSiguienteCalculo, 6);
                                     } else if(periodicidad.localeCompare("anual") == 0) {
-                                        console.log("6");
                                         fechaSiguienteCalculo = this.addYears(fechaSiguienteCalculo, 1);
                                     }
-                                    console.log("DESPUES");
-                                    console.log(fechaSiguienteCalculo);
                                 }
-                                console.log("==================");
-                                console.log("fechaUltimoCalculo");
-                                console.log(fechaUltimoCalculo);
-                                console.log("==================");
                                 var tocaNuevoCalculo = false;
                                 if(periodicidad.localeCompare("diario") == 0) {
                                     if(fechaSiguienteCalculo.getDate() >= fechaUltimoCalculo.getDate()+1) {
@@ -1590,8 +1280,6 @@ export default class FuenteDatoVariable extends React.Component {
                 this.getResultsVariables(arregloDeFormas[i], "forma", arregloDeFormas, i);
             }
         };
-        console.log('arregloDeVariables')
-        console.log(arregloDeVariables)
         for (var i = 0; i < arregloDeVariables.length; i++) {
             if(!arregloDeVariables[i].realizarCalculo) {
                 banderaImportarValoresPeriodicidadFIN++;
@@ -1630,12 +1318,9 @@ export default class FuenteDatoVariable extends React.Component {
                     }
                 } else {
                     transaction.commit(err => {
-                        console.log("llamado")
-                        console.log('result.recordset');
-                        console.log(result.recordset);
-                        this.getResultsVariablesFieldsInit(result.recordset, variable, tabla);
                         if(result.recordset.length == 0)
                             banderaImportarValoresPeriodicidadINICIO++;
+                        this.getResultsVariablesFieldsInit(result.recordset, variable, tabla);
                     });
                 }
             });
@@ -1643,11 +1328,6 @@ export default class FuenteDatoVariable extends React.Component {
     }
 
     getResultsVariablesFieldsInit (resultados, variable, tabla) {
-        console.log('getResultsVariablesFieldsInit');
-        console.log('resultados');
-        console.log(resultados);
-        console.log('variable');
-        console.log(variable);
         var arregloTemp = [];
         for (var i = 0; i < resultados.length; i++) {
             arregloTemp.push(resultados[i]);
@@ -1662,20 +1342,19 @@ export default class FuenteDatoVariable extends React.Component {
         var textoSelect = '';
         var textoGroupBy = ' group by ID';
         if(tabla.localeCompare("excel") == 0) {
-            for (var i = 0; i < variable.variables.length; i++) {
-                if(i > 0)
-                    textoSelect += ', ';
-                textoSelect += variable.variables[i].nombre;
-            };
+            textoSelect += ' ID, '+variable.nombre;
+            textoGroupBy += ', ' + variable.nombre;
         } else if(tabla.localeCompare("variable") == 0) {
             for (var i = 0; i < variable.atributos.length; i++) {
                 if(i > 0)
                     textoSelect += ', ';
+                else
+                    textoSelect += ' ID, ';
                 textoSelect += variable.atributos[i].nombre;
                 textoGroupBy += ', ' + variable.atributos[i].nombre;
             };
         } else {
-            textoSelect += variable.nombre;
+            textoSelect += ' ID, '+ variable.nombre;
             textoGroupBy += ', ' + variable.nombre;
         }
         if(textoSelect.length > 0)
@@ -1690,7 +1369,6 @@ export default class FuenteDatoVariable extends React.Component {
             const request = new sql.Request(transaction);
             request.query("select "+textoSelect+" from "+resultado.nombreVariable+'_'+resultado.inicioVigencia.getFullYear()+'_'+(resultado.inicioVigencia.getMonth()+1)+'_'+resultado.inicioVigencia.getDate()+'_'+resultado.inicioVigencia.getHours()+'_'+resultado.inicioVigencia.getMinutes()+'_'+resultado.inicioVigencia.getSeconds()+textoGroupBy, (err, result) => {
                 if (err) {
-                    console.log(err);
                     banderaImportarValoresPeriodicidadINICIO++;
                     this.verificarFinImportacionValoresCalculados();
                     if (!rolledBack) {
@@ -1701,12 +1379,12 @@ export default class FuenteDatoVariable extends React.Component {
                     transaction.commit(err => {
                         if(result.recordset.length > 0) {
                             if(tabla.localeCompare("excel") == 0 || tabla.localeCompare("forma") == 0) {
-                                window[variable.nombre] = result.recordset[0][variable.nombre];
+                                window[variable.nombre] = result.recordset[result.recordset.length-1][variable.nombre];
                             } else if(tabla.localeCompare("variable") == 0) {
-                                if(variable.esInstruccionSQL || variable.esObjeto) {
-                                    window[variable.nombre] = result.recordset;
+                                if(variable.esInstruccionSQL || variable.esColeccion) {
+                                    window[variable.nombre] = result.recordset[result.recordset.length-1];
                                 } else {
-                                    window[variable.nombre] = result.recordset[0][variable.nombre];
+                                    window[variable.nombre] = result.recordset[result.recordset.length-1][variable.nombre];
                                 }
                             }
                         } else {
@@ -1747,9 +1425,9 @@ export default class FuenteDatoVariable extends React.Component {
                     }
                 } else {
                     transaction.commit(err => {
-                        this.getResultsIndicatorsFieldsInit(result.recordset, indicador, index);
                         if(result.recordset.length == 0)
                             banderaImportarValoresPeriodicidadINICIO++;
+                        this.getResultsIndicatorsFieldsInit(result.recordset, indicador, index);
                     });
                 }
             });
@@ -1758,8 +1436,6 @@ export default class FuenteDatoVariable extends React.Component {
 
     getResultsIndicatorsFieldsInit (resultados, indicador, index) {
         console.log('getResultsIndicatorsFieldsInit');
-        console.log('resultados');
-        console.log(resultados);
         var arregloTemp = [];
         for (var i = 0; i < resultados.length; i++) {
             arregloTemp.push(resultados[i]);
@@ -1817,11 +1493,7 @@ export default class FuenteDatoVariable extends React.Component {
     verificarFinImportacionValoresCalculados () {
         console.log('verificarFinImportacionValoresCalculados');
         if(banderaImportarValoresPeriodicidadINICIO == banderaImportarValoresPeriodicidadFIN) {
-            for (var a = 0; a < arregloDeVariables.length; a++) {
-                console.log('window["'+arregloDeVariables[a].nombre+'"]');
-                console.log(window[arregloDeVariables[a].nombre]);
-            };
-            //this.iniciarCalculoExcel();
+            this.iniciarCalculoExcel();
         }
     }
 
@@ -1829,16 +1501,6 @@ export default class FuenteDatoVariable extends React.Component {
         if(arregloDeExcel.length > 0) {
             this.crearVariablesExcel();
         }
-        console.log('======================');
-        console.log('arregloDeExcel');
-        console.log(arregloDeExcel);
-        for (var i = 0; i < arregloDeExcel.length; i++) {
-            for (var j = 0; j < arregloDeExcel[i].variables.length; j++) {
-                console.log(arregloDeExcel[i].variables[j].nombre);
-                console.log(window["'"+arregloDeExcel[i].variables[j].nombre+"'"]);
-            };
-        };
-        console.log('======================');
         this.iniciarCalculoFormas();
     }
 
@@ -1846,21 +1508,13 @@ export default class FuenteDatoVariable extends React.Component {
         if(arregloDeFormas.length > 0) {
             this.iniciarMostrarFormas();
         }
-        console.log('11111111111111111111');
-        console.log('arregloDeFormas');
-        console.log(arregloDeFormas);
-        for (var i = 0; i < arregloDeFormas.length; i++) {
-            console.log(arregloDeFormas[i].nombre);
-            console.log(window["'"+arregloDeFormas[i].nombre+"'"]);
-        };
-        console.log('11111111111111111111');
         if(arregloDeFormas.length == 0) {
             this.iniciarHilo();
         }
     }
 
     iniciarHilo () {
-        console.log('nivelMaximoVariables');
+        /*console.log('nivelMaximoVariables');
         console.log(nivelMaximoVariables);
         console.log('arregloDeFuentesDeDatos');
         console.log(arregloDeFuentesDeDatos);
@@ -1869,7 +1523,7 @@ export default class FuenteDatoVariable extends React.Component {
         console.log('arregloResultadosDeTablas');
         console.log(arregloResultadosDeTablas);
         console.log('arregloConexionesATablas');
-        console.log(arregloConexionesATablas);
+        console.log(arregloConexionesATablas);*/
         //DESCRIPCION DEL PROCEDIMIENTO
         //1) PRIMERO CREAR CODIGO PARA CREAR VARIABLES DE ELEMENTOS DE FORMULAS, AGRUPADAS POR TABLAS CORRESPONDIENTES  -- SERA PRIMER METODO A LLAMAR
         //2) CREAR METODO NIVEL XX, CONTENDRA LLAMADO A METODO 'CALCULO VARIABLES NIVEL XX', Y JUSTO DESPUES LLAMARÁ AL SIGUIENTE NIVEL QUE SIGUE, O AL METODO DE MENSAJE FINAL
@@ -1884,6 +1538,7 @@ export default class FuenteDatoVariable extends React.Component {
         //la variable es insertado una unica vez cada por cada segmento de regla que pertenezca a la tabla
         var arregloAgrupacionElementosFormulaPorFormasVariables = [];    //arreglo que contiene los segmento de reglas de la variable forma a calcular agrupados por la posicion de la variable a comparar en el arregloDeVariables
         //la variable es insertado una unica vez cada por cada segmento de regla que pertenezca a la tabla
+        var arregloAgrupacionElementosFormulaPorManualVariables = [];
         for (var i = 0; i < arregloDeVariables.length; i++) {
             for (var j = 0; j < arregloDeVariables[i].atributos.length; j++) {
                 for (var k = 0; k < arregloDeVariables[i].atributos[j].segmentoReglas.length; k++) {
@@ -1899,11 +1554,13 @@ export default class FuenteDatoVariable extends React.Component {
                     } else if (arregloDeVariables[i].atributos[j].segmentoReglas[k].excelArchivoID != -1 && arregloDeVariables[i].atributos[j].segmentoReglas[k].formaVariableID == -1 && arregloDeVariables[i].atributos[j].segmentoReglas[k].variableIDCreacionCodigo == -1) {
                         for (var x = 0; x < arregloDeExcel.length; x++) {
                             if(arregloDeVariables[i].atributos[j].segmentoReglas[k].excelArchivoID == arregloDeExcel[x].ID) {
+                                if(arregloAgrupacionElementosFormulaPorExcelVariables[x] == undefined)
+                                    arregloAgrupacionElementosFormulaPorExcelVariables[x] = [];
                                 for (var y = 0; y < arregloDeExcel[x].variables.length; y++) {
                                     if(arregloDeVariables[i].atributos[j].segmentoReglas[k].excelVariableID == arregloDeExcel[x].variables[y].ID) {
-                                        if(arregloAgrupacionElementosFormulaPorExcelVariables[x] == undefined)
-                                            arregloAgrupacionElementosFormulaPorExcelVariables[x] = [];
-                                        arregloAgrupacionElementosFormulaPorExcelVariables[x].push({segmentoRegla: arregloDeVariables[i].atributos[j].segmentoReglas[k], variable: arregloDeVariables[i], variableCreacionCodigo: arregloDeExcel[x].variables[y], atributo: arregloDeVariables[i].atributos[j], index: k});
+                                        if(arregloAgrupacionElementosFormulaPorExcelVariables[x][y] == undefined)
+                                            arregloAgrupacionElementosFormulaPorExcelVariables[x][y] = [];
+                                        arregloAgrupacionElementosFormulaPorExcelVariables[x][y].push({segmentoRegla: arregloDeVariables[i].atributos[j].segmentoReglas[k], variable: arregloDeVariables[i], variableCreacionCodigo: arregloDeExcel[x].variables[y], atributo: arregloDeVariables[i].atributos[j], index: k});
                                         break;
                                     }
                                 };
@@ -1918,6 +1575,10 @@ export default class FuenteDatoVariable extends React.Component {
                                 break;
                             }
                         };
+                    } else if (arregloDeVariables[i].atributos[j].segmentoReglas[k].esValorManual && arregloDeVariables[i].atributos[j].segmentoReglas[k].formaVariableID == -1 && arregloDeVariables[i].atributos[j].segmentoReglas[k].excelArchivoID == -1 && arregloDeVariables[i].atributos[j].segmentoReglas[k].variableIDCreacionCodigo == -1) {
+                        if(arregloAgrupacionElementosFormulaPorManualVariables[i] == undefined)
+                            arregloAgrupacionElementosFormulaPorManualVariables[i] = [];
+                        arregloAgrupacionElementosFormulaPorManualVariables[i].push({segmentoRegla: arregloDeVariables[i].atributos[j].segmentoReglas[k], variable: arregloDeVariables[i], variableCreacionCodigo: arregloDeVariables[i], atributo: arregloDeVariables[i].atributos[j], index: k});
                     } else {
                         for (var x = 0; x < arregloDeVariables.length; x++) {
                             if(arregloDeVariables[i].atributos[j].segmentoReglas[k].variableIDCreacionCodigo == arregloDeVariables[x].ID) {
@@ -1931,93 +1592,30 @@ export default class FuenteDatoVariable extends React.Component {
                 };
             };
         };
-        console.log('arregloAgrupacionElementosFormulaPorConexionATablaVariables');
+        /*console.log('arregloAgrupacionElementosFormulaPorConexionATablaVariables');
         console.log(arregloAgrupacionElementosFormulaPorConexionATablaVariables);
         console.log('arregloAgrupacionElementosFormulaPorVariablesVariables');
         console.log(arregloAgrupacionElementosFormulaPorVariablesVariables);
         console.log('arregloAgrupacionElementosFormulaPorExcelVariables');
         console.log(arregloAgrupacionElementosFormulaPorExcelVariables);
         console.log('arregloAgrupacionElementosFormulaPorFormasVariables');
-        console.log(arregloAgrupacionElementosFormulaPorFormasVariables);
-
-        //AGRUPANDO ELEMENTOS DE FORMULA POR CONEXION A TABLA
-        var arregloAgrupacionElementosFormulaPorConexionATablaIndicadores = [];    //arreglo que contiene los segmento de reglas agrupados por el arreglo de tablas
-        //la variable es insertado una unica vez cada por cada segmento de regla que pertenezca a la tabla
-        var arregloAgrupacionElementosFormulaPorVariablesIndicadores = [];    //arreglo que contiene los segmento de reglas de la variable a calcular agrupados por la posicion de la variable a comparar en el arregloDeVariables
-        //la variable es insertado una unica vez cada por cada segmento de regla que pertenezca a la tabla
-        var arregloAgrupacionElementosFormulaPorExcelIndicadores = [];    //arreglo que contiene los segmento de reglas de la variable excel a calcular agrupados por la posicion de la variable a comparar en el arregloDeVariables
-        //la variable es insertado una unica vez cada por cada segmento de regla que pertenezca a la tabla
-        var arregloAgrupacionElementosFormulaPorFormasIndicadores = [];    //arreglo que contiene los segmento de reglas de la variable forma a calcular agrupados por la posicion de la variable a comparar en el arregloDeVariables
-        //la variable es insertado una unica vez cada por cada segmento de regla que pertenezca a la tabla
-        for (var i = 0; i < arregloDeIndicadores.length; i++) {
-            for (var j = 0; j < arregloDeIndicadores[i].atributos.length; j++) {
-                for (var k = 0; k < arregloDeIndicadores[i].atributos[j].segmentoReglas.length; k++) {
-                    if (arregloDeIndicadores[i].atributos[j].segmentoReglas[k].esConexionTabla) {
-                        for (var m = 0; m < arregloConexionesATablas.length; m++) {
-                            if (arregloDeIndicadores[i].atributos[j].segmentoReglas[k].conexionTablaID == arregloConexionesATablas[m].ID) {
-                                if(arregloAgrupacionElementosFormulaPorConexionATablaIndicadores[m] == undefined)
-                                    arregloAgrupacionElementosFormulaPorConexionATablaIndicadores[m] = [];
-                                arregloAgrupacionElementosFormulaPorConexionATablaIndicadores[m].push({segmentoRegla: arregloDeIndicadores[i].atributos[j].segmentoReglas[k], variable: arregloDeIndicadores[i], atributo: arregloDeIndicadores[i].atributos[j], index: k});
-                                break;
-                            }
-                        }
-                    } else if (arregloDeIndicadores[i].atributos[j].segmentoReglas[k].excelArchivoID != -1 && arregloDeIndicadores[i].atributos[j].segmentoReglas[k].formaVariableID == -1 && arregloDeIndicadores[i].atributos[j].segmentoReglas[k].variableIDCreacionCodigo == -1) {
-                        for (var x = 0; x < arregloDeExcel.length; x++) {
-                            if(arregloDeIndicadores[i].atributos[j].segmentoReglas[k].excelArchivoID == arregloDeExcel[x].ID) {
-                                for (var y = 0; y < arregloDeExcel[x].variables.length; y++) {
-                                    if(arregloDeIndicadores[i].atributos[j].segmentoReglas[k].excelVariableID == arregloDeExcel[x].variables[y].ID) {
-                                        if(arregloAgrupacionElementosFormulaPorExcelIndicadores[x] == undefined)
-                                            arregloAgrupacionElementosFormulaPorExcelIndicadores[x] = [];
-                                        arregloAgrupacionElementosFormulaPorExcelIndicadores[x].push({segmentoRegla: arregloDeIndicadores[i].atributos[j].segmentoReglas[k], variable: arregloDeIndicadores[i], variableCreacionCodigo: arregloDeExcel[x].variables[y], atributo: arregloDeIndicadores[i].atributos[j], index: k});
-                                        break;
-                                    }
-                                };
-                            }
-                        };
-                    } else if (arregloDeIndicadores[i].atributos[j].segmentoReglas[k].formaVariableID != -1 && arregloDeIndicadores[i].atributos[j].segmentoReglas[k].excelArchivoID == -1 && arregloDeIndicadores[i].atributos[j].segmentoReglas[k].variableIDCreacionCodigo == -1) {
-                        for (var x = 0; x < arregloDeFormas.length; x++) {
-                            if(arregloDeIndicadores[i].atributos[j].segmentoReglas[k].variableIDCreacionCodigo == arregloDeFormas[x].ID) {
-                                if(arregloAgrupacionElementosFormulaPorFormasIndicadores[x] == undefined)
-                                    arregloAgrupacionElementosFormulaPorFormasIndicadores[x] = [];
-                                arregloAgrupacionElementosFormulaPorFormasIndicadores[x].push({segmentoRegla: arregloDeIndicadores[i].atributos[j].segmentoReglas[k], variable: arregloDeIndicadores[i], variableCreacionCodigo: arregloDeFormas[x], atributo: arregloDeIndicadores[i].atributos[j], index: k});
-                                break;
-                            }
-                        };
-                    } else {
-                        for (var x = 0; x < arregloDeIndicadores.length; x++) {
-                            if(arregloDeIndicadores[i].atributos[j].segmentoReglas[k].variableIDCreacionCodigo == arregloDeIndicadores[x].ID) {
-                                if(arregloAgrupacionElementosFormulaPorVariablesIndicadores[x] == undefined)
-                                    arregloAgrupacionElementosFormulaPorVariablesIndicadores[x] = [];
-                                arregloAgrupacionElementosFormulaPorVariablesIndicadores[x].push({segmentoRegla: arregloDeIndicadores[i].atributos[j].segmentoReglas[k], variable: arregloDeIndicadores[i], variableCreacionCodigo: arregloDeIndicadores[x], atributo: arregloDeIndicadores[i].atributos[j], index: k});
-                                break;
-                            }
-                        };
-                    }
-                };
-            };
-        };
-        console.log('arregloAgrupacionElementosFormulaPorConexionATablaIndicadores');
-        console.log(arregloAgrupacionElementosFormulaPorConexionATablaIndicadores);
-        console.log('arregloAgrupacionElementosFormulaPorVariablesIndicadores');
-        console.log(arregloAgrupacionElementosFormulaPorVariablesIndicadores);
-        console.log('arregloAgrupacionElementosFormulaPorExcelIndicadores');
-        console.log(arregloAgrupacionElementosFormulaPorExcelIndicadores);
-        console.log('arregloAgrupacionElementosFormulaPorFormasIndicadores');
-        console.log(arregloAgrupacionElementosFormulaPorFormasIndicadores);
+        console.log(arregloAgrupacionElementosFormulaPorFormasVariables);*/
 
         var existeVarSQL = false;
 
         //INICIALIZANDO VARIABLES EN MEMORIA
         for (var a = 0; a < arregloDeVariables.length; a++) {
-            if (arregloDeVariables[a].esObjeto || arregloDeVariables[a].esInstruccionSQL) {
-                //CREANDO ESPACIO EN MEMORIA DE ARREGLO DE VARIABLES
-                window[arregloDeVariables[a].nombre] = [];
-            } else {
-                //CREANDO ESPACIO EN MEMORIA DE VARIABLE SI ES VAR PRIMITVA
-                window[arregloDeVariables[a].nombre] = {};
-            }
-            if (arregloDeVariables[a].esInstruccionSQL) {
-                existeVarSQL = true;
+            if(arregloDeVariables[a].realizarCalculo) {
+                if (arregloDeVariables[a].esObjeto || arregloDeVariables[a].esInstruccionSQL) {
+                    //CREANDO ESPACIO EN MEMORIA DE ARREGLO DE VARIABLES
+                    window[arregloDeVariables[a].nombre] = [];
+                } else {
+                    //CREANDO ESPACIO EN MEMORIA DE VARIABLE SI ES VAR PRIMITVA
+                    window[arregloDeVariables[a].nombre] = {};
+                }
+                if (arregloDeVariables[a].esInstruccionSQL) {
+                    existeVarSQL = true;
+                }
             }
         }
 
@@ -2026,10 +1624,10 @@ export default class FuenteDatoVariable extends React.Component {
 
         var codigo = '';
 
-        //AGREGAR CODIGO VARIABLES EXCEL
+        /*//AGREGAR CODIGO VARIABLES EXCEL
         codigo += this.crearNivel(false, arregloAgrupacionElementosFormulaPorExcelVariables, 0);
         //AGREGAR CODIGO VARIABLES FORMA
-        codigo += this.crearNivel(false, arregloAgrupacionElementosFormulaPorFormasVariables, 0);
+        codigo += this.crearNivel(false, arregloAgrupacionElementosFormulaPorFormasVariables, 0);*/
 
         //codigo var general
         for (var i = 0; i <= nivelMaximoVariables; i++) {
@@ -2038,11 +1636,16 @@ export default class FuenteDatoVariable extends React.Component {
                 if(nivelMaximoVariables >= 1)
                     llamarSiguienteNivel = true;
                 codigo += this.crearCodigoFuenteDato(llamarSiguienteNivel, arregloAgrupacionElementosFormulaPorConexionATablaVariables, 0);
+                codigo += this.crearNivel(llamarSiguienteNivel, arregloAgrupacionElementosFormulaPorExcelVariables, 0);
+                codigo += this.crearNivel(llamarSiguienteNivel, arregloAgrupacionElementosFormulaPorFormasVariables, 0);
+                codigo += this.crearNivel(llamarSiguienteNivel, arregloAgrupacionElementosFormulaPorManualVariables, 0);
             } else {
                 var llamarSiguienteNivel = false;
                 if(nivelMaximoVariables > i)
                     llamarSiguienteNivel = true;
                 codigo += this.crearNivel(llamarSiguienteNivel, arregloAgrupacionElementosFormulaPorVariablesVariables, i);
+                codigo += this.crearNivel(llamarSiguienteNivel, arregloAgrupacionElementosFormulaPorExcelVariables, i);
+                codigo += this.crearNivel(llamarSiguienteNivel, arregloAgrupacionElementosFormulaPorFormasVariables, i);
             }
         };
         codigo += '\n\tiniciarCalculoIndicadores();';
@@ -2065,11 +1668,11 @@ export default class FuenteDatoVariable extends React.Component {
                 }
             };
         }
-        console.log(window['calculoPrincipal']);
+        /*console.log(window['calculoPrincipal']);
         for (var a = 0; a < arregloDeVariables.length; a++) {
             console.log('window["'+arregloDeVariables[a].nombre+'"]');
             console.log(window[arregloDeVariables[a].nombre]);
-        };
+        };*/
         setTimeout(function() {
             for (var a = 0; a < arregloDeVariables.length; a++) {
                 console.log('window["'+arregloDeVariables[a].nombre+'"]');
@@ -2084,43 +1687,15 @@ export default class FuenteDatoVariable extends React.Component {
                 console.log(window[arregloDeFormas[a].nombre]);
             };
         }, 3000);
-
-
-
-
-        //INICIALIZANDO INDICADORES EN MEMORIA
-        /*for (var a = 0; a < arregloDeIndicadores.length; a++) {
-            if (arregloDeIndicadores[a].esObjeto) {
-                //CREANDO ESPACIO EN MEMORIA DE ARREGLO DE VARIABLE SI ES ARREGLO
-                window[arregloDeIndicadores[a].nombre] = [];
-            } else {
-                //CREANDO ESPACIO EN MEMORIA DE ARREGLO DE VARIABLE SI ES VAR PRIMITVA
-                window[arregloDeIndicadores[a].nombre] = {};
-            }
-        }*/
-
-        var codigoIndicadores = '';
-
-        //AGREGAR CODIGO VARIABLES EXCEL
-        codigo += this.crearNivel(false, arregloAgrupacionElementosFormulaPorExcelIndicadores, 0);
-        //AGREGAR CODIGO VARIABLES FORMA
-        codigo += this.crearNivel(false, arregloAgrupacionElementosFormulaPorFormasIndicadores, 0);
-
-        for (var i = 0; i <= nivelMaximoIndicadores; i++) {
-            if(i == 0) {
-                var llamarSiguienteNivel = false;
-                if(nivelMaximoVariables >= 1)
-                    llamarSiguienteNivel = true;
-                codigoIndicadores += this.crearCodigoFuenteDato(llamarSiguienteNivel, arregloAgrupacionElementosFormulaPorConexionATablaIndicadores, 0);
-            } else {
-                var llamarSiguienteNivel = false;
-                if(nivelMaximoVariables > i)
-                    llamarSiguienteNivel = true;
-                codigoIndicadores += this.codigoIndicadores(llamarSiguienteNivel, arregloAgrupacionElementosFormulaPorVariablesIndicadores, i);
-            }
-        };
-
-        //CALCULANDO INDICADORES
+        setTimeout(function() {
+            console.log('===========');
+            for (var i = 0; i < arregloDeExcel.length; i++) {
+                for (var j = 0; j < arregloDeExcel[i].variables.length; j++) {
+                    console.log('window["'+arregloDeExcel[i].variables[j].nombre+'"]');
+                    console.log(window[arregloDeExcel[i].variables[j].nombre]);
+                };
+            };
+        }, 3000); 
     }
 
     codigoIniciacion (variable, tipoVariable, atributo, tabsText, esOperacionSQL, esPromedio) {
@@ -2416,8 +1991,6 @@ export default class FuenteDatoVariable extends React.Component {
 
     crearCodigoSQL (variable, siguienteMetodo) {
         var codigo = '';
-        console.log(window)
-        console.log(window["sql"])
         codigo += "\nconst transaction = new sql.Transaction( pool );";
         codigo += "\ntransaction.begin(err => {";
             codigo += "\n\tvar rolledBack = false;";
@@ -2435,8 +2008,6 @@ export default class FuenteDatoVariable extends React.Component {
                     codigo += "\n\t\t\t}";
                 codigo += "\n\t\t} else {";
                     codigo += "\n\t\t\ttransaction.commit(err => {";
-                        codigo += "\n\t\t\t\tconsole.log('result.recordset');";
-                        codigo += "\n\t\t\t\tconsole.log(result.recordset);";
                         codigo += "\n\t\t\t\tfor(var i = 0; i < result.recordset.length; i++) {";
                         codigo += '\n\t\t\t\t\t//INICIACION VARIABLE: '+variable.nombre;
                         codigo += '\n' + this.codigoIniciacion(variable, "variable", {}, '\t\t\t\t\t');
@@ -2486,6 +2057,26 @@ export default class FuenteDatoVariable extends React.Component {
         return codigo;
     }
 
+    crearCodigoSegmentoReglasFormaOExcel (segmentoReglas, reglas, tabs, posicionVariable, posicionCampo, nombreReferenciaArregloEnCodigo, esExcel) {
+        var codigo = '';
+        var tabsText = '';
+        for (var i = 0; i < tabs; i++) {
+            tabsText+='\t';
+        };
+        for (var n = 0; n < reglas.length; n++) {
+            if(reglas[n].reglaPadreID == -1 && reglas[n].operacion.localeCompare("ELSE") != 0) {
+                var resultado = this.arregloCodigoReglaFormaOExcel(reglas[n], tabs, posicionVariable, posicionCampo, [], reglas, nombreReferenciaArregloEnCodigo, esExcel);
+                if(resultado.length > 0)
+                    resultado[0].codigo = "\n"+resultado[0].codigo;
+                //$.merge( prestamosCuerpo, resultado );
+                for (var i = 0; i < resultado.length; i++) {
+                    codigo += resultado[i].codigo;
+                };
+            }
+        };
+        return codigo;
+    }
+
     agregarCodigoGuardarVariable (variable, campo, tabs) {
         var codigo = '';
         var tabsText = '';
@@ -2510,14 +2101,6 @@ export default class FuenteDatoVariable extends React.Component {
     }
 
     crearNivel (llamarSiguienteNivel, arregloAgrupacionElementosFormulaPorVariables, nivelACrear) {
-        /*var totalVarACrearNivel = 0;
-        for (var i = 0; i < arregloDeVariables.length; i++) {
-            for (var j = 0; j < arregloDeVariables[i].atributos.length; j++) {
-                if(arregloDeVariables[i].atributos[j].nivel == nivelACrear) {
-                    totalVarACrearNivel++;
-                }
-            };
-        };*/
         //arregloAgrupacionElementosFormulaPorVariables contiene todas las variables que se calculan a base de otras variables
             //cada posicion nivel 0 representa la posicion de la variable en el arreglo de variables
             //cada posicion nivel 1 tiene la variable de la cual se va a calcular, el campo, la variable a crear y el segmento que pertenece a la variable de la cual se va a calcular
@@ -2527,7 +2110,7 @@ export default class FuenteDatoVariable extends React.Component {
             if(/*!arregloDeVariables[i].esInstruccionSQL &&*/ arregloAgrupacionElementosFormulaPorVariables[i] != undefined) {
                 var totalVarACrearNivel = 0;
                 for (var j = 0; j < arregloAgrupacionElementosFormulaPorVariables[i].length; j++) {
-                    if(arregloAgrupacionElementosFormulaPorVariables[i][j].atributo.nivel == nivelACrear) {
+                    if(arregloAgrupacionElementosFormulaPorVariables[i][j] != undefined && arregloAgrupacionElementosFormulaPorVariables[i][j].length == undefined && arregloAgrupacionElementosFormulaPorVariables[i][j].atributo.nivel == nivelACrear) {
                         totalVarACrearNivel++;
                     }
                 };
@@ -2537,9 +2120,10 @@ export default class FuenteDatoVariable extends React.Component {
                 var totalVarCreadasNivel = 0;
                 var codigoGuardarVariableOperacionSQL = '';
                 for (var j = 0; j < arregloAgrupacionElementosFormulaPorVariables[i].length; j++) {
-                    if(arregloDeVariables[i].ID == arregloAgrupacionElementosFormulaPorVariables[i][j].variableCreacionCodigo.ID && arregloAgrupacionElementosFormulaPorVariables[i][j].atributo.nivel == nivelACrear && arregloAgrupacionElementosFormulaPorVariables[i][j].variable.realizarCalculo) {
+                    //arregloAgrupacionElementosFormulaPorVariables[i][j].length == undefined --- para ver si no son varias variables de excel
+                    if(arregloAgrupacionElementosFormulaPorVariables[i][j] != undefined && arregloAgrupacionElementosFormulaPorVariables[i][j].length == undefined && arregloAgrupacionElementosFormulaPorVariables[i][j].length == undefined && arregloDeVariables[i].ID == arregloAgrupacionElementosFormulaPorVariables[i][j].variableCreacionCodigo.ID && arregloDeVariables[i].nombre.localeCompare(arregloAgrupacionElementosFormulaPorVariables[i][j].variableCreacionCodigo.nombre) == 0 && arregloAgrupacionElementosFormulaPorVariables[i][j].atributo.nivel == nivelACrear && arregloAgrupacionElementosFormulaPorVariables[i][j].variable.realizarCalculo) {//segundo es para ver si no es arregloAgrupacionElementosFormulaPorVariables de excel
                         totalVarCreadasNivel++;
-                        if(j == 0 && (arregloDeVariables[i].esObjeto || arregloDeVariables[i].esInstruccionSQL)) {
+                        if(j == 0 && ((arregloDeVariables[i].esObjeto || arregloDeVariables[i].esInstruccionSQL) && !arregloAgrupacionElementosFormulaPorVariables[i][j].segmentoRegla.esValorManual)) {
                             //solo crear codigo for una vez por variable
                             codigoCuerpo += '\n\t//CODIGO VARIABLE: '+arregloDeVariables[i].nombre;
                             codigoCuerpo += '\n\tfor ( var x = 0; x < window["'+arregloDeVariables[i].nombre+'"].length; x++) {';
@@ -2577,7 +2161,7 @@ export default class FuenteDatoVariable extends React.Component {
                                 codigoIniciacionVarPrimitiva += '\n\t//INICIACION VARIABLE: '+arregloAgrupacionElementosFormulaPorVariables[i][j].variable.nombre;
                                 for (var p = 0; p < arregloAgrupacionElementosFormulaPorVariables[i][j].variable.atributos.length; p++) {
                                     var esPromedio = false;
-                                    if( arregloAgrupacionElementosFormulaPorConexionATabla[i][j].segmentoRegla.reglas[arregloAgrupacionElementosFormulaPorConexionATabla[i][j].segmentoRegla.reglas.length-1].operacion.localeCompare("PROM") == 0 )
+                                    if( arregloAgrupacionElementosFormulaPorVariables[i][j].segmentoRegla.reglas[arregloAgrupacionElementosFormulaPorVariables[i][j].segmentoRegla.reglas.length-1].operacion.localeCompare("PROM") == 0 )
                                         esPromedio = true;
                                     codigoIniciacionVarPrimitiva += '\n' + this.codigoIniciacion(arregloAgrupacionElementosFormulaPorVariables[i][j].variable, "atributo", arregloAgrupacionElementosFormulaPorVariables[i][j].variable.atributos[p], '\t', false, esPromedio);
                                 };
@@ -2637,7 +2221,7 @@ export default class FuenteDatoVariable extends React.Component {
                         if(totalVarCreadasNivel == totalVarACrearNivel) {
                             codigoCuerpo += codigoGuardarVariables;
                             //solo crear codigo for una vez por variable
-                            if(arregloDeVariables[i].esObjeto || arregloDeVariables[i].esInstruccionSQL)
+                            if((arregloDeVariables[i].esObjeto || arregloDeVariables[i].esInstruccionSQL) && !arregloAgrupacionElementosFormulaPorVariables[i][j].segmentoRegla.esValorManual)
                                 codigoCuerpo += '\n\t};\n';
                             codigo += codigoIniciacionVarPrimitiva + codigoCuerpo + codigoGuardarVariableOperacionSQL;
                         }
@@ -2645,8 +2229,255 @@ export default class FuenteDatoVariable extends React.Component {
                 };
             }
         };
-        console.log('codigo');
-        console.log(codigo);
+
+        for (var i = 0; i < arregloDeFormas.length; i++) {
+            var variablesInstanciadasID = [], variablesGuardadasID = [];
+            if(arregloAgrupacionElementosFormulaPorVariables[i] != undefined) {
+                var totalVarACrearNivel = 0;
+                for (var j = 0; j < arregloAgrupacionElementosFormulaPorVariables[i].length; j++) {
+                    if(arregloAgrupacionElementosFormulaPorVariables[i][j] != undefined && arregloAgrupacionElementosFormulaPorVariables[i][j].length == undefined && arregloAgrupacionElementosFormulaPorVariables[i][j].atributo.nivel == nivelACrear) {
+                        totalVarACrearNivel++;
+                    }
+                };
+                var codigoCuerpo = '';
+                var codigoIniciacionVarPrimitiva = '';
+                var codigoGuardarVariables = '';
+                var totalVarCreadasNivel = 0;
+                var codigoGuardarVariableOperacionSQL = '';
+                for (var j = 0; j < arregloAgrupacionElementosFormulaPorVariables[i].length; j++) {
+                    if(arregloAgrupacionElementosFormulaPorVariables[i][j] != undefined && arregloAgrupacionElementosFormulaPorVariables[i][j].length == undefined && arregloDeFormas[i].ID == arregloAgrupacionElementosFormulaPorVariables[i][j].variableCreacionCodigo.ID && this.verificarExistenciaErroresForma(arregloAgrupacionElementosFormulaPorVariables[i][j].variableCreacionCodigo) && arregloDeFormas[i].nombre.localeCompare(arregloAgrupacionElementosFormulaPorVariables[i][j].variableCreacionCodigo.nombre) == 0  && arregloAgrupacionElementosFormulaPorVariables[i][j].atributo.nivel == nivelACrear && arregloAgrupacionElementosFormulaPorVariables[i][j].variable.realizarCalculo) {//segundo es para ver si no es arregloAgrupacionElementosFormulaPorVariables de excel
+                        totalVarCreadasNivel++;
+                        /*if(j == 0) {
+                            //solo crear codigo for una vez por variable
+                            codigoCuerpo += '\n\t//CODIGO VARIABLE: '+arregloDeFormas[i].nombre;
+                            codigoCuerpo += '\n\tfor ( var x = 0; x < window["'+arregloDeFormas[i].nombre+'"].length; x++) {';
+                        }*/
+                        var varFueInicializada = false;
+                        for (var w = 0; w < variablesInstanciadasID.length; w++) {
+                            if (variablesInstanciadasID[w] == arregloAgrupacionElementosFormulaPorVariables[i][j].variable.ID) {
+                                varFueInicializada = true;
+                                break;
+                            }
+                        };
+                        /*if(!varFueInicializada) {
+                            variablesInstanciadasID.push(arregloAgrupacionElementosFormulaPorVariables[i][j].variable.ID);*/
+                            if(arregloAgrupacionElementosFormulaPorVariables[i][j].variable.esObjeto) {
+                                if(!varFueInicializada) {
+                                    variablesInstanciadasID.push(arregloAgrupacionElementosFormulaPorVariables[i][j].variable.ID);
+                                    codigoCuerpo += '\n\t\t//INICIACION VARIABLE: '+arregloAgrupacionElementosFormulaPorVariables[i][j].variable.nombre;
+                                    codigoCuerpo += '\n' + this.codigoIniciacion(arregloAgrupacionElementosFormulaPorVariables[i][j].variable, "variable", {}, '\t\t'); //variable, tipoVariable, atributo
+                                }
+                                //for (var p = 0; p < arregloAgrupacionElementosFormulaPorVariables[i][j].variable.atributos.length; p++) {
+                                    var contieneOperacionSQL = false, esPromedio = false;
+                                    //viendo si la ultima regla del segmento (la de asignacion) es una operacion de SQL (AUTOSUMAR, PROMEDIO, MAX, MIN)
+                                    if( this.existeOperacion(arregloAgrupacionElementosFormulaPorVariables[i][j].segmentoRegla.reglas[arregloAgrupacionElementosFormulaPorVariables[i][j].segmentoRegla.reglas.length-1].operacion) )
+                                        contieneOperacionSQL = true;
+                                    if( arregloAgrupacionElementosFormulaPorVariables[i][j].segmentoRegla.reglas[arregloAgrupacionElementosFormulaPorVariables[i][j].segmentoRegla.reglas.length-1].operacion.localeCompare("PROM") == 0 )
+                                        esPromedio = true;
+                                    if(!contieneOperacionSQL)
+                                        codigoCuerpo += '\n' + this.codigoIniciacion(arregloAgrupacionElementosFormulaPorVariables[i][j].variable, "atributo", arregloAgrupacionElementosFormulaPorVariables[i][j].atributo, '\t\t', false, esPromedio);
+                                    else {
+                                        codigoCuerpo += '\n' + this.codigoIniciacion(arregloAgrupacionElementosFormulaPorVariables[i][j].variable, "atributo", arregloAgrupacionElementosFormulaPorVariables[i][j].atributo, '\t\t', false, false);
+                                        codigoIniciacionVarPrimitiva += '\n' + this.codigoIniciacion(arregloAgrupacionElementosFormulaPorVariables[i][j].variable, "atributo", arregloAgrupacionElementosFormulaPorVariables[i][j].atributo, '\t', true, esPromedio);
+                                    }
+                                //};
+                            } else {
+                                codigoIniciacionVarPrimitiva += '\n\t//INICIACION VARIABLE: '+arregloAgrupacionElementosFormulaPorVariables[i][j].variable.nombre;
+                                for (var p = 0; p < arregloAgrupacionElementosFormulaPorVariables[i][j].variable.atributos.length; p++) {
+                                    var esPromedio = false;
+                                    if( arregloAgrupacionElementosFormulaPorVariables[i][j].segmentoRegla.reglas[arregloAgrupacionElementosFormulaPorVariables[i][j].segmentoRegla.reglas.length-1].operacion.localeCompare("PROM") == 0 )
+                                        esPromedio = true;
+                                    codigoIniciacionVarPrimitiva += '\n' + this.codigoIniciacion(arregloAgrupacionElementosFormulaPorVariables[i][j].variable, "atributo", arregloAgrupacionElementosFormulaPorVariables[i][j].variable.atributos[p], '\t', false, esPromedio);
+                                };
+                            }
+                        //}
+                        //if(arregloAgrupacionElementosFormulaPorVariables[i][j].atributo.nivel == nivelACrear) {
+                            var posicionVariable = 0, posicionCampo = 0;
+                            EncontrarPosiciones:
+                            for (var a = 0; a < arregloDeVariables.length; a++) {
+                                if(arregloDeVariables[a].ID == arregloAgrupacionElementosFormulaPorVariables[i][j].variable.ID) {
+                                    posicionVariable = a;
+                                    for (var b = 0; b < arregloDeVariables[a].atributos.length; b++) {
+                                        if(arregloDeVariables[a].atributos[b].ID == arregloAgrupacionElementosFormulaPorVariables[i][j].atributo.ID) {
+                                            posicionCampo = b;
+                                            break EncontrarPosiciones;
+                                        }
+                                    };
+                                }
+                            };
+                            var esArregloReferenciaArregloEnCodigo = false;
+                            codigoCuerpo += this.crearCodigoSegmentoReglasFormaOExcel(arregloAgrupacionElementosFormulaPorVariables[i][j].segmentoRegla, arregloAgrupacionElementosFormulaPorVariables[i][j].segmentoRegla.reglas, 2, posicionVariable, posicionCampo, 'window["'+arregloDeFormas[i].nombre+'"]', false);
+                        //}
+                        var varFueGuardada = false;
+                        for (var w = 0; w < variablesGuardadasID.length; w++) {
+                            if (variablesGuardadasID[w] == arregloAgrupacionElementosFormulaPorVariables[i][j].variable.ID) {
+                                varFueGuardada = true;
+                                break;
+                            }
+                        };
+                        if(!varFueGuardada) {
+                            variablesGuardadasID.push(arregloAgrupacionElementosFormulaPorVariables[i][j].variable.ID);
+                            codigoGuardarVariables += this.agregarCodigoGuardarVariable(arregloAgrupacionElementosFormulaPorVariables[i][j].variable, arregloAgrupacionElementosFormulaPorVariables[i][j].atributos, 2);
+                        }
+                            //for (var p = 0; p < arregloAgrupacionElementosFormulaPorVariables[i][j].variable.atributos.length; p++) {
+                            if(arregloAgrupacionElementosFormulaPorVariables[i][j].variable.esObjeto || arregloAgrupacionElementosFormulaPorVariables[i][j].variable.esInstruccionSQL) {
+                                var contieneOperacionSQL = false;
+                                //viendo si la ultima regla del segmento (la de asignacion) es una operacion de SQL (AUTOSUMAR, PROMEDIO, MAX, MIN)
+                                if( this.existeOperacion(arregloAgrupacionElementosFormulaPorVariables[i][j].segmentoRegla.reglas[arregloAgrupacionElementosFormulaPorVariables[i][j].segmentoRegla.reglas.length-1].operacion) )
+                                    contieneOperacionSQL = true;
+                                if(contieneOperacionSQL && arregloAgrupacionElementosFormulaPorVariables[i][j].segmentoRegla.reglas[arregloAgrupacionElementosFormulaPorVariables[i][j].segmentoRegla.reglas.length-1].operacion.localeCompare("PROM") != 0 )
+                                    codigoGuardarVariableOperacionSQL += '\n\tguardarOperacionSQL(window["'+arregloAgrupacionElementosFormulaPorVariables[i][j].variable.nombre+'"], "'+arregloAgrupacionElementosFormulaPorVariables[i][j].atributo.nombre+'", '+arregloAgrupacionElementosFormulaPorVariables[i][j].variable.nombre+arregloAgrupacionElementosFormulaPorVariables[i][j].atributo.nombre+'NU3V0);';
+                                else if(contieneOperacionSQL && arregloAgrupacionElementosFormulaPorVariables[i][j].segmentoRegla.reglas[arregloAgrupacionElementosFormulaPorVariables[i][j].segmentoRegla.reglas.length-1].operacion.localeCompare("PROM") == 0 ) {
+                                    //NU3V0T0T4L
+                                    codigoGuardarVariableOperacionSQL += '\n\tif('+arregloAgrupacionElementosFormulaPorVariables[i][j].variable.nombre+arregloAgrupacionElementosFormulaPorVariables[i][j].atributo.nombre+'NU3V0T0T4L != 0 || '+arregloAgrupacionElementosFormulaPorVariables[i][j].variable.nombre+arregloAgrupacionElementosFormulaPorVariables[i][j].atributo.nombre+'NU3V0T0T4L != -1) {';
+                                    codigoGuardarVariableOperacionSQL += '\n\t\tvar total = '+arregloAgrupacionElementosFormulaPorVariables[i][j].variable.nombre+arregloAgrupacionElementosFormulaPorVariables[i][j].atributo.nombre+'NU3V0/'+arregloAgrupacionElementosFormulaPorVariables[i][j].variable.nombre+arregloAgrupacionElementosFormulaPorVariables[i][j].atributo.nombre+'NU3V0T0T4L;';
+                                    codigoGuardarVariableOperacionSQL += '\n\t\tguardarOperacionSQL(window["'+arregloAgrupacionElementosFormulaPorVariables[i][j].variable.nombre+'"], "'+arregloAgrupacionElementosFormulaPorVariables[i][j].atributo.nombre+'", total);';
+                                    codigoGuardarVariableOperacionSQL += '\n\t}';
+                                } else if(!arregloAgrupacionElementosFormulaPorVariables[i][j].variable.esObjeto && !arregloAgrupacionElementosFormulaPorVariables[i][j].variable.esInstruccionSQL && arregloAgrupacionElementosFormulaPorVariables[i][j].segmentoRegla.reglas[arregloAgrupacionElementosFormulaPorVariables[i][j].segmentoRegla.reglas.length-1].operacion.localeCompare("PROM") == 0) {
+                                    codigoGuardarVariableOperacionSQL += '\n\tvar total = '+arregloAgrupacionElementosFormulaPorVariables[i][j].variable.nombre+'NU3V0/'+arregloAgrupacionElementosFormulaPorVariables[i][j].variable.nombre+'NU3V0T0T4L;';
+                                    codigoGuardarVariableOperacionSQL += '\n\twindow["'+arregloAgrupacionElementosFormulaPorVariables[i][j].variable.nombre+'"] = total;';
+                                }
+                            }
+                            //};
+                        //}
+                        if(totalVarCreadasNivel == totalVarACrearNivel) {
+                            codigoCuerpo += codigoGuardarVariables;
+                            //solo crear codigo for una vez por variable
+                            /*if((arregloDeVariables[i].esObjeto || arregloDeVariables[i].esInstruccionSQL) && !arregloAgrupacionElementosFormulaPorVariables[i][j].segmentoRegla.esValorManual)
+                                codigoCuerpo += '\n\t};\n';*/
+                            codigo += codigoIniciacionVarPrimitiva + codigoCuerpo + codigoGuardarVariableOperacionSQL;
+                        }
+                    }
+                };
+            }
+        };
+
+        for (var i = 0; i < arregloDeExcel.length; i++) {
+            for (var p = 0; p < arregloDeExcel[i].variables.length; p++) {
+                var variablesInstanciadasID = [], variablesGuardadasID = [];
+                if(arregloAgrupacionElementosFormulaPorVariables[i] != undefined && arregloAgrupacionElementosFormulaPorVariables[i][p] != undefined &&  arregloAgrupacionElementosFormulaPorVariables[i][p].length != undefined) {
+                    var totalVarACrearNivel = 0;
+                    for (var j = 0; j < arregloAgrupacionElementosFormulaPorVariables[i][p].length; j++) {
+                        if(arregloAgrupacionElementosFormulaPorVariables[i][p][j].atributo.nivel == nivelACrear) {
+                            totalVarACrearNivel++;
+                        }
+                    };
+                    var codigoCuerpo = '';
+                    var codigoIniciacionVarPrimitiva = '';
+                    var codigoGuardarVariables = '';
+                    var totalVarCreadasNivel = 0;
+                    var codigoGuardarVariableOperacionSQL = '';
+                    for (var j = 0; j < arregloAgrupacionElementosFormulaPorVariables[i][p].length; j++) {
+                        if(arregloDeExcel[i].variables[p].ID == arregloAgrupacionElementosFormulaPorVariables[i][p][j].variableCreacionCodigo.ID && !this.verificarExistenciaErroresExcel(arregloAgrupacionElementosFormulaPorVariables[i][p][j].variableCreacionCodigo) && arregloDeExcel[i].variables[p].nombre.localeCompare(arregloAgrupacionElementosFormulaPorVariables[i][p][j].variableCreacionCodigo.nombre) == 0  && arregloAgrupacionElementosFormulaPorVariables[i][p][j].atributo.nivel == nivelACrear && arregloAgrupacionElementosFormulaPorVariables[i][p][j].variable.realizarCalculo) {
+                            totalVarCreadasNivel++;
+                            if(j == 0 && window[arregloDeExcel[i].variables[p].nombre].length != undefined) {
+                                //solo crear codigo for una vez por variable
+                                codigoCuerpo += '\n\t//CODIGO VARIABLE: '+arregloDeExcel[i].variables[p].nombre;
+                                codigoCuerpo += '\n\tfor ( var x = 0; x < window["'+arregloDeExcel[i].variables[p].nombre+'"].length; x++) {';
+                            }
+                            var varFueInicializada = false;
+                            for (var w = 0; w < variablesInstanciadasID.length; w++) {
+                                if (variablesInstanciadasID[w] == arregloAgrupacionElementosFormulaPorVariables[i][p][j].variable.ID) {
+                                    varFueInicializada = true;
+                                    break;
+                                }
+                            };
+                            /*if(!varFueInicializada) {
+                                variablesInstanciadasID.push(arregloAgrupacionElementosFormulaPorVariables[i][p][j].variable.ID);*/
+                                if(arregloAgrupacionElementosFormulaPorVariables[i][p][j].variable.esObjeto) {
+                                    if(!varFueInicializada) {
+                                        variablesInstanciadasID.push(arregloAgrupacionElementosFormulaPorVariables[i][p][j].variable.ID);
+                                        codigoCuerpo += '\n\t\t//INICIACION VARIABLE: '+arregloAgrupacionElementosFormulaPorVariables[i][p][j].variable.nombre;
+                                        codigoCuerpo += '\n' + this.codigoIniciacion(arregloAgrupacionElementosFormulaPorVariables[i][p][j].variable, "variable", {}, '\t\t'); //variable, tipoVariable, atributo
+                                    }
+                                    //for (var p = 0; p < arregloAgrupacionElementosFormulaPorVariables[i][p][j].variable.atributos.length; p++) {
+                                        var contieneOperacionSQL = false, esPromedio = false;
+                                        //viendo si la ultima regla del segmento (la de asignacion) es una operacion de SQL (AUTOSUMAR, PROMEDIO, MAX, MIN)
+                                        if( this.existeOperacion(arregloAgrupacionElementosFormulaPorVariables[i][p][j].segmentoRegla.reglas[arregloAgrupacionElementosFormulaPorVariables[i][p][j].segmentoRegla.reglas.length-1].operacion) )
+                                            contieneOperacionSQL = true;
+                                        if( arregloAgrupacionElementosFormulaPorVariables[i][p][j].segmentoRegla.reglas[arregloAgrupacionElementosFormulaPorVariables[i][p][j].segmentoRegla.reglas.length-1].operacion.localeCompare("PROM") == 0 )
+                                            esPromedio = true;
+                                        if(!contieneOperacionSQL)
+                                            codigoCuerpo += '\n' + this.codigoIniciacion(arregloAgrupacionElementosFormulaPorVariables[i][p][j].variable, "atributo", arregloAgrupacionElementosFormulaPorVariables[i][p][j].atributo, '\t\t', false, esPromedio);
+                                        else {
+                                            codigoCuerpo += '\n' + this.codigoIniciacion(arregloAgrupacionElementosFormulaPorVariables[i][p][j].variable, "atributo", arregloAgrupacionElementosFormulaPorVariables[i][p][j].atributo, '\t\t', false, false);
+                                            codigoIniciacionVarPrimitiva += '\n' + this.codigoIniciacion(arregloAgrupacionElementosFormulaPorVariables[i][p][j].variable, "atributo", arregloAgrupacionElementosFormulaPorVariables[i][p][j].atributo, '\t', true, esPromedio);
+                                        }
+                                    //};
+                                } else {
+                                    codigoIniciacionVarPrimitiva += '\n\t//INICIACION VARIABLE: '+arregloAgrupacionElementosFormulaPorVariables[i][p][j].variable.nombre;
+                                    for (var k = 0; k < arregloAgrupacionElementosFormulaPorVariables[i][p][j].variable.atributos.length; k++) {
+                                        var esPromedio = false;
+                                        if( arregloAgrupacionElementosFormulaPorVariables[i][p][j].segmentoRegla.reglas[arregloAgrupacionElementosFormulaPorVariables[i][p][j].segmentoRegla.reglas.length-1].operacion.localeCompare("PROM") == 0 )
+                                            esPromedio = true;
+                                        codigoIniciacionVarPrimitiva += '\n' + this.codigoIniciacion(arregloAgrupacionElementosFormulaPorVariables[i][p][j].variable, "atributo", arregloAgrupacionElementosFormulaPorVariables[i][p][j].variable.atributos[k], '\t', false, esPromedio);
+                                    };
+                                }
+                            //}
+                            //if(arregloAgrupacionElementosFormulaPorVariables[i][p][j].atributo.nivel == nivelACrear) {
+                                var posicionVariable = 0, posicionCampo = 0;
+                                EncontrarPosiciones:
+                                for (var a = 0; a < arregloDeVariables.length; a++) {
+                                    if(arregloDeVariables[a].ID == arregloAgrupacionElementosFormulaPorVariables[i][p][j].variable.ID) {
+                                        posicionVariable = a;
+                                        for (var b = 0; b < arregloDeVariables[a].atributos.length; b++) {
+                                            if(arregloDeVariables[a].atributos[b].ID == arregloAgrupacionElementosFormulaPorVariables[i][p][j].atributo.ID) {
+                                                posicionCampo = b;
+                                                break EncontrarPosiciones;
+                                            }
+                                        };
+                                    }
+                                };
+                                var esArregloReferenciaArregloEnCodigo = false;
+                                if(window[arregloDeExcel[i].variables[p].nombre].length != undefined)
+                                    codigoCuerpo += this.crearCodigoSegmentoReglasFormaOExcel(arregloAgrupacionElementosFormulaPorVariables[i][p][j].segmentoRegla, arregloAgrupacionElementosFormulaPorVariables[i][p][j].segmentoRegla.reglas, 2, posicionVariable, posicionCampo, "window['"+arregloDeExcel[i].variables[p].nombre+"'][x]", true);
+                                else
+                                    codigoCuerpo += this.crearCodigoSegmentoReglasFormaOExcel(arregloAgrupacionElementosFormulaPorVariables[i][p][j].segmentoRegla, arregloAgrupacionElementosFormulaPorVariables[i][p][j].segmentoRegla.reglas, 2, posicionVariable, posicionCampo, "window['"+arregloDeExcel[i].variables[p].nombre+"']", false);
+                            //}
+                            var varFueGuardada = false;
+                            for (var w = 0; w < variablesGuardadasID.length; w++) {
+                                if (variablesGuardadasID[w] == arregloAgrupacionElementosFormulaPorVariables[i][p][j].variable.ID) {
+                                    varFueGuardada = true;
+                                    break;
+                                }
+                            };
+                            if(!varFueGuardada) {
+                                variablesGuardadasID.push(arregloAgrupacionElementosFormulaPorVariables[i][p][j].variable.ID);
+                                codigoGuardarVariables += this.agregarCodigoGuardarVariable(arregloAgrupacionElementosFormulaPorVariables[i][p][j].variable, arregloAgrupacionElementosFormulaPorVariables[i][p][j].atributos, 2);
+                            }
+                                //for (var p = 0; p < arregloAgrupacionElementosFormulaPorVariables[i][p][j].variable.atributos.length; p++) {
+                                if(arregloAgrupacionElementosFormulaPorVariables[i][p][j].variable.esObjeto || arregloAgrupacionElementosFormulaPorVariables[i][p][j].variable.esInstruccionSQL) {
+                                    var contieneOperacionSQL = false;
+                                    //viendo si la ultima regla del segmento (la de asignacion) es una operacion de SQL (AUTOSUMAR, PROMEDIO, MAX, MIN)
+                                    if( this.existeOperacion(arregloAgrupacionElementosFormulaPorVariables[i][p][j].segmentoRegla.reglas[arregloAgrupacionElementosFormulaPorVariables[i][p][j].segmentoRegla.reglas.length-1].operacion) )
+                                        contieneOperacionSQL = true;
+                                    if(contieneOperacionSQL && arregloAgrupacionElementosFormulaPorVariables[i][p][j].segmentoRegla.reglas[arregloAgrupacionElementosFormulaPorVariables[i][p][j].segmentoRegla.reglas.length-1].operacion.localeCompare("PROM") != 0 )
+                                        codigoGuardarVariableOperacionSQL += '\n\tguardarOperacionSQL(window["'+arregloAgrupacionElementosFormulaPorVariables[i][p][j].variable.nombre+'"], "'+arregloAgrupacionElementosFormulaPorVariables[i][p][j].atributo.nombre+'", '+arregloAgrupacionElementosFormulaPorVariables[i][p][j].variable.nombre+arregloAgrupacionElementosFormulaPorVariables[i][p][j].atributo.nombre+'NU3V0);';
+                                    else if(contieneOperacionSQL && arregloAgrupacionElementosFormulaPorVariables[i][p][j].segmentoRegla.reglas[arregloAgrupacionElementosFormulaPorVariables[i][p][j].segmentoRegla.reglas.length-1].operacion.localeCompare("PROM") == 0 ) {
+                                        //NU3V0T0T4L
+                                        codigoGuardarVariableOperacionSQL += '\n\tif('+arregloAgrupacionElementosFormulaPorVariables[i][p][j].variable.nombre+arregloAgrupacionElementosFormulaPorVariables[i][p][j].atributo.nombre+'NU3V0T0T4L != 0 || '+arregloAgrupacionElementosFormulaPorVariables[i][p][j].variable.nombre+arregloAgrupacionElementosFormulaPorVariables[i][p][j].atributo.nombre+'NU3V0T0T4L != -1) {';
+                                        codigoGuardarVariableOperacionSQL += '\n\t\tvar total = '+arregloAgrupacionElementosFormulaPorVariables[i][p][j].variable.nombre+arregloAgrupacionElementosFormulaPorVariables[i][p][j].atributo.nombre+'NU3V0/'+arregloAgrupacionElementosFormulaPorVariables[i][p][j].variable.nombre+arregloAgrupacionElementosFormulaPorVariables[i][p][j].atributo.nombre+'NU3V0T0T4L;';
+                                        codigoGuardarVariableOperacionSQL += '\n\t\tguardarOperacionSQL(window["'+arregloAgrupacionElementosFormulaPorVariables[i][p][j].variable.nombre+'"], "'+arregloAgrupacionElementosFormulaPorVariables[i][p][j].atributo.nombre+'", total);';
+                                        codigoGuardarVariableOperacionSQL += '\n\t}';
+                                    } else if(!arregloAgrupacionElementosFormulaPorVariables[i][p][j].variable.esObjeto && !arregloAgrupacionElementosFormulaPorVariables[i][p][j].variable.esInstruccionSQL && arregloAgrupacionElementosFormulaPorVariables[i][p][j].segmentoRegla.reglas[arregloAgrupacionElementosFormulaPorVariables[i][p][j].segmentoRegla.reglas.length-1].operacion.localeCompare("PROM") == 0) {
+                                        codigoGuardarVariableOperacionSQL += '\n\tvar total = '+arregloAgrupacionElementosFormulaPorVariables[i][p][j].variable.nombre+'NU3V0/'+arregloAgrupacionElementosFormulaPorVariables[i][p][j].variable.nombre+'NU3V0T0T4L;';
+                                        codigoGuardarVariableOperacionSQL += '\n\twindow["'+arregloAgrupacionElementosFormulaPorVariables[i][p][j].variable.nombre+'"] = total;';
+                                    }
+                                }
+                                //};
+                            //}
+                            if(totalVarCreadasNivel == totalVarACrearNivel) {
+                                codigoCuerpo += codigoGuardarVariables;
+                                //solo crear codigo for una vez por variable
+                                if(window[arregloDeExcel[i].variables[p].nombre].length != undefined)
+                                    codigoCuerpo += '\n\t};\n';
+                                codigo += codigoIniciacionVarPrimitiva + codigoCuerpo + codigoGuardarVariableOperacionSQL;
+                            }
+                        }
+                    };
+                }
+            };
+        };
         return codigo;
     }
 
@@ -2665,31 +2496,50 @@ export default class FuenteDatoVariable extends React.Component {
                 var formula = arregloDeVariables[posicionVariable].atributos[posicionCampo].formulas.filter(function( formula ) {
                     return regla.formulaID == formula.ID;
                 });
-                console.log('1');
                 if(formula.length > 0) {
-                    console.log('1.1');
                     //este tipo de operacion siempre sera una formula con un elemento de formula
-                    console.log('formula')
-                    console.log(formula)
                     if(arregloDeVariables[posicionVariable].esObjeto) {
                         if(esArregloReferenciaArregloEnCodigo) {
-                            arreglo.push({codigo: tabsText+"if ("+nombreReferenciaArregloEnCodigo+"[x]."+formula[0].fuenteDeDatos[0].nombreColumnaEnTabla+" != undefined) {", tipo: "ASIG"});
-                            arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"NU3V0."+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+" = "+nombreReferenciaArregloEnCodigo+"[x]."+formula[0].fuenteDeDatos[0].nombreColumnaEnTabla+";", tipo: "ASIG"});
+                            if(formula[0].fuenteDeDatos != undefined && formula[0].fuenteDeDatos[0].esValorManual) {
+                                arreglo.push({codigo: tabsText+"if ('"+formula[0].fuenteDeDatos[0].nombreVariable+"' != undefined) {", tipo: "ASIG"});
+                                arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"NU3V0."+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+" = '"+formula[0].fuenteDeDatos[0].nombreVariable+"';", tipo: "ASIG"});
+                            } else {
+                                arreglo.push({codigo: tabsText+"if ("+nombreReferenciaArregloEnCodigo+"[x]."+formula[0].fuenteDeDatos[0].nombreColumnaEnTabla+" != undefined) {", tipo: "ASIG"});
+                                arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"NU3V0."+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+" = "+nombreReferenciaArregloEnCodigo+"[x]."+formula[0].fuenteDeDatos[0].nombreColumnaEnTabla+";", tipo: "ASIG"});
+                            }
                         } else {
-                            arreglo.push({codigo: tabsText+"if ("+nombreReferenciaArregloEnCodigo+" != undefined) {", tipo: "ASIG"});
-                            arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"NU3V0."+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+" = "+nombreReferenciaArregloEnCodigo+";", tipo: "ASIG"});
+                            if(formula[0].fuenteDeDatos != undefined && formula[0].fuenteDeDatos[0].esValorManual) {
+                                arreglo.push({codigo: tabsText+"if ('"+formula[0].fuenteDeDatos[0].nombreVariable+"' != undefined) {", tipo: "ASIG"});
+                                arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"NU3V0."+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+" = '"+formula[0].fuenteDeDatos[0].nombreVariable+"';", tipo: "ASIG"});
+                            } else {
+                                arreglo.push({codigo: tabsText+"if ("+nombreReferenciaArregloEnCodigo+" != undefined) {", tipo: "ASIG"});
+                                arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"NU3V0."+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+" = "+nombreReferenciaArregloEnCodigo+";", tipo: "ASIG"});
+                            }
                         }
                     } else {
                         if(esArregloReferenciaArregloEnCodigo) {
-                            arreglo.push({codigo: tabsText+"if ("+nombreReferenciaArregloEnCodigo+"[x]."+formula[0].fuenteDeDatos[0].nombreColumnaEnTabla+" != undefined) {", tipo: "ASIG"});
-                            arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"NU3V0 = "+nombreReferenciaArregloEnCodigo+"[x]."+formula[0].fuenteDeDatos[0].nombreColumnaEnTabla+";", tipo: "ASIG"});
+                            if(formula[0].fuenteDeDatos != undefined && formula[0].fuenteDeDatos[0].esValorManual) {
+                                arreglo.push({codigo: tabsText+"if ('"+formula[0].fuenteDeDatos[0].nombreVariable+"' != undefined) {", tipo: "ASIG"});
+                                arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"NU3V0 = '"+formula[0].fuenteDeDatos[0].nombreVariable+"';", tipo: "ASIG"});
+                            } else {
+                                arreglo.push({codigo: tabsText+"if ("+nombreReferenciaArregloEnCodigo+"[x]."+formula[0].fuenteDeDatos[0].nombreColumnaEnTabla+" != undefined) {", tipo: "ASIG"});
+                                arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"NU3V0 = "+nombreReferenciaArregloEnCodigo+"[x]."+formula[0].fuenteDeDatos[0].nombreColumnaEnTabla+";", tipo: "ASIG"});
+                            }
                         } else {
-                            arreglo.push({codigo: tabsText+"if ("+nombreReferenciaArregloEnCodigo+" != undefined) {", tipo: "ASIG"});
-                            arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"NU3V0 = "+nombreReferenciaArregloEnCodigo+";", tipo: "ASIG"});
+                            if(formula[0].fuenteDeDatos != undefined && formula[0].fuenteDeDatos[0].esValorManual) {
+                                arreglo.push({codigo: tabsText+"if ('"+formula[0].fuenteDeDatos[0].nombreVariable+"' != undefined) {", tipo: "ASIG"});
+                                arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"NU3V0 = '"+formula[0].fuenteDeDatos[0].nombreVariable+"';", tipo: "ASIG"});
+                            } else {
+                                arreglo.push({codigo: tabsText+"if ("+nombreReferenciaArregloEnCodigo+" != undefined) {", tipo: "ASIG"});
+                                arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"NU3V0 = "+nombreReferenciaArregloEnCodigo+";", tipo: "ASIG"});
+                            }
                         }
                     }
                     arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"GU4RD4RV4L0R = true;", tipo: "BANDERA_ASIG"});
                     arreglo.push({codigo: "\n"+tabsText+"}", tipo: "ASIG"});
+                    /*arreglo.push({codigo: "\n"+tabsText+"} else {\n", tipo: "ASIG"});
+                    arreglo.push({codigo: "\n"+tabsText+"\tarregloDeErroresVariables.push({nombre: nombreVariable, ID: id})\n", tipo: "ASIG"});
+                    arreglo.push({codigo: "\n"+tabsText+"} else {", tipo: "ASIG"});*/
                 }
             } else if(regla.operacion.indexOf('MAX') == 0) {
                 //trayendo formula correcta
@@ -2756,7 +2606,7 @@ export default class FuenteDatoVariable extends React.Component {
                                 arreglo.push({codigo: tabsText+"if ("+nombreReferenciaArregloEnCodigo+"[x]."+formula[0].fuenteDeDatos[0].nombreColumnaEnTabla+" != undefined && !isNaN("+nombreReferenciaArregloEnCodigo+"[x]."+formula[0].fuenteDeDatos[0].nombreColumnaEnTabla+")) {", tipo: "MAX"});
                                 arreglo.push({codigo: "\n\t"+tabsText+"if ("+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 < "+nombreReferenciaArregloEnCodigo+"[x]."+formula[0].fuenteDeDatos[0].nombreColumnaEnTabla+") {", tipo: "MAX"});
                                 arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 = "+nombreReferenciaArregloEnCodigo+"[x]."+formula[0].fuenteDeDatos[0].nombreColumnaEnTabla+";", tipo: "MAX"});
-                                arreglo.push({codigo: "\n\t\t"+tabsText+"if( window['"+arregloDeVariables[posicionVariable].nombre+"'].length == 0)", tipo: "BANDERA_ASIG"});
+                                //arreglo.push({codigo: "\n\t\t"+tabsText+"if( window['"+arregloDeVariables[posicionVariable].nombre+"'].length == 0)", tipo: "BANDERA_ASIG"});
                                 arreglo.push({codigo: "\n\t\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"GU4RD4RV4L0R = true;", tipo: "BANDERA_ASIG"});
                                 arreglo.push({codigo: "\n\t"+tabsText+"}", tipo: "MAX"});
                                 arreglo.push({codigo: "\n"+tabsText+"}", tipo: "MAX"});
@@ -2764,7 +2614,7 @@ export default class FuenteDatoVariable extends React.Component {
                                 arreglo.push({codigo: tabsText+"if ("+nombreReferenciaArregloEnCodigo+" != undefined && !isNaN("+nombreReferenciaArregloEnCodigo+")) {", tipo: "MAX"});
                                 arreglo.push({codigo: "\n\t"+tabsText+"if ("+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 < "+nombreReferenciaArregloEnCodigo+") {", tipo: "MAX"});
                                 arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 = "+nombreReferenciaArregloEnCodigo+";", tipo: "MAX"});
-                                arreglo.push({codigo: "\n\t\t"+tabsText+"if( window['"+arregloDeVariables[posicionVariable].nombre+"'].length == 0)", tipo: "BANDERA_ASIG"});
+                                //arreglo.push({codigo: "\n\t\t"+tabsText+"if( window['"+arregloDeVariables[posicionVariable].nombre+"'].length == 0)", tipo: "BANDERA_ASIG"});
                                 arreglo.push({codigo: "\n\t\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"GU4RD4RV4L0R = true;", tipo: "BANDERA_ASIG"});
                                 arreglo.push({codigo: "\n\t"+tabsText+"}", tipo: "MAX"});
                                 arreglo.push({codigo: "\n"+tabsText+"}", tipo: "MAX"});
@@ -2851,17 +2701,17 @@ export default class FuenteDatoVariable extends React.Component {
                         if(arregloDeVariables[posicionVariable].esObjeto) {
                             if(esArregloReferenciaArregloEnCodigo) {
                                 arreglo.push({codigo: tabsText+"if ("+nombreReferenciaArregloEnCodigo+"[x]."+formula[0].fuenteDeDatos[0].nombreColumnaEnTabla+" != undefined && !isNaN("+nombreReferenciaArregloEnCodigo+"[x]."+formula[0].fuenteDeDatos[0].nombreColumnaEnTabla+")) {", tipo: "MAX"});
-                                arreglo.push({codigo: "\n\t"+tabsText+"if ("+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 > "+nombreReferenciaArregloEnCodigo+"[x]."+formula[0].fuenteDeDatos[0].nombreColumnaEnTabla+") {", tipo: "MAX"});
+                                arreglo.push({codigo: "\n\t"+tabsText+"if ("+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 > "+nombreReferenciaArregloEnCodigo+"[x]."+formula[0].fuenteDeDatos[0].nombreColumnaEnTabla+" || "+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 == -1) {", tipo: "MAX"});
                                 arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 = "+nombreReferenciaArregloEnCodigo+"[x]."+formula[0].fuenteDeDatos[0].nombreColumnaEnTabla+";", tipo: "MAX"});
-                                arreglo.push({codigo: "\n\t\t"+tabsText+"if( window['"+arregloDeVariables[posicionVariable].nombre+"'].length == 0)", tipo: "BANDERA_ASIG"});
+                                //arreglo.push({codigo: "\n\t\t"+tabsText+"if( window['"+arregloDeVariables[posicionVariable].nombre+"'].length == 0)", tipo: "BANDERA_ASIG"});
                                 arreglo.push({codigo: "\n\t\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"GU4RD4RV4L0R = true;", tipo: "BANDERA_ASIG"});
                                 arreglo.push({codigo: "\n\t"+tabsText+"}", tipo: "MAX"});
                                 arreglo.push({codigo: "\n"+tabsText+"}", tipo: "MAX"});
                             } else {
                                 arreglo.push({codigo: tabsText+"if ("+nombreReferenciaArregloEnCodigo+" != undefined && !isNaN("+nombreReferenciaArregloEnCodigo+")) {", tipo: "MAX"});
-                                arreglo.push({codigo: "\n\t"+tabsText+"if ("+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 > "+nombreReferenciaArregloEnCodigo+") {", tipo: "MAX"});
+                                arreglo.push({codigo: "\n\t"+tabsText+"if ("+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 > "+nombreReferenciaArregloEnCodigo+" || "+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 == -1) {", tipo: "MAX"});
                                 arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 = "+nombreReferenciaArregloEnCodigo+";", tipo: "MAX"});
-                                arreglo.push({codigo: "\n\t\t"+tabsText+"if( window['"+arregloDeVariables[posicionVariable].nombre+"'].length == 0)", tipo: "BANDERA_ASIG"});
+                                //arreglo.push({codigo: "\n\t\t"+tabsText+"if( window['"+arregloDeVariables[posicionVariable].nombre+"'].length == 0)", tipo: "BANDERA_ASIG"});
                                 arreglo.push({codigo: "\n\t\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"GU4RD4RV4L0R = true;", tipo: "BANDERA_ASIG"});
                                 arreglo.push({codigo: "\n\t"+tabsText+"}", tipo: "MAX"});
                                 arreglo.push({codigo: "\n"+tabsText+"}", tipo: "MAX"});
@@ -2872,7 +2722,7 @@ export default class FuenteDatoVariable extends React.Component {
                                 arreglo.push({codigo: "\n\t"+tabsText+"if ("+arregloDeVariables[posicionVariable].nombre+"NU3V0 > "+nombreReferenciaArregloEnCodigo+"[x]."+formula[0].fuenteDeDatos[0].nombreColumnaEnTabla+") {", tipo: "MAX"});
                                 arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"NU3V0 = "+nombreReferenciaArregloEnCodigo+"[x]."+formula[0].fuenteDeDatos[0].nombreColumnaEnTabla+";", tipo: "MAX"});
                                 arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"GU4RD4RV4L0R = true;", tipo: "BANDERA_ASIG"});
-                                arreglo.push({codigo: "\n\t"+tabsText+"} else if( isNaN(window['"+arregloDeVariables[posicionVariable].nombre+"']) && x == 0) {", tipo: "MAX"});
+                                arreglo.push({codigo: "\n\t"+tabsText+"} else if( "+arregloDeVariables[posicionVariable].nombre+"NU3V0 == -1  ) {", tipo: "MAX"});
                                 arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"NU3V0 = "+nombreReferenciaArregloEnCodigo+"[x]."+formula[0].fuenteDeDatos[0].nombreColumnaEnTabla+";", tipo: "MAX"});
                                 arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"GU4RD4RV4L0R = true;", tipo: "BANDERA_ASIG"});
                                 arreglo.push({codigo: "\n\t"+tabsText+"}", tipo: "MAX"});
@@ -2882,7 +2732,7 @@ export default class FuenteDatoVariable extends React.Component {
                                 arreglo.push({codigo: "\n\t"+tabsText+"if ("+arregloDeVariables[posicionVariable].nombre+"NU3V0 > "+nombreReferenciaArregloEnCodigo+") {", tipo: "MAX"});
                                 arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"NU3V0 = "+nombreReferenciaArregloEnCodigo+";", tipo: "MAX"});
                                 arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"GU4RD4RV4L0R = true;", tipo: "BANDERA_ASIG"});
-                                arreglo.push({codigo: "\n\t"+tabsText+"} else if( isNaN(window['"+arregloDeVariables[posicionVariable].nombre+"']) && x == 0) {", tipo: "MAX"});
+                                arreglo.push({codigo: "\n\t"+tabsText+"} else if( "+arregloDeVariables[posicionVariable].nombre+"NU3V0 == -1 ) {", tipo: "MAX"});
                                 arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"NU3V0 = "+nombreReferenciaArregloEnCodigo+";", tipo: "MAX"});
                                 arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"GU4RD4RV4L0R = true;", tipo: "BANDERA_ASIG"});
                                 arreglo.push({codigo: "\n\t"+tabsText+"}", tipo: "MAX"});
@@ -2906,7 +2756,7 @@ export default class FuenteDatoVariable extends React.Component {
                                 arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 = 0;", tipo: "MAX"});
                                 arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 += "+nombreReferenciaArregloEnCodigo+"[x]."+formula[0].fuenteDeDatos[0].nombreColumnaEnTabla+";", tipo: "MAX"});
                                 arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0T0T4L++;", tipo: "MAX"});
-                                arreglo.push({codigo: "\n\t"+tabsText+"if( window['"+arregloDeVariables[posicionVariable].nombre+"'].length == 0)", tipo: "BANDERA_ASIG"});
+                                //arreglo.push({codigo: "\n\t"+tabsText+"if( window['"+arregloDeVariables[posicionVariable].nombre+"'].length == 0)", tipo: "BANDERA_ASIG"});
                                 arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"GU4RD4RV4L0R = true;", tipo: "BANDERA_ASIG"});
                                 arreglo.push({codigo: "\n"+tabsText+"}", tipo: "MAX"});
                             } else {
@@ -2915,7 +2765,7 @@ export default class FuenteDatoVariable extends React.Component {
                                 arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 = 0;", tipo: "MAX"});
                                 arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 += "+nombreReferenciaArregloEnCodigo+";", tipo: "MAX"});
                                 arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0T0T4L++;", tipo: "MAX"});
-                                arreglo.push({codigo: "\n\t"+tabsText+"if( window['"+arregloDeVariables[posicionVariable].nombre+"'].length == 0)", tipo: "BANDERA_ASIG"});
+                                //arreglo.push({codigo: "\n\t"+tabsText+"if( window['"+arregloDeVariables[posicionVariable].nombre+"'].length == 0)", tipo: "BANDERA_ASIG"});
                                 arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"GU4RD4RV4L0R = true;", tipo: "BANDERA_ASIG"});
                                 arreglo.push({codigo: "\n"+tabsText+"}", tipo: "MAX"});
                             }
@@ -2953,7 +2803,7 @@ export default class FuenteDatoVariable extends React.Component {
                                 arreglo.push({codigo: tabsText+"if ("+nombreReferenciaArregloEnCodigo+"[x]."+formula[0].fuenteDeDatos[0].nombreColumnaEnTabla+" != undefined && !isNaN("+nombreReferenciaArregloEnCodigo+"[x]."+formula[0].fuenteDeDatos[0].nombreColumnaEnTabla+")) {", tipo: "AUTOSUM"});
                                 arreglo.push({codigo: "\n\t"+tabsText+"if ("+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 == -1)", tipo: "AUTOSUM"});
                                 arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 = 0;", tipo: "AUTOSUM"});
-                                arreglo.push({codigo: "\n\t\t"+tabsText+"if( window['"+arregloDeVariables[posicionVariable].nombre+"'].length == 0)", tipo: "BANDERA_ASIG"});
+                                //arreglo.push({codigo: "\n\t\t"+tabsText+"if( window['"+arregloDeVariables[posicionVariable].nombre+"'].length == 0)", tipo: "BANDERA_ASIG"});
                                 arreglo.push({codigo: "\n\t\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"GU4RD4RV4L0R = true;", tipo: "BANDERA_ASIG"});
                                 arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 = evaluate("+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 + "+nombreReferenciaArregloEnCodigo+"[x]."+formula[0].fuenteDeDatos[0].nombreColumnaEnTabla+");", tipo: "AUTOSUM"});
                                 arreglo.push({codigo: "\n"+tabsText+"}", tipo: "AUTOSUM"});
@@ -2961,7 +2811,7 @@ export default class FuenteDatoVariable extends React.Component {
                                 arreglo.push({codigo: tabsText+"if ("+nombreReferenciaArregloEnCodigo+" != undefined && !isNaN("+nombreReferenciaArregloEnCodigo+")) {", tipo: "AUTOSUM"});
                                 arreglo.push({codigo: "\n\t"+tabsText+"if ("+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 == -1)", tipo: "AUTOSUM"});
                                 arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 = 0;", tipo: "AUTOSUM"});
-                                arreglo.push({codigo: "\n\t\t"+tabsText+"if( window['"+arregloDeVariables[posicionVariable].nombre+"'].length == 0)", tipo: "BANDERA_ASIG"});
+                                //arreglo.push({codigo: "\n\t\t"+tabsText+"if( window['"+arregloDeVariables[posicionVariable].nombre+"'].length == 0)", tipo: "BANDERA_ASIG"});
                                 arreglo.push({codigo: "\n\t\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"GU4RD4RV4L0R = true;", tipo: "BANDERA_ASIG"});
                                 arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 = evaluate("+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 + "+nombreReferenciaArregloEnCodigo+");", tipo: "AUTOSUM"});
                                 arreglo.push({codigo: "\n"+tabsText+"}", tipo: "AUTOSUM"});
@@ -2996,7 +2846,7 @@ export default class FuenteDatoVariable extends React.Component {
                             arreglo.push({codigo: "\n\t"+tabsText+"if ("+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 == -1 )", tipo: "COUNT"});
                             arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 = 0;", tipo: "COUNT"});
                             arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0++;", tipo: "COUNT"});
-                            arreglo.push({codigo: "\n\t"+tabsText+"if( window['"+arregloDeVariables[posicionVariable].nombre+"'].length == 0)", tipo: "BANDERA_ASIG"});
+                            //arreglo.push({codigo: "\n\t"+tabsText+"if( window['"+arregloDeVariables[posicionVariable].nombre+"'].length == 0)", tipo: "BANDERA_ASIG"});
                             arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"GU4RD4RV4L0R = true;", tipo: "BANDERA_ASIG"});
                             arreglo.push({codigo: "\n"+tabsText+"}", tipo: "COUNT"});
                         } else {
@@ -3004,7 +2854,7 @@ export default class FuenteDatoVariable extends React.Component {
                             arreglo.push({codigo: "\n\t"+tabsText+"if ("+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 == -1 )", tipo: "COUNT"});
                             arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 = 0;", tipo: "COUNT"});
                             arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0++;", tipo: "COUNT"});
-                            arreglo.push({codigo: "\n\t"+tabsText+"if( window['"+arregloDeVariables[posicionVariable].nombre+"'].length == 0)", tipo: "BANDERA_ASIG"});
+                            //arreglo.push({codigo: "\n\t"+tabsText+"if( window['"+arregloDeVariables[posicionVariable].nombre+"'].length == 0)", tipo: "BANDERA_ASIG"});
                             arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"GU4RD4RV4L0R = true;", tipo: "BANDERA_ASIG"});
                             arreglo.push({codigo: "\n"+tabsText+"}", tipo: "COUNT"});
                         }
@@ -3032,7 +2882,7 @@ export default class FuenteDatoVariable extends React.Component {
                             arreglo.push({codigo: "\n\t"+tabsText+"if ("+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 == -1 )", tipo: "COUNT"});
                             arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 = 0;", tipo: "COUNT"});
                             arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0++;", tipo: "COUNT"});
-                            arreglo.push({codigo: "\n\t"+tabsText+"if( window['"+arregloDeVariables[posicionVariable].nombre+"'].length == 0)", tipo: "BANDERA_ASIG"});
+                            //arreglo.push({codigo: "\n\t"+tabsText+"if( window['"+arregloDeVariables[posicionVariable].nombre+"'].length == 0)", tipo: "BANDERA_ASIG"});
                             arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"GU4RD4RV4L0R = true;", tipo: "BANDERA_ASIG"});
                             arreglo.push({codigo: "\n"+tabsText+"}", tipo: "COUNT"});
                         } else {
@@ -3040,7 +2890,7 @@ export default class FuenteDatoVariable extends React.Component {
                             arreglo.push({codigo: "\n\t"+tabsText+"if ("+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 == -1 )", tipo: "COUNT"});
                             arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 = 0;", tipo: "COUNT"});
                             arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0++;", tipo: "COUNT"});
-                            arreglo.push({codigo: "\n\t"+tabsText+"if( window['"+arregloDeVariables[posicionVariable].nombre+"'].length == 0)", tipo: "BANDERA_ASIG"});
+                            //arreglo.push({codigo: "\n\t"+tabsText+"if( window['"+arregloDeVariables[posicionVariable].nombre+"'].length == 0)", tipo: "BANDERA_ASIG"});
                             arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"GU4RD4RV4L0R = true;", tipo: "BANDERA_ASIG"});
                             arreglo.push({codigo: "\n"+tabsText+"}", tipo: "COUNT"});
                         }
@@ -3068,7 +2918,7 @@ export default class FuenteDatoVariable extends React.Component {
                             arreglo.push({codigo: "\n\t"+tabsText+"if ("+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 == -1 )", tipo: "COUNT"});
                             arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 = 0;", tipo: "COUNT"});
                             arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0++;", tipo: "COUNT"});
-                            arreglo.push({codigo: "\n\t"+tabsText+"if( window['"+arregloDeVariables[posicionVariable].nombre+"'].length == 0)", tipo: "BANDERA_ASIG"});
+                            //arreglo.push({codigo: "\n\t"+tabsText+"if( window['"+arregloDeVariables[posicionVariable].nombre+"'].length == 0)", tipo: "BANDERA_ASIG"});
                             arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"GU4RD4RV4L0R = true;", tipo: "BANDERA_ASIG"});
                             arreglo.push({codigo: "\n"+tabsText+"}", tipo: "COUNT"});
                         } else {
@@ -3076,7 +2926,7 @@ export default class FuenteDatoVariable extends React.Component {
                             arreglo.push({codigo: "\n\t"+tabsText+"if ("+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 == -1 )", tipo: "COUNT"});
                             arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 = 0;", tipo: "COUNT"});
                             arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0++;", tipo: "COUNT"});
-                            arreglo.push({codigo: "\n\t"+tabsText+"if( window['"+arregloDeVariables[posicionVariable].nombre+"'].length == 0)", tipo: "BANDERA_ASIG"});
+                            //arreglo.push({codigo: "\n\t"+tabsText+"if( window['"+arregloDeVariables[posicionVariable].nombre+"'].length == 0)", tipo: "BANDERA_ASIG"});
                             arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"GU4RD4RV4L0R = true;", tipo: "BANDERA_ASIG"});
                             arreglo.push({codigo: "\n"+tabsText+"}", tipo: "COUNT"});
                         }
@@ -3104,7 +2954,7 @@ export default class FuenteDatoVariable extends React.Component {
                             arreglo.push({codigo: "\n\t"+tabsText+"if ("+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 == -1 )", tipo: "COUNT"});
                             arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 = 0;", tipo: "COUNT"});
                             arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0++;", tipo: "COUNT"});
-                            arreglo.push({codigo: "\n\t"+tabsText+"if( window['"+arregloDeVariables[posicionVariable].nombre+"'].length == 0)", tipo: "BANDERA_ASIG"});
+                            //arreglo.push({codigo: "\n\t"+tabsText+"if( window['"+arregloDeVariables[posicionVariable].nombre+"'].length == 0)", tipo: "BANDERA_ASIG"});
                             arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"GU4RD4RV4L0R = true;", tipo: "BANDERA_ASIG"});
                             arreglo.push({codigo: "\n"+tabsText+"}", tipo: "COUNT"});
                         } else {
@@ -3112,7 +2962,7 @@ export default class FuenteDatoVariable extends React.Component {
                             arreglo.push({codigo: "\n\t"+tabsText+"if ("+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 == -1 )", tipo: "COUNT"});
                             arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 = 0;", tipo: "COUNT"});
                             arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0++;", tipo: "COUNT"});
-                            arreglo.push({codigo: "\n\t"+tabsText+"if( window['"+arregloDeVariables[posicionVariable].nombre+"'].length == 0)", tipo: "BANDERA_ASIG"});
+                            //arreglo.push({codigo: "\n\t"+tabsText+"if( window['"+arregloDeVariables[posicionVariable].nombre+"'].length == 0)", tipo: "BANDERA_ASIG"});
                             arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"GU4RD4RV4L0R = true;", tipo: "BANDERA_ASIG"});
                             arreglo.push({codigo: "\n"+tabsText+"}", tipo: "COUNT"});
                         }
@@ -3147,14 +2997,14 @@ export default class FuenteDatoVariable extends React.Component {
                                 arreglo.push({codigo: saltoLinea+tabsText+newTabsTextFormula+"if ("+nombreReferenciaArregloEnCodigo+"[x]."+formula[0].fuenteDeDatos[i].nombreColumnaEnTabla+" != undefined) {", tipo: "FORMULA"});
                                 newTabsTextFormula += "\t";
                                 arreglo.push({codigo: saltoLinea+tabsText+newTabsTextFormula+"var "+formula[0].fuenteDeDatos[i].nombreVariable+" = "+nombreReferenciaArregloEnCodigo+"[x]."+formula[0].fuenteDeDatos[i].nombreColumnaEnTabla+";", tipo: "FORMULA"});
-                                arreglo.push({codigo: saltoLinea+tabsText+newTabsTextFormula+"console.log('"+formula[0].fuenteDeDatos[i].nombreVariable+"');", tipo: "FORMULA"});
-                                arreglo.push({codigo: saltoLinea+tabsText+newTabsTextFormula+"console.log("+formula[0].fuenteDeDatos[i].nombreVariable+");", tipo: "FORMULA"});
+                                /*arreglo.push({codigo: saltoLinea+tabsText+newTabsTextFormula+"console.log('"+formula[0].fuenteDeDatos[i].nombreVariable+"');", tipo: "FORMULA"});
+                                arreglo.push({codigo: saltoLinea+tabsText+newTabsTextFormula+"console.log("+formula[0].fuenteDeDatos[i].nombreVariable+");", tipo: "FORMULA"});*/
                             } else {
                                 arreglo.push({codigo: saltoLinea+tabsText+newTabsTextFormula+"if (window['"+formula[0].fuenteDeDatos[i].nombreColumnaEnTabla+"'] != undefined) {", tipo: "FORMULA"});
                                 newTabsTextFormula += "\t";
                                 arreglo.push({codigo: saltoLinea+tabsText+newTabsTextFormula+"var "+formula[0].fuenteDeDatos[i].nombreVariable+" = window['"+formula[0].fuenteDeDatos[i].nombreColumnaEnTabla+"'];", tipo: "FORMULA"});
-                                arreglo.push({codigo: saltoLinea+tabsText+newTabsTextFormula+"console.log('"+formula[0].fuenteDeDatos[i].nombreVariable+"');", tipo: "FORMULA"});
-                                arreglo.push({codigo: saltoLinea+tabsText+newTabsTextFormula+"console.log("+formula[0].fuenteDeDatos[i].nombreVariable+");", tipo: "FORMULA"});
+                                /*arreglo.push({codigo: saltoLinea+tabsText+newTabsTextFormula+"console.log('"+formula[0].fuenteDeDatos[i].nombreVariable+"');", tipo: "FORMULA"});
+                                arreglo.push({codigo: saltoLinea+tabsText+newTabsTextFormula+"console.log("+formula[0].fuenteDeDatos[i].nombreVariable+");", tipo: "FORMULA"});*/
                             }
                         /*} else {
                             if (!arregloDeVariables[posicionVariable].esObjeto) {
@@ -3187,8 +3037,6 @@ export default class FuenteDatoVariable extends React.Component {
                 for (var i = formula[0].fuenteDeDatos.length; i > 0; i--) {
                     posicionesIF.push(arreglo.length+i);
                 }
-                console.log('arreglo');
-                console.log(arreglo);
             }
         } else {
             //condiciones if
@@ -3200,17 +3048,23 @@ export default class FuenteDatoVariable extends React.Component {
                 arregloValoresAComparar = ["new Date("+fecha+").getTime()"];
             } else if(regla.valor.indexOf("TIEMPO") == 0) {
                 var stringValores = regla.valor.substring(regla.valor.indexOf("[")+1, regla.valor.lastIndexOf("]"));
-                var diasAgregarCadena = stringValores.split(",")[0], mesesAgregarCadena = stringValores.split(",")[1], aniosAgregarCadena = stringValores.split(",")[2];
+                var diasAgregarCadena = stringValores.split(",")[0], mesesAgregarCadena = stringValores.split(",")[1], aniosAgregarCadena = stringValores.split(",")[2], futuro = stringValores.split(",")[3];
                 var diasAgregar = parseInt(diasAgregarCadena.indexOf("=")+1), mesesAgregar = parseInt(mesesAgregarCadena.indexOf("=")+1), aniosAgregar = parseInt(aniosAgregarCadena.indexOf("=")+1);
-                Date.prototype.addDays = function(days) {
-                    var date = new Date(this.valueOf());
-                    date.setDate(date.getDate() + days);
-                    return date;
-                }
+                var esFuturo = true;
+                if(futuro.localeCompare("FUTURO") == 0)
+                    esFuturo = true;
+                else
+                    esFuturo = false;
                 var hoy = new Date();
-                hoy = this.addYears(hoy, aniosAgregar);
-                hoy = this.addMonths(hoy, mesesAgregar);
-                hoy = this.addDays(hoy, diasAgregar);
+                if(esFuturo) {
+                    hoy = this.addYears(hoy, aniosAgregar);
+                    hoy = this.addMonths(hoy, mesesAgregar);
+                    hoy = this.addDays(hoy, diasAgregar);
+                } else {
+                    hoy = this.minusDays(hoy, diasAgregar);
+                    hoy = this.minusMonths(hoy, mesesAgregar);
+                    hoy = this.minusYears(hoy, aniosAgregar);
+                }
                 arregloValoresAComparar = ["new Date("+hoy.getFullYear()+", "+hoy.getMonth()+", "+hoy.getDate()+").getTime()"];
             } else if(regla.valor.indexOf("MANUAL") == 0) {
                 arregloValoresAComparar = [regla.valor.substring(regla.valor.indexOf("[")+1, regla.valor.lastIndexOf("]"))];
@@ -3227,17 +3081,29 @@ export default class FuenteDatoVariable extends React.Component {
                     var comparacion = "";
                     var inicioComparacion = "";
                     var operacion = "";
-                    if(regla.operacion.localeCompare("ES_MENOR") == 0) {
+                    if(regla.operacion.localeCompare("ES_MENOR") == 0 && regla.valor.indexOf("TIEMPO") != 0) {
                         operacion = "<";
-                    } else if(regla.operacion.localeCompare("ES_MENOR_O_IGUAL") == 0) {
+                    } else if(regla.operacion.localeCompare("ES_MENOR_O_IGUAL") == 0 && regla.valor.indexOf("TIEMPO") != 0) {
                         operacion = "<=";
-                    } else if(regla.operacion.localeCompare("ES_MAYOR_O_IGUAL") == 0) {
+                    } else if(regla.operacion.localeCompare("ES_MAYOR_O_IGUAL") == 0 && regla.valor.indexOf("TIEMPO") != 0) {
                         operacion = ">=";
-                    } else if(regla.operacion.localeCompare("ES_MAYOR") == 0) {
+                    } else if(regla.operacion.localeCompare("ES_MAYOR") == 0 && regla.valor.indexOf("TIEMPO") != 0) {
                         operacion = ">";
                     } else if(regla.operacion.localeCompare("ES_IGUAL") == 0) {
                         operacion = "==";
                     } else if(regla.operacion.localeCompare("NO_ES_IGUAL") == 0) {
+                        operacion = "!=";
+                    } else if(regla.operacion.localeCompare("ES_MENOR") == 0 && regla.valor.indexOf("TIEMPO") == 0) {
+                        operacion = ">";
+                    } else if(regla.operacion.localeCompare("ES_MENOR_O_IGUAL") == 0 && regla.valor.indexOf("TIEMPO") == 0) {
+                        operacion = ">=";
+                    } else if(regla.operacion.localeCompare("ES_MAYOR_O_IGUAL") == 0 && regla.valor.indexOf("TIEMPO") == 0) {
+                        operacion = "<=";
+                    } else if(regla.operacion.localeCompare("ES_MAYOR") == 0 && regla.valor.indexOf("TIEMPO") == 0) {
+                        operacion = "<";
+                    } else if(regla.operacion.localeCompare("ES_IGUAL") == 0 && regla.valor.indexOf("TIEMPO") == 0) {
+                        operacion = "==";
+                    } else if(regla.operacion.localeCompare("NO_ES_IGUAL") == 0 && regla.valor.indexOf("TIEMPO") == 0) {
                         operacion = "!=";
                     }
                     if (regla.tipoCampoObjetivo.localeCompare("date") == 0) {
@@ -3344,16 +3210,514 @@ export default class FuenteDatoVariable extends React.Component {
         }
     }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    arregloCodigoReglaFormaOExcel (regla, tabs, posicionVariable, posicionCampo, arreglo, arregloDeReglas, nombreReferenciaArregloEnCodigo, esArregloReferenciaArregloEnCodigo) {
+        //a este metodo solo entra cuando la asignacion, max, min, ect es de solo variables formula o excel, o formulas solo es de excel o formulas
+        var tabsText = '';
+        for (var i = 0; i < tabs; i++) {
+            tabsText+='\t';
+        };
+        var posicionesIF = [];
+        var newTabsTextFormula = '';
+        if(!regla.esCondicion) {
+            //asignaciones
+            //si no es condicion, la variable de referencia se le agrega NU3V0 que hace referencia al objeto temporal vacio
+            if(regla.operacion.indexOf('ASIG') == 0) {
+                //trayendo formula correcta
+                var formula = arregloDeVariables[posicionVariable].atributos[posicionCampo].formulas.filter(function( formula ) {
+                    return regla.formulaID == formula.ID;
+                });
+                if(formula.length > 0) {
+                    //este tipo de operacion siempre sera una formula con un elemento de formula
+                    if(arregloDeVariables[posicionVariable].esObjeto) {
+                        if(formula[0].fuenteDeDatos != undefined && formula[0].fuenteDeDatos[0].esValorManual) {
+                            arreglo.push({codigo: tabsText+"if ("+nombreReferenciaArregloEnCodigo+" != undefined) {", tipo: "ASIG"});
+                            arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"NU3V0."+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+" = '"+formula[0].fuenteDeDatos[0].nombreVariable+"';", tipo: "ASIG"});
+                        } else {
+                            arreglo.push({codigo: tabsText+"if ("+nombreReferenciaArregloEnCodigo+" != undefined) {", tipo: "ASIG"});
+                            arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"NU3V0."+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+" = "+nombreReferenciaArregloEnCodigo+";", tipo: "ASIG"});
+                        }
+                    } else {
+                        if(formula[0].fuenteDeDatos != undefined && formula[0].fuenteDeDatos[0].esValorManual) {
+                            arreglo.push({codigo: tabsText+"if ("+nombreReferenciaArregloEnCodigo+" != undefined) {", tipo: "ASIG"});
+                            arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"NU3V0 = '"+formula[0].fuenteDeDatos[0].nombreVariable+"';", tipo: "ASIG"});
+                        } else {
+                            arreglo.push({codigo: tabsText+"if ("+nombreReferenciaArregloEnCodigo+" != undefined) {", tipo: "ASIG"});
+                            arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"NU3V0 = "+nombreReferenciaArregloEnCodigo+";", tipo: "ASIG"});
+                        }
+                    }
+                    arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"GU4RD4RV4L0R = true;", tipo: "BANDERA_ASIG"});
+                    arreglo.push({codigo: "\n"+tabsText+"}", tipo: "ASIG"});
+                }
+            } else if(regla.operacion.indexOf('MAX') == 0) {
+                //trayendo formula correcta
+                var formula = arregloDeVariables[posicionVariable].atributos[posicionCampo].formulas.filter(function( formula ) {
+                    return regla.formulaID == formula.ID;
+                });
+                if(formula.length > 0) {
+                    //este tipo de operacion siempre sera una formula con un elemento de formula
+                    if(formula[0].fuenteDeDatos[0].tipoColumnaEnTabla.toLowerCase().localeCompare("date") == 0) {
+                        arreglo.push({codigo: tabsText+"if ("+nombreReferenciaArregloEnCodigo+" != undefined) {", tipo: "MAX"});
+                        arreglo.push({codigo: "\n\t"+tabsText+"if ( isValidDate("+nombreReferenciaArregloEnCodigo+") ) {", tipo: "MAX"});
+                        arreglo.push({codigo: "\n\t\t"+tabsText+"if ("+arregloDeVariables[posicionVariable].nombre+"NU3V0.getTime() < "+nombreReferenciaArregloEnCodigo+".getTime()) {", tipo: "MAX"});
+                        arreglo.push({codigo: "\n\t\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"NU3V0 = new Date("+nombreReferenciaArregloEnCodigo+");", tipo: "MAX"});
+                        arreglo.push({codigo: "\n\t\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"GU4RD4RV4L0R = true;", tipo: "BANDERA_ASIG"});
+                        arreglo.push({codigo: "\n\t\t"+tabsText+"}", tipo: "MAX"})
+                        arreglo.push({codigo: "\n\t\t"+tabsText+"if ("+arregloDeVariables[posicionVariable].nombre+"NU3V0.getFullYear() == 1964 && "+arregloDeVariables[posicionVariable].nombre+"NU3V0.getMonth() == 4 && "+arregloDeVariables[posicionVariable].nombre+"NU3V0.getDate() == 28)", tipo: "MAX"});;
+                        arreglo.push({codigo: "\n\t\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"NU3V0 = new Date("+nombreReferenciaArregloEnCodigo+");", tipo: "MAX"});
+                        arreglo.push({codigo: "\n\t"+tabsText+"}", tipo: "MAX"});
+                        arreglo.push({codigo: "\n"+tabsText+"}", tipo: "MAX"});
+                    } else if(formula[0].fuenteDeDatos[0].tipoColumnaEnTabla.toLowerCase().localeCompare("int") == 0 || arregloDeVariables[posicionVariable].atributos[posicionCampo].tipo.toLowerCase().localeCompare("decimal") == 0) {
+                        if(arregloDeVariables[posicionVariable].esObjeto) {
+                            arreglo.push({codigo: tabsText+"if ("+nombreReferenciaArregloEnCodigo+" != undefined && !isNaN("+nombreReferenciaArregloEnCodigo+")) {", tipo: "MAX"});
+                            arreglo.push({codigo: "\n\t"+tabsText+"if ("+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 < "+nombreReferenciaArregloEnCodigo+") {", tipo: "MAX"});
+                            arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 = "+nombreReferenciaArregloEnCodigo+";", tipo: "MAX"});
+                            //arreglo.push({codigo: "\n\t\t"+tabsText+"if( window['"+arregloDeVariables[posicionVariable].nombre+"'].length == 0)", tipo: "BANDERA_ASIG"});
+                            arreglo.push({codigo: "\n\t\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"GU4RD4RV4L0R = true;", tipo: "BANDERA_ASIG"});
+                            arreglo.push({codigo: "\n\t"+tabsText+"}", tipo: "MAX"});
+                            arreglo.push({codigo: "\n"+tabsText+"}", tipo: "MAX"});
+                        } else {
+                            arreglo.push({codigo: tabsText+"if ("+nombreReferenciaArregloEnCodigo+" != undefined && !isNaN("+nombreReferenciaArregloEnCodigo+")) {", tipo: "MAX"});
+                            arreglo.push({codigo: "\n\t"+tabsText+"if ("+arregloDeVariables[posicionVariable].nombre+"NU3V0 < "+nombreReferenciaArregloEnCodigo+") {", tipo: "MAX"});
+                            arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"NU3V0 = "+nombreReferenciaArregloEnCodigo+";", tipo: "MAX"});
+                            arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"GU4RD4RV4L0R = true;", tipo: "BANDERA_ASIG"});
+                            arreglo.push({codigo: "\n\t"+tabsText+"}", tipo: "MAX"});
+                            arreglo.push({codigo: "\n"+tabsText+"}", tipo: "MAX"});
+                        }
+                    }
+                }
+            } else if(regla.operacion.indexOf('MIN') == 0) {
+                //trayendo formula correcta
+                var formula = arregloDeVariables[posicionVariable].atributos[posicionCampo].formulas.filter(function( formula ) {
+                    return regla.formulaID == formula.ID;
+                });
+                if(formula.length > 0) {
+                    //este tipo de operacion siempre sera una formula con un elemento de formula
+                    if(formula[0].fuenteDeDatos[0].tipoColumnaEnTabla.toLowerCase().localeCompare("date") == 0) {
+                        if(arregloDeVariables[posicionVariable].esObjeto) {
+                            arreglo.push({codigo: tabsText+"if ("+nombreReferenciaArregloEnCodigo+" != undefined) {", tipo: "MAX"});
+                            arreglo.push({codigo: "\n\t"+tabsText+"if ( isValidDate("+nombreReferenciaArregloEnCodigo+") ) {", tipo: "MAX"});
+                            arreglo.push({codigo: "\n\t\t"+tabsText+"if ("+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0.getTime() > "+nombreReferenciaArregloEnCodigo+".getTime()) {", tipo: "MAX"});
+                            arreglo.push({codigo: "\n\t\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 = new Date("+nombreReferenciaArregloEnCodigo+");", tipo: "MAX"});
+                            arreglo.push({codigo: "\n\t\t"+tabsText+"if( window['"+arregloDeVariables[posicionVariable].nombre+"'].length == 0)", tipo: "BANDERA_ASIG"});
+                            arreglo.push({codigo: "\n\t\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"GU4RD4RV4L0R = true;", tipo: "BANDERA_ASIG"});
+                            arreglo.push({codigo: "\n\t\t"+tabsText+"}", tipo: "MAX"});
+                            arreglo.push({codigo: "\n\t\t"+tabsText+"if ("+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0.getFullYear() == 1964 && "+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0.getMonth() == 4 && "+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0.getDate() == 28)", tipo: "MAX"});
+                            arreglo.push({codigo: "\n\t\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 = new Date("+nombreReferenciaArregloEnCodigo+");", tipo: "MAX"});
+                            arreglo.push({codigo: "\n\t"+tabsText+"}", tipo: "MAX"});
+                            arreglo.push({codigo: "\n"+tabsText+"}", tipo: "MAX"});
+                        } else {
+                            arreglo.push({codigo: tabsText+"if ("+nombreReferenciaArregloEnCodigo+" != undefined) {", tipo: "MAX"});
+                            arreglo.push({codigo: "\n\t"+tabsText+"if ( isValidDate("+nombreReferenciaArregloEnCodigo+") ) {", tipo: "MAX"});
+                            arreglo.push({codigo: "\n\t\t"+tabsText+"if ("+arregloDeVariables[posicionVariable].nombre+"NU3V0.getTime() > "+nombreReferenciaArregloEnCodigo+".getTime()) {", tipo: "MAX"});
+                            arreglo.push({codigo: "\n\t\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"NU3V0 = new Date("+nombreReferenciaArregloEnCodigo+");", tipo: "MAX"});
+                            arreglo.push({codigo: "\n\t\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"GU4RD4RV4L0R = true;", tipo: "BANDERA_ASIG"});
+                            arreglo.push({codigo: "\n\t\t"+tabsText+"}", tipo: "MAX"});
+                            arreglo.push({codigo: "\n\t\t"+tabsText+"if ("+arregloDeVariables[posicionVariable].nombre+"NU3V0.getFullYear() == 1964 && "+arregloDeVariables[posicionVariable].nombre+"NU3V0.getMonth() == 4 && "+arregloDeVariables[posicionVariable].nombre+"NU3V0.getDate() == 28) {", tipo: "MAX"});
+                            arreglo.push({codigo: "\n\t\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"NU3V0 = new Date("+nombreReferenciaArregloEnCodigo+");", tipo: "MAX"});
+                            arreglo.push({codigo: "\n\t"+tabsText+"}", tipo: "MAX"});
+                            arreglo.push({codigo: "\n"+tabsText+"}", tipo: "MAX"});
+                        }
+                    } else if(formula[0].fuenteDeDatos[0].tipoColumnaEnTabla.toLowerCase().localeCompare("int") == 0 || arregloDeVariables[posicionVariable].atributos[posicionCampo].tipo.toLowerCase().localeCompare("decimal") == 0) {
+                        if(arregloDeVariables[posicionVariable].esObjeto) {
+                            arreglo.push({codigo: tabsText+"if ("+nombreReferenciaArregloEnCodigo+" != undefined && !isNaN("+nombreReferenciaArregloEnCodigo+")) {", tipo: "MAX"});
+                            arreglo.push({codigo: "\n\t"+tabsText+"if ("+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 > "+nombreReferenciaArregloEnCodigo+" || "+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 == -1) {", tipo: "MAX"});
+                            arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 = "+nombreReferenciaArregloEnCodigo+";", tipo: "MAX"});
+                            //arreglo.push({codigo: "\n\t\t"+tabsText+"if( window['"+arregloDeVariables[posicionVariable].nombre+"'].length == 0)", tipo: "BANDERA_ASIG"});
+                            arreglo.push({codigo: "\n\t\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"GU4RD4RV4L0R = true;", tipo: "BANDERA_ASIG"});
+                            arreglo.push({codigo: "\n\t"+tabsText+"}", tipo: "MAX"});
+                            arreglo.push({codigo: "\n"+tabsText+"}", tipo: "MAX"});
+                        } else {
+                            arreglo.push({codigo: tabsText+"if ("+nombreReferenciaArregloEnCodigo+" != undefined && !isNaN("+nombreReferenciaArregloEnCodigo+")) {", tipo: "MAX"});
+                            arreglo.push({codigo: "\n\t"+tabsText+"if ("+arregloDeVariables[posicionVariable].nombre+"NU3V0 > "+nombreReferenciaArregloEnCodigo+") {", tipo: "MAX"});
+                            arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"NU3V0 = "+nombreReferenciaArregloEnCodigo+";", tipo: "MAX"});
+                            arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"GU4RD4RV4L0R = true;", tipo: "BANDERA_ASIG"});
+                            arreglo.push({codigo: "\n\t"+tabsText+"} else if( "+arregloDeVariables[posicionVariable].nombre+"NU3V0 == -1 ) {", tipo: "MAX"});
+                            arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"NU3V0 = "+nombreReferenciaArregloEnCodigo+";", tipo: "MAX"});
+                            arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"GU4RD4RV4L0R = true;", tipo: "BANDERA_ASIG"});
+                            arreglo.push({codigo: "\n\t"+tabsText+"}", tipo: "MAX"});
+                            arreglo.push({codigo: "\n"+tabsText+"}", tipo: "MAX"});
+                        }
+                    }
+                }
+            } else if(regla.operacion.indexOf('PROM') == 0) {
+                //trayendo formula correcta
+                var formula = arregloDeVariables[posicionVariable].atributos[posicionCampo].formulas.filter(function( formula ) {
+                    return regla.formulaID == formula.ID;
+                });
+                if(formula.length > 0) {
+                    //este tipo de operacion siempre sera una formula con un elemento de formula
+                    if(formula[0].fuenteDeDatos[0].tipoColumnaEnTabla.toLowerCase().localeCompare("int") == 0 || arregloDeVariables[posicionVariable].atributos[posicionCampo].tipo.toLowerCase().localeCompare("decimal") == 0) {
+                        if(arregloDeVariables[posicionVariable].esObjeto) {
+                            arreglo.push({codigo: tabsText+"if ("+nombreReferenciaArregloEnCodigo+" != undefined && !isNaN("+nombreReferenciaArregloEnCodigo+")) {", tipo: "MAX"});
+                            arreglo.push({codigo: "\n\t"+tabsText+"if ( "+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 == -1 )", tipo: "MAX"});
+                            arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 = 0;", tipo: "MAX"});
+                            arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 += "+nombreReferenciaArregloEnCodigo+";", tipo: "MAX"});
+                            arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0T0T4L++;", tipo: "MAX"});
+                            //arreglo.push({codigo: "\n\t"+tabsText+"if( window['"+arregloDeVariables[posicionVariable].nombre+"'].length == 0)", tipo: "BANDERA_ASIG"});
+                            arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"GU4RD4RV4L0R = true;", tipo: "BANDERA_ASIG"});
+                            arreglo.push({codigo: "\n"+tabsText+"}", tipo: "MAX"});
+                        } else {
+                            arreglo.push({codigo: tabsText+"if ("+nombreReferenciaArregloEnCodigo+" != undefined && !isNaN("+nombreReferenciaArregloEnCodigo+")) {", tipo: "MAX"});
+                            arreglo.push({codigo: "\n\t"+tabsText+"if ( "+arregloDeVariables[posicionVariable].nombre+"NU3V0 == -1 )", tipo: "MAX"});
+                            arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"NU3V0 = 0;", tipo: "MAX"});
+                            arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"NU3V0 += "+nombreReferenciaArregloEnCodigo+";", tipo: "MAX"});
+                            arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"NU3V0T0T4L++;", tipo: "MAX"});
+                            arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"GU4RD4RV4L0R = true;", tipo: "BANDERA_ASIG"});
+                            arreglo.push({codigo: "\n"+tabsText+"}", tipo: "MAX"});
+                        }
+                    }
+                }
+            } else if(regla.operacion.indexOf('AUTOSUM') == 0) {
+                //trayendo formula correcta
+                var formula = arregloDeVariables[posicionVariable].atributos[posicionCampo].formulas.filter(function( formula ) {
+                    return regla.formulaID == formula.ID;
+                });
+                if(formula.length > 0) {
+                    //este tipo de operacion siempre sera una formula con un elemento de formula
+                    if(formula[0].fuenteDeDatos[0].tipoColumnaEnTabla.toLowerCase().localeCompare("int") == 0 || formula[0].fuenteDeDatos[0].tipoColumnaEnTabla.toLowerCase().localeCompare("decimal") == 0) {
+                        if(arregloDeVariables[posicionVariable].esObjeto) {
+                            arreglo.push({codigo: tabsText+"if ("+nombreReferenciaArregloEnCodigo+" != undefined && !isNaN("+nombreReferenciaArregloEnCodigo+")) {", tipo: "AUTOSUM"});
+                            arreglo.push({codigo: "\n\t"+tabsText+"if ("+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 == -1)", tipo: "AUTOSUM"});
+                            arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 = 0;", tipo: "AUTOSUM"});
+                            //arreglo.push({codigo: "\n\t\t"+tabsText+"if( window['"+arregloDeVariables[posicionVariable].nombre+"'].length == 0)", tipo: "BANDERA_ASIG"});
+                            arreglo.push({codigo: "\n\t\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"GU4RD4RV4L0R = true;", tipo: "BANDERA_ASIG"});
+                            arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 = evaluate("+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 + "+nombreReferenciaArregloEnCodigo+");", tipo: "AUTOSUM"});
+                            arreglo.push({codigo: "\n"+tabsText+"}", tipo: "AUTOSUM"});
+                        } else {
+                            arreglo.push({codigo: tabsText+"if ("+nombreReferenciaArregloEnCodigo+" != undefined && !isNaN("+nombreReferenciaArregloEnCodigo+")) {", tipo: "AUTOSUM"});
+                            arreglo.push({codigo: "\n\t"+tabsText+"if ("+arregloDeVariables[posicionVariable].nombre+"NU3V0 == -1)", tipo: "AUTOSUM"});
+                            arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"NU3V0 = 0;", tipo: "AUTOSUM"});
+                            arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"GU4RD4RV4L0R = true;", tipo: "BANDERA_ASIG"});
+                            arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"NU3V0 = evaluate("+arregloDeVariables[posicionVariable].nombre+"NU3V0 + "+nombreReferenciaArregloEnCodigo+");", tipo: "AUTOSUM"});
+                            arreglo.push({codigo: "\n"+tabsText+"}", tipo: "AUTOSUM"});
+                        }
+                    }
+                }
+            } else if(regla.operacion.indexOf('COUNT') == 0) {
+                var formula = arregloDeVariables[posicionVariable].atributos[posicionCampo].formulas.filter(function( formula ) {
+                    return regla.formulaID == formula.ID;
+                });
+                if(formula[0].fuenteDeDatos[0].tipoColumnaEnTabla.toLowerCase().localeCompare("int") == 0 || formula[0].fuenteDeDatos[0].tipoColumnaEnTabla.toLowerCase().localeCompare("decimal") == 0) {
+                    if(arregloDeVariables[posicionVariable].esObjeto) {
+                        arreglo.push({codigo: tabsText+"if ("+nombreReferenciaArregloEnCodigo+" != undefined && !isNaN("+nombreReferenciaArregloEnCodigo+") && !isNaN("+nombreReferenciaArregloEnCodigo+") ) {", tipo: "COUNT"});
+                        arreglo.push({codigo: "\n\t"+tabsText+"if ("+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 == -1 )", tipo: "COUNT"});
+                        arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 = 0;", tipo: "COUNT"});
+                        arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0++;", tipo: "COUNT"});
+                        //arreglo.push({codigo: "\n\t"+tabsText+"if( window['"+arregloDeVariables[posicionVariable].nombre+"'].length == 0)", tipo: "BANDERA_ASIG"});
+                        arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"GU4RD4RV4L0R = true;", tipo: "BANDERA_ASIG"});
+                        arreglo.push({codigo: "\n"+tabsText+"}", tipo: "COUNT"});
+                    } else {
+                        arreglo.push({codigo: tabsText+"if ("+nombreReferenciaArregloEnCodigo+" != undefined && !isNaN("+nombreReferenciaArregloEnCodigo+") ) {", tipo: "COUNT"});
+                        arreglo.push({codigo: "\n\t"+tabsText+"if ("+arregloDeVariables[posicionVariable].nombre+"NU3V0 == -1 )", tipo: "COUNT"});
+                        arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"NU3V0 = 0;", tipo: "COUNT"});
+                        arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"NU3V0++;", tipo: "COUNT"});
+                        arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"GU4RD4RV4L0R = true;", tipo: "BANDERA_ASIG"});
+                        arreglo.push({codigo: "\n"+tabsText+"}", tipo: "COUNT"});
+                    }
+                } else if(formula[0].fuenteDeDatos[0].tipoColumnaEnTabla.toLowerCase().localeCompare("varchar") == 0) {
+                    if(arregloDeVariables[posicionVariable].esObjeto) {
+                        arreglo.push({codigo: tabsText+"if ("+nombreReferenciaArregloEnCodigo+" != undefined && "+nombreReferenciaArregloEnCodigo+".length > 0) {", tipo: "COUNT"});
+                        arreglo.push({codigo: "\n\t"+tabsText+"if ("+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 == -1 )", tipo: "COUNT"});
+                        arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 = 0;", tipo: "COUNT"});
+                        arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0++;", tipo: "COUNT"});
+                        //arreglo.push({codigo: "\n\t"+tabsText+"if( window['"+arregloDeVariables[posicionVariable].nombre+"'].length == 0)", tipo: "BANDERA_ASIG"});
+                        arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"GU4RD4RV4L0R = true;", tipo: "BANDERA_ASIG"});
+                        arreglo.push({codigo: "\n"+tabsText+"}", tipo: "COUNT"});
+                    } else {
+                        arreglo.push({codigo: tabsText+"if ("+nombreReferenciaArregloEnCodigo+" != undefined && "+nombreReferenciaArregloEnCodigo+".length > 0) {", tipo: "COUNT"});
+                        arreglo.push({codigo: "\n\t"+tabsText+"if ("+arregloDeVariables[posicionVariable].nombre+"NU3V0 == -1 )", tipo: "COUNT"});
+                        arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"NU3V0 = 0;", tipo: "COUNT"});
+                        arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"NU3V0++;", tipo: "COUNT"});
+                        arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"GU4RD4RV4L0R = true;", tipo: "BANDERA_ASIG"});
+                        arreglo.push({codigo: "\n"+tabsText+"}", tipo: "COUNT"});
+                    }
+                } else if(formula[0].fuenteDeDatos[0].tipoColumnaEnTabla.toLowerCase().localeCompare("bool") == 0) {
+                    if(arregloDeVariables[posicionVariable].esObjeto) {
+                        arreglo.push({codigo: tabsText+"if ("+nombreReferenciaArregloEnCodigo+" != undefined && ("+nombreReferenciaArregloEnCodigo+" == true || "+nombreReferenciaArregloEnCodigo+" == false) ) {", tipo: "COUNT"});
+                        arreglo.push({codigo: "\n\t"+tabsText+"if ("+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 == -1 )", tipo: "COUNT"});
+                        arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 = 0;", tipo: "COUNT"});
+                        arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0++;", tipo: "COUNT"});
+                        //arreglo.push({codigo: "\n\t"+tabsText+"if( window['"+arregloDeVariables[posicionVariable].nombre+"'].length == 0)", tipo: "BANDERA_ASIG"});
+                        arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"GU4RD4RV4L0R = true;", tipo: "BANDERA_ASIG"});
+                        arreglo.push({codigo: "\n"+tabsText+"}", tipo: "COUNT"});
+                    } else {
+                        arreglo.push({codigo: tabsText+"if ("+nombreReferenciaArregloEnCodigo+" != undefined && ("+nombreReferenciaArregloEnCodigo+" == true || "+nombreReferenciaArregloEnCodigo+" == false) ) {", tipo: "COUNT"});
+                        arreglo.push({codigo: "\n\t"+tabsText+"if ("+arregloDeVariables[posicionVariable].nombre+"NU3V0 == -1 )", tipo: "COUNT"});
+                        arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"NU3V0 = 0;", tipo: "COUNT"});
+                        arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"NU3V0++;", tipo: "COUNT"});
+                        arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"GU4RD4RV4L0R = true;", tipo: "BANDERA_ASIG"});
+                        arreglo.push({codigo: "\n"+tabsText+"}", tipo: "COUNT"});
+                    }
+                } else if(formula[0].fuenteDeDatos[0].tipoColumnaEnTabla.toLowerCase().localeCompare("date") == 0) {
+                    if(arregloDeVariables[posicionVariable].esObjeto) {
+                        arreglo.push({codigo: tabsText+"if ("+nombreReferenciaArregloEnCodigo+" != undefined && isValidDate("+nombreReferenciaArregloEnCodigo+") {", tipo: "COUNT"});
+                        arreglo.push({codigo: "\n\t"+tabsText+"if ("+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 == -1 )", tipo: "COUNT"});
+                        arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0 = 0;", tipo: "COUNT"});
+                        arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+"NU3V0++;", tipo: "COUNT"});
+                        //arreglo.push({codigo: "\n\t"+tabsText+"if( window['"+arregloDeVariables[posicionVariable].nombre+"'].length == 0)", tipo: "BANDERA_ASIG"});
+                        arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"GU4RD4RV4L0R = true;", tipo: "BANDERA_ASIG"});
+                        arreglo.push({codigo: "\n"+tabsText+"}", tipo: "COUNT"});
+                    } else {
+                        arreglo.push({codigo: tabsText+"if ("+nombreReferenciaArregloEnCodigo+" != undefined && isValidDate("+nombreReferenciaArregloEnCodigo+")) {", tipo: "COUNT"});
+                        arreglo.push({codigo: "\n\t"+tabsText+"if ("+arregloDeVariables[posicionVariable].nombre+"NU3V0 == -1 )", tipo: "COUNT"});
+                        arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"NU3V0 = 0;", tipo: "COUNT"});
+                        arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"NU3V0++;", tipo: "COUNT"});
+                        arreglo.push({codigo: "\n\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"GU4RD4RV4L0R = true;", tipo: "BANDERA_ASIG"});
+                        arreglo.push({codigo: "\n"+tabsText+"}", tipo: "COUNT"});
+                    }
+                }
+            } else if(regla.operacion.indexOf('FORMULA') == 0) {
+                var formula = arregloDeVariables[posicionVariable].atributos[posicionCampo].formulas.filter(function( formula ) {
+                    return regla.formulaID == formula.ID;
+                });
+                for (var i = 0; i < formula[0].fuenteDeDatos.length; i++) {
+                    var saltoLinea = '\n';
+                    if(formula[0].fuenteDeDatos[i].operacion != undefined && formula[0].fuenteDeDatos[i].operacion.length > 0) {
+                        //if(formula[0].fuenteDeDatos[i].esFuenteDeDato) {
+                            //elemento formula es de conexion de tabla
+                            arreglo.push({codigo: saltoLinea+tabsText+newTabsTextFormula+"if (window['"+formula[0].fuenteDeDatos[i].nombreColumnaEnTabla+"'] != undefined) {", tipo: "FORMULA"});
+                            newTabsTextFormula += "\t";
+                            arreglo.push({codigo: saltoLinea+tabsText+newTabsTextFormula+"var "+formula[0].fuenteDeDatos[i].nombreVariable+" = window['"+formula[0].fuenteDeDatos[i].nombreColumnaEnTabla+"'];", tipo: "FORMULA"});
+                            /*arreglo.push({codigo: saltoLinea+tabsText+newTabsTextFormula+"console.log('"+formula[0].fuenteDeDatos[i].nombreVariable+"');", tipo: "FORMULA"});
+                            arreglo.push({codigo: saltoLinea+tabsText+newTabsTextFormula+"console.log("+formula[0].fuenteDeDatos[i].nombreVariable+");", tipo: "FORMULA"});*/
+                        /*} else {
+                            if (!arregloDeVariables[posicionVariable].esObjeto) {
+                                arreglo.push({codigo: saltoLinea+tabsText+newTabsTextFormula+"if ("+nombreReferenciaArregloEnCodigo+" != undefined) {", tipo: "FORMULA"});
+                                newTabsTextFormula += "\t";
+                                //elemento formula es variable primitiva
+                                if(i > 0) {
+                                    arreglo.push({codigo: saltoLinea+tabsText+newTabsTextFormula+"var "+formula[0].fuenteDeDatos[i].nombreVariable+" = "+nombreReferenciaArregloEnCodigo+";", tipo: "FORMULA"});
+                                } else {
+                                    arreglo.push({codigo: saltoLinea+tabsText+newTabsTextFormula+"var "+formula[0].fuenteDeDatos[i].nombreVariable+" = "+nombreReferenciaArregloEnCodigo+";", tipo: "FORMULA"});
+                                }
+                            } else {
+                                arreglo.push({codigo: saltoLinea+tabsText+newTabsTextFormula+"if ("+nombreReferenciaArregloEnCodigo+"[x]."+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+" != undefined) {", tipo: "FORMULA"});
+                                newTabsTextFormula += "\t";
+                                if(i > 0) {
+                                    arreglo.push({codigo: saltoLinea+tabsText+newTabsTextFormula+"var "+formula[0].fuenteDeDatos[i].nombreVariable+" = "+nombreReferenciaArregloEnCodigo+"[x]."+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+";", tipo: "FORMULA"});
+                                } else {
+                                    arreglo.push({codigo: saltoLinea+tabsText+newTabsTextFormula+"var "+formula[0].fuenteDeDatos[i].nombreVariable+" = "+nombreReferenciaArregloEnCodigo+"[x]."+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+";", tipo: "FORMULA"});
+                                }
+                            }
+                        }*/
+                    }
+                };
+                //arreglo.push({codigo: "\n\t\t"+tabsText+arregloDeVariables[posicionVariable].nombre+"NU3V0."+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+" = math.eval(formula[0].formula);"});
+                if(arregloDeVariables[posicionVariable].esObjeto)
+                    arreglo.push({codigo: "\n"+tabsText+newTabsTextFormula+arregloDeVariables[posicionVariable].nombre+"NU3V0."+arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre+" = "+formula[0].formula+";"});
+                else
+                    arreglo.push({codigo: "\n"+tabsText+newTabsTextFormula+arregloDeVariables[posicionVariable].nombre+"NU3V0 = evaluate("+formula[0].formula+");"});
+                arreglo.push({codigo: "\n"+tabsText+newTabsTextFormula+arregloDeVariables[posicionVariable].nombre+"GU4RD4RV4L0R = true;", tipo: "BANDERA_ASIG"});
+                for (var i = formula[0].fuenteDeDatos.length; i > 0; i--) {
+                    posicionesIF.push(arreglo.length+i);
+                }
+            }
+        } else {
+            //condiciones if
+            var arregloValoresAComparar = [];
+            if(regla.valor.indexOf("LISTAID") == 0) {
+                //
+            } else if(regla.valor.indexOf("FECHA") == 0) {
+                var fecha = regla.valor.substring(regla.valor.indexOf("[")+1, regla.valor.lastIndexOf("]"));
+                arregloValoresAComparar = ["new Date("+fecha+").getTime()"];
+            } else if(regla.valor.indexOf("TIEMPO") == 0) {
+                var stringValores = regla.valor.substring(regla.valor.indexOf("[")+1, regla.valor.lastIndexOf("]"));
+                var diasAgregarCadena = stringValores.split(",")[0], mesesAgregarCadena = stringValores.split(",")[1], aniosAgregarCadena = stringValores.split(",")[2], futuro = stringValores.split(",")[3];
+                var diasAgregar = parseInt(diasAgregarCadena.substring(diasAgregarCadena.indexOf("=")+1)), mesesAgregar = parseInt(mesesAgregarCadena.substring(mesesAgregarCadena.indexOf("=")+1)), aniosAgregar = parseInt(aniosAgregarCadena.substring(aniosAgregarCadena.indexOf("=")+1));
+                var esFuturo = true;
+                if(futuro.localeCompare("FUTURO") == 0)
+                    esFuturo = true;
+                else
+                    esFuturo = false;
+                var hoy = new Date();
+                if(esFuturo) {
+                    hoy = this.addYears(hoy, aniosAgregar);
+                    hoy = this.addMonths(hoy, mesesAgregar);
+                    hoy = this.addDays(hoy, diasAgregar);
+                } else {
+                    hoy = this.minusYears(hoy, aniosAgregar);
+                    hoy = this.minusMonths(hoy, mesesAgregar);
+                    hoy = this.minusDays(hoy, diasAgregar);
+                }
+                arregloValoresAComparar = ["new Date("+hoy.getFullYear()+", "+hoy.getMonth()+", "+hoy.getDate()+").getTime()"];
+            } else if(regla.valor.indexOf("MANUAL") == 0) {
+                arregloValoresAComparar = [regla.valor.substring(regla.valor.indexOf("[")+1, regla.valor.lastIndexOf("]"))];
+            }
+            var nombreCampoDeArregloEnCodigo = '';
+            if(regla.esConexionTabla) {
+                nombreCampoDeArregloEnCodigo = regla.nombreColumnaEnTabla;
+            } else {
+                nombreCampoDeArregloEnCodigo = arregloDeVariables[posicionVariable].atributos[posicionCampo].nombre;
+            }
+            var tamArreglo = arreglo.length;
+            //for (var j = 0; j < tamArreglo; j++) {
+                for (var i = 0; i < arregloValoresAComparar.length; i++) {
+                    var comparacion = "";
+                    var inicioComparacion = "";
+                    var operacion = "";
+                    if(regla.operacion.localeCompare("ES_MENOR") == 0 && regla.valor.indexOf("TIEMPO") != 0) {
+                        operacion = "<";
+                    } else if(regla.operacion.localeCompare("ES_MENOR_O_IGUAL") == 0 && regla.valor.indexOf("TIEMPO") != 0) {
+                        operacion = "<=";
+                    } else if(regla.operacion.localeCompare("ES_MAYOR_O_IGUAL") == 0 && regla.valor.indexOf("TIEMPO") != 0) {
+                        operacion = ">=";
+                    } else if(regla.operacion.localeCompare("ES_MAYOR") == 0 && regla.valor.indexOf("TIEMPO") != 0) {
+                        operacion = ">";
+                    } else if(regla.operacion.localeCompare("ES_IGUAL") == 0) {
+                        operacion = "==";
+                    } else if(regla.operacion.localeCompare("NO_ES_IGUAL") == 0) {
+                        operacion = "!=";
+                    } else if(regla.operacion.localeCompare("ES_MENOR") == 0 && regla.valor.indexOf("TIEMPO") == 0) {
+                        operacion = ">";
+                    } else if(regla.operacion.localeCompare("ES_MENOR_O_IGUAL") == 0 && regla.valor.indexOf("TIEMPO") == 0) {
+                        operacion = ">=";
+                    } else if(regla.operacion.localeCompare("ES_MAYOR_O_IGUAL") == 0 && regla.valor.indexOf("TIEMPO") == 0) {
+                        operacion = "<=";
+                    } else if(regla.operacion.localeCompare("ES_MAYOR") == 0 && regla.valor.indexOf("TIEMPO") == 0) {
+                        operacion = "<";
+                    } else if(regla.operacion.localeCompare("ES_IGUAL") == 0 && regla.valor.indexOf("TIEMPO") == 0) {
+                        operacion = "==";
+                    } else if(regla.operacion.localeCompare("NO_ES_IGUAL") == 0 && regla.valor.indexOf("TIEMPO") == 0) {
+                        operacion = "!=";
+                    }
+                    if (regla.tipoCampoObjetivo.localeCompare("date") == 0) {
+                        if(regla.operacion.localeCompare("encuentra") == 0) {
+                            //
+                        } else if(regla.operacion.localeCompare("no_encuentra") == 0) {
+                            //
+                        } else {
+                            if(esArregloReferenciaArregloEnCodigo) {
+                                inicioComparacion = nombreReferenciaArregloEnCodigo+"[x]."+nombreCampoDeArregloEnCodigo+" != undefined && isValidDate("+nombreReferenciaArregloEnCodigo+"[x]."+nombreCampoDeArregloEnCodigo+")";
+                                comparacion = nombreReferenciaArregloEnCodigo+"[x]."+nombreCampoDeArregloEnCodigo+".getTime() "+operacion+" "+arregloValoresAComparar[i];
+                            } else {
+                                inicioComparacion = nombreReferenciaArregloEnCodigo+" != undefined && isValidDate("+nombreReferenciaArregloEnCodigo+")";
+                                comparacion = nombreReferenciaArregloEnCodigo+".getTime() "+operacion+" "+arregloValoresAComparar[i];
+                            }
+                        }
+                    } else if (regla.tipoCampoObjetivo.localeCompare("varchar") == 0) {
+                        if(regla.operacion.localeCompare("encuentra") == 0) {
+                            //
+                        } else if(regla.operacion.localeCompare("no_encuentra") == 0) {
+                            //
+                        } else {
+                            if(esArregloReferenciaArregloEnCodigo) {
+                                inicioComparacion = nombreReferenciaArregloEnCodigo+"[x]."+nombreCampoDeArregloEnCodigo+" != undefined";
+                                comparacion = nombreReferenciaArregloEnCodigo+"[x]."+nombreCampoDeArregloEnCodigo+".localeCompare('"+arregloValoresAComparar[i]+"') "+operacion+" 0";
+                            } else {
+                                inicioComparacion = nombreReferenciaArregloEnCodigo+" != undefined";
+                                comparacion = nombreReferenciaArregloEnCodigo+".localeCompare('"+arregloValoresAComparar[i]+"') "+operacion+" 0";
+                            }
+                        }
+                    } else if (regla.tipoCampoObjetivo.localeCompare("int") == 0 || regla.tipoCampoObjetivo.localeCompare("decimal") == 0) {
+                        if(regla.operacion.localeCompare("encuentra") == 0) {
+                            //
+                        } else if(regla.operacion.localeCompare("no_encuentra") == 0) {
+                            //
+                        } else {
+                            if(esArregloReferenciaArregloEnCodigo) {
+                                inicioComparacion = nombreReferenciaArregloEnCodigo+"[x]."+nombreCampoDeArregloEnCodigo+" != undefined && !isNaN("+nombreReferenciaArregloEnCodigo+"[x]."+nombreCampoDeArregloEnCodigo+")"
+                                comparacion = nombreReferenciaArregloEnCodigo+"[x]."+nombreCampoDeArregloEnCodigo+" "+operacion+" "+arregloValoresAComparar[i];
+                            } else {
+                                inicioComparacion = nombreReferenciaArregloEnCodigo+" != undefined && !isNaN("+nombreReferenciaArregloEnCodigo+")"
+                                comparacion = nombreReferenciaArregloEnCodigo+" "+operacion+" "+arregloValoresAComparar[i];
+                            }
+                        }
+                    } else if (regla.tipoCampoObjetivo.localeCompare("bit") == 0) {
+                        if(esArregloReferenciaArregloEnCodigo) {
+                            inicioComparacion = nombreReferenciaArregloEnCodigo+"[x]."+nombreCampoDeArregloEnCodigo+" != undefined"
+                            comparacion = nombreReferenciaArregloEnCodigo+"[x]."+nombreCampoDeArregloEnCodigo+" "+operacion+" "+arregloValoresAComparar[i];
+                        } else {
+                            inicioComparacion = nombreReferenciaArregloEnCodigo+" != undefined"
+                            comparacion = nombreReferenciaArregloEnCodigo+" "+operacion+" "+arregloValoresAComparar[i];
+                        }
+                    }
+                    if(i+1 == arregloValoresAComparar.length) {
+                        comparacion += " ) {";
+                    }
+                    if(i==0) {
+                        //arreglo[j].codigo += comparacion;
+                        //arreglo.push({codigo: tabsText+"console.log("+nombreReferenciaArregloEnCodigo+"[x]);", tipo: "COMPARACION"});
+                        //arreglo.push({codigo: '\n'+tabsText+"console.log( "+nombreReferenciaArregloEnCodigo+"[x]."+nombreCampoDeArregloEnCodigo+");", tipo: "COMPARACION"});
+                        arreglo.push({codigo: '\n'+tabsText+"if ( "+inicioComparacion+" && "+comparacion, tipo: "COMPARACION"});
+                    } else {
+                        arreglo[arreglo.length-1].codigo += " && "+comparacion;
+                    }
+                };
+                /*console.log("ENTROOO j");
+            };*/
+            posicionesIF.push(arreglo.length);
+        }
+
+        var cuerpo = arregloDeReglas.filter(function( object ) {
+            return object.reglaPadreID == regla.ID;
+        });
+        if(cuerpo.length > 0) {
+            var arregloCuerpo = [];
+            for (var i = 0; i < cuerpo.length; i++) {
+                /*var cuantasTabs = tabs;
+                if(regla.esCondicion)
+                    cuantasTabs++;*/
+                var retorno = this.arregloCodigoReglaFormaOExcel(cuerpo[i], tabs+1, posicionVariable, posicionCampo, [], arregloDeReglas, nombreReferenciaArregloEnCodigo), esArregloReferenciaArregloEnCodigo;
+                retorno[0].codigo = "\n"+retorno[0].codigo;
+                $.merge( arregloCuerpo, retorno );
+            };
+            for (var i = 0; i < posicionesIF.length; i++) {
+                arreglo.splice(posicionesIF[i], 0, ...arregloCuerpo);
+                if(regla.esCondicion)
+                    arreglo.splice(posicionesIF[i]+arregloCuerpo.length, 0, {codigo: "\n"+tabsText+"}", filtro: regla.filtro});
+                for (var j = i; j < posicionesIF.length; j++) {
+                    posicionesIF[j]+=arregloCuerpo.length;
+                };
+            };
+            if(posicionesIF.length == 0)
+                $.merge( arreglo, arregloCuerpo );
+            return arreglo;
+        } else {
+            if(regla.esCondicion || posicionesIF.length > 0){
+                for (var i = 0; i < posicionesIF.length; i++) {
+                    if (newTabsTextFormula.length > 0)
+                        newTabsTextFormula = newTabsTextFormula.substring(0, newTabsTextFormula.length - 1);
+                    arreglo.splice(posicionesIF[i], 0, {codigo: "\n"+tabsText+newTabsTextFormula+"}", filtro: regla.filtro})
+                };
+            }
+            return arreglo;
+        }
+    }
+
     isValidDate (fecha) {
         if (Object.prototype.toString.call(fecha) === "[object Date]") {
             if (isNaN(fecha.getTime())) {
-                alert("Ingrese una fecha valida.");
+                //alert("Ingrese una fecha valida.");
                 return false;
             } else {
                 return true;
             }
         } else {
-            alert("Ingrese una fecha valida.");
+            //alert("Ingrese una fecha valida.");
             return false;
         }
     }
@@ -3374,9 +3738,15 @@ export default class FuenteDatoVariable extends React.Component {
     }
 
     guardarOperacionSQL (arreglo, campo, valorAInsertar) {
-        for (var i = 0; i < arreglo.length; i++) {
-            arreglo[i][campo] = valorAInsertar;
-        };
+        if(arreglo.length != undefined) {
+            // es coleccion
+            for (var i = 0; i < arreglo.length; i++) {
+                arreglo[i][campo] = valorAInsertar;
+            };
+        } else {
+            // no es coleccion
+            arreglo[campo] = valorAInsertar;
+        }
     }
 
     //elementoFormula: objeto elementoFormula
@@ -3547,239 +3917,40 @@ export default class FuenteDatoVariable extends React.Component {
         }
     }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     iniciarCalculoIndicadores () {
-        //arregloDeIndicadores[index].elementoFormula
-        //codigo var general
-        /*for (var i = 0; i <= nivelMaximoVariables; i++) {
-            if(i == 0) {
-                var llamarSiguienteNivel = false;
-                if(nivelMaximoVariables >= 1)
-                    llamarSiguienteNivel = true;
-                codigo += this.crearCodigoFuenteDato(llamarSiguienteNivel, arregloAgrupacionElementosFormulaPorConexionATablaVariables, 0);
-            } else {
-                var llamarSiguienteNivel = false;
-                if(nivelMaximoVariables > i)
-                    llamarSiguienteNivel = true;
-                codigo += this.crearNivel(llamarSiguienteNivel, arregloAgrupacionElementosFormulaPorVariablesVariables, i);
-            }
-        };
-        codigo += '\n\tconsole.log(window);';
-        codigo += '\n\tiniciarCalculoIndicadores();';
-
-        window['calculoPrincipal'] = new Function(
-            'return function calculoPrincipalMain(evaluate, iniciarCalculoIndicadores){'+
-                    codigo+
-            '}'
-        )();*/
-        //crear codigo pertenecientes a tablas
-        var codigoTablas = '';
-        var primeraVezCodigoIndicador1 = true;
-        for (var i = 0; i < arregloDeIndicadores.length; i++) {
-            if(arregloDeIndicadores[i].realizarCalculo) {
-                var tabsText = '\t\t\t';
-                var primeraVezCodigoTabla = true;
-                for (var j = 0; j < arregloDeIndicadores[i].elementoFormula.length; j++) {
-                    var entroElemento = false;
-                    if(primeraVezCodigoIndicador1) {
-                        codigoTablas += '\n\tfor (var x = 0; x < window["arregloDeIndicadores"].length; x++) {';
-                        primeraVezCodigoIndicador1 = false;
-                    }
-                    for (var a = 0; a < arregloConexionesATablas.length; a++) {
-                        if(arregloDeIndicadores[i].elementoFormula[j].esFuenteDeDato && arregloConexionesATablas[a].ID == arregloDeIndicadores[i].elementoFormula[j].conexionTablaID) {
-                            if(primeraVezCodigoTabla) {
-                                codigoTablas += '\n\t\tfor (var i = 0; i < i+1; i++) {';
-                                codigoTablas += '\n\t\t\tfor (var j = 0; j < arregloResultadosDeTablas[i].length; j++) {';
-                                primeraVezCodigoTabla = false;
-                            }
-                            codigoTablas += '\n'+tabsText+'if (arregloResultadosDeTablas[i][j].'+arregloDeIndicadores[i].elementoFormula[j].nombreColumnaEnTabla+' != undefined) {'
-                            tabsText += '\t';
-                            codigoTablas += '\n'+tabsText+'var '+arregloDeIndicadores[i].elementoFormula[j].nombreVariable+' = arregloResultadosDeTablas[i][j].'+arregloDeIndicadores[i].elementoFormula[j].nombreColumnaEnTabla+';';
-                            entroElemento = true;
-                        }
-                    };
-                    //cuando es excel o forma
-                    if(!entroElemento && arregloDeIndicadores[i].elementoFormula[j].esFuenteDeDato) {
-                        codigoTablas += '\n'+tabsText+'if (window["'+arregloDeIndicadores[i].elementoFormula[j].nombreColumnaEnTabla+'"] != undefined && !isNaN(window["'+arregloDeIndicadores[i].elementoFormula[j].nombreColumnaEnTabla+'"]) && x == '+i+') {'
-                        tabsText += '\t';
-                        codigoTablas += '\n'+tabsText+'let '+arregloDeIndicadores[i].elementoFormula[j].nombreVariable+' = window["'+arregloDeIndicadores[i].elementoFormula[j].nombreColumnaEnTabla+'"];';
-                        entroElemento = true;
-                    }
-                    if(entroElemento && j == arregloDeIndicadores[i].elementoFormula.length-1) {
-                        codigoTablas += '\n'+tabsText+'window["arregloDeIndicadores"][x].total = evaluate('+arregloDeIndicadores[i].formula+');';
-                    }
-                };
-                for (var j = 0; j < arregloDeIndicadores[i].elementoFormula.length; j++) {
-                    //todos los elementoFormula por indicador van a pertenecer a la misma variable o tabla
-                    if(arregloDeIndicadores[i].elementoFormula[j].esFuenteDeDato) {
-                        tabsText = tabsText.substring(0, tabsText.length - 1);
-                        codigoTablas += '\n'+tabsText+'}';
-                    }
-                };
-                if(!primeraVezCodigoTabla) {
-                    codigoTablas += '\n\t\t\t};';
-                    codigoTablas += '\n\t\t};';
-                }
-            }
-        };
-        if(!primeraVezCodigoIndicador1 && codigoTablas.length > 0)
-            codigoTablas += '\n\t};';
-        ////////////////////////////////////////////////////////////////////////
-        /*var codigoTablas = '';
-        var primeraVezCodigoIndicador1 = true;
-        for (var a = 0; a < arregloConexionesATablas.length; a++) {
-            var primeraVezCodigoTabla = true;
-            for (var i = 0; i < arregloDeIndicadores.length; i++) {
-                var tabsText = '\t\t\t';
-                for (var j = 0; j < arregloDeIndicadores[i].elementoFormula.length; j++) {
-                    //todos los elementoFormula por indicador van a pertenecer a la misma variable o tabla
-                    if(arregloDeIndicadores[i].elementoFormula[j].esFuenteDeDato && arregloConexionesATablas[a].ID == arregloDeIndicadores[i].elementoFormula[j].conexionTablaID) {
-                        if(primeraVezCodigoIndicador1) {
-                            codigoVariables += '\n\tfor (var x = 0; x < window["arregloDeIndicadores"].length; x++) {';
-                            primeraVezCodigoIndicador1 = false;
-                        }
-                        if(primeraVezCodigoTabla) {
-                            codigoTablas += '\n\t\tfor (var i = 0; i < i+1; i++) {';
-                            codigoTablas += '\n\t\t\tfor (var j = 0; j < arregloResultadosDeTablas[i].length; j++) {';
-                            primeraVezCodigoTabla = false;
-                        }
-                        codigoTablas += '\n'+tabsText+'if (arregloResultadosDeTablas[i][j].'+arregloDeIndicadores[i].elementoFormula[j].nombreColumnaEnTabla+' != undefined) {'
-                        tabsText += '\t';
-                        codigoTablas += '\n'+tabsText+'var '+arregloDeIndicadores[i].elementoFormula[j].nombreVariable+' = arregloResultadosDeTablas[i][j].'+arregloDeIndicadores[i].elementoFormula[j].nombreColumnaEnTabla+';';
-                    }
-                };
-                //asignar formula a valores asignados
-                if(!primeraVezCodigoTabla) {
-                    codigoTablas += '\n'+tabsText+'window["arregloDeIndicadores"][x].total = evaluate('+arregloDeIndicadores[i].formula+');';
-                }
-                for (var j = 0; j < arregloDeIndicadores[i].elementoFormula.length; j++) {
-                    //todos los elementoFormula por indicador van a pertenecer a la misma variable o tabla
-                    if(arregloDeIndicadores[i].elementoFormula[j].esFuenteDeDato && arregloConexionesATablas[a].ID == arregloDeIndicadores[i].elementoFormula[j].conexionTablaID) {
-                        tabsText = tabsText.substring(0, tabsText.length - 1);
-                        codigoTablas += '\n'+tabsText+'}';
-                    }
-                };
-            };
-            if(!primeraVezCodigoTabla) {
-                codigoTablas += '\n\t\t\t};';
-                codigoTablas += '\n\t\t};';
-            }
-        };
-        if(!primeraVezCodigoIndicador1)
-            codigoTablas += '\n\t};';*/
-        //crear codigo pertenecientes a variables
-        var codigoVariables = '';
-        var primeraVezCodigoIndicador2 = true;
-        for (var i = 0; i < arregloDeIndicadores.length; i++) {
-            if(arregloDeIndicadores[i].realizarCalculo) {
-                var tabsText = '\t\t\t';
-                var primeraVezCodigoTabla = true;
-                for (var j = 0; j < arregloDeIndicadores[i].elementoFormula.length; j++) {
-                    var entroElemento = false;
-                    if(primeraVezCodigoIndicador2) {
-                        codigoVariables += '\n\tfor (var x = 0; x < window["arregloDeIndicadores"].length; x++) {';
-                        primeraVezCodigoIndicador2 = false;
-                    }
-                    for (var a = 0; a < arregloDeVariables.length; a++) {
-                        if(!arregloDeIndicadores[i].elementoFormula[j].esFuenteDeDato && arregloDeVariables[a].ID == arregloDeIndicadores[i].elementoFormula[j].elementoVariableID) {
-                            if(primeraVezCodigoTabla && (arregloDeVariables[a].esObjeto || arregloDeVariables[a].esInstruccionSQL) ) {
-                                codigoVariables += '\n\t\tfor (var i = 0; i < window["'+arregloDeVariables[a].nombre+'"].length; i++) {';
-                                primeraVezCodigoTabla = false;
-                            }
-                            if(!arregloDeVariables[a].esObjeto && !arregloDeVariables[a].esInstruccionSQL) {
-                                codigoVariables += '\n'+tabsText+'if (window["'+arregloDeVariables[a].nombre+'"] != undefined && !isNaN(window["'+arregloDeVariables[a].nombre+'"]) && x == '+i+') {'
-                                tabsText += '\t';
-                                codigoVariables += '\n'+tabsText+'let '+arregloDeVariables[a].nombre+' = window["'+arregloDeVariables[a].nombre+'"];';
-                            } else {
-                                codigoVariables += '\n'+tabsText+'if (window["'+arregloDeVariables[a].nombre+'"][i].'+arregloDeIndicadores[i].elementoFormula[j].nombreColumnaEnTabla+' != undefined && !isNaN(window["'+arregloDeVariables[a].nombre+'"][i].'+arregloDeIndicadores[i].elementoFormula[j].nombreColumnaEnTabla+') && x == '+i+') {'
-                                tabsText += '\t';
-                                codigoVariables += '\n'+tabsText+'let '+arregloDeIndicadores[i].elementoFormula[j].nombreVariable+' = window["'+arregloDeVariables[a].nombre+'"][i].'+arregloDeIndicadores[i].elementoFormula[j].nombreColumnaEnTabla+';';
-                            }
-                            entroElemento = true;
-                        }
-                    };
-                    //cuando es excel o forma
-                    if(!entroElemento && !arregloDeIndicadores[i].elementoFormula[j].esFuenteDeDato) {
-                        codigoVariables += '\n'+tabsText+'if (window["'+arregloDeIndicadores[i].elementoFormula[j].nombreColumnaEnTabla+'"] != undefined && !isNaN(window["'+arregloDeIndicadores[i].elementoFormula[j].nombreColumnaEnTabla+'"]) && x == '+i+') {'
-                        tabsText += '\t';
-                        codigoVariables += '\n'+tabsText+'let '+arregloDeIndicadores[i].elementoFormula[j].nombreVariable+' = window["'+arregloDeIndicadores[i].elementoFormula[j].nombreColumnaEnTabla+'"];';
-                        entroElemento = true;
-                    }
-                    if(entroElemento && j == arregloDeIndicadores[i].elementoFormula.length-1) {
-                        codigoVariables += '\n'+tabsText+'window["arregloDeIndicadores"][x].total = evaluate('+arregloDeIndicadores[i].formula+');';
-                    }
-                };
-                for (var j = 0; j < arregloDeIndicadores[i].elementoFormula.length; j++) {
-                    //todos los elementoFormula por indicador van a pertenecer a la misma variable o tabla
-                    if(!arregloDeIndicadores[i].elementoFormula[j].esFuenteDeDato) {
-                        tabsText = tabsText.substring(0, tabsText.length - 1);
-                        codigoVariables += '\n'+tabsText+'}';
-                    }
-                };
-                if(!primeraVezCodigoTabla) {
-                    codigoVariables += '\n\t\t};';
-                }
-            }
-        };
-        if(!primeraVezCodigoIndicador2 && codigoVariables.length > 0)
-            codigoVariables += '\n\t};';
-        window['calculoIndicadores'] = new Function(
-            'return function calculoIndicadores(evaluate, calculoDeRiesgos){'+
-                    codigoTablas+'\n'+codigoVariables+'\n\tcalculoDeRiesgos();\n'+
-            '}'
-        )();
-        console.log('arregloDeIndicadores')
-        console.log(arregloDeIndicadores)
-        console.log('codigoTablas')
-        console.log(codigoTablas)
-        console.log('codigoVariables')
-        console.log(codigoVariables)
-        window['calculoIndicadores'](evaluate, this.calculoDeRiesgos);
-    }
-
-    calculoDeRiesgos() {
-        console.log('arregloDeIndicadores')
-        console.log(arregloDeIndicadores)
-        //CALCULANDO RIESGOS
-        for (var a = 0; a < arregloDeRiesgos.length; a++) {
-            var indicadoresInherentes = [], indicadoresCalidadGestion = [];
-            for (var i = 0; i < arregloDeIndicadores.length; i++) {
-                if (arregloDeRiesgos[a].ID == arregloDeIndicadores[i].idRiesgoPadre) {
-                    if(arregloDeIndicadores[i].tipoIndicador.localeCompare("riesgoInherente") == 0) {
-                        indicadoresInherentes.push(arregloDeIndicadores[i]);
-                    } else if(arregloDeIndicadores[i].tipoIndicador.localeCompare("calidadGestion") == 0) {
-                        indicadoresCalidadGestion.push(arregloDeIndicadores[i]);
-                    }
-                }
-            };
-            var totalInherente = 0;
-            for (var i = 0; i < indicadoresInherentes.length; i++) {
-                totalInherente += indicadoresInherentes[i].total;
-            };
-            var totalCalidadGestion = 0;
-            for (var i = 0; i < indicadoresCalidadGestion.length; i++) {
-                totalCalidadGestion += indicadoresCalidadGestion[i].total;
-            };
-            arregloDeRiesgos[a].total = totalInherente - totalCalidadGestion;
-            console.log('Riesgo')
-            console.log(arregloDeRiesgos[a])
-            console.log('totalInherente')
-            console.log(totalInherente)
-            console.log('totalCalidadGestion')
-            console.log(totalCalidadGestion)
-            console.log('indicadoresInherentes')
-            console.log(indicadoresInherentes)
-            console.log('indicadoresCalidadGestion')
-            console.log(indicadoresCalidadGestion)
-        };
-        console.log('arregloDeRiesgos')
-        console.log(arregloDeRiesgos)
         this.guardarVariablesCalculadas();
     }
 
     guardarVariablesCalculadas () {
         for (var a = 0; a < arregloDeVariables.length; a++) {
-            //if(arregloDeVariables[a].guardar && )
+            if(arregloDeVariables[a].realizarCalculo && this.props.idVariable == arregloDeVariables[a].ID) {
                 this.verificarSiExisteVariableEnResultadosHistoricos(arregloDeVariables[a]);
+            }
         };
     }
 
@@ -3803,8 +3974,6 @@ export default class FuenteDatoVariable extends React.Component {
                         if (result.recordset.length == 0) {
                             this.crearTablaDeResultadoNombreVariable(variable);
                         } else {
-                            console.log("ENCONTRO")
-                            console.log(result.recordset[0])
                             this.guardarResultadosNombreVariable(variable, result.recordset[0].inicioVigencia);
                         }
                     });
@@ -3834,8 +4003,6 @@ export default class FuenteDatoVariable extends React.Component {
             }
         };
         textoCreacionTabla += ', f3ch4Gu4rd4do date )';
-        console.log('textoCreacionTabla')
-        console.log(textoCreacionTabla)
         const transaction = new sql.Transaction( this.props.pool );
         transaction.begin(err => {
             var rolledBack = false;
@@ -3853,7 +4020,6 @@ export default class FuenteDatoVariable extends React.Component {
                 } else {
                     transaction.commit(err => {
                         //console.log("Tabla "+variable.nombre+'_'+hoy.getFullYear()+'_'+hoy.getMonth()+'_'+hoy.getDate()+'_'+hoy.getHours()+'_'+hoy.getMinutes()+'_'+hoy.getSeconds()+" creada.");
-                        console.log('CREO TABLA');
                         this.crearResultadoNombreVariable(variable, hoy);
                     });
                 }
@@ -3862,7 +4028,6 @@ export default class FuenteDatoVariable extends React.Component {
     }
 
     crearResultadoNombreVariable (variable, hoy) {
-        console.log('INICAR CREAR RESULTADO');
         let mes = hoy.getMonth()+1;
         if(mes.toString().length == 1)
             mes = '0'+mes;
@@ -3885,7 +4050,6 @@ export default class FuenteDatoVariable extends React.Component {
                     }
                 } else {
                     transaction.commit(err => {
-                        console.log('GUARDO RESULTADO');
                         this.guardarResultadosNombreVariable(variable, hoy);
                     });
                 }
@@ -3894,21 +4058,7 @@ export default class FuenteDatoVariable extends React.Component {
     }
 
     guardarResultadosNombreVariable (variable, fechaNombreTabla) {
-        console.log('INICAR GUARDAR RESULTADO');
-        console.log('fechaNombreTabla');
-        console.log(fechaNombreTabla);
-        console.log('fechaNombreTabla.getFullYear()');
-        console.log(fechaNombreTabla.getFullYear());
-        console.log('fechaNombreTabla.getMonth()');
-        console.log(fechaNombreTabla.getMonth());
-        console.log('fechaNombreTabla.getDate()');
-        console.log(fechaNombreTabla.getDate());
-        console.log('fechaNombreTabla.getHours()');
-        console.log(fechaNombreTabla.getHours());
-        console.log('fechaNombreTabla.getMinutes()');
-        console.log(fechaNombreTabla.getMinutes());
-        console.log('fechaNombreTabla.getSeconds()');
-        console.log(fechaNombreTabla.getSeconds());
+        alert("Calculo realizado con exito.")
 
         let hoy = new Date();
         var textoInsertPrincipio = 'INSERT INTO '+variable.nombre+'_'+fechaNombreTabla.getFullYear()+'_'+(fechaNombreTabla.getMonth()+1)+'_'+fechaNombreTabla.getDate()+'_'+fechaNombreTabla.getHours()+'_'+fechaNombreTabla.getMinutes()+'_'+fechaNombreTabla.getSeconds()+' ( ';
@@ -3919,63 +4069,118 @@ export default class FuenteDatoVariable extends React.Component {
         };
         textoInsertPrincipio += ', f3ch4Gu4rd4do ) values ( ';
         var instruccionSQLBorrar = "DELETE FROM "+variable.nombre+"_"+fechaNombreTabla.getFullYear()+"_"+(fechaNombreTabla.getMonth()+1)+"_"+fechaNombreTabla.getDate()+"_"+fechaNombreTabla.getHours()+"_"+fechaNombreTabla.getMinutes()+"_"+fechaNombreTabla.getSeconds()+ " WHERE f3ch4Gu4rd4do = '"+hoy.getFullYear()+"-"+(hoy.getMonth()+1)+"-"+hoy.getDate()+"' ";
-        console.log('instruccionSQLBorrar');
-        console.log(instruccionSQLBorrar);
         this.borrarVariable(instruccionSQLBorrar);
-        if(variable.esInstruccionSQL || variable.esObjeto) {
-            for (var i = 0; i < window[variable.nombre].length; i++) {
+        if(variable.esInstruccionSQL || variable.esColeccion) {
+            if(variable.esInstruccionSQL || variable.esObjeto) {
+                for (var i = 0; i < window[variable.nombre].length; i++) {
+                    var instruccionSQLFinal = textoInsertPrincipio;
+                    for (var j = 0; j < variable.atributos.length; j++) {
+                        if(j > 0)
+                            instruccionSQLFinal += ', ';
+                        if(variable.atributos[j].tipo.localeCompare("decimal") == 0) {
+                            instruccionSQLFinal += window[variable.nombre][i][variable.atributos[j].nombre];
+                        } else if(variable.atributos[j].tipo.localeCompare("int") == 0) {
+                            instruccionSQLFinal += window[variable.nombre][i][variable.atributos[j].nombre];
+                        } else if(variable.atributos[j].tipo.localeCompare("varchar") == 0) {
+                            instruccionSQLFinal += "'"+window[variable.nombre][i][variable.atributos[j].nombre]+"'";
+                        } else if(variable.atributos[j].tipo.localeCompare("bit") == 0) {
+                            instruccionSQLFinal += "'"+window[variable.nombre][i][variable.atributos[j].nombre]+"'";
+                        } else if(variable.atributos[j].tipo.localeCompare("date") == 0) {
+                            instruccionSQLFinal += "'"+window[variable.nombre][i][variable.atributos[j].nombre].getFullYear()+"-"+(window[variable.nombre][i][variable.atributos[j].nombre].getMonth()+1)+"-"+window[variable.nombre][i][variable.atributos[j].nombre].getDate()+"'";
+                        }
+                    };
+                    instruccionSQLFinal += ", '"+hoy.getFullYear()+"-"+(hoy.getMonth()+1)+"-"+hoy.getDate()+"' )";
+                    var self = this;
+                    setTimeout(function () {
+                        self.guardarVariable(instruccionSQLFinal, variable, 'variable', hoy);
+                    }, 600);
+                };
+            } else if(!variable.esObjeto) {
+                for (var i = 0; i < window[variable.nombre].length; i++) {
+                    let instruccionSQLFinal = textoInsertPrincipio;
+                    for (var j = 0; j < variable.atributos.length; j++) {
+                        if(j > 0)
+                            instruccionSQLFinal += ', ';
+                        if(variable.atributos[j].tipo.localeCompare("decimal") == 0) {
+                            instruccionSQLFinal += window[variable.nombre][i];
+                        } else if(variable.atributos[j].tipo.localeCompare("int") == 0) {
+                            instruccionSQLFinal += window[variable.nombre][i];
+                        } else if(variable.atributos[j].tipo.localeCompare("varchar") == 0) {
+                            instruccionSQLFinal += "'"+window[variable.nombre][i]+"'";
+                        } else if(variable.atributos[j].tipo.localeCompare("bit") == 0) {
+                            instruccionSQLFinal += "'"+window[variable.nombre][i]+"'";
+                        } else if(variable.atributos[j].tipo.localeCompare("date") == 0) {
+                            instruccionSQLFinal += "'"+window[variable.nombre][i].getFullYear()+"-"+(window[variable.nombre][i].getMonth()+1)+"-"+window[variable.nombre][i].getDate()+"'";
+                        }
+                    };
+                    instruccionSQLFinal += ", '"+hoy.getFullYear()+"-"+(hoy.getMonth()+1)+"-"+hoy.getDate()+"' )";
+                    var self = this;
+                    setTimeout(function () {
+                        self.guardarVariable(instruccionSQLFinal, variable, 'variable', hoy);
+                    }, 600);
+                };
+            }
+        } else {
+            if(variable.esObjeto) {
+                let instruccionSQLFinal = textoInsertPrincipio;
+                for (var j = 0; j < variable.atributos.length; j++) {
+                    if(j > 0)
+                        instruccionSQLFinal += ', ';
+                    if(variable.atributos[j].tipo.localeCompare("decimal") == 0) {
+                        instruccionSQLFinal += window[variable.nombre][variable.atributos[j].nombre];
+                    } else if(variable.atributos[j].tipo.localeCompare("int") == 0) {
+                        instruccionSQLFinal += window[variable.nombre][variable.atributos[j].nombre];
+                    } else if(variable.atributos[j].tipo.localeCompare("varchar") == 0) {
+                        instruccionSQLFinal += "'"+window[variable.nombre][variable.atributos[j].nombre]+"'";
+                    } else if(variable.atributos[j].tipo.localeCompare("bit") == 0) {
+                        instruccionSQLFinal += "'"+window[variable.nombre][variable.atributos[j].nombre]+"'";
+                    } else if(variable.atributos[j].tipo.localeCompare("date") == 0) {
+                        instruccionSQLFinal += "'"+window[variable.nombre][variable.atributos[j].nombre].getFullYear()+"-"+(window[variable.nombre][variable.atributos[j].nombre].getMonth()+1)+"-"+window[variable.nombre][variable.atributos[j].nombre].getDate()+"'";
+                    }
+                };
+                instruccionSQLFinal += ", '"+hoy.getFullYear()+"-"+(hoy.getMonth()+1)+"-"+hoy.getDate()+"' )";
+                var self = this;
+                setTimeout(function () {
+                    self.guardarVariable(instruccionSQLFinal, variable, 'variable', hoy);
+                }, 600);
+            } else if(!variable.esObjeto) {
                 var instruccionSQLFinal = textoInsertPrincipio;
                 for (var j = 0; j < variable.atributos.length; j++) {
                     if(j > 0)
                         instruccionSQLFinal += ', ';
                     if(variable.atributos[j].tipo.localeCompare("decimal") == 0) {
-                        instruccionSQLFinal += window[variable.nombre][i][variable.atributos[j].nombre];
+                        instruccionSQLFinal += window[variable.nombre];
                     } else if(variable.atributos[j].tipo.localeCompare("int") == 0) {
-                        instruccionSQLFinal += window[variable.nombre][i][variable.atributos[j].nombre];
+                        instruccionSQLFinal += window[variable.nombre];
                     } else if(variable.atributos[j].tipo.localeCompare("varchar") == 0) {
-                        instruccionSQLFinal += "'"+window[variable.nombre][i][variable.atributos[j].nombre]+"'";
+                        instruccionSQLFinal += "'"+window[variable.nombre]+"'";
                     } else if(variable.atributos[j].tipo.localeCompare("bit") == 0) {
-                        instruccionSQLFinal += "'"+window[variable.nombre][i][variable.atributos[j].nombre]+"'";
+                        instruccionSQLFinal += "'"+window[variable.nombre]+"'";
                     } else if(variable.atributos[j].tipo.localeCompare("date") == 0) {
-                        instruccionSQLFinal += "'"+window[variable.nombre][i][variable.atributos[j].nombre].getFullYear()+"-"+(window[variable.nombre][i][variable.atributos[j].nombre].getMonth()+1)+"-"+window[variable.nombre][i][variable.atributos[j].nombre].getDate()+"'";
+                        instruccionSQLFinal += "'"+window[variable.nombre].getFullYear()+"-"+(window[variable.nombre].getMonth()+1)+"-"+window[variable.nombre].getDate()+"'";
                     }
                 };
                 instruccionSQLFinal += ", '"+hoy.getFullYear()+"-"+(hoy.getMonth()+1)+"-"+hoy.getDate()+"' )";
-                console.log('instruccionSQLFinal 1');
-                console.log(instruccionSQLFinal);
                 var self = this;
                 setTimeout(function () {
                     self.guardarVariable(instruccionSQLFinal, variable, 'variable', hoy);
                 }, 600);
-            };
-        } else if(!variable.esObjeto) {
-            var instruccionSQLFinal = textoInsertPrincipio;
-            for (var j = 0; j < variable.atributos.length; j++) {
-                if(j > 0)
-                    instruccionSQLFinal += ', ';
-                if(variable.atributos[j].tipo.localeCompare("decimal") == 0) {
-                    instruccionSQLFinal += window[variable.nombre];
-                } else if(variable.atributos[j].tipo.localeCompare("int") == 0) {
-                    instruccionSQLFinal += window[variable.nombre];
-                } else if(variable.atributos[j].tipo.localeCompare("varchar") == 0) {
-                    instruccionSQLFinal += "'"+window[variable.nombre]+"'";
-                } else if(variable.atributos[j].tipo.localeCompare("bit") == 0) {
-                    instruccionSQLFinal += "'"+window[variable.nombre]+"'";
-                } else if(variable.atributos[j].tipo.localeCompare("date") == 0) {
-                    instruccionSQLFinal += "'"+window[variable.nombre].getFullYear()+"-"+(window[variable.nombre].getMonth()+1)+"-"+window[variable.nombre].getDate()+"'";
-                }
-            };
-            instruccionSQLFinal += ", '"+hoy.getFullYear()+"-"+(hoy.getMonth()+1)+"-"+hoy.getDate()+"' )";
-            console.log('instruccionSQLFinal 2');
-            console.log(instruccionSQLFinal);
-            var self = this;
-            setTimeout(function () {
-                self.guardarVariable(instruccionSQLFinal, variable, 'variable', hoy);
-            }, 600);
+            }
         }
+        var tipoVar = '';
+        if (variable.esInstruccionSQL) {
+            tipoVar = 'SQL';
+        } else if(variable.esObjeto) {
+            tipoVar = 'objeto';
+        } else if(variable.esObjeto) {
+            tipoVar = 'objeto';
+        }
+        this.saveBitacora(hoy, "Usuario: "+this.props.userName+" realizo el cálculo para la variable tipo variable: "+variable.nombre);
     }
 
     guardarVariable (instruccionSQL, variable, tabla, hoy) {
+        /*console.log('instruccionSQLFinal');
+        console.log(instruccionSQL);*/
         const transaction = new sql.Transaction( this.props.pool );
         transaction.begin(err => {
             var rolledBack = false;
@@ -4059,7 +4264,7 @@ export default class FuenteDatoVariable extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("update PeriodicidadCalculo where variableID = "+variable.ID+" and tablaVariable = '"+tabla+"' set fechaUltimoCalculo = '"+hoy.getFullYear()+"-"+(hoy.getMonth()+1)+"-"+hoy.getDate()+"'", (err, result) => {
+            request.query("update PeriodicidadCalculo set fechaUltimoCalculo = '"+hoy.getFullYear()+"-"+(hoy.getMonth()+1)+"-"+hoy.getDate()+"' where variableID = "+variable.ID+" and tablaVariable = '"+tabla+"'", (err, result) => {
                 if (err) {
                     console.log(err);
                     if (!rolledBack) {
@@ -4082,7 +4287,7 @@ export default class FuenteDatoVariable extends React.Component {
                 rolledBack = true;
             });
             const request = new sql.Request(transaction);
-            request.query("insert into PeriodicidadCalculo (variableID, tablaVariable, fechaInicio, fechaUltimoCalculo) values ("+variable.ID+", '"+tabla+"', '"+hoy.getFullYear()+"-"+(hoy.getMonth()+1)+"-"+hoy.getDate()+"', '"+hoy.getFullYear()+"-"+hoy.getMonth()+"-"+hoy.getDate()+"') ", (err, result) => {
+            request.query("insert into PeriodicidadCalculo (variableID, tablaVariable, fechaInicio, fechaUltimoCalculo) values ("+variable.ID+", '"+tabla+"', '"+hoy.getFullYear()+"-"+(hoy.getMonth()+1)+"-"+hoy.getDate()+"', '"+hoy.getFullYear()+"-"+(hoy.getMonth()+1)+"-"+hoy.getDate()+"') ", (err, result) => {
                 if (err) {
                     console.log(err);
                     if (!rolledBack) {
@@ -4135,45 +4340,45 @@ export default class FuenteDatoVariable extends React.Component {
                         }
                     };
                     var sheet = workbook.Sheets[workbook.SheetNames[k]];
-                    if(sheet != null) {
+                    if(sheet != null && arregloDeExcel[i].variables[j].realizarCalculo) {
                         try {
                             var arregloPosicionesExcel = this.getArregloPosicionesExcel(arregloDeExcel[i].variables[j].celdas);
                             if(arregloPosicionesExcel.length == 1) {
                                 var variable;
-                                if(arregloDeExcel[i].variables[j].tipo.localeCompare('numero') == 0 && sheet[arregloPosicionesExcel[0]].t.localeCompare('n') == 0) {
+                                if(arregloDeExcel[i].variables[j].tipo.localeCompare('numero') == 0 && sheet[arregloPosicionesExcel[0]].t.localeCompare('n') == 0 && sheet[arregloPosicionesExcel[0]].w.indexOf('/') == -1) {
                                     variable = parseFloat(sheet[arregloPosicionesExcel[0]].v);
-                                } else if(arregloDeExcel[i].variables[j].tipo.localeCompare('bit') == 0 && sheet[arregloPosicionesExcel[0]].t.localeCompare('b') == 0) {
+                                } else if(arregloDeExcel[i].variables[j].tipo.localeCompare('bit') == 0 && sheet[arregloPosicionesExcel[0]].t.localeCompare('b') == 0 && sheet[arregloPosicionesExcel[0]].w.indexOf('/') == -1) {
                                     variable = sheet[arregloPosicionesExcel[0]].v;
-                                } else if(arregloDeExcel[i].variables[j].tipo.localeCompare('varchar') == 0 && sheet[arregloPosicionesExcel[0]].t.localeCompare('s') == 0) {
+                                } else if(arregloDeExcel[i].variables[j].tipo.localeCompare('varchar') == 0 && sheet[arregloPosicionesExcel[0]].t.localeCompare('s') == 0 && sheet[arregloPosicionesExcel[0]].w.indexOf('/') == -1) {
                                     variable = sheet[arregloPosicionesExcel[0]].v;
-                                } else if(arregloDeExcel[i].variables[j].tipo.localeCompare('date') == 0 && sheet[arregloPosicionesExcel[0]].t.localeCompare('d') == 0) {
-                                    variable = new Date(sheet[arregloPosicionesExcel[0]].v);
+                                } else if(arregloDeExcel[i].variables[j].tipo.localeCompare('date') == 0 && (sheet[arregloPosicionesExcel[0]].t.localeCompare('d') == 0 || sheet[arregloPosicionesExcel[0]].t.localeCompare('n') == 0) && sheet[arregloPosicionesExcel[0]].w.indexOf('/') != -1 ) {
+                                    variable = new Date(sheet[arregloPosicionesExcel[0]].w);
                                 }
-                                window["'"+arregloDeExcel[i].variables[j].nombre+"'"] = variable;
+                                window[arregloDeExcel[i].variables[j].nombre] = variable;
                             } else if(arregloPosicionesExcel.length > 1 && arregloDeExcel[i].variables[j].operacion.localeCompare("ASIG") == 0) {
                                 if(arregloDeExcel[i].variables[j].tipo.localeCompare('numero') == 0) {
-                                    window["'"+arregloDeExcel[i].variables[j].nombre+"'"] = [];
+                                    window[arregloDeExcel[i].variables[j].nombre] = [];
                                     for (var k = 0; k < arregloPosicionesExcel.length; k++) {
                                         var variable = parseFloat(sheet[arregloPosicionesExcel[k]].v);
-                                        window["'"+arregloDeExcel[i].variables[j].nombre+"'"].push(variable);
+                                        window[arregloDeExcel[i].variables[j].nombre].push(variable);
                                     };
                                 } else if(arregloDeExcel[i].variables[j].tipo.localeCompare('bit') == 0) {
-                                    window["'"+arregloDeExcel[i].variables[j].nombre+"'"] = [];
+                                    window[arregloDeExcel[i].variables[j].nombre] = [];
                                     for (var k = 0; k < arregloPosicionesExcel.length; k++) {
                                         var variable = sheet[arregloPosicionesExcel[k]].v;
-                                        window["'"+arregloDeExcel[i].variables[j].nombre+"'"].push(variable);
+                                        window[arregloDeExcel[i].variables[j].nombre].push(variable);
                                     };
                                 } else if(arregloDeExcel[i].variables[j].tipo.localeCompare('varchar') == 0) {
-                                    window["'"+arregloDeExcel[i].variables[j].nombre+"'"] = [];
+                                    window[arregloDeExcel[i].variables[j].nombre] = [];
                                     for (var k = 0; k < arregloPosicionesExcel.length; k++) {
                                         var variable = sheet[arregloPosicionesExcel[k]].v;
-                                        window["'"+arregloDeExcel[i].variables[j].nombre+"'"].push(variable);
+                                        window[arregloDeExcel[i].variables[j].nombre].push(variable);
                                     };
                                 } else if(arregloDeExcel[i].variables[j].tipo.localeCompare('date') == 0) {
-                                    window["'"+arregloDeExcel[i].variables[j].nombre+"'"] = [];
+                                    window[arregloDeExcel[i].variables[j].nombre] = [];
                                     for (var k = 0; k < arregloPosicionesExcel.length; k++) {
-                                        var variable = new Date(sheet[arregloPosicionesExcel[k]].v);
-                                        window["'"+arregloDeExcel[i].variables[j].nombre+"'"].push(variable);
+                                        var variable = new Date(sheet[arregloPosicionesExcel[k]].w);
+                                        window[arregloDeExcel[i].variables[j].nombre].push(variable);
                                     };
                                 }
                             } else if(arregloPosicionesExcel.length > 1) {
@@ -4183,7 +4388,7 @@ export default class FuenteDatoVariable extends React.Component {
                                         var variable = parseFloat(sheet[arregloPosicionesExcel[k]].v);
                                         suma+=variable;
                                     };
-                                    window["'"+arregloDeExcel[i].variables[j].nombre+"'"] = suma;
+                                    window[arregloDeExcel[i].variables[j].nombre] = suma;
                                 } else if(arregloDeExcel[i].variables[j].tipo.localeCompare("numero") == 0 && arregloDeExcel[i].variables[j].operacion.localeCompare("PROM") == 0) {
                                     var suma = 0;
                                     for (var k = 0; k < arregloPosicionesExcel.length; k++) {
@@ -4191,7 +4396,7 @@ export default class FuenteDatoVariable extends React.Component {
                                         suma+=variable;
                                     };
                                     var promedio = suma / arregloPosicionesExcel.length;
-                                    window["'"+arregloDeExcel[i].variables[j].nombre+"'"] = promedio;
+                                    window[arregloDeExcel[i].variables[j].nombre] = promedio;
                                 } else if(arregloDeExcel[i].variables[j].operacion.localeCompare("MAX") == 0) {
                                     if(arregloDeExcel[i].variables[j].tipo.localeCompare("numero") == 0) {
                                         var max = 0;
@@ -4203,19 +4408,19 @@ export default class FuenteDatoVariable extends React.Component {
                                                 max = variable;
                                             }
                                         };
-                                        window["'"+arregloDeExcel[i].variables[j].nombre+"'"] = max;
+                                        window[arregloDeExcel[i].variables[j].nombre] = max;
                                     }
                                     if(arregloDeExcel[i].variables[j].tipo.localeCompare("date") == 0) {
                                         var max = new Date(1900, 1, 1);
                                         for (var k = 0; k < arregloPosicionesExcel.length; k++) {
-                                            var variable = new Date(sheet[arregloPosicionesExcel[k]].v);
+                                            var variable = new Date(sheet[arregloPosicionesExcel[k]].w);
                                             if(k == 0)
                                                 max = variable;
                                             if (max.getTime() < variable.getTime()) {
                                                 max = variable;
                                             }
                                         };
-                                        window["'"+arregloDeExcel[i].variables[j].nombre+"'"] = max;
+                                        window[arregloDeExcel[i].variables[j].nombre] = max;
                                     }
                                 } else if(arregloDeExcel[i].variables[j].operacion.localeCompare("MIN") == 0) {
                                     if(arregloDeExcel[i].variables[j].tipo.localeCompare("numero") == 0) {
@@ -4228,19 +4433,19 @@ export default class FuenteDatoVariable extends React.Component {
                                                 min = variable;
                                             }
                                         };
-                                        window["'"+arregloDeExcel[i].variables[j].nombre+"'"] = min;
+                                        window[arregloDeExcel[i].variables[j].nombre] = min;
                                     }
                                     if(arregloDeExcel[i].variables[j].tipo.localeCompare("date") == 0) {
                                         var min = new Date(1900, 1, 1);
                                         for (var k = 0; k < arregloPosicionesExcel.length; k++) {
-                                            var variable = new Date(sheet[arregloPosicionesExcel[k]].v);
+                                            var variable = new Date(sheet[arregloPosicionesExcel[k]].w);
                                             if(k == 0)
                                                 min = variable;
                                             if (min.getTime() > variable.getTime()) {
                                                 min = variable;
                                             }
                                         };
-                                        window["'"+arregloDeExcel[i].variables[j].nombre+"'"] = min;
+                                        window[arregloDeExcel[i].variables[j].nombre] = min;
                                     }
                                 } else if(arregloDeExcel[i].variables[j].operacion.localeCompare("COUNT") == 0) {
                                     if(arregloDeExcel[i].variables[j].tipo.localeCompare("numero") == 0) {
@@ -4250,16 +4455,47 @@ export default class FuenteDatoVariable extends React.Component {
                                             if(!isNaN(variable))
                                                 count++;
                                         };
-                                        window["'"+arregloDeExcel[i].variables[j].nombre+"'"] = count;
+                                        window[arregloDeExcel[i].variables[j].nombre] = count;
                                     }
                                     if(arregloDeExcel[i].variables[j].tipo.localeCompare("date") == 0) {
                                         var count = 0;
                                         for (var k = 0; k < arregloPosicionesExcel.length; k++) {
-                                            var variable = new Date(sheet[arregloPosicionesExcel[k]].v);
+                                            //var variable = new Date(sheet[arregloPosicionesExcel[k]].v);
+                                            var variable;
+                                            //
+                                            if( sheet[arregloPosicionesExcel[k]].t.localeCompare('d') == 0 ) {
+                                                variable = new Date(sheet[arregloPosicionesExcel[k]].w);
+                                            }/* else {
+                                                var partes;
+                                                if(sheet[arregloPosicionesExcel[k]].w.indexOf("-") > -1) {
+                                                    partes = sheet[arregloPosicionesExcel[k]].w.split("-");
+                                                } else if(sheet[arregloPosicionesExcel[k]].w.indexOf("/") > -1) {
+                                                    partes = sheet[arregloPosicionesExcel[k]].w.split("/");
+                                                }
+                                                var dia, mes, anio, entro = false;
+                                                if(partes.length != undefined && partes.length == 3) {
+                                                    if(partes[0].length == 4) {
+                                                        anio = partes[0];
+                                                        mes = partes[1];
+                                                        dia = partes[2];
+                                                    } else if(partes[2].length == 4) {
+                                                        anio = partes[2];
+                                                        mes = partes[1];
+                                                        dia = partes[0];
+                                                    }
+                                                }
+                                                if(entro) {
+                                                    variable = new Date(parseInt(anio), parseInt(mes), parseInt(dia));
+                                                } else {
+                                                    arregloDeErroresExcel.push({nombre: arregloDeExcel[i].variables[j].nombre, ID: arregloDeExcel[i].variables[j].ID });
+                                                    alert("problema para leer fecha: "+arregloDeExcel[i].variables[j].nombre);
+                                                }
+                                            }*/
+                                            //
                                             if(this.isValidDate(variable))
                                                 count++;
                                         };
-                                        window["'"+arregloDeExcel[i].variables[j].nombre+"'"] = count;
+                                        window[arregloDeExcel[i].variables[j].nombre] = count;
                                     }
                                     if(arregloDeExcel[i].variables[j].tipo.localeCompare("varchar") == 0) {
                                         var count = 0;
@@ -4268,7 +4504,7 @@ export default class FuenteDatoVariable extends React.Component {
                                             if(variable.length > 0)
                                                 count++;
                                         };
-                                        window["'"+arregloDeExcel[i].variables[j].nombre+"'"] = count;
+                                        window[arregloDeExcel[i].variables[j].nombre] = count;
                                     }
                                     if(arregloDeExcel[i].variables[j].tipo.localeCompare("bit") == 0) {
                                         var count = 0;
@@ -4277,17 +4513,19 @@ export default class FuenteDatoVariable extends React.Component {
                                             if(variable != undefined)
                                                 count++;
                                         };
-                                        window["'"+arregloDeExcel[i].variables[j].nombre+"'"] = count;
+                                        window[arregloDeExcel[i].variables[j].nombre] = count;
                                     }
                                 }
                             }
                         } catch(err) {
                             console.log(err.message);
-                            arregloDeErroresExcel.push({nombre: arregloDeExcel[i].variables[j].nombre });
+                            arregloDeErroresExcel.push({nombre: arregloDeExcel[i].variables[j].nombre, ID: arregloDeExcel[i].variables[j].ID });
                         }
                     } else {
-                        arregloDeErroresExcel.push({nombre: arregloDeExcel[i].variables[j].nombre });
-                        alert("problema para leer la hoja: "+arregloDeExcel[i].variables[j].nombreHoja);
+                        if(arregloDeExcel[i].variables[j].realizarCalculo) {
+                            arregloDeErroresExcel.push({nombre: arregloDeExcel[i].variables[j].nombre, ID: arregloDeExcel[i].variables[j].ID });
+                            alert("problema para leer la hoja: "+arregloDeExcel[i].variables[j].nombreHoja);
+                        }
                     }
                 };
             } else {
@@ -4430,20 +4668,40 @@ export default class FuenteDatoVariable extends React.Component {
     formaCrearVariable (id, nombreVariable, tipoVariable, nombreSiguiente, indexSiguiente, tipoSiguiente, inputSiguiente) {
         //variableForma
         if(tipoVariable.localeCompare("numero") == 0) {
-            var variable = parseFloat($("#variableForma"+id).val());
-            window[nombreVariable] = variable;
+            try {
+                var variable = parseFloat($("#variableForma"+id).val());
+                window[nombreVariable] = variable;
+            }  catch(err) {
+                console.log(err.message);
+                arregloDeErroresFormas.push({nombre: nombreVariable, ID: id});
+            }
         } else if(tipoVariable.localeCompare("bit") == 0) {
-            if ($("#variableForma"+id).is(':checked')) {
-                window[nombreVariable] = true;
-            } else {
-                window[nombreVariable] = false;
+            try {
+                if ($("#variableForma"+id).is(':checked')) {
+                    window[nombreVariable] = true;
+                } else {
+                    window[nombreVariable] = false;
+                }
+            }  catch(err) {
+                console.log(err.message);
+                arregloDeErroresFormas.push({nombre: nombreVariable, ID: id});
             }
         } else if(tipoVariable.localeCompare("varchar") == 0) {
-            var variable = $("#variableForma"+id).val();
-            window[nombreVariable] = variable;
+            try {
+                var variable = $("#variableForma"+id).val();
+                window[nombreVariable] = variable;
+            }  catch(err) {
+                console.log(err.message);
+                arregloDeErroresFormas.push({nombre: nombreVariable, ID: id});
+            }
         } else if(tipoVariable.localeCompare("date") == 0) {
-            var variable = $("#variableForma"+id).datepicker('getDate');
-            window[nombreVariable] = variable;
+            try {
+                var variable = $("#variableForma"+id).datepicker('getDate');
+                window[nombreVariable] = variable;
+            }  catch(err) {
+                console.log(err.message);
+                arregloDeErroresFormas.push({nombre: nombreVariable, ID: id});
+            }
         }
         if(nombreSiguiente != undefined) {
             this.updateForm(nombreSiguiente, indexSiguiente, tipoSiguiente, inputSiguiente);
@@ -4687,6 +4945,33 @@ export default class FuenteDatoVariable extends React.Component {
         });
     }
 
+    verificarExistenciaErroresExcel(variable) {
+        for (var i = 0; i < arregloDeErroresExcel.length; i++) {
+            if (arregloDeErroresExcel[i].nombre.localeCompare(variable.nombre) == 0 && arregloDeErroresExcel[i].ID == variable.ID) {
+                return true;
+            }
+        };
+        return false;
+    }
+
+    verificarExistenciaErroresForma(variable) {
+        for (var i = 0; i < arregloDeErroresFormas.length; i++) {
+            if (arregloDeErroresFormas[i].nombre.localeCompare(variable.nombre) == 0 && arregloDeErroresFormas[i].ID == variable.ID) {
+                return true;
+            }
+        };
+        return false;
+    }
+
+    verificarExistenciaErroresVariable(variable) {
+        for (var i = 0; i < arregloDeErroresVariables.length; i++) {
+            if (arregloDeErroresVariables[i].nombre.localeCompare(variable.nombre) == 0 && arregloDeErroresVariables[i].ID == variable.ID) {
+                return true;
+            }
+        };
+        return false;
+    }
+
     /*
         **************************************
         **************************************
@@ -4721,6 +5006,11 @@ export default class FuenteDatoVariable extends React.Component {
         }); // fin transaction
     }
 
+    goToTimeline (esExcel, idVariableExcel, nombreVariable, esColeccion) {
+        this.props.changeStateFirstTimeToTrue();
+        this.props.goToTimeline(esExcel, idVariableExcel, nombreVariable, esColeccion);
+    }
+
     render() {
         return (
             <div>
@@ -4731,6 +5021,14 @@ export default class FuenteDatoVariable extends React.Component {
                     </div>
                     <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
                         <input id="nombreFuenteDato" defaultValue={this.props.nombreVariable} onKeyUp={this.props.actualizarNombreVariable} type="text" className="form-control form-control-sm"/>
+                    </div>
+                </div>
+                <div className={"row"} style={{width: "100%"}}>
+                    <div className={"col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"}>
+                        <label htmlFor="idFormula" className="col-form-label">Identificador de la Variable en Fórmula</label>
+                    </div>
+                    <div className={"col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"} style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
+                        <input id="idFormula" defaultValue={this.props.idFormula} onKeyUp={this.props.actualizarIdFormula} type="text" className="form-control form-control-sm"/>
                     </div>
                 </div>
                 <div className={"row"} style={{width: "100%"}}>
@@ -4856,7 +5154,8 @@ export default class FuenteDatoVariable extends React.Component {
                                                         mostrarEsObjeto={this.state.mostrarEsObjeto}
                                                         goToCreateConditions={this.props.goToCreateConditions}
                                                         goCreateVariableFieldSQL={this.props.goCreateVariableFieldSQL}
-                                                        tipoVariable={this.state.tipoVariable}>
+                                                        tipoVariable={this.state.tipoVariable}
+                                                        changeStateFirstTimeToFalse={this.props.changeStateFirstTimeToFalse}>
                     </FuenteDatoVariableAtributos>
                 </div>
                 <br/>
@@ -4869,12 +5168,12 @@ export default class FuenteDatoVariable extends React.Component {
                     }
                     {
                         this.props.tipoVariableOriginal.localeCompare("variable") == 0
-                        ? <a href="#" className="btn btn-primary active" style={{marginLeft: "10px"}} onClick={this.calculoVariable}>Realizar Cálculo</a>
+                        ? <a href="#" className="btn btn-primary active" style={{marginLeft: "10px"}} onClick={this.traerArchivosExcel}>Realizar Cálculo</a>
                         : null
                     }
                     {
                         this.props.tipoVariableOriginal.localeCompare("variable") == 0
-                        ? <a href="#" className="btn btn-info active" style={{marginLeft: "10px"}} onClick={() => this.props.goToTimeline(false)}>Historial de Variable</a>
+                        ? <a href="#" className="btn btn-info active" style={{marginLeft: "10px"}} onClick={() => this.goToTimeline(false)}>Historial de Variable</a>
                         : null
                     }
                 </div>

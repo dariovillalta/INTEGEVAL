@@ -134,6 +134,8 @@ function (_React$Component) {
     value: function getFieldAttributes(resultado, index, array) {
       var _this3 = this;
 
+      var nombreVariable = '';
+      if (this.props.esVariable) nombreVariable = resultado.nombreVariable;else if (this.props.esIndicador) nombreVariable = resultado.nombreIndicador;else nombreVariable = resultado.nombreRiesgo;
       var transaction = new _mssql["default"].Transaction(this.props.pool);
       transaction.begin(function (err) {
         var rolledBack = false;
@@ -141,7 +143,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("select * from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME = '" + resultado.nombreVariable + '_' + resultado.inicioVigencia.getFullYear() + '_' + (resultado.inicioVigencia.getMonth() + 1) + '_' + resultado.inicioVigencia.getDate() + '_' + resultado.inicioVigencia.getHours() + '_' + resultado.inicioVigencia.getMinutes() + '_' + resultado.inicioVigencia.getSeconds() + "'", function (err, result) {
+        request.query("select * from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME = '" + nombreVariable + '_' + resultado.inicioVigencia.getFullYear() + '_' + (resultado.inicioVigencia.getMonth() + 1) + '_' + resultado.inicioVigencia.getDate() + '_' + resultado.inicioVigencia.getHours() + '_' + resultado.inicioVigencia.getMinutes() + '_' + resultado.inicioVigencia.getSeconds() + "'", function (err, result) {
           if (err) {
             console.log(err);
 
@@ -176,6 +178,8 @@ function (_React$Component) {
     value: function getFieldResults(resultado, index, array) {
       var _this4 = this;
 
+      var nombreVariable = '';
+      if (this.props.esVariable) nombreVariable = resultado.nombreVariable;else if (this.props.esIndicador) nombreVariable = resultado.nombreIndicador;else nombreVariable = resultado.nombreRiesgo;
       var transaction = new _mssql["default"].Transaction(this.props.pool);
       transaction.begin(function (err) {
         var rolledBack = false;
@@ -183,7 +187,7 @@ function (_React$Component) {
           rolledBack = true;
         });
         var request = new _mssql["default"].Request(transaction);
-        request.query("select * from " + resultado.nombreVariable + '_' + resultado.inicioVigencia.getFullYear() + '_' + (resultado.inicioVigencia.getMonth() + 1) + '_' + resultado.inicioVigencia.getDate() + '_' + resultado.inicioVigencia.getHours() + '_' + resultado.inicioVigencia.getMinutes() + '_' + resultado.inicioVigencia.getSeconds(), function (err, result) {
+        request.query("select * from " + nombreVariable + '_' + resultado.inicioVigencia.getFullYear() + '_' + (resultado.inicioVigencia.getMonth() + 1) + '_' + resultado.inicioVigencia.getDate() + '_' + resultado.inicioVigencia.getHours() + '_' + resultado.inicioVigencia.getMinutes() + '_' + resultado.inicioVigencia.getSeconds(), function (err, result) {
           if (err) {
             console.log(err);
 
@@ -193,6 +197,8 @@ function (_React$Component) {
           } else {
             transaction.commit(function (err) {
               array[index].resultados = result.recordset;
+              console.log('result.recordset');
+              console.log(result.recordset);
               banderaImportacionInicio++; //this.finImportacion();
 
               _this4.setState({
@@ -353,7 +359,7 @@ function (_React$Component) {
               className: "cd-timeline__content js-cd-content"
             }, htmlObjectDesc, _react["default"].createElement("span", {
               className: "cd-timeline__date"
-            }, this.state.resultados[0].resultados[i].f3ch4Gu4rd4do.getFullYear() + "-" + this.state.resultados[0].resultados[i].f3ch4Gu4rd4do.getMonth() + "-" + this.state.resultados[0].resultados[i].f3ch4Gu4rd4do.getDate())));
+            }, this.state.resultados[0].resultados[i].f3ch4Gu4rd4do.getFullYear() + "-" + (this.state.resultados[0].resultados[i].f3ch4Gu4rd4do.getMonth() + 1) + "-" + this.state.resultados[0].resultados[i].f3ch4Gu4rd4do.getDate())));
 
             htmlContent.push(htmlRow);
           }

@@ -7,6 +7,8 @@ exports["default"] = void 0;
 
 var _react = _interopRequireDefault(require("react"));
 
+var _mssql = _interopRequireDefault(require("mssql"));
+
 var _FuenteDatoVariableAtributos = _interopRequireDefault(require("./FuenteDatoVariableAtributos.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
@@ -102,6 +104,7 @@ function (_React$Component) {
         var fecha = $("#fecha").datepicker('getDate');
         self.props.actualizarFechaInicio(fecha);
       });
+      this.getUsuarios();
     }
   }, {
     key: "cambioInstruccionSQL",
@@ -187,13 +190,13 @@ function (_React$Component) {
     value: function getUsuarios() {
       var _this2 = this;
 
-      var transaction = new sql.Transaction(this.props.pool);
+      var transaction = new _mssql["default"].Transaction(this.props.pool);
       transaction.begin(function (err) {
         var rolledBack = false;
         transaction.on('rollback', function (aborted) {
           rolledBack = true;
         });
-        var request = new sql.Request(transaction);
+        var request = new _mssql["default"].Request(transaction);
         request.query("select * from Usuarios", function (err, result) {
           if (err) {
             console.log(err);
@@ -235,6 +238,29 @@ function (_React$Component) {
         id: "nombreFuenteDato",
         defaultValue: this.props.nombreVariable,
         onKeyUp: this.props.actualizarNombreVariable,
+        type: "text",
+        className: "form-control form-control-sm"
+      }))), _react["default"].createElement("div", {
+        className: "row",
+        style: {
+          width: "100%"
+        }
+      }, _react["default"].createElement("div", {
+        className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
+      }, _react["default"].createElement("label", {
+        htmlFor: "idFormula",
+        className: "col-form-label"
+      }, "Identificador de la Variable en F\xF3rmula")), _react["default"].createElement("div", {
+        className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group",
+        style: {
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center"
+        }
+      }, _react["default"].createElement("input", {
+        id: "idFormula",
+        defaultValue: this.props.idFormula,
+        onKeyUp: this.props.actualizarIdFormula,
         type: "text",
         className: "form-control form-control-sm"
       }))), _react["default"].createElement("div", {

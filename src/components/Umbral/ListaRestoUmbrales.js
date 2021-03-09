@@ -4,10 +4,10 @@ export default function ListaRestoUmbrales(props) {
     return (
         <div className="row">
             <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
-                {props.lista.map((variable, i) =>
-                    <div key={variable.ID}>
-                        <div className={"card"}>
-                            <div className={"card-body"}>
+                <div className={"card"}>
+                    <div className={"card-body"}>
+                        {props.lista.map((variable, i) =>
+                            <div key={variable.ID}>
                                 <div className={"row border-top border-bottom addPaddingToConfig"}>
                                     <div style={{height: "20px", width: "100%"}}> </div>
                                     <div className={"row"} style={{width: "100%"}}>
@@ -29,11 +29,11 @@ export default function ListaRestoUmbrales(props) {
                                     </div>
                                     <div style={{height: "20px", width: "100%"}}> </div>
                                 </div>
+                                <br/>
                             </div>
-                        </div>
-                        <br/>
+                        )}
                     </div>
-                )}
+                </div>
             </div>
         </div>
     )

@@ -260,13 +260,10 @@ export default class ConfiguracionRiesgos extends React.Component {
                             <div className={"card influencer-profile-data"}>
                                 <div className={"card-body"}>
                                     <div className={"row border-top border-bottom addPaddingToConfig"}>
-                                        <a className={"btn btn-success btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.props.showVariables}>Variables</a>
-                                        <a className={"btn btn-primary btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.props.showIndicador}>Indicadores</a>
-                                        <a className={"btn btn-brand btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.props.showRiesgos}>Tipos de Riesgos</a>
-                                        <a className={"btn btn-info btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.showUmbralIntegral}>Umbral del Riesgo Integral</a>
-                                        <a className={"btn btn-dark btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.props.showListas}>Administrar Listas</a>
-                                        <a className={"btn btn-danger btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.props.showUsuarios}>Administrar Usuarios</a>
-                                        <a className={"btn btn-success btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.props.showBitacora}>Ver Bitacora</a>
+                                        <a className={"btn btn-success btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa", display: this.props.permision.variable.indexOf("C") > -1 || this.props.permision.variable.indexOf("V") > -1 || this.props.permision.variable.indexOf("E") > -1 ? "" : "none"}} onClick={this.props.showVariables}>Variables</a>
+                                        <a className={"btn btn-primary btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa", display: this.props.permision.indicador.indexOf("C") > -1 || this.props.permision.indicador.indexOf("V") > -1 || this.props.permision.indicador.indexOf("E") > -1 ? "" : "none"}} onClick={this.props.showIndicador}>Indicadores</a>
+                                        <a className={"btn btn-brand btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa", display: this.props.permision.riesgo.indexOf("C") > -1 || this.props.permision.riesgo.indexOf("V") > -1 || this.props.permision.riesgo.indexOf("E") > -1 ? "" : "none"}} onClick={this.props.showRiesgos}>Tipos de Riesgos</a>
+                                        <a className={"btn btn-info btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa", display: this.props.permision.riesgoIntegral.indexOf("E") > -1 ? "" : "none"}} onClick={this.showUmbralIntegral}>Umbral del Riesgo Integral</a>
                                     </div>
                                 </div>
                             </div>
@@ -282,7 +279,10 @@ export default class ConfiguracionRiesgos extends React.Component {
                                     idVariable={-99}
                                     pool={this.props.pool}
                                     tablaVariable={"Institucional"}
-                                    tituloUmbral={"Institucional"}>
+                                    tituloUmbral={"Institucional"}
+                                    maximoUmbral={100}
+                                    showSuccesMessage={this.props.showSuccesMessage}
+                                    showMessage={this.props.showMessage}>
                     </Umbral>
                 </div>
             );

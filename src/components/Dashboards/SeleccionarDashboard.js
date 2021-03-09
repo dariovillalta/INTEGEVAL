@@ -45,20 +45,8 @@ export default class SeleccionarDashboard extends React.Component {
     render() {
         return (
             <div>
-                <div className={"row"}>
-                    <div className={"col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"}>
-                        <div className={"page-header"}>
-                            <h2 className={"pageheader-title"}>Seleccionar Dashboard</h2>
-                            <div className={"page-breadcrumb"}>
-                                <nav aria-label="breadcrumb">
-                                    <ol className={"breadcrumb"}>
-                                        <li className={"breadcrumb-item active font-16"} aria-current="page">Dashboards</li>
-                                    </ol>
-                                </nav>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                {this.props.navbar}
+                
                 <div className={"row"}>
                     <a className={"btn btn-success btn-block btnWhiteColorHover font-bold font-20"} style={{color: "#fafafa"}} onClick={this.props.crearDashboard}>Crear Dashboard</a>
                 </div>

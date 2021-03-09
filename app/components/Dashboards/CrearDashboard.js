@@ -1579,31 +1579,7 @@ function (_React$Component) {
         onClick: function onClick() {
           return _this6.cerrarDivGraficos();
         }
-      }, _react["default"].createElement("div", {
-        className: "row"
-      }, _react["default"].createElement("div", {
-        className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"
-      }, _react["default"].createElement("div", {
-        className: "page-header"
-      }, _react["default"].createElement("h2", {
-        className: "pageheader-title"
-      }, "Crear Dashboard"), _react["default"].createElement("div", {
-        className: "page-breadcrumb"
-      }, _react["default"].createElement("nav", {
-        "aria-label": "breadcrumb"
-      }, _react["default"].createElement("ol", {
-        className: "breadcrumb"
-      }, _react["default"].createElement("li", {
-        className: "breadcrumb-item font-16",
-        "aria-current": "page",
-        onClick: this.props.retornarSeleccionDashboards
-      }, _react["default"].createElement("a", {
-        href: "#",
-        className: "breadcrumb-link"
-      }, "Dashboards")), _react["default"].createElement("li", {
-        className: "breadcrumb-item active font-16",
-        "aria-current": "page"
-      }, "Crear Dashboard"))))))), _react["default"].createElement("div", {
+      }, this.props.navbar, _react["default"].createElement("div", {
         className: "row"
       }, _react["default"].createElement("div", {
         className: "col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"

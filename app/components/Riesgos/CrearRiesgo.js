@@ -43,6 +43,7 @@ var tipoCampos = [{
   nombre: "arreglo"
 }];
 var peso = 0,
+    idFormula = '',
     nombre = '',
     formula = '',
     nombreEncargadoRiesgo = '';
@@ -65,6 +66,7 @@ function (_React$Component) {
     _this.getUsuarios = _this.getUsuarios.bind(_assertThisInitialized(_this));
     _this.crearRiesgo = _this.crearRiesgo.bind(_assertThisInitialized(_this));
     _this.tieneEspaciosEnBlanco = _this.tieneEspaciosEnBlanco.bind(_assertThisInitialized(_this));
+    _this.updateIdFormula = _this.updateIdFormula.bind(_assertThisInitialized(_this));
     _this.updateNombreRiesgo = _this.updateNombreRiesgo.bind(_assertThisInitialized(_this));
     _this.updateFormulaRiesgo = _this.updateFormulaRiesgo.bind(_assertThisInitialized(_this));
     _this.updateNombreEncargadoRiesgo = _this.updateNombreEncargadoRiesgo.bind(_assertThisInitialized(_this));
@@ -118,62 +120,72 @@ function (_React$Component) {
     value: function crearRiesgo() {
       var _this3 = this;
 
+      var idFormula = $("#idFormula").val();
       var nombre = $("#nombreRiesgo").val();
       var formula = $("#formula").val();
       var responsable = $("#responsable").val();
       var peso = this.state.x;
 
-      if (nombre.length > 0 && nombre.length < 101) {
-        if (!this.tieneEspaciosEnBlanco(nombre)) {
-          if (formula.length > 0 && formula.length < 501) {
-            if (nombre.length > 0 && nombre.length < 101) {
-              if (responsable.length > 0) {
-                if (!isNaN(parseInt(peso))) {
-                  var transaction = new _mssql["default"].Transaction(this.props.pool);
-                  transaction.begin(function (err) {
-                    var rolledBack = false;
-                    transaction.on('rollback', function (aborted) {
-                      rolledBack = true;
-                    });
-                    var request = new _mssql["default"].Request(transaction);
-                    request.query("insert into Riesgos (nombre, formula, responsable, peso) values ('" + nombre + "', '" + formula + "', '" + responsable + "', " + peso + ")", function (err, result) {
-                      if (err) {
-                        if (!rolledBack) {
-                          console.log(err);
-                          transaction.rollback(function (err) {});
-                        }
-                      } else {
-                        transaction.commit(function (err) {
-                          _this3.props.terminoCrearRiesgo();
+      if (idFormula.length > 0 && idFormula.length < 101) {
+        if (nombre.length > 0 && nombre.length < 501) {
+          if (!this.tieneEspaciosEnBlanco(nombre)) {
+            if (formula.length > 0 && formula.length < 501) {
+              if (nombre.length > 0 && nombre.length < 101) {
+                if (responsable.length > 0) {
+                  if (!isNaN(parseInt(peso))) {
+                    var transaction = new _mssql["default"].Transaction(this.props.pool);
+                    transaction.begin(function (err) {
+                      var rolledBack = false;
+                      transaction.on('rollback', function (aborted) {
+                        rolledBack = true;
+                      });
+                      var request = new _mssql["default"].Request(transaction);
+                      request.query("insert into Riesgos (idFormula, nombre, formula, responsable, peso) values ('" + idFormula + "', '" + nombre + "', '" + formula + "', '" + responsable + "', " + peso + ")", function (err, result) {
+                        if (err) {
+                          if (!rolledBack) {
+                            console.log(err);
+                            transaction.rollback(function (err) {});
+                          }
+                        } else {
+                          transaction.commit(function (err) {
+                            _this3.props.terminoCrearRiesgo();
 
-                          _this3.props.actualizarRiesgos();
-                        });
-                      }
-                    });
-                  }); // fin transaction
+                            _this3.props.actualizarRiesgos();
+                          });
+                        }
+                      });
+                    }); // fin transaction
+                  } else {
+                    alert("el peso del riesgo debe ser un numero valido");
+                  }
                 } else {
-                  alert("el peso del riesgo debe ser un numero valido");
+                  alert("Ingrese un valor para el responsable.");
                 }
               } else {
-                alert("Ingrese un valor para el responsable.");
+                alert("el peso del riesgo debe ser un numero valido");
               }
             } else {
-              alert("el peso del riesgo debe ser un numero valido");
+              alert("la formula del riesgo debe tener una longitud mayor a 0 y menor a 501");
             }
           } else {
-            alert("la formula del riesgo debe tener una longitud mayor a 0 y menor a 501");
+            alert('El nombre del riesgo no debe contener espacios en blanco');
           }
         } else {
-          alert('El nombre del riesgo no debe contener espacios en blanco');
+          alert("el nombre del riesgo debe tener una longitud mayor a 0 y menor a 501");
         }
       } else {
-        alert("el nombre del riesgo debe tener una longitud mayor a 0 y menor a 101");
+        alert("el idenficador en fórmula del riesgo debe tener una longitud mayor a 0 y menor a 101");
       }
     }
   }, {
     key: "tieneEspaciosEnBlanco",
     value: function tieneEspaciosEnBlanco(s) {
       return /\s/g.test(s);
+    }
+  }, {
+    key: "updateIdFormula",
+    value: function updateIdFormula() {
+      idFormula = $("#idFormula").val();
     }
   }, {
     key: "updateNombreRiesgo",
@@ -256,6 +268,24 @@ function (_React$Component) {
         type: "text",
         defaultValue: nombre,
         onKeyUp: this.updateNombreRiesgo,
+        className: "form-control form-control-sm"
+      }))), _react["default"].createElement("div", {
+        className: "row",
+        style: {
+          width: "100%"
+        }
+      }, _react["default"].createElement("div", {
+        className: "col-xl-3 col-lg-3 col-md-3 col-sm-3 col-3 form-group"
+      }, _react["default"].createElement("label", {
+        htmlFor: "idFormula",
+        className: "col-form-label"
+      }, "Identificador en F\xF3rmula")), _react["default"].createElement("div", {
+        className: "col-xl-9 col-lg-9 col-md-9 col-sm-9 col-9 form-group"
+      }, _react["default"].createElement("input", {
+        id: "idFormula",
+        type: "text",
+        defaultValue: idFormula,
+        onKeyUp: this.updateIdFormula,
         className: "form-control form-control-sm"
       }))), _react["default"].createElement("div", {
         className: "row",

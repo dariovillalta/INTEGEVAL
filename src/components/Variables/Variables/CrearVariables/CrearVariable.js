@@ -7,7 +7,7 @@ import FuenteDatoExcel from './FuenteDatoExcel.js';
 
 var mostrarFuenteDatoVariableGlobal = false;
 var mostrarFuenteDatoFormaGlobal = false;
-var mostrarFuenteDatoExcelGlobal = true;
+var mostrarFuenteDatoExcelGlobal = false;
 
 /*COMPONENTE QUE CONTROLA TIPOS DE VARIABLES (EXCEL, FORMA, VARIABLE)*/
 
@@ -84,7 +84,7 @@ export default class CrearVariable extends React.Component {
                                     {
                                         this.state.mostrarFuenteDatoVariable
                                         ?
-                                            <FuenteDatoVariable campos={this.props.columnas}
+                                            <FuenteDatoVariable pool={this.props.pool} campos={this.props.columnas}
                                                                 goToCreateConditions={this.props.goToCreateConditions}
                                                                 goCreateVariableFieldSQL={this.props.goCreateVariableFieldSQL}
                                                                 guardarVariable={this.props.guardarVariable}
@@ -92,7 +92,9 @@ export default class CrearVariable extends React.Component {
                                                                 eliminarAtributoVariable={this.props.eliminarAtributoVariable}
                                                                 modificarNombreVariable={this.props.modificarNombreVariable}
                                                                 cambioDeArreglosDeAtributos={this.props.cambioDeArreglosDeAtributos}
+                                                                idFormula={this.props.idFormula}
                                                                 nombreVariable={this.props.nombreVariable}
+                                                                actualizarIdFormula={this.props.actualizarIdFormula}
                                                                 actualizarNombreVariable={this.props.actualizarNombreVariable}
                                                                 actualizarEstadoSiEsObjeto={this.props.actualizarEstadoSiEsObjeto}
                                                                 actualizarEstadoSiEsInstruccionSQL={this.props.actualizarEstadoSiEsInstruccionSQL}
@@ -117,7 +119,9 @@ export default class CrearVariable extends React.Component {
                                         this.state.mostrarFuenteDatoForma
                                         ?
                                             <FuenteDatoForma pool={this.props.pool}
-                                                                getFormas={this.props.getFormas}>
+                                                                getFormas={this.props.getFormas}
+                                                                showSuccesMessage={this.props.showSuccesMessage}
+                                                                showMessage={this.props.showMessage}>
                                             </FuenteDatoForma>
                                         : null
                                     }
@@ -125,7 +129,9 @@ export default class CrearVariable extends React.Component {
                                         this.state.mostrarFuenteDatoExcel
                                         ?
                                             <FuenteDatoExcel pool={this.props.pool}
-                                                                getExcel={this.props.getExcel}>
+                                                                getExcel={this.props.getExcel}
+                                                                showSuccesMessage={this.props.showSuccesMessage}
+                                                                showMessage={this.props.showMessage}>
                                             </FuenteDatoExcel>
                                         : null
                                     }
